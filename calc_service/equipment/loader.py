@@ -174,6 +174,15 @@ def load_generic_catalog(filename: str) -> EquipmentCatalog:
 
         raw_pph = raw.get("processPerHour")
         pph_table = _parse_pairs(raw_pph) if isinstance(raw_pph, (list, tuple)) and raw_pph and isinstance(raw_pph[0], (list, tuple)) else None
+        # Принтер: скорость листов/час по плотности (в JSON — sheetsPerHour)
+        raw_sph = raw.get("sheetsPerHour")
+        sph_table = _parse_pairs(raw_sph) if isinstance(raw_sph, (list, tuple)) and raw_sph and isinstance(raw_sph[0], (list, tuple)) else None
+        if sph_table is None and isinstance(raw_sph, (int, float)):
+            sph_table = [(0.0, float(raw_sph))]
+        cost_print_sheet = None
+        raw_cps = raw.get("costPrintSheet")
+        if isinstance(raw_cps, (list, tuple)) and len(raw_cps) >= 2:
+            cost_print_sheet = [float(raw_cps[0]), float(raw_cps[1])]
         raw_mph = raw.get("meterPerHour")
         mph_table = _parse_pairs(raw_mph) if isinstance(raw_mph, (list, tuple)) and raw_mph and isinstance(raw_mph[0], (list, tuple)) else None
         mph_single = float(raw_mph) if isinstance(raw_mph, (int, float)) else 0.0
@@ -203,6 +212,8 @@ def load_generic_catalog(filename: str) -> EquipmentCatalog:
             max_sheet=int(raw.get("maxSheet", 0) or 0),
             meter_per_hour=mph_single,
             meter_per_hour_table=mph_table,
+            sheets_per_hour_table=sph_table,
+            cost_print_sheet=cost_print_sheet,
         )
 
         catalog.add(spec)

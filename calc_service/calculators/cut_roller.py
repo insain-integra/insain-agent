@@ -33,11 +33,11 @@ CUTTER_CODE = "KWTrio3026"
 MATERIAL_CATEGORIES = ("sheet", "roll", "hardsheet")
 
 
-def _find_material(material_code: str):
+def _find_material(material_id: str):
     """Найти материал в sheet, roll или hardsheet."""
     for cat in MATERIAL_CATEGORIES:
         try:
-            return get_material(cat, material_code)
+            return get_material(cat, material_id)
         except Exception:
             continue
     return None
@@ -87,22 +87,22 @@ class CutRollerCalculator(BaseCalculator):
                 "type": "object",
                 "properties": {
                     "quantity": {"type": "integer", "minimum": 1, "description": "Количество листов/изделий"},
-                    "width_mm": {"type": "number", "minimum": 1},
-                    "height_mm": {"type": "number", "minimum": 1},
-                    "material_code": {"type": "string"},
+                    "width": {"type": "number", "minimum": 1},
+                    "height": {"type": "number", "minimum": 1},
+                    "material_id": {"type": "string"},
                     "material_category": {"type": "string", "enum": list(MATERIAL_CATEGORIES)},
                     "cutter_code": {"type": "string"},
                     "material_mode": {"type": "string", "enum": ["isMaterial", "isMaterialCustomer", "noMaterial"]},
                     "mode": {"type": "integer", "enum": [0, 1, 2]},
                 },
-                "required": ["quantity", "width_mm", "height_mm", "material_code"],
+                "required": ["quantity", "width", "height", "material_id"],
             },
         }
 
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
         quantity = int(params.get("quantity", 1))
-        size = [float(params.get("width_mm", 0)), float(params.get("height_mm", 0))]
-        material_code = str(params.get("material_code", "") or "").strip()
+        size = [float(params.get("width", 0)), float(params.get("height", 0))]
+        material_id = str(params.get("material_id", "") or "").strip()
         material_category = str(params.get("material_category", "sheet") or "sheet")
         cutter_code = str(params.get("cutter_code", "") or CUTTER_CODE).strip() or CUTTER_CODE
         # По умолчанию материал в цену не включаем (как в JS: isMaterial = 'noMaterial').
@@ -110,11 +110,11 @@ class CutRollerCalculator(BaseCalculator):
         mode = ProductionMode(int(params.get("mode", ProductionMode.STANDARD)))
 
         if size[0] <= 0 or size[1] <= 0:
-            raise ValueError("width_mm и height_mm должны быть положительными")
-        if not material_code:
-            raise ValueError("material_code обязателен")
+            raise ValueError("width и height должны быть положительными")
+        if not material_id:
+            raise ValueError("material_id обязателен")
 
-        material = _find_material(material_code)
+        material = _find_material(material_id)
         if material is None:
             raise ValueError("Параметры материала не найдены")
 
@@ -238,7 +238,7 @@ class CutRollerCalculator(BaseCalculator):
             qty = best_len / 1000.0 if best_size[1] == 0 else best_num_sheet
             unit = "mm" if best_size[1] == 0 else "sheet"
             materials_out.append({
-                "code": material_code,
+                "code": material_id,
                 "name": material.name,
                 "size_mm": best_size,
                 "quantity": qty,

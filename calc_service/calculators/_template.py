@@ -90,12 +90,12 @@ class TemplateCalculator(BaseCalculator):
                         "minimum": 1,
                         "description": "Тираж, шт.",
                     },
-                    "width_mm": {
+                    "width": {
                         "type": "number",
                         "minimum": 1,
                         "description": "Ширина изделия, мм.",
                     },
-                    "height_mm": {
+                    "height": {
                         "type": "number",
                         "minimum": 1,
                         "description": "Высота изделия, мм.",
@@ -110,7 +110,7 @@ class TemplateCalculator(BaseCalculator):
                         "description": "Режим производства (0 — эконом, 1 — стандарт, 2 — экспресс).",
                     },
                 },
-                "required": ["quantity", "width_mm", "height_mm"],
+                "required": ["quantity", "width", "height"],
             },
         }
 
@@ -122,7 +122,7 @@ class TemplateCalculator(BaseCalculator):
 
           1. Прочитать входные параметры.
              quantity = int(params.get("quantity", 1))
-             size = [width_mm, height_mm]
+             size = [width, height]  # width, height — мм (params "width", "height")
              mode = ProductionMode(params.get("mode", ProductionMode.STANDARD))
 
           2. Выбрать материалы и оборудование:

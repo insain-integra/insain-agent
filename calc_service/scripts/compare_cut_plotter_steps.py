@@ -18,9 +18,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 # Параметры как в эталонном тесте 1000 шт
 PARAMS = {
     "quantity": 1000,
-    "width_mm": 60,
-    "height_mm": 60,
-    "material_code": "Avery500c",
+    "width": 60,
+    "height": 60,
+    "material_id": "Avery500c",
     "plotter_code": "",
     "difficulty": 1.3,
     "mode": 1,
@@ -44,10 +44,10 @@ def main():
 
     calc = CutPlotterCalculator()
     quantity = int(PARAMS["quantity"])
-    w = float(PARAMS["width_mm"])
-    h = float(PARAMS["height_mm"])
+    w = float(PARAMS["width"])
+    h = float(PARAMS["height"])
     size = [w, h]
-    material_code = PARAMS["material_code"]
+    material_id = PARAMS["material_id"]
     plotter_code = PARAMS.get("plotter_code") or "GraphtecCE5000-60"
     difficulty = float(PARAMS.get("difficulty", 1))
     mode = int(PARAMS.get("mode", 1))
@@ -55,7 +55,7 @@ def main():
 
     plotter = plotter_catalog.get(plotter_code)
     from calculators.cut_plotter import _find_material
-    material = _find_material(material_code)
+    material = _find_material(material_id)
 
     margins = list(plotter.margins or [30, 10, 10, 10])
     if len(margins) < 4:
@@ -64,7 +64,7 @@ def main():
     print("=" * 60)
     print("Входные данные (как в эталоне 1000 шт)")
     print("=" * 60)
-    print(f"  quantity={quantity}, size={w}x{h} mm, material={material_code}, difficulty={difficulty}, mode={mode}")
+    print(f"  quantity={quantity}, size={w}x{h} mm, material={material_id}, difficulty={difficulty}, mode={mode}")
     print()
 
     # Шаг 1: брак

@@ -48,8 +48,8 @@ def _print_params(params: dict, label: str = "") -> None:
     """Вывод параметров расчёта ламинации."""
     parts = [
         "quantity=%s" % params.get("quantity"),
-        "size=%sx%s" % (params.get("width_mm"), params.get("height_mm")),
-        "laminat_code=%s" % params.get("laminat_code"),
+        "size=%sx%s" % (params.get("width"), params.get("height")),
+        "material_id=%s" % params.get("material_id"),
         "laminator_code=%s" % params.get("laminator_code", "FGKFM360"),
         "double_side=%s" % params.get("double_side"),
         "mode=%s" % params.get("mode"),
@@ -71,9 +71,9 @@ def base_params(calc):
     code = mat.get("code", "Laminat32G")
     return {
         "quantity": 50,
-        "width_mm": 210,
-        "height_mm": 297,
-        "laminat_code": code,
+        "width": 210,
+        "height": 297,
+        "material_id": code,
         "laminator_code": "FGKFM360",
         "double_side": True,
         "mode": 1,
@@ -85,9 +85,9 @@ def ref_params_roll():
     """Рулонная ламинация: 13 шт, 320×450 мм, Laminat32G, ламинатор FGKFM360, двухсторонняя."""
     return {
         "quantity": 13,
-        "width_mm": 320,
-        "height_mm": 450,
-        "laminat_code": "Laminat32G",
+        "width": 320,
+        "height": 450,
+        "material_id": "Laminat32G",
         "laminator_code": "FGKFM360",
         "double_side": True,
         "mode": 1,
@@ -99,9 +99,9 @@ def ref_params_packet():
     """Пакетная ламинация: 100 шт, 148×105 мм, LaminatA660G, ламинатор FGKFM360, двухсторонняя."""
     return {
         "quantity": 100,
-        "width_mm": 148,
-        "height_mm": 105,
-        "laminat_code": "LaminatA660G",
+        "width": 148,
+        "height": 105,
+        "material_id": "LaminatA660G",
         "laminator_code": "FGKFM360",
         "double_side": True,
         "mode": 1,

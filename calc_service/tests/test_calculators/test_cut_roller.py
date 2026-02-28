@@ -37,8 +37,8 @@ def _print_params(params: dict) -> None:
     """Вывод параметров расчёта рулонной резки."""
     parts = [
         "quantity=%s" % params.get("quantity"),
-        "size=%s×%s" % (params.get("width_mm"), params.get("height_mm")),
-        "material_code=%s" % params.get("material_code"),
+        "size=%s×%s" % (params.get("width"), params.get("height")),
+        "material_id=%s" % params.get("material_id"),
         "material_category=%s" % params.get("material_category"),
         "cutter_code=%s" % (params.get("cutter_code") or ""),
         "material_mode=%s" % params.get("material_mode"),
@@ -61,9 +61,9 @@ def base_params(calc):
     code = mat.get("code", "")
     return {
         "quantity": 50,
-        "width_mm": 100,
-        "height_mm": 150,
-        "material_code": code or "Paper80",
+        "width": 100,
+        "height": 150,
+        "material_id": code or "Paper80",
         "material_category": "sheet",
         "cutter_code": "",
         "material_mode": "isMaterial",
@@ -76,9 +76,9 @@ def ref_params():
     """Параметры эталонного кейса: 13 шт, 320×450 мм, SUPERWAIS, резак KWTrio3026. По умолчанию материал в цену не включаем (noMaterial) — эталон 243/389 только резка."""
     return {
         "quantity": 13,
-        "width_mm": 320,
-        "height_mm": 450,
-        "material_code": "SUPERWAIS",
+        "width": 320,
+        "height": 450,
+        "material_id": "SUPERWAIS",
         "material_category": "sheet",
         "cutter_code": "KWTrio3026",
         "material_mode": "noMaterial",
@@ -97,7 +97,7 @@ def ref_result(calc, ref_params):
 
 @pytest.fixture(scope="module")
 def result(calc, base_params):
-    if not base_params.get("material_code"):
+    if not base_params.get("material_id"):
         return None
     try:
         return calc.execute(base_params)
@@ -166,7 +166,7 @@ def test_time_ready_greater(result):
 
 
 def test_time_ready_modes(calc, base_params):
-    if not base_params.get("material_code"):
+    if not base_params.get("material_id"):
         pytest.skip("нет материала")
     base_params = dict(base_params)
     res_e = calc.calculate({**base_params, "mode": ProductionMode.ECONOMY})
@@ -177,7 +177,7 @@ def test_time_ready_modes(calc, base_params):
 
 
 def test_more_quantity_more_time(calc, base_params):
-    if not base_params.get("material_code"):
+    if not base_params.get("material_id"):
         pytest.skip("нет материала")
     base_params = dict(base_params)
     r10 = calc.calculate({**base_params, "quantity": 10})

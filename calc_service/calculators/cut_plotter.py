@@ -26,12 +26,12 @@ SHEET_CATEGORIES = ("sheet", "roll")
 INTERVAL_DEFAULT = 4.0
 
 
-def _find_material(material_code: str):
+def _find_material(material_id: str):
     """Найти материал в sheet или roll."""
     from materials import get_material
     for cat in SHEET_CATEGORIES:
         try:
-            return get_material(cat, material_code)
+            return get_material(cat, material_id)
         except Exception:
             continue
     return None
@@ -81,9 +81,9 @@ class CutPlotterCalculator(BaseCalculator):
                 "type": "object",
                 "properties": {
                     "quantity": {"type": "integer", "minimum": 1, "description": "Тираж, шт."},
-                    "width_mm": {"type": "number", "minimum": 1},
-                    "height_mm": {"type": "number", "minimum": 1},
-                    "material_code": {"type": "string"},
+                    "width": {"type": "number", "minimum": 1},
+                    "height": {"type": "number", "minimum": 1},
+                    "material_id": {"type": "string"},
                     "plotter_code": {"type": "string"},
                     "interval": {"type": "number", "description": "Интервал между изделиями, мм"},
                     "is_find_mark": {"type": "boolean"},
@@ -94,16 +94,16 @@ class CutPlotterCalculator(BaseCalculator):
                     "size_item": {"type": "number"},
                     "mode": {"type": "integer", "enum": [0, 1, 2]},
                 },
-                "required": ["quantity", "width_mm", "height_mm", "material_code"],
+                "required": ["quantity", "width", "height", "material_id"],
             },
         }
 
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
         quantity = int(params.get("quantity", 1))
-        w = float(params.get("width_mm", 0))
-        h = float(params.get("height_mm", 0))
+        w = float(params.get("width", 0))
+        h = float(params.get("height", 0))
         size = [w, h]
-        material_code = str(params.get("material_code", "") or "").strip()
+        material_id = str(params.get("material_id", "") or "").strip()
         plotter_code = str(params.get("plotter_code", "") or PLOTTER_CODE).strip() or PLOTTER_CODE
         interval = float(params.get("interval", INTERVAL_DEFAULT) or INTERVAL_DEFAULT)
         is_find_mark = bool(params.get("is_find_mark", False))
@@ -122,7 +122,7 @@ class CutPlotterCalculator(BaseCalculator):
         if not plotter:
             return self._empty_result(size, quantity, mode)
 
-        material = _find_material(material_code) if material_code else None
+        material = _find_material(material_id) if material_id else None
         margins = list(plotter.margins or [30, 10, 10, 10])
         if len(margins) < 4:
             margins = [30, 10, 10, 10]
@@ -299,7 +299,7 @@ class CutPlotterCalculator(BaseCalculator):
 
         weight_kg = 0.0
         materials_out: List[Dict[str, Any]] = []
-        if material and material_code:
+        if material and material_id:
             weight_kg = 0.0
             try:
                 from common.helpers import calc_weight

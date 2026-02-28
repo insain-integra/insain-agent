@@ -57,9 +57,9 @@ def base_params(calc):
     code = mat.get("code", "Paper80")
     return {
         "quantity": 50,
-        "width_mm": 100,
-        "height_mm": 150,
-        "material_code": code,
+        "width": 100,
+        "height": 150,
+        "material_id": code,
         "plotter_code": "",
         "mode": 1,
     }
@@ -70,9 +70,9 @@ def ref_params_cut_plotter():
     """Плоттерная резка: 100 шт, 60×60 мм, сложная форма. len_cut не подаётся — считается в калькуляторе: 0.24*difficulty=0.312 м/шт, с браком 105 шт → 32.76 м."""
     return {
         "quantity": 100,
-        "width_mm": 60,
-        "height_mm": 60,
-        "material_code": "Avery500c",
+        "width": 60,
+        "height": 60,
+        "material_id": "Avery500c",
         "plotter_code": "",
         "difficulty": 1.3,
         "mode": 1,
@@ -92,9 +92,9 @@ def ref_params_cut_plotter_1000():
     """Плоттерная резка: 1000 шт, 60×60 мм. len_cut на вход не подаётся (0) — калькулятор вычисляет: 0.312 м/шт (difficulty=1.3). Эталон: cost 2716, price 4345, time 1.64, материал 3.22 м."""
     return {
         "quantity": 1000,
-        "width_mm": 60,
-        "height_mm": 60,
-        "material_code": "Avery500c",
+        "width": 60,
+        "height": 60,
+        "material_id": "Avery500c",
         "plotter_code": "",
         "difficulty": 1.3,
         "mode": 1,
@@ -146,9 +146,9 @@ def test_expected_values_cut_plotter(ref_result_cut_plotter, ref_params_cut_plot
     ok_ready = _cmp(r["time_ready"], e["time_ready"], rel)
 
     print("")
-    print("  [плоттерная резка] Параметры   quantity=%s  |  size=%sx%s  |  material_code=%s  |  len_cut=%s  |  mode=%s"
-          % (ref_params_cut_plotter.get("quantity"), ref_params_cut_plotter.get("width_mm"),
-             ref_params_cut_plotter.get("height_mm"), ref_params_cut_plotter.get("material_code"),
+    print("  [плоттерная резка] Параметры   quantity=%s  |  size=%sx%s  |  material_id=%s  |  len_cut=%s  |  mode=%s"
+          % (ref_params_cut_plotter.get("quantity"), ref_params_cut_plotter.get("width"),
+             ref_params_cut_plotter.get("height"), ref_params_cut_plotter.get("material_id"),
              ref_params_cut_plotter.get("len_cut"), ref_params_cut_plotter.get("mode")))
     print("  ---")
     print("  cost        %s  (ожид. %s)  %s" % (r["cost"], e["cost"], "ok" if ok_cost else "FAIL"))
@@ -192,9 +192,9 @@ def test_expected_values_cut_plotter_1000(ref_result_cut_plotter_1000, ref_param
     ok_ready = _cmp(r["time_ready"], e["time_ready"], rel)
 
     print("")
-    print("  [плоттерная резка 1000 шт] quantity=%s  |  size=%sx%s  |  material_code=%s  |  mode=%s"
-          % (ref_params_cut_plotter_1000.get("quantity"), ref_params_cut_plotter_1000.get("width_mm"),
-             ref_params_cut_plotter_1000.get("height_mm"), ref_params_cut_plotter_1000.get("material_code"),
+    print("  [плоттерная резка 1000 шт] quantity=%s  |  size=%sx%s  |  material_id=%s  |  mode=%s"
+          % (ref_params_cut_plotter_1000.get("quantity"), ref_params_cut_plotter_1000.get("width"),
+             ref_params_cut_plotter_1000.get("height"), ref_params_cut_plotter_1000.get("material_id"),
              ref_params_cut_plotter_1000.get("mode")))
     print("  ---")
     print("  cost        %s  (ожид. %s)  %s" % (r["cost"], e["cost"], "ok" if ok_cost else "FAIL"))
@@ -227,7 +227,7 @@ def test_expected_values_cut_plotter_1000(ref_result_cut_plotter_1000, ref_param
 def test_time_hours_positive(result, base_params, calc):
     if result is None:
         pytest.skip("расчёт не выполнен")
-    if result["time_hours"] == 0 and (base_params.get("material_code") or base_params.get("quantity", 0) == 0):
+    if result["time_hours"] == 0 and (base_params.get("material_id") or base_params.get("quantity", 0) == 0):
         pytest.skip("нет материала или нулевой тираж")
     assert result["time_hours"] >= 0
 

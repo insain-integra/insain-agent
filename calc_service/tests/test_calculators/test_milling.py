@@ -47,9 +47,9 @@ def base_params(calc):
     code = mat.get("code", "PVC3")
     return {
         "quantity": 10,
-        "width_mm": 300,
-        "height_mm": 400,
-        "material_code": code,
+        "width": 300,
+        "height": 400,
+        "material_id": code,
         "material_mode": "isMaterial",
         "len_cut": 1.5,
         "mode": 1,
@@ -61,9 +61,9 @@ def ref_params_milling():
     """Фрезеровка: 10 шт, 500×1000 мм, форма простая (периметр 3 м), PVC3."""
     return {
         "quantity": 10,
-        "width_mm": 500,
-        "height_mm": 1000,
-        "material_code": "PVC3",
+        "width": 500,
+        "height": 1000,
+        "material_id": "PVC3",
         "material_mode": "isMaterial",
         "len_cut": 3.0,
         "mode": 1,
@@ -116,9 +116,9 @@ def test_expected_values_milling(ref_result_milling, ref_params_milling):
     ok_weight = _cmp(r["weight_kg"], e["weight_kg"], rel)
 
     print("")
-    print("  [фрезеровка] Параметры   quantity=%s  |  size=%sx%s  |  material_code=%s  |  len_cut=%s  |  mode=%s"
-          % (ref_params_milling.get("quantity"), ref_params_milling.get("width_mm"),
-             ref_params_milling.get("height_mm"), ref_params_milling.get("material_code"),
+    print("  [фрезеровка] Параметры   quantity=%s  |  size=%sx%s  |  material_id=%s  |  len_cut=%s  |  mode=%s"
+          % (ref_params_milling.get("quantity"), ref_params_milling.get("width"),
+             ref_params_milling.get("height"), ref_params_milling.get("material_id"),
              ref_params_milling.get("len_cut"), ref_params_milling.get("mode")))
     print("  ---")
     print("  cost        %s  (ожид. %s)  %s" % (r["cost"], e["cost"], "ok" if ok_cost else "FAIL"))

@@ -46,13 +46,13 @@ def _load_milling_raw() -> Dict[str, Any]:
         return {}
 
 
-def _cost_cut_per_meter(material_code: str, thickness_mm: float, raw: Dict[str, Any]) -> float:
+def _cost_cut_per_meter(material_id: str, thickness_mm: float, raw: Dict[str, Any]) -> float:
     """Стоимость фрезеровки руб/м.п. по группе материала и толщине."""
     cost_cut = raw.get("costCut") or {}
     if not isinstance(cost_cut, dict):
         return 0.0
     for key, table in cost_cut.items():
-        if material_code.startswith(key) and isinstance(table, (list, tuple)) and table:
+        if material_id.startswith(key) and isinstance(table, (list, tuple)) and table:
             tiers = [(float(x[0]), float(x[1])) for x in table if len(x) >= 2]
             if tiers:
                 return find_in_table(sorted(tiers, key=lambda p: p[0]), thickness_mm)
@@ -124,23 +124,23 @@ class MillingCalculator(BaseCalculator):
                 "type": "object",
                 "properties": {
                     "quantity": {"type": "integer", "minimum": 1},
-                    "width_mm": {"type": "number", "minimum": 1},
-                    "height_mm": {"type": "number", "minimum": 1},
-                    "material_code": {"type": "string"},
+                    "width": {"type": "number", "minimum": 1},
+                    "height": {"type": "number", "minimum": 1},
+                    "material_id": {"type": "string"},
                     "material_mode": {"type": "string", "enum": ["isMaterial", "isMaterialCustomer", "noMaterial"]},
                     "len_cut": {"type": "number"},
                     "mode": {"type": "integer", "enum": [0, 1, 2]},
                 },
-                "required": ["quantity", "width_mm", "height_mm", "material_code"],
+                "required": ["quantity", "width", "height", "material_id"],
             },
         }
 
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
         quantity = int(params.get("quantity", 1))
-        w = float(params.get("width_mm", 0))
-        h = float(params.get("height_mm", 0))
+        w = float(params.get("width", 0))
+        h = float(params.get("height", 0))
         size = [w, h]
-        material_code = str(params.get("material_code", "") or "").strip()
+        material_id = str(params.get("material_id", "") or "").strip()
         material_mode = str(params.get("material_mode", "isMaterial") or "isMaterial")
         len_cut = float(params.get("len_cut", 0) or 0)
         mode = ProductionMode(int(params.get("mode", 1)))
@@ -165,14 +165,14 @@ class MillingCalculator(BaseCalculator):
         material = None
         time_cut = 0.0
 
-        if material_code:
+        if material_id:
             try:
-                material = get_material("hardsheet", material_code)
+                material = get_material("hardsheet", material_id)
             except Exception:
                 material = None
             if material:
                 thickness_mm = float(material.thickness or 0 or 3)
-                cost_cut_per_m = _cost_cut_per_meter(material_code, thickness_mm, raw)
+                cost_cut_per_m = _cost_cut_per_meter(material_id, thickness_mm, raw)
                 if cost_cut_per_m > 0 and len_cut > 0:
                     # В JS lenCut в мм: len = ceil(n * lenCut / 1000). Если len_cut < 100 — считаем в метрах (периметр 3 м → len_cut=3).
                     if 0 < len_cut <= 100:
@@ -252,7 +252,7 @@ class MillingCalculator(BaseCalculator):
 
         weight_kg = 0.0
         materials_out: List[Dict[str, Any]] = []
-        if material and material_code and material_mode == "isMaterial":
+        if material and material_id and material_mode == "isMaterial":
             try:
                 weight_kg = calc_weight(
                     quantity=quantity,

@@ -38,9 +38,9 @@ def _print_params(params: dict) -> None:
     """Вывод параметров расчёта гильотинной резки."""
     parts = [
         "num_sheet=%s" % params.get("num_sheet"),
-        "size=%s×%s" % (params.get("width_mm"), params.get("height_mm")),
-        "sheet=%s×%s" % (params.get("sheet_width_mm"), params.get("sheet_height_mm")),
-        "material_code=%s" % params.get("material_code"),
+        "size=%s×%s" % (params.get("width"), params.get("height")),
+        "sheet=%s×%s" % (params.get("sheet_width"), params.get("sheet_height")),
+        "material_id=%s" % params.get("material_id"),
         "mode=%s" % params.get("mode"),
     ]
     print("  Параметры   %s" % "  |  ".join(parts))
@@ -56,11 +56,11 @@ def base_params(calc):
     """Параметры для тестов: тираж 1000 шт, изделие 90×50 мм, лист 450×320 мм, материал PaperCoated300M."""
     return {
         "num_sheet": 34,  # 34 листа × 30 изделий/лист (90×50 на 450×320) = 1020 шт ≥ 1000
-        "width_mm": 90,
-        "height_mm": 50,
-        "sheet_width_mm": 450,
-        "sheet_height_mm": 320,
-        "material_code": "PaperCoated300M",
+        "width": 90,
+        "height": 50,
+        "sheet_width": 450,
+        "sheet_height": 320,
+        "material_id": "PaperCoated300M",
         "material_category": "sheet",
         "margins": [0, 0, 0, 0],
         "interval": 0,

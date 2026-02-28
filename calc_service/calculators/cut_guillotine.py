@@ -59,25 +59,25 @@ class CutGuillotineCalculator(BaseCalculator):
                 "type": "object",
                 "properties": {
                     "num_sheet": {"type": "integer", "minimum": 1, "description": "Количество листов для резки"},
-                    "width_mm": {"type": "number", "minimum": 1, "description": "Ширина изделия, мм"},
-                    "height_mm": {"type": "number", "minimum": 1, "description": "Высота изделия, мм"},
-                    "sheet_width_mm": {"type": "number", "minimum": 1, "description": "Ширина листа, мм"},
-                    "sheet_height_mm": {"type": "number", "minimum": 1, "description": "Высота листа, мм"},
-                    "material_code": {"type": "string", "description": "Код материала (sheet/roll/hardsheet)"},
+                    "width": {"type": "number", "minimum": 1, "description": "Ширина изделия, мм"},
+                    "height": {"type": "number", "minimum": 1, "description": "Высота изделия, мм"},
+                    "sheet_width": {"type": "number", "minimum": 1, "description": "Ширина листа, мм"},
+                    "sheet_height": {"type": "number", "minimum": 1, "description": "Высота листа, мм"},
+                    "material_id": {"type": "string", "description": "Код материала (sheet/roll/hardsheet)"},
                     "material_category": {"type": "string", "enum": ["sheet", "roll", "hardsheet"], "description": "Категория материала"},
                     "margins": {"type": "array", "items": {"type": "number"}, "description": "[top, right, bottom, left] мм"},
                     "interval": {"type": "number", "minimum": 0, "description": "Интервал между изделиями, мм"},
                     "mode": {"type": "integer", "enum": [0, 1, 2], "description": "Режим: 0 эконом, 1 стандарт, 2 экспресс"},
                 },
-                "required": ["num_sheet", "width_mm", "height_mm", "sheet_width_mm", "sheet_height_mm"],
+                "required": ["num_sheet", "width", "height", "sheet_width", "sheet_height"],
             },
         }
 
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
         num_sheet = int(params.get("num_sheet", 1))
-        size = [float(params.get("width_mm", 0)), float(params.get("height_mm", 0))]
-        size_sheet = [float(params.get("sheet_width_mm", 0)), float(params.get("sheet_height_mm", 0))]
-        material_code = str(params.get("material_code", "") or "").strip()
+        size = [float(params.get("width", 0)), float(params.get("height", 0))]
+        size_sheet = [float(params.get("sheet_width", 0)), float(params.get("sheet_height", 0))]
+        material_id = str(params.get("material_id", "") or "").strip()
         material_category = str(params.get("material_category", "sheet") or "sheet")
         margins = params.get("margins")
         if margins is None or not isinstance(margins, (list, tuple)) or len(margins) != 4:
@@ -87,7 +87,7 @@ class CutGuillotineCalculator(BaseCalculator):
         mode = ProductionMode(int(params.get("mode", ProductionMode.STANDARD)))
 
         if size[0] <= 0 or size[1] <= 0 or size_sheet[0] <= 0 or size_sheet[1] <= 0:
-            raise ValueError("width_mm, height_mm, sheet_width_mm, sheet_height_mm должны быть положительными")
+            raise ValueError("width, height, sheet_width, sheet_height должны быть положительными")
 
         cutter = cutter_catalog.get(CUTTER_CODE)
         cutter_max = (cutter.max_size or [475, 650])[:2]
@@ -100,9 +100,9 @@ class CutGuillotineCalculator(BaseCalculator):
             raise ValueError("Изделия не помещаются на листе")
 
         density = 80.0
-        if material_code:
+        if material_id:
             try:
-                mat = get_material(material_category, material_code)
+                mat = get_material(material_category, material_id)
                 density = float(mat.density or 80) if hasattr(mat, "density") else 80.0
             except Exception:
                 pass

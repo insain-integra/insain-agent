@@ -2,11 +2,14 @@
 Реестр калькуляторов сервиса.
 
 Используется API и ботом для вызова по slug.
+
+Калькуляторы: laser, cut_plotter, cut_guillotine, cut_roller, milling,
+lamination, print_sheet, print_laser.
 """
 
 from __future__ import annotations
 
-from typing import Dict, Type
+from typing import Dict
 
 from .base import BaseCalculator
 from .cut_guillotine import CutGuillotineCalculator
@@ -15,6 +18,8 @@ from .cut_roller import CutRollerCalculator
 from .lamination import LaminationCalculator
 from .laser import LaserCalculator
 from .milling import MillingCalculator
+from .print_laser import PrintLaserCalculator
+from .print_sheet import PrintSheetCalculator
 
 CALCULATORS: Dict[str, BaseCalculator] = {
     "laser": LaserCalculator(),
@@ -23,6 +28,8 @@ CALCULATORS: Dict[str, BaseCalculator] = {
     "cut_roller": CutRollerCalculator(),
     "milling": MillingCalculator(),
     "lamination": LaminationCalculator(),
+    "print_sheet": PrintSheetCalculator(),
+    "print_laser": PrintLaserCalculator(),
 }
 
 

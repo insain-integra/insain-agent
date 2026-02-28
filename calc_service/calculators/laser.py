@@ -81,8 +81,8 @@ class LaserCalculator(BaseCalculator):
         и валидации API. Поля подобраны так, чтобы один-в-один покрыть опции
         оригинального JS-калькулятора:
 
-          - базовые размеры и тираж (`quantity`, `width_mm`, `height_mm`);
-          - выбор материала (`material_code` из каталога `hardsheet`);
+          - базовые размеры и тираж (`quantity`, `width`, `height`);
+          - выбор материала (`material_id` из каталога `hardsheet`);
           - режим производства (`mode` → `ProductionMode`);
           - блок `is_cut_laser` для конфигурации резки;
           - флаги и параметры гравировки (`is_grave`, `is_grave_fill`, `is_grave_contur`);
@@ -101,17 +101,17 @@ class LaserCalculator(BaseCalculator):
                         "minimum": 1,
                         "description": "Тираж, шт.",
                     },
-                    "width_mm": {
+                    "width": {
                         "type": "number",
                         "minimum": 1,
                         "description": "Ширина изделия, мм.",
                     },
-                    "height_mm": {
+                    "height": {
                         "type": "number",
                         "minimum": 1,
                         "description": "Высота изделия, мм.",
                     },
-                    "material_code": {
+                    "material_id": {
                         "type": "string",
                         "description": "Код материала из hardsheet (например, 'PVC3').",
                     },
@@ -191,7 +191,7 @@ class LaserCalculator(BaseCalculator):
                         "description": "Нанесение клеевого слоя (тип скотча).",
                     },
                 },
-                "required": ["quantity", "width_mm", "height_mm"],
+                "required": ["quantity", "width", "height"],
             },
         }
 
@@ -208,23 +208,23 @@ class LaserCalculator(BaseCalculator):
         описанными в `get_tool_schema()`.
         """
         quantity = int(params.get("quantity", 1))
-        width_mm = float(params.get("width_mm", 0))
-        height_mm = float(params.get("height_mm", 0))
-        if width_mm <= 0 or height_mm <= 0:
-            raise ValueError("width_mm и height_mm должны быть положительными числами")
-        size = [width_mm, height_mm]
+        width = float(params.get("width", 0))
+        height = float(params.get("height", 0))
+        if width <= 0 or height <= 0:
+            raise ValueError("width и height должны быть положительными числами")
+        size = [width, height]
 
-        material_code = str(params.get("material_code", "") or "")
+        material_id = str(params.get("material_id", "") or "")
         mode = ProductionMode(params.get("mode", ProductionMode.STANDARD))
 
         # Оборудование и материал (явно Qualitech11G1290)
         laser = laser_catalog.get(LASER_CODE)
 
         material = None
-        if material_code:
-            material = hardsheet.get(material_code)
+        if material_id:
+            material = hardsheet.get(material_id)
         else:
-            raise ValueError("параметр material_code обязателен для лазерного калькулятора")
+            raise ValueError("параметр material_id обязателен для лазерного калькулятора")
 
         # Брак
         defect_rate = laser.get_defect_rate(quantity)

@@ -231,9 +231,9 @@ def main() -> None:
         calc = LaserCalculator()
         params = {
             "quantity": N,
-            "width_mm": SIZE[0],
-            "height_mm": SIZE[1],
-            "material_code": MATERIAL_ID,
+            "width": SIZE[0],
+            "height": SIZE[1],
+            "material_id": MATERIAL_ID,
             "mode": MODE,
             "is_cut_laser": {},
             "is_grave": IS_GRAVE,

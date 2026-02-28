@@ -24,14 +24,14 @@ ACRYL_3MM_CODE = "AcrylColor3"
 
 
 def _nomerki_params(
-    material_code: str = ACRYL_3MM_CODE,
+    material_id: str = ACRYL_3MM_CODE,
     is_grave: int = 1,
 ) -> Dict[str, Any]:
     return {
         "quantity": 50,
-        "width_mm": 40,
-        "height_mm": 80,
-        "material_code": material_code,
+        "width": 40,
+        "height": 80,
+        "material_id": material_id,
         "mode": 1,
         "is_cut_laser": {},
         "is_grave": is_grave,
@@ -92,14 +92,14 @@ def _cmp(a: float, b: float, rel: float = 0.01) -> bool:
 
 def _print_params(params: Dict[str, Any]) -> None:
     """Параметры расчёта: размер одним полем, порядок фиксированный."""
-    w = params.get("width_mm")
-    h = params.get("height_mm")
+    w = params.get("width")
+    h = params.get("height")
     parts = []
     if w is not None and h is not None:
         parts.append("size=%s×%s" % (w, h))
-    order = ["quantity", "material_code", "mode", "is_grave", "is_grave_fill", "is_cut_laser"]
+    order = ["quantity", "material_id", "mode", "is_grave", "is_grave_fill", "is_cut_laser"]
     for k in order:
-        if k in ("width_mm", "height_mm"):
+        if k in ("width", "height"):
             continue
         v = params.get(k)
         if v is None or (isinstance(v, (dict, list)) and len(v) == 0):
@@ -109,7 +109,7 @@ def _print_params(params: Dict[str, Any]) -> None:
         else:
             parts.append("%s=%s" % (k, v))
     for k, v in sorted(params.items()):
-        if k in order or k in ("width_mm", "height_mm"):
+        if k in order or k in ("width", "height"):
             continue
         if v is None or (isinstance(v, (dict, list)) and len(v) == 0):
             continue

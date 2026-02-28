@@ -21,9 +21,9 @@ for m in options.get("materials", [])[:1]:
     print(f"\n--- Расчёт для {code} ---")
     params = {
         "quantity": 10,
-        "width_mm": 200,
-        "height_mm": 150,
-        "material_code": code,
+        "width": 200,
+        "height": 150,
+        "material_id": code,
         "mode": 1,
     }
     try:

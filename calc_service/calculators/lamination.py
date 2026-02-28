@@ -60,22 +60,22 @@ class LaminationCalculator(BaseCalculator):
                 "type": "object",
                 "properties": {
                     "quantity": {"type": "integer", "minimum": 1},
-                    "width_mm": {"type": "number", "minimum": 1},
-                    "height_mm": {"type": "number", "minimum": 1},
-                    "laminat_code": {"type": "string"},
+                    "width": {"type": "number", "minimum": 1},
+                    "height": {"type": "number", "minimum": 1},
+                    "material_id": {"type": "string"},
                     "double_side": {"type": "boolean"},
                     "mode": {"type": "integer", "enum": [0, 1, 2]},
                 },
-                "required": ["quantity", "width_mm", "height_mm", "laminat_code"],
+                "required": ["quantity", "width", "height", "material_id"],
             },
         }
 
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
         quantity = int(params.get("quantity", 1))
-        w = float(params.get("width_mm", 0))
-        h = float(params.get("height_mm", 0))
+        w = float(params.get("width", 0))
+        h = float(params.get("height", 0))
         size = [w, h]
-        laminat_code = str(params.get("laminat_code", "") or "").strip()
+        material_id = str(params.get("material_id", "") or "").strip()
         double_side = bool(params.get("double_side", True))
         mode = ProductionMode(int(params.get("mode", 1)))
         laminator_code = str(params.get("laminator_code", "") or LAMINATOR_CODE).strip() or LAMINATOR_CODE
@@ -86,7 +86,7 @@ class LaminationCalculator(BaseCalculator):
             return self._empty_result(mode)
 
         try:
-            laminat = get_material("laminat", laminat_code)
+            laminat = get_material("laminat", material_id)
         except Exception:
             return self._empty_result(mode)
 

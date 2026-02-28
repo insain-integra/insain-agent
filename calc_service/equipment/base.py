@@ -76,6 +76,10 @@ class EquipmentSpec(BaseModel):
     meter_per_hour: float = 0.0
     meter_per_hour_table: Optional[List[Tuple[float, float]]] = None  # [(density_um, speed_m/h), ...]
 
+    # Принтер: листов/час по плотности бумаги, себестоимость листа [ч/б, цвет]
+    sheets_per_hour_table: Optional[List[Tuple[float, float]]] = None  # [(density, sheets_per_hour), ...]
+    cost_print_sheet: Optional[List[float]] = None  # [cost_bw, cost_color] руб./лист SRA3
+
     @property
     def depreciation_per_hour(self) -> float:
         """
@@ -141,6 +145,16 @@ class EquipmentSpec(BaseModel):
             table = LookupTable(self.meter_per_hour_table)
             return float(table.find(float(density_um)))
         return float(self.meter_per_hour or 0.0)
+
+    def get_sheets_per_hour(self, density: float = 0.0) -> float:
+        """
+        Скорость печати принтера (листов/час) по плотности бумаги.
+        Если задана таблица sheets_per_hour_table — поиск по порогу, иначе process_per_hour.
+        """
+        if self.sheets_per_hour_table:
+            table = LookupTable(self.sheets_per_hour_table)
+            return float(table.find(float(density)))
+        return float(self.process_per_hour or 0.0)
 
 
 class LaserSpec(EquipmentSpec):
