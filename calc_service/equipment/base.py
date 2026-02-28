@@ -14,7 +14,7 @@ class LookupTable:
 
     def __init__(self, data: Sequence[Sequence[float]]) -> None:
         if not data:
-            raise ValueError("LookupTable data must not be empty")
+            raise ValueError("данные для LookupTable не должны быть пустыми")
         # Нормализуем кортежи и сортируем по порогу
         self._data: List[Tuple[float, float]] = sorted(
             [(float(th), float(val)) for th, val in data],
@@ -56,12 +56,25 @@ class EquipmentSpec(BaseModel):
 
     time_prepare: float = 0.0  # часов
     time_load: float = 0.0  # часов
+    time_load_sheet: float = 0.0  # плоттер: загрузка листа, час
+    time_find_mark: float = 0.0  # плоттер: поиск меток, час
 
     base_time_ready: Optional[List[float]] = None  # [экономичный, стандартный, экспресс]
 
     defect_table: Optional[List[Tuple[float, float]]] = None
 
     available: bool = True
+
+    # Опционально: себестоимость за рез/м и скорость (для резаков, плоттеров)
+    cost_process: float = 0.0
+    cuts_per_hour: float = 0.0
+    process_per_hour: float = 0.0
+    process_per_hour_table: Optional[List[Tuple[float, float]]] = None  # [(thickness_um, speed_m/h), ...]
+    max_sheet: int = 0  # макс. листов в пачке (гильотина)
+
+    # Ламинатор: скорость м/час (число или таблица по плотности)
+    meter_per_hour: float = 0.0
+    meter_per_hour_table: Optional[List[Tuple[float, float]]] = None  # [(density_um, speed_m/h), ...]
 
     @property
     def depreciation_per_hour(self) -> float:
@@ -100,14 +113,34 @@ class EquipmentSpec(BaseModel):
         """
         Вернуть базовый срок изготовления в рабочих часах для режима.
 
-        mode: 1 — экономичный, 2 — стандартный, 3 — экспресс.
-        Индекс зажимается в пределах массива.
+        mode: 1 — экономичный, 2 — стандартный, 3 — экспресс (индекс в baseTimeReady).
+        При 0 трактуется как 1. Индекс зажимается в пределах массива.
         """
         times = self.base_time_ready or BASE_TIME_READY
         if not times:
             return 0.0
-        idx = max(0, min(len(times) - 1, int(mode) - 1))
+        m = max(1, int(mode))
+        idx = max(0, min(len(times) - 1, m - 1))
         return float(times[idx])
+
+    def get_process_speed(self, thickness_um: float) -> float:
+        """
+        Скорость резки/обработки (м/час) по толщине материала.
+        Если задана таблица process_per_hour_table — поиск по порогу, иначе process_per_hour.
+        """
+        if self.process_per_hour_table:
+            table = LookupTable(self.process_per_hour_table)
+            return float(table.find(float(thickness_um)))
+        return float(self.process_per_hour or 0.0)
+
+    def get_meter_per_hour(self, density_um: float = 0.0) -> float:
+        """
+        Скорость ламинации (м/час). Если задана таблица — по плотности пленки, иначе meter_per_hour.
+        """
+        if self.meter_per_hour_table:
+            table = LookupTable(self.meter_per_hour_table)
+            return float(table.find(float(density_um)))
+        return float(self.meter_per_hour or 0.0)
 
 
 class LaserSpec(EquipmentSpec):
@@ -177,7 +210,7 @@ class EquipmentCatalog:
         try:
             return self._items[code]
         except KeyError:
-            raise KeyError(f"Unknown equipment code: {code!r}") from None
+            raise KeyError(f"Неизвестный код оборудования: {code!r}") from None
 
     def find_for_width(self, width_mm: float) -> Optional[EquipmentSpec]:
         """

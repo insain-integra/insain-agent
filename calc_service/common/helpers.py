@@ -12,7 +12,7 @@ def find_in_table(table: Sequence[Tuple[float, float]], value: float) -> float:
              либо последнее result_value, если подходящего порога нет.
     """
     if not table:
-        raise ValueError("table must not be empty")
+        raise ValueError("таблица порогов не должна быть пустой")
 
     last_value = table[-1][1]
 
@@ -41,7 +41,7 @@ def calc_weight(
     :return: общий вес тиража в килограммах
     """
     if len(size) != 2:
-        raise ValueError("size must be a sequence of [width_mm, height_mm]")
+        raise ValueError("size должен быть последовательностью вида [width_mm, height_mm]")
 
     width_mm, height_mm = size
 
@@ -61,7 +61,7 @@ def calc_weight(
         area_m2 = width_m * height_m
         weight_per_piece_g = area_m2 * density
     else:
-        raise ValueError('density_unit must be "гсм3" or "гм2"')
+        raise ValueError('density_unit должен быть "гсм3" или "гм2"')
 
     total_weight_kg = quantity * weight_per_piece_g / 1000.0
     return total_weight_kg

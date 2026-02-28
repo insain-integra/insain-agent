@@ -25,7 +25,7 @@ def _safe_load_generic(filename: str) -> EquipmentCatalog:
 try:
     laser: EquipmentCatalog = load_laser_catalog()
 except Exception as exc:  # noqa: BLE001
-    print(f"[equipment] warning: failed to load laser.json: {exc}")
+    print(f"[equipment] предупреждение: не удалось загрузить laser.json: {exc}")
     laser = EquipmentCatalog(category="laser")
 
 

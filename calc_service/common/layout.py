@@ -19,7 +19,7 @@ def _normalize_margins(margins: Sequence[float] | None) -> tuple[float, float, f
     if margins is None:
         return 0.0, 0.0, 0.0, 0.0
     if len(margins) != 4:
-        raise ValueError("margins must be [top, right, bottom, left]")
+        raise ValueError("margins должен быть списком [top, right, bottom, left]")
     top, right, bottom, left = margins
     return float(top), float(right), float(bottom), float(left)
 
@@ -71,7 +71,7 @@ def layout_on_sheet(
     Возвращает лучший: {"num": количество, "cols": столбцов, "rows": строк}.
     """
     if len(item_size) != 2 or len(sheet_size) != 2:
-        raise ValueError("item_size and sheet_size must be [width, height]")
+        raise ValueError("item_size и sheet_size должны быть списками [width, height]")
 
     item_w, item_h = map(float, item_size)
     sheet_w, sheet_h = map(float, sheet_size)
@@ -114,7 +114,7 @@ def layout_on_roll(
     Возвращает: {"num": фактическое количество, "length": длина отреза в мм}.
     """
     if len(item_size) != 2 or len(roll_size) != 2:
-        raise ValueError("item_size and roll_size must be [width, height]")
+        raise ValueError("item_size и roll_size должны быть списками [width, height]")
 
     if quantity <= 0:
         return {"num": 0, "length": 0.0}
@@ -157,4 +157,61 @@ def layout_on_roll(
         best_length = min(length1, length2)
 
     return {"num": int(quantity), "length": float(best_length)}
+
+
+def layout_on_roll_with_orientation(
+    quantity: int,
+    item_size: Sequence[float],
+    roll_width: float,
+    gap: float = 0.0,
+    along_long: int = 0,
+) -> float:
+    """
+    Длина отреза рулона (мм) при заданной ориентации изделия.
+
+    quantity: нужное количество изделий.
+    item_size: [width, height] изделия в мм.
+    roll_width: полезная ширина рулона в мм.
+    gap: интервал между изделиями в мм.
+    along_long: -1 — короткой стороной по ширине рулона, 1 — длинной, 0 — лучший из двух.
+
+    Соответствует calcLayoutOnRoll(..., alongLong) в JS.
+    """
+    if quantity <= 0 or roll_width <= 0 or len(item_size) != 2:
+        return 0.0
+    item_w, item_h = float(item_size[0]), float(item_size[1])
+    min_s = min(item_w, item_h)
+    max_s = max(item_w, item_h)
+    gap = float(gap)
+
+    def _length(width_item: float, height_item: float) -> float | None:
+        if width_item > roll_width:
+            return None
+        step = width_item + gap
+        if step <= 0:
+            return None
+        cols = int((roll_width + gap) // step)
+        if cols <= 0:
+            return None
+        rows = int(math.ceil(quantity / cols))
+        return rows * height_item + max(0, rows - 1) * gap
+
+    if along_long == -1:
+        # короткой стороной по ширине рулона
+        L = _length(min_s, max_s)
+        return float(L) if L is not None else 0.0
+    if along_long == 1:
+        # длинной стороной по ширине рулона
+        L = _length(max_s, min_s)
+        return float(L) if L is not None else 0.0
+    # along_long == 0: лучший вариант
+    l1 = _length(min_s, max_s)
+    l2 = _length(max_s, min_s)
+    if l1 is None and l2 is None:
+        return 0.0
+    if l1 is None:
+        return float(l2)
+    if l2 is None:
+        return float(l1)
+    return float(min(l1, l2))
 

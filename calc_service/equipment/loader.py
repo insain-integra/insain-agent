@@ -17,6 +17,19 @@ def _load_json(path: Path) -> Dict[str, Any]:
         return json5.load(f)
 
 
+def _first_process_per_hour(value: Any) -> float:
+    """
+    Из processPerHour (таблица [[толщина, скорость], ...] или число) вернуть скорость.
+    """
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, (list, tuple)) and value:
+        first = value[0]
+        if isinstance(first, (list, tuple)) and len(first) >= 2:
+            return float(first[1])
+    return 0.0
+
+
 def _parse_time_load(value: Any) -> float:
     """
     Преобразовать timeLoad в одно число (часы).
@@ -33,6 +46,26 @@ def _parse_time_load(value: Any) -> float:
         except TypeError:
             return 0.0
     return 0.0
+
+
+def _to_float(value: Any, default: float = 0.0) -> float:
+    """
+    Преобразовать значение в float. Если список — взять первый элемент или default.
+    (В printer.json/tools.json costProcess иногда массив, напр. [1300, 800, 800].)
+    """
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, (list, tuple)) and value:
+        try:
+            return float(value[0])
+        except (TypeError, ValueError):
+            return default
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
 
 
 def _parse_pairs(value: Any) -> Optional[List[Tuple[float, float]]]:
@@ -127,13 +160,23 @@ def load_generic_catalog(filename: str) -> EquipmentCatalog:
         if not isinstance(raw, dict):
             continue
 
-        defects = _parse_pairs(raw.get("defects"))
+        raw_defects = raw.get("defects")
+        if isinstance(raw_defects, (int, float)):
+            defects = [(0.0, float(raw_defects)), (1e9, float(raw_defects))]
+        else:
+            defects = _parse_pairs(raw_defects)
 
         raw_cost = raw.get("cost")
         if isinstance(raw_cost, (int, float, str)):
             purchase_cost = parse_currency(raw_cost)
         else:
             purchase_cost = 0.0
+
+        raw_pph = raw.get("processPerHour")
+        pph_table = _parse_pairs(raw_pph) if isinstance(raw_pph, (list, tuple)) and raw_pph and isinstance(raw_pph[0], (list, tuple)) else None
+        raw_mph = raw.get("meterPerHour")
+        mph_table = _parse_pairs(raw_mph) if isinstance(raw_mph, (list, tuple)) and raw_mph and isinstance(raw_mph[0], (list, tuple)) else None
+        mph_single = float(raw_mph) if isinstance(raw_mph, (int, float)) else 0.0
 
         spec = EquipmentSpec(
             code=code,
@@ -148,9 +191,18 @@ def load_generic_catalog(filename: str) -> EquipmentCatalog:
             cost_operator=raw.get("costOperator", 0.0),
             time_prepare=raw.get("timePrepare", 0.0),
             time_load=_parse_time_load(raw.get("timeLoad")),
+            time_load_sheet=_to_float(raw.get("timeLoadSheet")),
+            time_find_mark=_to_float(raw.get("timeFindMark")),
             base_time_ready=raw.get("baseTimeReady"),
             defect_table=defects,
             available=bool(raw.get("available", True)),
+            cost_process=_to_float(raw.get("costProcess")),
+            cuts_per_hour=_to_float(raw.get("cutsPerHour")),
+            process_per_hour=_first_process_per_hour(raw_pph),
+            process_per_hour_table=pph_table,
+            max_sheet=int(raw.get("maxSheet", 0) or 0),
+            meter_per_hour=mph_single,
+            meter_per_hour_table=mph_table,
         )
 
         catalog.add(spec)

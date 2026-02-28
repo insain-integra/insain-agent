@@ -74,7 +74,7 @@ class MaterialCatalog:
         try:
             return self._items[code]
         except KeyError:
-            raise KeyError(f"Unknown material code: {code!r}") from None
+            raise KeyError(f"Неизвестный код материала: {code!r}") from None
 
     def get_group(self, group: str) -> List[MaterialSpec]:
         """

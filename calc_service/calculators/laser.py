@@ -15,6 +15,9 @@ from common.markups import (
 from equipment import laser as laser_catalog, tools as tools_catalog
 from materials import hardsheet, misc
 
+# Код лазера для расчёта (должен соответствовать data/equipment/laser.json)
+LASER_CODE = "Qualitech11G1290"
+
 
 class LaserCalculator(BaseCalculator):
     """
@@ -208,26 +211,27 @@ class LaserCalculator(BaseCalculator):
         width_mm = float(params.get("width_mm", 0))
         height_mm = float(params.get("height_mm", 0))
         if width_mm <= 0 or height_mm <= 0:
-            raise ValueError("width_mm and height_mm must be positive")
+            raise ValueError("width_mm и height_mm должны быть положительными числами")
         size = [width_mm, height_mm]
 
         material_code = str(params.get("material_code", "") or "")
         mode = ProductionMode(params.get("mode", ProductionMode.STANDARD))
 
-        # Оборудование и материал
-        laser = next(iter(laser_catalog._items.values()))  # type: ignore[attr-defined]
+        # Оборудование и материал (явно Qualitech11G1290)
+        laser = laser_catalog.get(LASER_CODE)
 
         material = None
         if material_code:
             material = hardsheet.get(material_code)
         else:
-            raise ValueError("material_code is required for laser calculator")
+            raise ValueError("параметр material_code обязателен для лазерного калькулятора")
 
         # Брак
         defect_rate = laser.get_defect_rate(quantity)
         if mode.value > 1:
             defect_rate += defect_rate * (mode.value - 1)
-        num_with_defects = round(quantity * (1 + defect_rate))
+        # Округление как в JS: Math.round(x) — «половина вверх»; в Python round(52.5)==52 (banker's)
+        num_with_defects = int(quantity * (1 + defect_rate) + 0.5)
 
         interval = 5.0
         # Отступы берем из лазера; это массив [top, right, bottom, left]
@@ -368,7 +372,7 @@ class LaserCalculator(BaseCalculator):
                         best_len_material = len_mat
 
                 if min_cost_material is None:
-                    raise ValueError("Изделие не помещается на материал")
+                    raise ValueError("изделие не помещается ни на один доступный размер материала")
 
                 cost_material = min_cost_material
                 size_material = best_size_material or sizes_material[0]

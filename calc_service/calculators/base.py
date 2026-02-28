@@ -65,10 +65,20 @@ class BaseCalculator(ABC):
 
         Формат:
             {SITE_URL}/calculator/{slug}/?{urlencode(params)}
+        Списки (напр. is_grave_fill=[30, 40]) приводятся к одному параметру "30,40".
         """
         base = SITE_URL.rstrip("/")
         slug = self.slug or self.__class__.__name__.lower()
-        query = urlencode(params, doseq=True)
+        # Списки — в один параметр через запятую, чтобы не дублировать ключ в URL
+        flat: Dict[str, str] = {}
+        for k, v in params.items():
+            if v is None or (isinstance(v, (dict, list)) and len(v) == 0):
+                continue
+            if isinstance(v, (list, tuple)):
+                flat[k] = ",".join(str(x) for x in v)
+            else:
+                flat[k] = str(v)
+        query = urlencode(flat)
         return f"{base}/calculator/{slug}/?{query}" if query else f"{base}/calculator/{slug}/"
 
     def execute(self, params: Mapping[str, Any]) -> Dict[str, Any]:

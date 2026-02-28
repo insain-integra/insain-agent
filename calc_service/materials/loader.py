@@ -30,7 +30,7 @@ def normalize_sizes(size_data: Any) -> List[List[float]]:
 
     # Ожидаем список / кортеж
     if not isinstance(size_data, (list, tuple)):
-        raise TypeError("size must be list, tuple or number")
+        raise TypeError("size должен быть списком, кортежем или числом")
 
     if not size_data:
         return []
@@ -40,14 +40,14 @@ def normalize_sizes(size_data: Any) -> List[List[float]]:
     # Формат [w, h]
     if isinstance(first, (int, float)):
         if len(size_data) < 2:
-            raise ValueError("size must contain [width, height]")
+            raise ValueError("size должен содержать [width, height]")
         return [[float(size_data[0]), float(size_data[1])]]
 
     # Формат [[w, h], [w2, h2], ...]
     result: List[List[float]] = []
     for pair in size_data:
         if not isinstance(pair, (list, tuple)) or len(pair) < 2:
-            raise ValueError("each size entry must be [width, height]")
+            raise ValueError("каждый элемент size должен быть [width, height]")
         result.append([float(pair[0]), float(pair[1])])
     return result
 
@@ -71,12 +71,12 @@ def parse_cost(raw_cost: Any) -> Tuple[Optional[float], Optional[List[Tuple[floa
         tiers: List[Tuple[float, float]] = []
         for item in raw_cost:
             if not isinstance(item, (list, tuple)) or len(item) < 2:
-                raise ValueError("each cost tier must be [threshold, value]")
+                raise ValueError("каждая градация цены должна быть [threshold, value]")
             threshold, value = item[0], item[1]
             tiers.append((float(threshold), float(value)))
         return None, tiers
 
-    raise TypeError("cost must be number or list of [threshold, value]")
+    raise TypeError("cost должен быть числом или списком [threshold, value]")
 
 
 def load_catalog(filename: str) -> MaterialCatalog:
