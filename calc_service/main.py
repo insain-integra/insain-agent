@@ -66,6 +66,13 @@ def get_options(slug: str) -> Dict[str, Any]:
     return calc.get_options()
 
 
+@app.get("/api/v1/tool_schema/{slug}")
+def get_tool_schema(slug: str) -> Dict[str, Any]:
+    """Схема инструмента для function calling (name, description, parameters)."""
+    calc = get_calculator(slug)  # KeyError → 404
+    return calc.get_tool_schema()
+
+
 @app.post("/api/v1/calc/{slug}")
 def calc(slug: str, body: Dict[str, Any]) -> Dict[str, Any]:
     """Расчёт: JSON body с параметрами, возврат результата (cost, price, time_hours, ...)."""

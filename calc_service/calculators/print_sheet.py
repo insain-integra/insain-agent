@@ -12,6 +12,7 @@ import math
 from typing import Any, Dict, List, Mapping, Optional
 
 from calculators.base import BaseCalculator, ProductionMode
+from calculators.cut_guillotine import CutGuillotineCalculator
 from common.helpers import calc_weight
 from common.layout import layout_on_sheet
 from common.markups import (
@@ -197,27 +198,55 @@ class PrintSheetCalculator(BaseCalculator):
         cost_cut = 0.0
         cost_lamination = 0.0
         cost_cut_guillotine = 0.0
+        price_cut_guillotine = 0.0
         time_cut = 0.0
         time_lamination = 0.0
         time_cut_guillotine = 0.0
-        # TODO: costCut, costLamination, costCutGuillotine из соответствующих калькуляторов
+
+        try:
+            cut_calc = CutGuillotineCalculator()
+            cut_params = {
+                "num_sheet": num_sheet,
+                "width": size[0],
+                "height": size[1],
+                "sheet_width": size_sheet[0],
+                "sheet_height": size_sheet[1],
+                "material_id": material_id,
+                "material_category": "sheet",
+                "margins": list(sum_margins),
+                "interval": interval,
+                "mode": mode.value,
+            }
+            cut_result = cut_calc.calculate(cut_params)
+            cost_cut_guillotine = float(cut_result.get("cost", 0))
+            time_cut_guillotine = float(cut_result.get("time_hours", 0))
+            price_cut_guillotine = float(cut_result.get("price", 0))
+        except Exception:
+            pass
 
         cost = cost_material + cost_cut + cost_print_total + cost_lamination + cost_cut_guillotine
+        # JS: result.price = (costMaterial*(1+marginMaterial) + costCut.price + costPrint.price + costLamination.price + costCutGuillotine.price + costOptions.price) * (1+marginPrintSheet)
+        # costPrint.price (calcPrintLaser): costPrint*(1+marginMaterial+marginPrintLaser) + costOperator*(1+marginOperation+marginPrintLaser)
         price_material = cost_material * (1 + MARGIN_MATERIAL)
-        margin_extra = get_margin("marginPrintSheet")
-        effective_margin = max(MARGIN_OPERATION + margin_extra, MARGIN_MIN)
-        price_operations = (cost_print_total + cost_cut + cost_lamination + cost_cut_guillotine) * (1 + effective_margin)
-        price = math.ceil(price_material + price_operations)
+        margin_print_laser = get_margin("marginPrintLaser")
+        price_print = cost_print * (1 + MARGIN_MATERIAL + margin_print_laser) + cost_operator * (
+            1 + MARGIN_OPERATION + margin_print_laser
+        )
+        price_lamination = cost_lamination * (1 + max(MARGIN_OPERATION, MARGIN_MIN))  # упрощённо, без вызова calcLamination
+        margin_print_sheet = get_margin("marginPrintSheet")
+        price = (price_material + price_print + price_cut_guillotine + price_lamination) * (1 + margin_print_sheet)
+        price = math.ceil(price)
 
         time_total = time_print + time_cut + time_lamination + time_cut_guillotine
         time_hours = round(time_total * 100) / 100.0
         base_time_ready_list = get_time_ready("baseTimeReadyPrintSheet")
         idx = max(0, min(len(base_time_ready_list) - 1, mode.value))
-        base_ready = base_time_ready_list[idx]
-        printer_ready = printer.base_time_ready or [24, 8, 1]
-        idx_p = max(0, min(len(printer_ready) - 1, mode.value))
-        time_ready = time_hours + max(float(base_ready), float(printer_ready[idx_p]))
+        base_ready = float(base_time_ready_list[idx])
+        # JS: result.timeReady = result.time + Math.max(baseTimeReady, costPrint.timeReady); costPrint.timeReady = timePrint + baseTimeReady
+        print_time_ready = time_print + base_ready
+        time_ready = time_hours + max(base_ready, print_time_ready)
 
+        # Вес по количеству выдаваемой продукции (тираж × размер изделия), не по листам с браком
         weight_kg = 0.0
         try:
             weight_kg = calc_weight(

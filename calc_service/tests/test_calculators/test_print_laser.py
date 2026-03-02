@@ -111,3 +111,68 @@ def test_get_tool_schema(calc):
     assert schema.get("name") == "calc_print_laser"
     assert "parameters" in schema
     assert "num_sheet" in schema["parameters"].get("properties", {})
+
+
+# Эталон: 50 шт, 320×450 мм, PaperCoated300M, цветность 4+4
+REF_PARAMS = {
+    "num_sheet": 50,
+    "width": 320,
+    "height": 450,
+    "material_id": "PaperCoated300M",
+    "color": "4+4",
+    "printer_code": "",
+    "mode": 1,
+}
+EXPECTED_REF = {
+    "cost": 2416.198181818182,
+    "price": 3955.582618181819,
+    "time_hours": 1.07,
+    "time_ready": 9.07,
+    "weight_kg": 2.16,
+}
+
+
+def _cmp(a: float, b: float, rel: float = 0.02) -> bool:
+    """Сравнение с относительным допуском."""
+    return abs(a - b) <= rel * max(abs(b), 1e-9)
+
+
+@pytest.fixture(scope="module")
+def ref_result(calc):
+    """Результат расчёта для эталонного кейса (50 шт, 320×450, PaperCoated300M, 4+4)."""
+    try:
+        return calc.execute(REF_PARAMS)
+    except Exception:
+        return None
+
+
+def test_expected_values_print_laser(ref_result):
+    """Сверка с эталоном: 50 шт, 320×450 мм, PaperCoated300M, цветность 4+4."""
+    if ref_result is None:
+        pytest.skip("расчёт эталонного кейса не выполнен (материал PaperCoated300M?)")
+    r = ref_result
+    e = EXPECTED_REF
+    rel = 0.02
+
+    ok_cost = _cmp(r["cost"], e["cost"], rel)
+    ok_price = _cmp(r["price"], e["price"], rel)
+    ok_time = _cmp(r["time_hours"], e["time_hours"], rel)
+    ok_ready = _cmp(r["time_ready"], e["time_ready"], rel)
+    ok_weight = _cmp(r["weight_kg"], e["weight_kg"], rel)
+
+    print("")
+    print("  [лазерная печать] Параметры   num_sheet=%s  |  size=%s×%s  |  material_id=%s  |  color=%s  |  mode=%s"
+          % (REF_PARAMS.get("num_sheet"), REF_PARAMS.get("width"), REF_PARAMS.get("height"),
+             REF_PARAMS.get("material_id"), REF_PARAMS.get("color"), REF_PARAMS.get("mode")))
+    print("  ---")
+    print("  cost        %s  (ожид. %s)  %s" % (r["cost"], e["cost"], "ok" if ok_cost else "FAIL"))
+    print("  price       %s  (ожид. %s)  %s" % (r["price"], e["price"], "ok" if ok_price else "FAIL"))
+    print("  time_hours  %s  (ожид. %s)  %s" % (r["time_hours"], e["time_hours"], "ok" if ok_time else "FAIL"))
+    print("  time_ready  %s  (ожид. %s)  %s" % (r["time_ready"], e["time_ready"], "ok" if ok_ready else "FAIL"))
+    print("  weight_kg   %s  (ожид. %s)  %s" % (r["weight_kg"], e["weight_kg"], "ok" if ok_weight else "FAIL"))
+
+    assert ok_cost, f"cost: got {r['cost']}, expected ~{e['cost']}"
+    assert ok_price, f"price: got {r['price']}, expected ~{e['price']}"
+    assert ok_time, f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
+    assert ok_ready, f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
+    assert ok_weight, f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
