@@ -94,7 +94,7 @@ class AllowedUsersMiddleware(BaseMiddleware):
         if user and user.id in ALLOWED_USERS:
             return await handler(event, data)
         if isinstance(event, Message):
-            await event.answer("⛔ Доступ запрещён.")
+            await event.answer("⛔ Доступ запрещён.", parse_mode="HTML")
         return
 
 
@@ -111,7 +111,7 @@ async def cmd_start(message: Message):
         "Просто напишите что нужно, например:\n"
         "«Посчитай лазерную резку акрила 3мм, 50 штук, 40 на 80 мм»"
     )
-    await message.answer(text)
+    await message.answer(text, parse_mode="HTML")
 
 
 @dp.message(Command("help"))
@@ -126,14 +126,14 @@ async def cmd_help(message: Message):
         "Команды:\n"
         "• /clear — очистить историю диалога"
     )
-    await message.answer(text)
+    await message.answer(text, parse_mode="HTML")
 
 
 @dp.message(Command("clear"))
 async def cmd_clear(message: Message):
     user_id = message.from_user.id if message.from_user else 0
     user_histories[user_id] = []
-    await message.answer("История диалога очищена.")
+    await message.answer("История диалога очищена.", parse_mode="HTML")
 
 
 @dp.message(F.text)
@@ -153,7 +153,7 @@ async def handle_text(message: Message):
         reply = await loop.run_in_executor(None, lambda: agent.chat(text, history=history))
     except Exception as e:
         logger.exception("agent.chat error: %s", e)
-        await message.answer("Произошла ошибка, попробуйте ещё раз.")
+        await message.answer("Произошла ошибка, попробуйте ещё раз.", parse_mode="HTML")
         return
 
     if not reply:
@@ -170,7 +170,7 @@ async def handle_text(message: Message):
 
     # Отправить ответ (разбить при необходимости)
     for part in split_message(reply):
-        await message.answer(part)
+        await message.answer(part, parse_mode="HTML")
 
 
 async def main():

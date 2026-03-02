@@ -162,6 +162,38 @@ EXPECTED_MATERIAL_2 = {
     "size": [320, 450],
 }
 
+# Эталон 3: 100 шт, 210×297 мм, PaperCoated250G, ламинат Laminat32G, цветность 4+0
+REF_PARAMS_3 = {
+    "quantity": 100,
+    "width": 210,
+    "height": 297,
+    "material_id": "PaperCoated250G",
+    "color": "4+0",
+    "printer_code": "",
+    "lamination_id": "Laminat32G",
+    "lamination_double_side": True,
+    "mode": 1,
+}
+EXPECTED_REF_3 = {
+    "cost": 3741.757001709402,
+    "price": 6113.682462735044,
+    "time_hours": 1.01,
+    "time_ready": 9.49,
+    "weight_kg": 2.41488,
+}
+EXPECTED_MATERIALS_3 = {
+    "paper": {
+        "code": "PaperCoated250G",
+        "name_substring": "Титан DIGITAL мелованная (глянцевая)",
+        "quantity_approx": 56,
+    },
+    "lamination": {
+        "code": "Laminat32G",
+        "name_substring": "Roll film 305мм х 100м х 32 mic GLOSS",
+        "quantity_approx": 49.35,  # метры плёнки
+    },
+}
+
 
 def _cmp(a: float, b: float, rel: float = 0.02) -> bool:
     """Сравнение с относительным допуском."""
@@ -284,3 +316,97 @@ def test_expected_values_print_sheet_1000(ref_result_2):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+@pytest.fixture(scope="module")
+def ref_result_3(calc):
+    """Результат расчёта для эталона 3: 100 шт, 210×297, PaperCoated250G + Laminat32G, 4+0."""
+    try:
+        return calc.execute(REF_PARAMS_3)
+    except Exception:
+        return None
+
+
+def test_expected_values_print_sheet_lamination(ref_result_3):
+    """Сверка с эталоном: 100 шт, 210×297 мм, PaperCoated250G + Laminat32G, цветность 4+0."""
+    if ref_result_3 is None:
+        pytest.skip("расчёт эталонного кейса не выполнен (материалы PaperCoated250G/Laminat32G?)")
+    r = ref_result_3
+    e = EXPECTED_REF_3
+    em_paper = EXPECTED_MATERIALS_3["paper"]
+    em_lam = EXPECTED_MATERIALS_3["lamination"]
+    rel = REF_REL_TOL
+
+    ok_cost = _cmp(r["cost"], e["cost"], rel)
+    ok_price = _cmp(r["price"], e["price"], rel)
+    ok_time = _cmp(r["time_hours"], e["time_hours"], rel)
+    ok_ready = _cmp(r["time_ready"], e["time_ready"], rel)
+    ok_weight = _cmp(r["weight_kg"], e["weight_kg"], rel)
+
+    materials = r.get("materials") or []
+    paper = next((m for m in materials if m.get("code") == em_paper["code"]), {})
+    lam = next((m for m in materials if m.get("code") == em_lam["code"]), {})
+
+    ok_paper_present = bool(paper)
+    ok_lam_present = bool(lam)
+    ok_paper_name = em_paper["name_substring"] in (paper.get("name") or "") if paper else False
+    ok_lam_name = em_lam["name_substring"] in (lam.get("name") or "") if lam else False
+    ok_paper_q = _cmp(float(paper.get("quantity") or 0), float(em_paper["quantity_approx"]), 0.15) if paper else False
+    ok_lam_q = _cmp(float(lam.get("quantity") or 0), float(em_lam["quantity_approx"]), 0.15) if lam else False
+
+    print("")
+    print(
+        "  [листовая печать + ламинация] quantity=%s  |  size=%s×%s  |  material_id=%s  |  lamination_id=%s  |  color=%s  |  mode=%s"
+        % (
+            REF_PARAMS_3.get("quantity"),
+            REF_PARAMS_3.get("width"),
+            REF_PARAMS_3.get("height"),
+            REF_PARAMS_3.get("material_id"),
+            REF_PARAMS_3.get("lamination_id"),
+            REF_PARAMS_3.get("color"),
+            REF_PARAMS_3.get("mode"),
+        )
+    )
+    print("  ---")
+    print("  cost        %s  (ожид. %s)  %s" % (r["cost"], e["cost"], "ok" if ok_cost else "FAIL"))
+    print("  price       %s  (ожид. %s)  %s" % (r["price"], e["price"], "ok" if ok_price else "FAIL"))
+    print("  time_hours  %s  (ожид. %s)  %s" % (r["time_hours"], e["time_hours"], "ok" if ok_time else "FAIL"))
+    print("  time_ready  %s  (ожид. %s)  %s" % (r["time_ready"], e["time_ready"], "ok" if ok_ready else "FAIL"))
+    print("  weight_kg   %s  (ожид. %s)  %s" % (r["weight_kg"], e["weight_kg"], "ok" if ok_weight else "FAIL"))
+    print(
+        "  paper       code=%s  name=%s  quantity=%s  (ожид. code=%s, name содержит '%s', qty ~%s)  %s"
+        % (
+            paper.get("code"),
+            (paper.get("name") or "")[:60],
+            paper.get("quantity"),
+            em_paper["code"],
+            em_paper["name_substring"],
+            em_paper["quantity_approx"],
+            "ok" if (ok_paper_present and ok_paper_name and ok_paper_q) else "FAIL",
+        )
+    )
+    print(
+        "  lamination  code=%s  name=%s  quantity=%s  (ожид. code=%s, name содержит '%s', qty ~%s)  %s"
+        % (
+            lam.get("code"),
+            (lam.get("name") or "")[:60],
+            lam.get("quantity"),
+            em_lam["code"],
+            em_lam["name_substring"],
+            em_lam["quantity_approx"],
+            "ok" if (ok_lam_present and ok_lam_name and ok_lam_q) else "FAIL",
+        )
+    )
+
+    assert ok_cost, f"cost: got {r['cost']}, expected ~{e['cost']}"
+    assert ok_price, f"price: got {r['price']}, expected ~{e['price']}"
+    assert ok_time, f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
+    assert ok_ready, f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
+    assert ok_weight, f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
+    assert materials, "ожидаются материалы в результате"
+    assert ok_paper_present, "бумага PaperCoated250G отсутствует в materials"
+    assert ok_lam_present, "ламинат Laminat32G отсутствует в materials"
+    assert ok_paper_name, f"paper name должен содержать '{em_paper['name_substring']}'"
+    assert ok_lam_name, f"lamination name должен содержать '{em_lam['name_substring']}'"
+    assert ok_paper_q, f"paper quantity: got {paper.get('quantity')}, expected ~{em_paper['quantity_approx']}"
+    assert ok_lam_q, f"lamination quantity: got {lam.get('quantity')}, expected ~{em_lam['quantity_approx']}"

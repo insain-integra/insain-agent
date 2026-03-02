@@ -83,6 +83,14 @@ _PROMPT_MATERIAL_RULES = """
 — Не предлагай материалы из другого калькулятора.
 """
 
+_PROMPT_FORMATTING = """
+ФОРМАТИРОВАНИЕ:
+— НЕ используй Markdown (звёздочки, решётки).
+— Используй только plain text и эмодзи.
+— Для списков используй тире — или эмодзи.
+— Для выделения используй ЗАГЛАВНЫЕ БУКВЫ или эмодзи.
+"""
+
 _PROMPT_RESULT_FORMAT = """
 Форматируй результат расчёта так:
 
@@ -236,6 +244,7 @@ class InsainAgent:
             parts.append("")
 
         parts.append(_PROMPT_MATERIAL_RULES)
+        parts.append(_PROMPT_FORMATTING)
         parts.append(_PROMPT_RESULT_FORMAT)
         parts.append("\nЕсли тебя спрашивают не о расчёте — отвечай как обычный помощник компании. Отвечай на русском языке.\n")
 

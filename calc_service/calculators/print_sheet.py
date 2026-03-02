@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Mapping, Optional
 
 from calculators.base import BaseCalculator, ProductionMode
 from calculators.cut_guillotine import CutGuillotineCalculator
+from calculators.lamination import LaminationCalculator
 from common.helpers import calc_weight
 from common.layout import layout_on_sheet
 from common.markups import (
@@ -24,6 +25,7 @@ from common.markups import (
 )
 from equipment import printer as printer_catalog
 from materials import sheet as sheet_catalog
+from materials import get_material as get_material_any
 
 PRINTER_CODE = "KMBizhubC220"
 
@@ -88,6 +90,14 @@ class PrintSheetCalculator(BaseCalculator):
                     "interval": {"type": "number", "description": "Отступ между изделиями, мм"},
                     "material_id": {"type": "string"},
                     "printer_code": {"type": "string"},
+                    "lamination_id": {
+                        "type": "string",
+                        "description": "Код плёнки ламинации (из каталога laminat). Пусто — без ламинации.",
+                    },
+                    "lamination_double_side": {
+                        "type": "boolean",
+                        "description": "Двусторонняя ламинация (как в JS calcPrintSheet, по умолчанию true).",
+                    },
                     "mode": {"type": "integer", "enum": [0, 1, 2], "default": 1},
                 },
                 "required": ["quantity", "width", "height", "material_id"],
@@ -108,6 +118,8 @@ class PrintSheetCalculator(BaseCalculator):
         interval = float(params.get("interval", 0) or 0)
         material_id = str(params.get("material_id", "") or "").strip()
         printer_code = str(params.get("printer_code", "") or PRINTER_CODE).strip() or PRINTER_CODE
+        lamination_id = str(params.get("lamination_id", "") or "").strip()
+        lamination_double_side = bool(params.get("lamination_double_side", True))
         mode = ProductionMode(int(params.get("mode", 1)))
 
         if color == "0+0":
@@ -199,6 +211,7 @@ class PrintSheetCalculator(BaseCalculator):
         cost_lamination = 0.0
         cost_cut_guillotine = 0.0
         price_cut_guillotine = 0.0
+        price_lamination = 0.0
         time_cut = 0.0
         time_lamination = 0.0
         time_cut_guillotine = 0.0
@@ -224,6 +237,46 @@ class PrintSheetCalculator(BaseCalculator):
         except Exception:
             pass
 
+        # Ламинация (как в JS calcPrintSheet: по плёнке laminat, с выбором по размеру плёнки)
+        lamination_result: Optional[Dict[str, Any]] = None
+        if lamination_id:
+            try:
+                lam_material = get_material_any("laminat", lamination_id)
+            except Exception:
+                lam_material = None
+            try:
+                lam_calc = LaminationCalculator()
+                if lam_material and getattr(lam_material, "sizes", None):
+                    first_size = lam_material.sizes[0]
+                    lam_w = float(first_size[0]) if len(first_size) > 0 else 0.0
+                    lam_h = float(first_size[1]) if len(first_size) > 1 else 0.0
+                else:
+                    lam_w = lam_h = 0.0
+
+                # JS: если laminat.size[1] == 0 → считаем по листам (numSheet, sizeSheet),
+                # иначе по изделиям (n, size).
+                if lam_h == 0:
+                    lam_quantity = num_sheet_to_print
+                    lam_width, lam_height = size_sheet[0], size_sheet[1]
+                else:
+                    lam_quantity = quantity
+                    lam_width, lam_height = size[0], size[1]
+
+                lam_params = {
+                    "quantity": int(lam_quantity),
+                    "width": float(lam_width),
+                    "height": float(lam_height),
+                    "material_id": lamination_id,
+                    "double_side": bool(lamination_double_side),
+                    "mode": mode.value,
+                }
+                lamination_result = lam_calc.calculate(lam_params)
+                cost_lamination = float(lamination_result.get("cost", 0.0))
+                time_lamination = float(lamination_result.get("time_hours", 0.0))
+                price_lamination = float(lamination_result.get("price", 0.0))
+            except Exception:
+                lamination_result = None
+
         cost = cost_material + cost_cut + cost_print_total + cost_lamination + cost_cut_guillotine
         # JS: result.price = (costMaterial*(1+marginMaterial) + costCut.price + costPrint.price + costLamination.price + costCutGuillotine.price + costOptions.price) * (1+marginPrintSheet)
         # costPrint.price (calcPrintLaser): costPrint*(1+marginMaterial+marginPrintLaser) + costOperator*(1+marginOperation+marginPrintLaser)
@@ -232,7 +285,6 @@ class PrintSheetCalculator(BaseCalculator):
         price_print = cost_print * (1 + MARGIN_MATERIAL + margin_print_laser) + cost_operator * (
             1 + MARGIN_OPERATION + margin_print_laser
         )
-        price_lamination = cost_lamination * (1 + max(MARGIN_OPERATION, MARGIN_MIN))  # упрощённо, без вызова calcLamination
         margin_print_sheet = get_margin("marginPrintSheet")
         price = (price_material + price_print + price_cut_guillotine + price_lamination) * (1 + margin_print_sheet)
         price = math.ceil(price)
@@ -246,7 +298,8 @@ class PrintSheetCalculator(BaseCalculator):
         print_time_ready = time_print + base_ready
         time_ready = time_hours + max(base_ready, print_time_ready)
 
-        # Вес по количеству выдаваемой продукции (тираж × размер изделия), не по листам с браком
+        # Вес по количеству выдаваемой продукции (тираж × размер изделия), не по листам с браком.
+        # Плюс вес плёнки ламинации, если она есть.
         weight_kg = 0.0
         try:
             weight_kg = calc_weight(
@@ -258,6 +311,11 @@ class PrintSheetCalculator(BaseCalculator):
             )
         except Exception:
             pass
+        if lamination_result:
+            try:
+                weight_kg += float(lamination_result.get("weight_kg", 0.0))
+            except Exception:
+                pass
 
         materials_out: List[Dict[str, Any]] = [
             {
@@ -267,6 +325,9 @@ class PrintSheetCalculator(BaseCalculator):
                 "unit": "sheet",
             }
         ]
+        if lamination_result:
+            for m in lamination_result.get("materials") or []:
+                materials_out.append(m)
 
         return {
             "cost": float(cost),
