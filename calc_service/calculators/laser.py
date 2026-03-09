@@ -52,6 +52,97 @@ class LaserCalculator(BaseCalculator):
     name = "Лазерная резка и гравировка"
     description = "Расчёт стоимости лазерной резки и гравировки по материалам hardsheet."
 
+    def get_param_schema(self) -> Dict[str, Any]:
+        """
+        Детальная схема параметров для агента / фронтенда.
+
+        Используется LLM-агентом и UI для построения форм и валидации.
+        """
+        return {
+            "slug": self.slug,
+            "title": self.name,
+            "params": [
+                {
+                    "name": "quantity",
+                    "type": "integer",
+                    "required": True,
+                    "title": "Тираж",
+                    "description": "Количество изделий",
+                    "validation": {"min": 1, "max": 100000},
+                },
+                {
+                    "name": "width_mm",
+                    "type": "number",
+                    "required": True,
+                    "title": "Ширина (мм)",
+                    "description": "Ширина изделия",
+                    "validation": {"min": 10, "max": 1300},
+                    "unit": "мм",
+                },
+                {
+                    "name": "height_mm",
+                    "type": "number",
+                    "required": True,
+                    "title": "Высота (мм)",
+                    "description": "Высота изделия",
+                    "validation": {"min": 10, "max": 900},
+                    "unit": "мм",
+                },
+                {
+                    "name": "material",
+                    "type": "enum_cascading",
+                    "required": True,
+                    "title": "Материал",
+                    "description": "Тип, вариант и толщина материала для лазерной резки/гравировки",
+                    "choices": {
+                        "source": "materials:hardsheet",
+                        "cascade_levels": ["type", "variant", "thickness"],
+                    },
+                },
+                {
+                    "name": "cut_length_m",
+                    "type": "number",
+                    "required": False,
+                    "default": 0,
+                    "title": "Длина реза (м)",
+                    "description": "Векторная резка по контуру (суммарная длина реза на одно изделие)",
+                    "validation": {"min": 0},
+                    "unit": "м",
+                },
+                {
+                    "name": "grave_area_m2",
+                    "type": "number",
+                    "required": False,
+                    "default": 0,
+                    "title": "Площадь гравировки (м²)",
+                    "description": "Площадь растровой гравировки на одном изделии",
+                    "validation": {"min": 0},
+                    "unit": "м²",
+                },
+                {
+                    "name": "mode",
+                    "type": "enum",
+                    "required": False,
+                    "default": int(ProductionMode.STANDARD),
+                    "title": "Режим",
+                    "description": "Срочность изготовления заказа",
+                    "choices": {
+                        "inline": [
+                            {"id": int(ProductionMode.ECONOMY), "title": "Эконом", "description": "3 рабочих дня"},
+                            {"id": int(ProductionMode.STANDARD), "title": "Стандарт", "description": "1 рабочий день"},
+                            {"id": int(ProductionMode.EXPRESS), "title": "Экспресс", "description": "4 часа"},
+                        ]
+                    },
+                },
+            ],
+            "param_groups": {
+                "main": ["quantity", "width_mm", "height_mm"],
+                "material": ["material"],
+                "processing": ["cut_length_m", "grave_area_m2"],
+                "mode": ["mode"],
+            },
+        }
+
     def get_options(self) -> Dict[str, Any]:
         """
         Опции для фронтенда / бота.

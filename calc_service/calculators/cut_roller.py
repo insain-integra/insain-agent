@@ -50,6 +50,74 @@ class CutRollerCalculator(BaseCalculator):
     name = "Рулонная резка"
     description = "Расчёт стоимости раскроя на роликовом резаке (листы или рулон)."
 
+    def get_param_schema(self) -> Dict[str, Any]:
+        """
+        Детальная схема параметров для резки на роликовом резаке.
+        """
+        return {
+            "slug": self.slug,
+            "title": self.name,
+            "params": [
+                {
+                    "name": "quantity",
+                    "type": "integer",
+                    "required": True,
+                    "title": "Количество листов/изделий",
+                    "description": "Сколько листов или изделий нужно разрезать",
+                    "validation": {"min": 1, "max": 100000},
+                },
+                {
+                    "name": "width_mm",
+                    "type": "number",
+                    "required": True,
+                    "title": "Ширина (мм)",
+                    "description": "Ширина изделия",
+                    "validation": {"min": 10, "max": 1600},
+                    "unit": "мм",
+                },
+                {
+                    "name": "height_mm",
+                    "type": "number",
+                    "required": True,
+                    "title": "Высота (мм)",
+                    "description": "Высота изделия",
+                    "validation": {"min": 10, "max": 1600},
+                    "unit": "мм",
+                },
+                {
+                    "name": "material",
+                    "type": "enum_cascading",
+                    "required": True,
+                    "title": "Материал",
+                    "description": "Бумага/плёнка для резки",
+                    "choices": {
+                        "source": "materials:sheet",
+                        "cascade_levels": ["type", "variant", "thickness"],
+                    },
+                },
+                {
+                    "name": "mode",
+                    "type": "enum",
+                    "required": False,
+                    "default": int(ProductionMode.STANDARD),
+                    "title": "Режим",
+                    "description": "Срочность выполнения работ",
+                    "choices": {
+                        "inline": [
+                            {"id": int(ProductionMode.ECONOMY), "title": "Эконом", "description": "3 рабочих дня"},
+                            {"id": int(ProductionMode.STANDARD), "title": "Стандарт", "description": "1 рабочий день"},
+                            {"id": int(ProductionMode.EXPRESS), "title": "Экспресс", "description": "4 часа"},
+                        ]
+                    },
+                },
+            ],
+            "param_groups": {
+                "main": ["quantity", "width_mm", "height_mm"],
+                "material": ["material"],
+                "mode": ["mode"],
+            },
+        }
+
     def get_options(self) -> Dict[str, Any]:
         materials = []
         try:

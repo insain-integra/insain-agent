@@ -98,6 +98,90 @@ class MillingCalculator(BaseCalculator):
     name = "Фрезеровка"
     description = "Расчёт стоимости фрезеровки (ПВХ, акрил, фанера, МДФ и др.)."
 
+    def get_param_schema(self) -> Dict[str, Any]:
+        """
+        Детальная схема параметров для фрезеровки.
+        """
+        return {
+            "slug": self.slug,
+            "title": self.name,
+            "params": [
+                {
+                    "name": "quantity",
+                    "type": "integer",
+                    "required": True,
+                    "title": "Тираж",
+                    "description": "Количество изделий",
+                    "validation": {"min": 1, "max": 100000},
+                },
+                {
+                    "name": "width_mm",
+                    "type": "number",
+                    "required": True,
+                    "title": "Ширина (мм)",
+                    "description": "Ширина изделия",
+                    "validation": {"min": 50, "max": 3000},
+                    "unit": "мм",
+                },
+                {
+                    "name": "height_mm",
+                    "type": "number",
+                    "required": True,
+                    "title": "Высота (мм)",
+                    "description": "Высота изделия",
+                    "validation": {"min": 50, "max": 3000},
+                    "unit": "мм",
+                },
+                {
+                    "name": "material",
+                    "type": "enum_cascading",
+                    "required": True,
+                    "title": "Материал",
+                    "description": "Листовой жёсткий материал (ПВХ, акрил, фанера и др.)",
+                    "choices": {
+                        "source": "materials:hardsheet",
+                        "cascade_levels": ["type", "variant", "thickness"],
+                    },
+                },
+                {
+                    "name": "tool_type",
+                    "type": "enum",
+                    "required": False,
+                    "default": "standard",
+                    "title": "Инструмент",
+                    "description": "Тип фрезы / сложность обработки",
+                    "choices": {
+                        "inline": [
+                            {"id": "standard", "title": "Стандарт", "description": "Обычная фреза"},
+                            {"id": "fine", "title": "Точная", "description": "Мелкая фреза, более медленная"},
+                            {"id": "rough", "title": "Черновая", "description": "Черновая обработка, быстрее"},
+                        ]
+                    },
+                },
+                {
+                    "name": "mode",
+                    "type": "enum",
+                    "required": False,
+                    "default": int(ProductionMode.STANDARD),
+                    "title": "Режим",
+                    "description": "Срочность изготовления",
+                    "choices": {
+                        "inline": [
+                            {"id": int(ProductionMode.ECONOMY), "title": "Эконом", "description": "3 рабочих дня"},
+                            {"id": int(ProductionMode.STANDARD), "title": "Стандарт", "description": "1 рабочий день"},
+                            {"id": int(ProductionMode.EXPRESS), "title": "Экспресс", "description": "4 часа"},
+                        ]
+                    },
+                },
+            ],
+            "param_groups": {
+                "main": ["quantity", "width_mm", "height_mm"],
+                "material": ["material"],
+                "processing": ["tool_type"],
+                "mode": ["mode"],
+            },
+        }
+
     def get_options(self) -> Dict[str, Any]:
         materials = []
         try:

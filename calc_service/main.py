@@ -66,6 +66,17 @@ def get_options(slug: str) -> Dict[str, Any]:
     return calc.get_options()
 
 
+@app.get("/api/v1/param_schema/{slug}")
+def get_param_schema(slug: str) -> Dict[str, Any]:
+    """
+    Детальная схема параметров калькулятора для агента / фронтенда.
+
+    Возвращает структуру с описанием параметров (обязательность, дефолты, источники).
+    """
+    calc = get_calculator(slug)  # KeyError → 404
+    return calc.get_param_schema()
+
+
 @app.get("/api/v1/tool_schema/{slug}")
 def get_tool_schema(slug: str) -> Dict[str, Any]:
     """Схема инструмента для function calling (name, description, parameters)."""

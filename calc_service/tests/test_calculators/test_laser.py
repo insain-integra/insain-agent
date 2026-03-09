@@ -169,6 +169,37 @@ def test_laser_real_nomerki(nomerki_result):
     assert ok_weight, "weight_kg: got %s, expected ~%s" % (r["weight_kg"], e["weight_kg"])
 
 
+def test_param_schema(laser_calc: LaserCalculator) -> None:
+    """Проверка param_schema для лазерного калькулятора."""
+    calc = laser_calc
+    schema = calc.get_param_schema()
+
+    assert "slug" in schema
+    assert schema["slug"] == "laser"
+
+    assert "title" in schema
+    assert "params" in schema
+    assert "param_groups" in schema
+
+    params = schema["params"]
+    assert isinstance(params, list)
+    assert len(params) > 0
+
+    for p in params:
+        assert "name" in p
+        assert "type" in p
+        assert "required" in p
+        assert "title" in p
+
+    required = calc.get_required_params()
+    assert "quantity" in required
+    assert "width_mm" in required
+
+    defaults = calc.get_default_values()
+    assert defaults.get("mode") == 1
+    assert defaults.get("cut_length_m") == 0
+
+
 def test_laser_real_nomerki_high(nomerki_high_result):
     """Сверка: та же раскладка, высокая точность гравировки (is_grave=2)."""
     if nomerki_high_result is None:

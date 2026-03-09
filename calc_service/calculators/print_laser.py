@@ -54,6 +54,92 @@ class PrintLaserCalculator(BaseCalculator):
     name = "Лазерная печать"
     description = "Расчёт стоимости лазерной печати на листовом материале (принтер Konica Minolta и др.)."
 
+    def get_param_schema(self) -> Dict[str, Any]:
+        """
+        Детальная схема параметров для лазерной листовой печати.
+        """
+        return {
+            "slug": self.slug,
+            "title": self.name,
+            "params": [
+                {
+                    "name": "quantity",
+                    "type": "integer",
+                    "required": True,
+                    "title": "Количество листов",
+                    "description": "Сколько листов будет отпечатано",
+                    "validation": {"min": 1, "max": 100000},
+                },
+                {
+                    "name": "width_mm",
+                    "type": "number",
+                    "required": True,
+                    "title": "Ширина листа (мм)",
+                    "description": "Ширина печатного листа",
+                    "validation": {"min": 100, "max": 450},
+                    "unit": "мм",
+                },
+                {
+                    "name": "height_mm",
+                    "type": "number",
+                    "required": True,
+                    "title": "Высота листа (мм)",
+                    "description": "Высота печатного листа",
+                    "validation": {"min": 100, "max": 450},
+                    "unit": "мм",
+                },
+                {
+                    "name": "material",
+                    "type": "enum_cascading",
+                    "required": True,
+                    "title": "Бумага",
+                    "description": "Тип бумаги, вариант и плотность",
+                    "choices": {
+                        "source": "materials:sheet",
+                        "cascade_levels": ["type", "variant", "thickness"],
+                    },
+                },
+                {
+                    "name": "color",
+                    "type": "enum",
+                    "required": True,
+                    "default": "4+0",
+                    "title": "Цветность",
+                    "description": "Схема печати: 1+0, 4+0, 1+1, 4+1, 4+4",
+                    "choices": {
+                        "inline": [
+                            {"id": "1+0", "title": "1+0", "description": "Ч/б с одной стороны"},
+                            {"id": "4+0", "title": "4+0", "description": "Цвет с одной стороны"},
+                            {"id": "1+1", "title": "1+1", "description": "Ч/б с двух сторон"},
+                            {"id": "4+1", "title": "4+1", "description": "Цвет + ч/б с оборота"},
+                            {"id": "4+4", "title": "4+4", "description": "Цвет с двух сторон"},
+                        ]
+                    },
+                },
+                {
+                    "name": "mode",
+                    "type": "enum",
+                    "required": False,
+                    "default": int(ProductionMode.STANDARD),
+                    "title": "Режим",
+                    "description": "Срочность изготовления заказа",
+                    "choices": {
+                        "inline": [
+                            {"id": int(ProductionMode.ECONOMY), "title": "Эконом", "description": "3 рабочих дня"},
+                            {"id": int(ProductionMode.STANDARD), "title": "Стандарт", "description": "1 рабочий день"},
+                            {"id": int(ProductionMode.EXPRESS), "title": "Экспресс", "description": "4 часа"},
+                        ]
+                    },
+                },
+            ],
+            "param_groups": {
+                "main": ["quantity", "width_mm", "height_mm"],
+                "material": ["material"],
+                "processing": ["color"],
+                "mode": ["mode"],
+            },
+        }
+
     def get_options(self) -> Dict[str, Any]:
         materials = sheet_catalog.list_for_frontend()
         try:

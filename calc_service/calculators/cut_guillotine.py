@@ -32,6 +32,93 @@ class CutGuillotineCalculator(BaseCalculator):
     name = "Гильотинная резка"
     description = "Расчёт стоимости резки листов на гильотине (размер изделия, размер листа, материал)."
 
+    def get_param_schema(self) -> Dict[str, Any]:
+        """
+        Детальная схема параметров для резки на гильотине.
+        """
+        return {
+            "slug": self.slug,
+            "title": self.name,
+            "params": [
+                {
+                    "name": "quantity",
+                    "type": "integer",
+                    "required": True,
+                    "title": "Количество листов",
+                    "description": "Сколько печатных листов нужно разрезать",
+                    "validation": {"min": 1, "max": 100000},
+                },
+                {
+                    "name": "width_mm",
+                    "type": "number",
+                    "required": True,
+                    "title": "Ширина изделия (мм)",
+                    "description": "Габарит готового изделия по ширине",
+                    "validation": {"min": 10, "max": 1000},
+                    "unit": "мм",
+                },
+                {
+                    "name": "height_mm",
+                    "type": "number",
+                    "required": True,
+                    "title": "Высота изделия (мм)",
+                    "description": "Габарит готового изделия по высоте",
+                    "validation": {"min": 10, "max": 1000},
+                    "unit": "мм",
+                },
+                {
+                    "name": "sheet_width_mm",
+                    "type": "number",
+                    "required": True,
+                    "title": "Ширина листа (мм)",
+                    "description": "Размер печатного листа по ширине",
+                    "validation": {"min": 100, "max": 700},
+                    "unit": "мм",
+                },
+                {
+                    "name": "sheet_height_mm",
+                    "type": "number",
+                    "required": True,
+                    "title": "Высота листа (мм)",
+                    "description": "Размер печатного листа по высоте",
+                    "validation": {"min": 100, "max": 1000},
+                    "unit": "мм",
+                },
+                {
+                    "name": "material",
+                    "type": "enum_cascading",
+                    "required": False,
+                    "title": "Материал",
+                    "description": "Бумага/картон листовой (для расчёта плотности и пачек)",
+                    "choices": {
+                        "source": "materials:sheet",
+                        "cascade_levels": ["type", "variant", "thickness"],
+                    },
+                },
+                {
+                    "name": "mode",
+                    "type": "enum",
+                    "required": False,
+                    "default": int(ProductionMode.STANDARD),
+                    "title": "Режим",
+                    "description": "Срочность работы",
+                    "choices": {
+                        "inline": [
+                            {"id": int(ProductionMode.ECONOMY), "title": "Эконом", "description": "3 рабочих дня"},
+                            {"id": int(ProductionMode.STANDARD), "title": "Стандарт", "description": "1 рабочий день"},
+                            {"id": int(ProductionMode.EXPRESS), "title": "Экспресс", "description": "4 часа"},
+                        ]
+                    },
+                },
+            ],
+            "param_groups": {
+                "main": ["quantity", "width_mm", "height_mm"],
+                "material": ["material"],
+                "sheet": ["sheet_width_mm", "sheet_height_mm"],
+                "mode": ["mode"],
+            },
+        }
+
     def get_options(self) -> Dict[str, Any]:
         materials_sheet = []
         for cat in ("sheet", "roll", "hardsheet"):
