@@ -43,6 +43,8 @@ _load_env()
 
 from openai import OpenAI
 
+from token_analyzer import TokenAnalyzer
+
 logger = logging.getLogger(__name__)
 
 # Конфиг из .env (поддержка обоих имён переменной)
@@ -192,6 +194,7 @@ class LLMProvider:
         if mode_value not in ("mixed", "gemini", "yandex"):
             mode_value = "mixed"
         self.mode = mode_value
+        self.analyzer = TokenAnalyzer()
 
     @property
     def client(self) -> OpenAI:
@@ -228,53 +231,84 @@ class LLMProvider:
             kwargs["tools"] = tools
             kwargs["tool_choice"] = "auto"
 
-        # Режим "только Yandex" — сразу уходим в fallback
-        if self.mode == "yandex":
-            logger.info("LLM request: mode=yandex, messages=%s", len(messages))
-            if not self._fallback._is_available():
-                raise ValueError("YandexGPT недоступен: проверьте YANDEX_API_KEY и YANDEX_FOLDER_ID в .env")
-            return self._fallback.chat(messages, tools=tools)
+        provider_hint = "yandex" if self.mode == "yandex" else "gemini"
+        request_log = self.analyzer.log_request(
+            messages=messages,
+            tools=tools,
+            metadata={
+                "provider": provider_hint,
+                "model": self.model,
+                "mode": self.mode,
+            },
+        )
 
-        logger.info("LLM request: mode=%s, model=%s, messages=%s", self.mode, self.model, len(messages))
+        used_provider = provider_hint
+        out: Dict[str, Any]
 
         try:
-            response = self.client.chat.completions.create(**kwargs)
+            # Режим "только Yandex" — сразу уходим в fallback
+            if self.mode == "yandex":
+                logger.info("LLM request: mode=yandex, messages=%s", len(messages))
+                if not self._fallback._is_available():
+                    raise ValueError("YandexGPT недоступен: проверьте YANDEX_API_KEY и YANDEX_FOLDER_ID в .env")
+                out = self._fallback.chat(messages, tools=tools)
+                used_provider = "yandex"
+            else:
+                logger.info("LLM request: mode=%s, model=%s, messages=%s", self.mode, self.model, len(messages))
+                try:
+                    response = self.client.chat.completions.create(**kwargs)
+                    choice = (response.choices or [None])[0]
+                    if not choice:
+                        raise RuntimeError("Пустой ответ от модели")
+                    msg = choice.message
+                    out = {"content": None, "tool_calls": None}
+                    if getattr(msg, "content", None):
+                        out["content"] = msg.content
+                    if getattr(msg, "tool_calls", None) and len(msg.tool_calls) > 0:
+                        out["tool_calls"] = [
+                            {
+                                "id": tc.id,
+                                "type": getattr(tc, "type", "function"),
+                                "function": {
+                                    "name": tc.function.name,
+                                    "arguments": tc.function.arguments,
+                                },
+                            }
+                            for tc in msg.tool_calls
+                        ]
+                    used_provider = "gemini"
+                except Exception as e:
+                    # В смешанном режиме при любой ошибке Gemini пробуем YandexGPT
+                    if self.mode == "mixed" and self._fallback._is_available():
+                        logger.warning("Gemini error (mode=mixed), переключаюсь на YandexGPT: %s", e)
+                        out = self._fallback.chat(messages, tools=tools)
+                        used_provider = "yandex"
+                    else:
+                        logger.exception("LLM API error: %s", e)
+                        err_msg = str(e)
+                        if "timeout" in err_msg.lower() or "timed out" in err_msg.lower():
+                            raise ConnectionError("Таймаут запроса к модели. Попробуйте позже.") from e
+                        if "api_key" in err_msg.lower() or "401" in err_msg or "403" in err_msg:
+                            raise ValueError("Неверный или отсутствующий API-ключ Google.") from e
+                        raise RuntimeError(f"Ошибка API: {err_msg}") from e
+
+            # обновляем провайдера в метаданных и логируем ответ
+            request_log.setdefault("metadata", {})["provider"] = used_provider
+            full_log = self.analyzer.log_response(out, request_log)
+            self.analyzer.save_to_file(full_log)
+
+            logger.info(
+                "LLM response: provider=%s has_content=%s, tool_calls=%s",
+                used_provider,
+                out.get("content") is not None,
+                len(out.get("tool_calls") or []),
+            )
+            return out
+
         except Exception as e:
-            # В смешанном режиме при любой ошибке Gemini пробуем YandexGPT
-            if self.mode == "mixed" and self._fallback._is_available():
-                logger.warning("Gemini error (mode=mixed), переключаюсь на YandexGPT: %s", e)
-                return self._fallback.chat(messages, tools=tools)
-
-            logger.exception("LLM API error: %s", e)
-            err_msg = str(e)
-            if "timeout" in err_msg.lower() or "timed out" in err_msg.lower():
-                raise ConnectionError("Таймаут запроса к модели. Попробуйте позже.") from e
-            if "api_key" in err_msg.lower() or "401" in err_msg or "403" in err_msg:
-                raise ValueError("Неверный или отсутствующий API-ключ Google.") from e
-            raise RuntimeError(f"Ошибка API: {err_msg}") from e
-
-        choice = (response.choices or [None])[0]
-        if not choice:
-            raise RuntimeError("Пустой ответ от модели")
-
-        msg = choice.message
-        out: Dict[str, Any] = {"content": None, "tool_calls": None}
-        if getattr(msg, "content", None):
-            out["content"] = msg.content
-        if getattr(msg, "tool_calls", None) and len(msg.tool_calls) > 0:
-            out["tool_calls"] = [
-                {
-                    "id": tc.id,
-                    "type": getattr(tc, "type", "function"),
-                    "function": {
-                        "name": tc.function.name,
-                        "arguments": tc.function.arguments,
-                    },
-                }
-                for tc in msg.tool_calls
-            ]
-        logger.info("LLM response: has_content=%s, tool_calls=%s", out["content"] is not None, len(out["tool_calls"] or []))
-        return out
+            request_log["error"] = str(e)
+            self.analyzer.save_to_file(request_log)
+            raise
 
     def chat_with_tools(
         self,

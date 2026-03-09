@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Mapping, Optional
 
 from calculators.base import BaseCalculator, ProductionMode
 from calculators.cut_guillotine import CutGuillotineCalculator
-from calculators.lamination import LaminationCalculator
+from calculators.lamination import LaminationCalculator, LAMINATOR_CODE
 from common.helpers import calc_weight
 from common.layout import layout_on_sheet
 from common.markups import (
@@ -24,6 +24,7 @@ from common.markups import (
     get_time_ready,
 )
 from equipment import printer as printer_catalog
+from equipment import laminator as laminator_catalog
 from materials import sheet as sheet_catalog
 from materials import get_material as get_material_any
 
@@ -174,7 +175,20 @@ class PrintSheetCalculator(BaseCalculator):
             layout_on_material = {"num": 1}
 
         num_sheet_to_print = num_sheet
-        # TODO: ламинация — defectsLaminator, num_sheet_to_print = ceil(num_sheet_to_print * (1 + defectsLaminator))
+        # Если есть ламинация, сначала учитываем брак ламинатора, как в JS calcPrintSheet:
+        # defectsLaminator → numSheetToPrint = ceil(numSheetToPrint * (1 + defectsLaminator)).
+        if lamination_id:
+            try:
+                laminator = laminator_catalog.get(LAMINATOR_CODE)
+            except Exception:
+                laminator = None
+            if laminator:
+                try:
+                    defects_laminator = laminator.get_defect_rate(float(num_sheet))
+                    num_sheet_to_print = math.ceil(num_sheet_to_print * (1 + defects_laminator))
+                except Exception:
+                    pass
+
         defects_printer = printer.get_defect_rate(float(num_sheet_to_print))
         if mode.value >= 2:
             defects_printer += defects_printer * (mode.value - 1)
@@ -256,7 +270,8 @@ class PrintSheetCalculator(BaseCalculator):
                 # JS: если laminat.size[1] == 0 → считаем по листам (numSheet, sizeSheet),
                 # иначе по изделиям (n, size).
                 if lam_h == 0:
-                    lam_quantity = num_sheet_to_print
+                    # JS: calcLamination(numSheet, sizeSheet, ...)
+                    lam_quantity = num_sheet
                     lam_width, lam_height = size_sheet[0], size_sheet[1]
                 else:
                     lam_quantity = quantity
@@ -290,7 +305,9 @@ class PrintSheetCalculator(BaseCalculator):
         price = math.ceil(price)
 
         time_total = time_print + time_cut + time_lamination + time_cut_guillotine
-        time_hours = round(time_total * 100) / 100.0
+        # В JS: result.time = Math.ceil((costCut.time+costPrint.time+costLamination.time+costCutGuillotine.time+costOptions.time)*100)/100
+        # Используем такое же округление вверх до сотых.
+        time_hours = math.ceil(time_total * 100) / 100.0
         base_time_ready_list = get_time_ready("baseTimeReadyPrintSheet")
         idx = max(0, min(len(base_time_ready_list) - 1, mode.value))
         base_ready = float(base_time_ready_list[idx])

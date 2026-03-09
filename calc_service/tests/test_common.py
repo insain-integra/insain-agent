@@ -56,7 +56,8 @@ def test_parse_currency_rub():
 
 
 def test_get_margin():
-    assert get_margin("marginBadge") == pytest.approx(0.2)
+    # marginBadge по данным common.json сейчас равен 0.15
+    assert get_margin("marginBadge") == pytest.approx(0.15)
     assert get_margin("marginButtonPins") == pytest.approx(-0.1)
     assert get_margin("marginDoesNotExist") == 0.0
 

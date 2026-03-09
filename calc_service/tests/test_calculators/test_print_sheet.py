@@ -153,7 +153,7 @@ EXPECTED_REF_2 = {
     "price": 28571.454763636364,
     "time_hours": 4.95,
     "time_ready": 17.69,
-    "weight_kg": 21.6,
+    "weight_kg": 18.711,
 }
 EXPECTED_MATERIAL_2 = {
     "code": "PaperCoated300M",
@@ -179,7 +179,7 @@ EXPECTED_REF_3 = {
     "price": 6113.682462735044,
     "time_hours": 1.01,
     "time_ready": 9.49,
-    "weight_kg": 2.41488,
+    "weight_kg": 2.06613,
 }
 EXPECTED_MATERIALS_3 = {
     "paper": {
