@@ -159,6 +159,8 @@ def test_laser_real_nomerki(nomerki_result):
         got_unit = got.get("unit", "")
         ok_q = _cmp(float(got_q), float(exp_q), 0.05) if got_q is not None else False
         print("    %s  %s %s ~ %s %s  %s" % (code, got_q, got_unit, exp_q, exp_unit, "ok" if ok_q else "FAIL"))
+        assert "name" in got
+        assert "title" in got
 
     assert ok_cost, "cost: got %s, expected ~%s" % (r["cost"], e["cost"])
     assert ok_price, "price: got %s, expected ~%s" % (r["price"], e["price"])

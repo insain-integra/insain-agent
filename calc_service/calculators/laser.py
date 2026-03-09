@@ -400,7 +400,8 @@ class LaserCalculator(BaseCalculator):
                 materials.append(
                     {
                         "code": material.code,
-                        "name": material.name,
+                        "name": material.description,
+                        "title": material.title,
                         "size_mm": size_material,
                         "quantity": material_qty,
                         "unit": material_unit,
@@ -471,7 +472,8 @@ class LaserCalculator(BaseCalculator):
             materials.append(
                 {
                     "code": adhesive_id,
-                    "name": mat_adh.name,
+                    "name": mat_adh.description,
+                    "title": mat_adh.title,
                     "size_mm": size_adh,
                     "quantity": num_adh_sheets,
                     "unit": "sheet",

@@ -19,8 +19,8 @@ def test_load_hardsheet():
 
 def test_load_all_material_files():
     json_files = sorted(DATA_DIR.glob("*.json"))
-    # В документации указано 11 файлов материалов
-    assert len(json_files) == 11
+    # В текущей структуре materials/ ожидается 21 файл материалов.
+    assert len(json_files) == 21
 
     total = 0
     for path in json_files:
@@ -42,7 +42,8 @@ def test_get_cost_fixed():
     spec = MaterialSpec(
         code="T1",
         group="G",
-        name="Fixed cost material",
+        title="Fixed",
+        description="Fixed cost material",
         category="test",
         cost=750.0,
         sizes=[[100.0, 100.0]],
@@ -55,7 +56,8 @@ def test_get_cost_tiered():
     spec = MaterialSpec(
         code="T2",
         group="G",
-        name="Tiered cost material",
+        title="Tiered",
+        description="Tiered cost material",
         category="test",
         cost=None,
         cost_tiers=[(10, 800.0), (50, 700.0)],

@@ -15,11 +15,17 @@ class MaterialSpec(BaseModel):
 
     code: str
     group: str
-    name: str
+    # Краткое название для UI (до ~50 символов).
+    title: str
+    # Полное описание материала.
+    description: str
     category: str
 
     cost: Optional[float] = None
     cost_tiers: Optional[List[Tuple[float, float]]] = None
+    # Метаданные о стоимости (дата обновления и источник прайса).
+    cost_date: Optional[str] = None
+    cost_source: Optional[str] = None
 
     sizes: List[List[float]]
     min_size: Optional[List[float]] = None
@@ -34,6 +40,14 @@ class MaterialSpec(BaseModel):
     weight_per_unit: Optional[float] = None
 
     available: bool = True
+
+    @property
+    def name(self) -> str:
+        """
+        Обратная совместимость: старый код использует material.name.
+        Теперь это синоним description.
+        """
+        return self.description
 
     def get_cost(self, quantity_or_area: float = 1.0) -> float:
         """
@@ -94,7 +108,9 @@ class MaterialCatalog:
         только доступные (available == True) и поля:
           - code
           - group
-          - name
+          - name        (краткое название для выпадающего списка — title)
+          - title       (то же, что name)
+          - description (полное название)
           - thickness
         """
         result: List[Dict[str, Optional[float] | str]] = []
@@ -105,7 +121,10 @@ class MaterialCatalog:
                 {
                     "code": m.code,
                     "group": m.group,
-                    "name": m.name,
+                    # Для совместимости фронтенда name = title.
+                    "name": m.title or m.description,
+                    "title": m.title or m.description,
+                    "description": m.description,
                     "thickness": m.thickness,
                 }
             )

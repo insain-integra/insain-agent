@@ -164,11 +164,12 @@ class TemplateCalculator(BaseCalculator):
              - price = cost * (1 + margin_total)
              - unit_price = price / quantity
 
-          9. Собрать расход материалов:
+         9. Собрать расход материалов:
              - materials = [
                    {
                        "code": material.code,
-                       "name": material.name,
+                       "name": material.description,  # полное название
+                       "title": material.title,       # краткое для UI
                        "quantity": quantity_with_defects,
                        "unit": "шт",
                    },

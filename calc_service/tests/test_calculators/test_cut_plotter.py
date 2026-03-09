@@ -130,6 +130,10 @@ def test_calculate_basic(result):
     assert result["price"] >= 0
     assert result["time_hours"] >= 0
     assert result["time_ready"] >= 0
+    materials = result.get("materials") or []
+    for m in materials:
+        assert "name" in m
+        assert "title" in m
 
 
 def test_expected_values_cut_plotter(ref_result_cut_plotter, ref_params_cut_plotter):
@@ -169,6 +173,7 @@ def test_expected_values_cut_plotter(ref_result_cut_plotter, ref_params_cut_plot
             ok_q = _cmp(float(got_q or 0), float(exp_q or 0), 0.15) if exp_q is not None and got_unit == exp_unit else True
             print("  material    %s  ~ %s %s  name_ok=%s q_ok=%s"
                   % (got_name[:50], got_q, got_unit, ok_name, ok_q))
+            assert "title" in got
         else:
             print("  material    (нет в результате) ожид. %s ~ %s %s" % (exp_name[:50], exp_q, exp_unit))
 
@@ -215,6 +220,7 @@ def test_expected_values_cut_plotter_1000(ref_result_cut_plotter_1000, ref_param
             ok_q = _cmp(float(got_q or 0), float(exp_q or 0), 0.15) if exp_q is not None and got_unit == exp_unit else True
             print("  material    %s  ~ %s %s  name_ok=%s q_ok=%s"
                   % (got_name[:50], got_q, got_unit, ok_name, ok_q))
+            assert "title" in got
         else:
             print("  material    (нет в результате) ожид. %s ~ %s %s" % (exp_name[:50], exp_q, exp_unit))
 

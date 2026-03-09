@@ -1,0 +1,13 @@
+{
+    "Epoxy": {
+        "Default": {
+            "density": 1
+        },
+        "EpoxyPoly": {
+            "cost": 2750,
+            "exptime": 0.25,
+            "description": "Полиуретановая смола M2152 (POL PART) и Отвердитель полиуретановой смолы E735F (ISO PART)",
+            "title": "Полиуретановая смола M2152 (POL PART) и Отвердител"
+        }
+    }
+}

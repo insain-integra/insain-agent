@@ -1,345 +1,426 @@
-{  "Paper" : {
-    // Значения по умолчанию, используются, когда не заданы для конкретного вида.
-    "Default": {
-        "size": [
-            320,
-            450
-        ],
-        //размер по умолчанию
-        "minSize": [
-            320,
-            450
-        ],
-        // Минимальный продажный размер.
-        "densityliner": 0,   // плотность подложки, гр/м2
-        "unitDensity" : "гм2" //  единица измерения плотности
-    },
-    // Значения для конкретного вида (если не заданы, следует использовать дефолтные)
-    "VHI80": {
-        "name": "Снегурочка 80гр А3",
-        "cost": 2.0, // 10.06.2022
-        "density": 80,
-        "size": [
-            297,
-            420
-        ]
-    },
-    "ColotechPlus90M": {
-        "name": "ColotechPlus 90гр матовая SRA3",
-        "cost": 10.0, // 12.03.2024
-        "density": 90
-    },
-    "PaperCoated115M": {
-        "name": "Титан DIGITAL мелованная (матовая) SRA3 113г/м",
-        "cost": 4.7, // 30.03.2024
-        "density": 115
-    },
-    "PaperCoated115G": {
-        "name": "Титан DIGITAL мелованная (глянцевая) SRA3 113г/м",
-        "cost": 4.7, // 30.03.2024
-        "density": 115
-    },
-    "PaperCoated130M": {
-        "name": "Титан DIGITAL мелованная (матовая) SRA3 128г/м",
-        "cost": 5.33, // 30.03.2024
-        "density": 130
-    },
-    "PaperCoated130G": {
-        "name": "Титан DIGITAL мелованная (глянцевая) SRA3 128г/м",
-        "cost": 5.33, // 30.03.2024
-        "density": 130
-    },
-    "PaperCoated170M": {
-        "name": "Титан DIGITAL мелованная (матовая) SRA3 170г/м",
-        "cost": 7.08, // 30.03.2024
-        "density": 170
-    },
-    "PaperCoated170G": {
-        "name": "Титан DIGITAL мелованная (глянцевая) SRA3 170г/м",
-        "cost": 7.08, // 30.03.2024
-        "density": 170
-    },
-    "PaperCoated200M": {
-        "name": "Титан DIGITAL мелованная (матовая) SRA3 200г/м",
-        "cost": 8.32, // 30.03.2024
-        "density": 200
-    },
-    "PaperCoated200G": {
-        "name": "Титан DIGITAL мелованная (глянцевая) SRA3 200г/м",
-        "cost": 8.32, // 30.03.2024
-        "density": 200
-    },
-    "PaperCoated250M": {
-        "name": "Титан DIGITAL мелованная (матовая) SRA3 250г/м",
-        "cost": 9.9, // 30.03.2024
-        "density": 250
-    },
-    "PaperCoated250G": {
-        "name": "Титан DIGITAL мелованная (глянцевая) SRA3 250г/м",
-        "cost": 9.9, // 30.03.2024
-        "density": 250
-    },
-    "PaperCoated300M": {
-        "name": "Титан DIGITAL мелованная (матовая) SRA3 300г/м",
-        "cost": 12.48, // 30.03.2024
-        "density": 300
-    },
-    "PaperCoated300G": {
-        "name": "Титан DIGITAL мелованная (глянцевая) SRA3 300г/м",
-        "cost": 12.48, // 30.03.2024
-        "density": 300
-    },
-    "ColotechPlus120M": {
-        "name": "ColotechPlus 120гр матовая SRA3",
-        "cost": 14.7, // 30.03.2024
-        "density": 120
-    },
-    "ColotechPlus160M": {
-        "name": "ColotechPlus 160гр матовая SRA3",
-        "cost": 17.75, // 30.03.2024
-        "density": 160
-    },
-    "ColotechPlus200M": {
-        "name": "ColotechPlus 200гр матовая SRA3",
-        "cost": 23.9, // 30.03.2024
-        "density": 200
-    },
-    "ColotechPlus250M": {
-        "name": "ColotechPlus 250гр матовая SRA3",
-        "cost": 27.8,  // 30.03.2024
-        "density": 250
-    },
-    "ColotechPlus300M": {
-        "name": "ColotechPlus 300гр матовая SRA3",
-        "cost": 41.5, // 30.03.2024
-        "density": 300
-    },
-    "ColotechPlus350M": {
-        "name": "ColotechPlus 350гр матовая SRA3",
-        "cost": 58.8, // 30.03.2024
-        "density": 350
-    },
-    "RAFLACOAT": {
-        "name": "Самоклеящаяся бумага RAFLACOAT SRA3 постоянный клей",
-        "cost": 18.3, // 09.08.2023
-        "density": 190, // плотность материала, гр/м2
-        "densityliner": 86, // плотность подложки, гр/м2
-        "thickness" : 50
-    },
-    "RaflatacMW": {
-        "name": "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 матовая белая 215 г/м",
-        "cost": 150.0,
-        "density": 215, // плотность материала, гр/м2
-        "densityliner": 135, // плотность подложки, гр/м2
-        "thickness" : 50
-    },
-    "RaflatacMT": {
-        "name": "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 матовая прозрачная 196г/м",
-        "cost": 150.0,
-        "density": 196,
-        "densityliner": 135, // плотность подложки, гр/м2
-        "thickness" : 50
-    },
-    "RaflatacGW": {
-        "name": "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 глянцевая белая 212г/м",
-        "cost": 150.0,
-        "density": 212,
-        "densityliner": 135, // плотность подложки, гр/м2
-        "thickness" : 50
-    },
-    "RaflatacGT": {
-        "name": "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 глянцевая прозрачная 211г/м",
-        "cost": 150.0,
-        "density": 211,
-        "densityliner": 135, // плотность подложки, гр/м2
-        "thickness" : 50
-    },
-    "EnvelopeDL": {
-        "name": "Конверт DL белый без запечатки 80г/м",
-        "cost": 1.92, // 2024.05.03 
-        "density": 160,
-        "size": [
-            220,
-            120
-        ]
-    },
-    "EnvelopeС6": {
-        "name": "Конверт С6 белый без запечатки 80г/м",
-        "cost": 1.43,
-        "density": 160,
-        "size": [
-            162,
-            114
-        ]
-    },
-    "EnvelopeС5": {
-        "name": "Конверт С5 белый без запечатки 80г/м",
-        "cost": 2.16,
-        "density": 160,
-        "size": [
-            229,
-            162
-        ]
-    },
-    "EnvelopeС4": {
-        "name": "Конверт С4 белый без запечатки 90г/м",
-        "cost": 5.12,
-        "density": 180,
-        "size": [
-            324,
-            229
-        ]
-    },
-    "MAJESTIC": {
-        "name": "Маджестик, 290г/м",
-        "cost": 365,
-        "density": 290,
-        "size": [
-            1020,
-            720
-        ]
-    },
-    "SUPERWAIS": {
-        "name": "Лен Супервайс, 280г/м",
-        "cost": 180,
-        "density": 290,
-        "size": [
-            1020,
-            720
-        ]
-    },
-    "ECOLINER100": {
-        "name": "Эколайнер, крафтовая бумага с двусторонним эффектом, коричневый/серый, 100гр",
-        "cost": 38,
-        "density": 100,
-        "size": [
-            1000,
-            700
-        ]
-    },
-    "ECOLINER250": {
-        "name": "Эколайнер, крафтовая бумага с двусторонним эффектом, коричневый/коричневый, 250гр",
-        "cost": 150,
-        "density": 250,
-        "size": [
-            1000,
-            700
-        ]
-    },
-    "ECOLINER290": {
-        "name": "Эколайнер, крафтовая бумага с двусторонним эффектом, коричневый/коричневый, 290гр",
-        "cost": 170,
-        "density": 290,
-        "size": [
-            1000,
-            700
-        ]
-    },
-    "TOUCHCAVER": {
-        "name": "Тач кавер, 301гр/м2",
-        "cost": 700,
-        "density": 301,
-        "size": [
-            1020,
-            720
-        ]
-    },
-    "CALQUE90": {
-        "name": "Калька, 90гр/м2",
-        "cost": 126,
-        "density": 90,
-        "size": [
-            1000,
-            700
-        ]
-    },
-    "CALQUE130": {
-        "name": "Калька, 130гр/м2",
-        "cost": 183,
-        "density": 130,
-        "size": [
-            1000,
-            700
-        ]
-    },
-    "CALQUE180": {
-        "name": "Калька, 180гр/м2",
-        "cost": 233,
-        "density": 180,
-        "size": [
-            1000,
-            700
-        ]
-    },
-    "PaperSublimation128": {
-        "name": "Бумага сублимационная А3 (Китай BS), 128гр/м2",
-        "cost": 17.8,
-        "density": 128,
-        "size": [
-            297,
-            420
-        ]
-    },
-    "PaperDTFTransfer": {
-        "name": "Пленка для DTF трансферов",
-        "cost": 0,
-        "density": 128,
-        "size": [
-            300,
-            1000
-        ]
-    },
-    "PaperFOREVERLASERTRANSPARENT": {
-        "name": "Термобумага FOREVER, серия LASER-TRANSPARENT, для светлых тканей, A3",
-        "cost": 164,
-        "density": 135,
-        "size": [
-            297,
-            420
-        ]
-    },
-    "ORACAL820": {
-        "name": "Пломбировочная пленка ORACAL 820, 1.00 х 50 м",
-        "length_min":0, //0 - значит поддерживаем на складе
-        "cost": 133, // 2022.08.03 1600р/м2 хватает на 12 листов SRA4
-        "size":[320,225],
-        "density": 211,
-        "thickness" : 55 // толщина без подложки
-    },
-},
-    "OffsetPromo": {
-        // Значения по умолчанию, используются, когда не заданы для конкретного вида.
+{
+    "Paper": {
         "Default": {
-            //состав по умолчанию
-            "numSheet":1000,
-            "color":"4+4",
-            "density" : 115
+            "size": [
+                320,
+                450
+            ],
+            "minSize": [
+                320,
+                450
+            ],
+            "densityliner": 0,
+            "unitDensity": "гм2"
+        },
+        "VHI80": {
+            "cost": 2.0,
+            "density": 80,
+            "size": [
+                297,
+                420
+            ],
+            "description": "Снегурочка 80гр А3",
+            "title": "Снегурочка 80гр А3",
+            "cost_date": "2022-06-10"
+        },
+        "ColotechPlus90M": {
+            "cost": 10.0,
+            "density": 90,
+            "description": "ColotechPlus 90гр матовая SRA3",
+            "title": "ColotechPlus 90гр матовая SRA3",
+            "cost_date": "2024-03-12"
+        },
+        "PaperCoated115M": {
+            "cost": 4.7,
+            "density": 115,
+            "description": "Титан DIGITAL мелованная (матовая) SRA3 113г/м",
+            "title": "Титан DIGITAL мелованная (матовая) SRA3 113г/м",
+            "cost_date": "2024-03-30"
+        },
+        "PaperCoated115G": {
+            "cost": 4.7,
+            "density": 115,
+            "description": "Титан DIGITAL мелованная (глянцевая) SRA3 113г/м",
+            "title": "Титан DIGITAL мелованная (глянцевая) SRA3 113г/м",
+            "cost_date": "2024-03-30"
+        },
+        "PaperCoated130M": {
+            "cost": 5.33,
+            "density": 130,
+            "description": "Титан DIGITAL мелованная (матовая) SRA3 128г/м",
+            "title": "Титан DIGITAL мелованная (матовая) SRA3 128г/м",
+            "cost_date": "2024-03-30"
+        },
+        "PaperCoated130G": {
+            "cost": 5.33,
+            "density": 130,
+            "description": "Титан DIGITAL мелованная (глянцевая) SRA3 128г/м",
+            "title": "Титан DIGITAL мелованная (глянцевая) SRA3 128г/м",
+            "cost_date": "2024-03-30"
+        },
+        "PaperCoated170M": {
+            "cost": 7.08,
+            "density": 170,
+            "description": "Титан DIGITAL мелованная (матовая) SRA3 170г/м",
+            "title": "Титан DIGITAL мелованная (матовая) SRA3 170г/м",
+            "cost_date": "2024-03-30"
+        },
+        "PaperCoated170G": {
+            "cost": 7.08,
+            "density": 170,
+            "description": "Титан DIGITAL мелованная (глянцевая) SRA3 170г/м",
+            "title": "Титан DIGITAL мелованная (глянцевая) SRA3 170г/м",
+            "cost_date": "2024-03-30"
+        },
+        "PaperCoated200M": {
+            "cost": 8.32,
+            "density": 200,
+            "description": "Титан DIGITAL мелованная (матовая) SRA3 200г/м",
+            "title": "Титан DIGITAL мелованная (матовая) SRA3 200г/м",
+            "cost_date": "2024-03-30"
+        },
+        "PaperCoated200G": {
+            "cost": 8.32,
+            "density": 200,
+            "description": "Титан DIGITAL мелованная (глянцевая) SRA3 200г/м",
+            "title": "Титан DIGITAL мелованная (глянцевая) SRA3 200г/м",
+            "cost_date": "2024-03-30"
+        },
+        "PaperCoated250M": {
+            "cost": 9.9,
+            "density": 250,
+            "description": "Титан DIGITAL мелованная (матовая) SRA3 250г/м",
+            "title": "Титан DIGITAL мелованная (матовая) SRA3 250г/м",
+            "cost_date": "2024-03-30"
+        },
+        "PaperCoated250G": {
+            "cost": 9.9,
+            "density": 250,
+            "description": "Титан DIGITAL мелованная (глянцевая) SRA3 250г/м",
+            "title": "Титан DIGITAL мелованная (глянцевая) SRA3 250г/м",
+            "cost_date": "2024-03-30"
+        },
+        "PaperCoated300M": {
+            "cost": 12.48,
+            "density": 300,
+            "description": "Титан DIGITAL мелованная (матовая) SRA3 300г/м",
+            "title": "Титан DIGITAL мелованная (матовая) SRA3 300г/м",
+            "cost_date": "2024-03-30"
+        },
+        "PaperCoated300G": {
+            "cost": 12.48,
+            "density": 300,
+            "description": "Титан DIGITAL мелованная (глянцевая) SRA3 300г/м",
+            "title": "Титан DIGITAL мелованная (глянцевая) SRA3 300г/м",
+            "cost_date": "2024-03-30"
+        },
+        "ColotechPlus120M": {
+            "cost": 14.7,
+            "density": 120,
+            "description": "ColotechPlus 120гр матовая SRA3",
+            "title": "ColotechPlus 120гр матовая SRA3",
+            "cost_date": "2024-03-30"
+        },
+        "ColotechPlus160M": {
+            "cost": 17.75,
+            "density": 160,
+            "description": "ColotechPlus 160гр матовая SRA3",
+            "title": "ColotechPlus 160гр матовая SRA3",
+            "cost_date": "2024-03-30"
+        },
+        "ColotechPlus200M": {
+            "cost": 23.9,
+            "density": 200,
+            "description": "ColotechPlus 200гр матовая SRA3",
+            "title": "ColotechPlus 200гр матовая SRA3",
+            "cost_date": "2024-03-30"
+        },
+        "ColotechPlus250M": {
+            "cost": 27.8,
+            "density": 250,
+            "description": "ColotechPlus 250гр матовая SRA3",
+            "title": "ColotechPlus 250гр матовая SRA3",
+            "cost_date": "2024-03-30"
+        },
+        "ColotechPlus300M": {
+            "cost": 41.5,
+            "density": 300,
+            "description": "ColotechPlus 300гр матовая SRA3",
+            "title": "ColotechPlus 300гр матовая SRA3",
+            "cost_date": "2024-03-30"
+        },
+        "ColotechPlus350M": {
+            "cost": 58.8,
+            "density": 350,
+            "description": "ColotechPlus 350гр матовая SRA3",
+            "title": "ColotechPlus 350гр матовая SRA3",
+            "cost_date": "2024-03-30"
+        },
+        "RAFLACOAT": {
+            "cost": 18.3,
+            "density": 190,
+            "densityliner": 86,
+            "thickness": 50,
+            "description": "Самоклеящаяся бумага RAFLACOAT SRA3 постоянный клей",
+            "title": "Самоклеящаяся бумага RAFLACOAT SRA3 постоянный кле",
+            "cost_date": "2023-08-09"
+        },
+        "RaflatacMW": {
+            "cost": 150.0,
+            "density": 215,
+            "densityliner": 135,
+            "thickness": 50,
+            "description": "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 матовая белая 215 г/м",
+            "title": "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 м"
+        },
+        "RaflatacMT": {
+            "cost": 150.0,
+            "density": 196,
+            "densityliner": 135,
+            "thickness": 50,
+            "description": "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 матовая прозрачная 196г/м",
+            "title": "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 м"
+        },
+        "RaflatacGW": {
+            "cost": 150.0,
+            "density": 212,
+            "densityliner": 135,
+            "thickness": 50,
+            "description": "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 глянцевая белая 212г/м",
+            "title": "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 г"
+        },
+        "RaflatacGT": {
+            "cost": 150.0,
+            "density": 211,
+            "densityliner": 135,
+            "thickness": 50,
+            "description": "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 глянцевая прозрачная 211г/м",
+            "title": "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 г"
+        },
+        "EnvelopeDL": {
+            "cost": 1.92,
+            "density": 160,
+            "size": [
+                220,
+                120
+            ],
+            "description": "Конверт DL белый без запечатки 80г/м",
+            "title": "Конверт DL белый без запечатки 80г/м"
+        },
+        "EnvelopeС6": {
+            "cost": 1.43,
+            "density": 160,
+            "size": [
+                162,
+                114
+            ],
+            "description": "Конверт С6 белый без запечатки 80г/м",
+            "title": "Конверт С6 белый без запечатки 80г/м"
+        },
+        "EnvelopeС5": {
+            "cost": 2.16,
+            "density": 160,
+            "size": [
+                229,
+                162
+            ],
+            "description": "Конверт С5 белый без запечатки 80г/м",
+            "title": "Конверт С5 белый без запечатки 80г/м"
+        },
+        "EnvelopeС4": {
+            "cost": 5.12,
+            "density": 180,
+            "size": [
+                324,
+                229
+            ],
+            "description": "Конверт С4 белый без запечатки 90г/м",
+            "title": "Конверт С4 белый без запечатки 90г/м"
+        },
+        "MAJESTIC": {
+            "cost": 365,
+            "density": 290,
+            "size": [
+                1020,
+                720
+            ],
+            "description": "Маджестик, 290г/м",
+            "title": "Маджестик, 290г/м"
+        },
+        "SUPERWAIS": {
+            "cost": 180,
+            "density": 290,
+            "size": [
+                1020,
+                720
+            ],
+            "description": "Лен Супервайс, 280г/м",
+            "title": "Лен Супервайс, 280г/м"
+        },
+        "ECOLINER100": {
+            "cost": 38,
+            "density": 100,
+            "size": [
+                1000,
+                700
+            ],
+            "description": "Эколайнер, крафтовая бумага с двусторонним эффектом, коричневый/серый, 100гр",
+            "title": "Эколайнер, крафтовая бумага с двусторонним эффекто"
+        },
+        "ECOLINER250": {
+            "cost": 150,
+            "density": 250,
+            "size": [
+                1000,
+                700
+            ],
+            "description": "Эколайнер, крафтовая бумага с двусторонним эффектом, коричневый/коричневый, 250гр",
+            "title": "Эколайнер, крафтовая бумага с двусторонним эффекто"
+        },
+        "ECOLINER290": {
+            "cost": 170,
+            "density": 290,
+            "size": [
+                1000,
+                700
+            ],
+            "description": "Эколайнер, крафтовая бумага с двусторонним эффектом, коричневый/коричневый, 290гр",
+            "title": "Эколайнер, крафтовая бумага с двусторонним эффекто"
+        },
+        "TOUCHCAVER": {
+            "cost": 700,
+            "density": 301,
+            "size": [
+                1020,
+                720
+            ],
+            "description": "Тач кавер, 301гр/м2",
+            "title": "Тач кавер, 301гр/м2"
+        },
+        "CALQUE90": {
+            "cost": 126,
+            "density": 90,
+            "size": [
+                1000,
+                700
+            ],
+            "description": "Калька, 90гр/м2",
+            "title": "Калька, 90гр/м2"
+        },
+        "CALQUE130": {
+            "cost": 183,
+            "density": 130,
+            "size": [
+                1000,
+                700
+            ],
+            "description": "Калька, 130гр/м2",
+            "title": "Калька, 130гр/м2"
+        },
+        "CALQUE180": {
+            "cost": 233,
+            "density": 180,
+            "size": [
+                1000,
+                700
+            ],
+            "description": "Калька, 180гр/м2",
+            "title": "Калька, 180гр/м2"
+        },
+        "PaperSublimation128": {
+            "cost": 17.8,
+            "density": 128,
+            "size": [
+                297,
+                420
+            ],
+            "description": "Бумага сублимационная А3 (Китай BS), 128гр/м2",
+            "title": "Бумага сублимационная А3 (Китай BS), 128гр/м2"
+        },
+        "PaperDTFTransfer": {
+            "cost": 0,
+            "density": 128,
+            "size": [
+                300,
+                1000
+            ],
+            "description": "Пленка для DTF трансферов",
+            "title": "Пленка для DTF трансферов"
+        },
+        "PaperFOREVERLASERTRANSPARENT": {
+            "cost": 164,
+            "density": 135,
+            "size": [
+                297,
+                420
+            ],
+            "description": "Термобумага FOREVER, серия LASER-TRANSPARENT, для светлых тканей, A3",
+            "title": "Термобумага FOREVER, серия LASER-TRANSPARENT, для"
+        },
+        "ORACAL820": {
+            "length_min": 0,
+            "cost": 133,
+            "size": [
+                320,
+                225
+            ],
+            "density": 211,
+            "thickness": 55,
+            "description": "Пломбировочная пленка ORACAL 820, 1.00 х 50 м",
+            "title": "Пломбировочная пленка ORACAL 820, 1.00 х 50 м"
+        }
+    },
+    "OffsetPromo": {
+        "Default": {
+            "numSheet": 1000,
+            "color": "4+4",
+            "density": 115
         },
         "OffsetPromoА41000": {
-            "name": "Листовки А4, 4+4, сборный тираж на офсет, 1000шт",
-            "sizeSheet": [210,297],
-            "cost": 3500 // 2024.09.11
+            "sizeSheet": [
+                210,
+                297
+            ],
+            "cost": 3500,
+            "description": "Листовки А4, 4+4, сборный тираж на офсет, 1000шт",
+            "title": "Листовки А4, 4+4, сборный тираж на офсет, 1000шт"
         },
         "OffsetPromoА51000": {
-            "name": "Листовки А5, 4+4, сборный тираж на офсет, 1000шт",
-            "sizeSheet": [148,210],
-            "cost": 1800 // 2024.09.11
+            "sizeSheet": [
+                148,
+                210
+            ],
+            "cost": 1800,
+            "description": "Листовки А5, 4+4, сборный тираж на офсет, 1000шт",
+            "title": "Листовки А5, 4+4, сборный тираж на офсет, 1000шт"
         },
         "OffsetPromoА61000": {
-            "name": "Листовки А6, 4+4, сборный тираж на офсет, 1000шт",
-            "sizeSheet": [105,148],
-            "cost": 1000 // 2024.09.11
+            "sizeSheet": [
+                105,
+                148
+            ],
+            "cost": 1000,
+            "description": "Листовки А6, 4+4, сборный тираж на офсет, 1000шт",
+            "title": "Листовки А6, 4+4, сборный тираж на офсет, 1000шт"
         },
         "OffsetPromoEuro1000": {
-            "name": "Листовки евро, 4+4, сборный тираж на офсет, 1000шт",
-            "sizeSheet": [210,99],
-            "cost": 1800 // 2025.02.19
+            "sizeSheet": [
+                210,
+                99
+            ],
+            "cost": 1800,
+            "description": "Листовки евро, 4+4, сборный тираж на офсет, 1000шт",
+            "title": "Листовки евро, 4+4, сборный тираж на офсет, 1000шт"
         },
         "OffsetPromoViz1000": {
-            "name": "Визитки, 4+4, сборный тираж на офсет, 1000шт",
-            "sizeSheet": [90,50],
-            "density" : 300,
-            "cost": 800 // 2024.09.11
+            "sizeSheet": [
+                90,
+                50
+            ],
+            "density": 300,
+            "cost": 800,
+            "description": "Визитки, 4+4, сборный тираж на офсет, 1000шт",
+            "title": "Визитки, 4+4, сборный тираж на офсет, 1000шт"
         }
     }
 }

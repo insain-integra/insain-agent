@@ -136,7 +136,8 @@ class LaminationCalculator(BaseCalculator):
             materials_out = [
                 {
                     "code": laminat.code,
-                    "name": laminat.name,
+                    "name": laminat.description,
+                    "title": laminat.title,
                     "quantity": round(2 * length_m, 4),
                     "unit": "m",
                 }
@@ -167,7 +168,8 @@ class LaminationCalculator(BaseCalculator):
             materials_out = [
                 {
                     "code": laminat.code,
-                    "name": laminat.name,
+                    "name": laminat.description,
+                    "title": laminat.title,
                     "quantity": num_with_defects,
                     "unit": "sheet",
                 }

@@ -1,0 +1,54 @@
+{
+    "Pack": {
+        "ZipLock0507": {
+            "cost": 0.15,
+            "size": [
+                50,
+                70
+            ],
+            "weight": 1,
+            "description": "Зиплок ZipLock 5*7,35мкм",
+            "title": "Зиплок ZipLock 5*7,35мкм"
+        },
+        "ZipLock0812": {
+            "cost": 0.5,
+            "size": [
+                80,
+                120
+            ],
+            "weight": 1,
+            "description": "Зиплок ZipLock 8*12,35мкм",
+            "title": "Зиплок ZipLock 8*12,35мкм"
+        },
+        "ZipLock1015": {
+            "cost": 0.74,
+            "size": [
+                100,
+                150
+            ],
+            "weight": 1,
+            "description": "Зиплок ZipLock 10*15,35мкм",
+            "title": "Зиплок ZipLock 10*15,35мкм"
+        },
+        "ZipLock1520": {
+            "cost": 1.4,
+            "size": [
+                150,
+                200
+            ],
+            "weight": 1,
+            "description": "Зиплок ZipLock 15*20,35мкм",
+            "title": "Зиплок ZipLock 15*20,35мкм"
+        },
+        "ZipLockAcrylic": {
+            "cost": 0.0,
+            "size": [
+                80,
+                120
+            ],
+            "weight": 1,
+            "description": "Зиплок для акриловых брелков",
+            "title": "Зиплок для акриловых брелков"
+        }
+    }
+}

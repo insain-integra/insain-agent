@@ -1,0 +1,173 @@
+{
+    "Pocket": {
+        "Default": {
+            "materialID": "PET05",
+            "tapeID": "TapePOLIMOUNT385_6",
+            "mountID": "tape"
+        },
+        "Pocket": {
+            "cost": 5,
+            "size": [
+                80,
+                23
+            ],
+            "weight": 1,
+            "description": "Карман для имени",
+            "title": "Карман для имени"
+        },
+        "PocketPETA5V": {
+            "size": [
+                164,
+                218
+            ],
+            "description": "Карман для стенда А5 вертикальный, пластик ПЭТ 0.5мм",
+            "title": "Карман для стенда А5 вертикальный, пластик ПЭТ 0.5"
+        },
+        "PocketPETA4V": {
+            "size": [
+                226,
+                305
+            ],
+            "description": "Карман для стенда А4 вертикальный, пластик ПЭТ 0.5мм",
+            "title": "Карман для стенда А4 вертикальный, пластик ПЭТ 0.5"
+        },
+        "PocketPETA3V": {
+            "size": [
+                313,
+                428
+            ],
+            "description": "Карман для стенда А3 вертикальный, пластик ПЭТ 0.5мм",
+            "title": "Карман для стенда А3 вертикальный, пластик ПЭТ 0.5"
+        },
+        "PocketAcrylicA4V": {
+            "size": [
+                220,
+                300,
+                30
+            ],
+            "materialID": "AcrylTrans2",
+            "tapeID": "TapeZENOTAPEАТ610_9",
+            "cost": 319.0,
+            "weight": 275,
+            "description": "Карман А4 объемный вертикальный, акрил 2мм",
+            "title": "Карман А4 объемный вертикальный, акрил 2мм"
+        },
+        "PocketAcrylicA4H": {
+            "size": [
+                300,
+                230,
+                30
+            ],
+            "materialID": "AcrylTrans2",
+            "tapeID": "TapeZENOTAPEАТ610_9",
+            "cost": 319.0,
+            "weight": 275,
+            "description": "Карман А4 объемный горизонтальный, акрил 2мм",
+            "title": "Карман А4 объемный горизонтальный, акрил 2мм"
+        },
+        "PocketAcrylicA5V": {
+            "size": [
+                165,
+                210,
+                25
+            ],
+            "materialID": "AcrylTrans2",
+            "tapeID": "TapeZENOTAPEАТ610_9",
+            "cost": 213.0,
+            "weight": 152,
+            "description": "Карман А4 объемный вертикальный, акрил 2мм",
+            "title": "Карман А4 объемный вертикальный, акрил 2мм"
+        },
+        "PocketAcrylicA5H": {
+            "size": [
+                220,
+                150,
+                25
+            ],
+            "materialID": "AcrylTrans2",
+            "tapeID": "TapeZENOTAPEАТ610_9",
+            "cost": 213.0,
+            "weight": 152,
+            "description": "Карман А4 объемный горизонтальный, акрил 2мм",
+            "title": "Карман А4 объемный горизонтальный, акрил 2мм"
+        },
+        "PocketAcrylicEuroV": {
+            "size": [
+                110,
+                205,
+                25
+            ],
+            "materialID": "AcrylTrans2",
+            "tapeID": "TapeZENOTAPEАТ610_9",
+            "cost": 185.0,
+            "weight": 84,
+            "description": "Карман 1/3 А4, еврофлаер объемный вертикальный, акрил 2мм",
+            "title": "Карман 1/3 А4, еврофлаер объемный вертикальный, ак"
+        },
+        "PocketAcrylicCardH": {
+            "size": [
+                90,
+                35,
+                25
+            ],
+            "materialID": "AcrylTrans2",
+            "tapeID": "TapeZENOTAPEАТ610_9",
+            "cost": 85.0,
+            "weight": 26,
+            "description": "Карман для визитных карточек, акрил 2мм",
+            "title": "Карман для визитных карточек, акрил 2мм"
+        },
+        "PocketStandoffА4V": {
+            "size": [
+                260,
+                200
+            ],
+            "materialID": "PET20",
+            "mountID": "standoff",
+            "setFasteners": [
+                [
+                    "DD170325",
+                    4
+                ],
+                [
+                    "WasherM5",
+                    4
+                ],
+                [
+                    "RivetM4_10",
+                    4
+                ]
+            ],
+            "description": "Карман на дистанционных держателях А4 вертикальный, ПЭТ 2мм",
+            "title": "Карман на дистанционных держателях А4 вертикальный"
+        },
+        "PocketMetalCapА4V": {
+            "size": [
+                260,
+                297
+            ],
+            "materialID": "PET20",
+            "mountID": "metalcap",
+            "setFasteners": [
+                [
+                    "ZD135812",
+                    4
+                ],
+                [
+                    "KZV14601",
+                    4
+                ],
+                [
+                    "WasherM5",
+                    4
+                ],
+                [
+                    "ScrewM4_10",
+                    4
+                ]
+            ],
+            "description": "Карман на металлических держателях А4 вертикальный, ПЭТ 2мм",
+            "title": "Карман на металлических держателях А4 вертикальный"
+        }
+    }
+}

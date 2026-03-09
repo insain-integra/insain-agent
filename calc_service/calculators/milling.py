@@ -264,7 +264,13 @@ class MillingCalculator(BaseCalculator):
             except Exception:
                 pass
             materials_out = [
-                {"code": material.code, "name": material.name, "quantity": num_sheet, "unit": "sheet"}
+                {
+                    "code": material.code,
+                    "name": material.description,
+                    "title": material.title,
+                    "quantity": num_sheet,
+                    "unit": "sheet",
+                }
             ]
 
         return {

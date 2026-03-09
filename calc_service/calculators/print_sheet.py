@@ -337,7 +337,8 @@ class PrintSheetCalculator(BaseCalculator):
         materials_out: List[Dict[str, Any]] = [
             {
                 "code": material.code,
-                "name": material.name,
+                "name": material.description,
+                "title": material.title,
                 "quantity": num_sheets_physical,
                 "unit": "sheet",
             }

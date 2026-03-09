@@ -60,6 +60,11 @@ def test_calculate_basic(result):
     assert result["price"] >= 0
     assert result["time_hours"] >= 0
     assert result["time_ready"] >= 0
+    # materials: каждый элемент должен содержать name и title
+    materials = result.get("materials") or []
+    for m in materials:
+        assert "name" in m
+        assert "title" in m
 
 
 def test_time_hours_positive(result):
@@ -241,10 +246,20 @@ def test_expected_values_print_sheet(ref_result):
     print("  time_ready  %s  (ожид. %s)  %s" % (r["time_ready"], e["time_ready"], "ok" if ok_ready else "FAIL"))
     print("  weight_kg   %s  (ожид. %s)  %s" % (r["weight_kg"], e["weight_kg"], "ok" if ok_weight else "FAIL"))
     if materials:
-        print("  material    code=%s  name=%s  quantity=%s  (ожид. code=%s, name содержит '%s', qty ~%s)  %s"
-              % (mat.get("code"), (mat.get("name") or "")[:40], mat.get("quantity"),
-                 em["code"], em["name_substring"], em["quantity_approx"],
-                 "ok" if (ok_mat_code and ok_mat_name and ok_mat_q) else "FAIL"))
+        print(
+            "  material    code=%s  name=%s  quantity=%s  (ожид. code=%s, name содержит '%s', qty ~%s)  %s"
+            % (
+                mat.get("code"),
+                (mat.get("name") or "")[:40],
+                mat.get("quantity"),
+                em["code"],
+                em["name_substring"],
+                em["quantity_approx"],
+                "ok" if (ok_mat_code and ok_mat_name and ok_mat_q) else "FAIL",
+            )
+        )
+        # поле title обязательно для UI
+        assert "title" in mat
     else:
         print("  material    (нет в результате, ожид. code=%s, qty ~%s)  FAIL" % (em["code"], em["quantity_approx"]))
 
@@ -300,10 +315,19 @@ def test_expected_values_print_sheet_1000(ref_result_2):
     print("  time_ready  %s  (ожид. %s)  %s" % (r["time_ready"], e["time_ready"], "ok" if ok_ready else "FAIL"))
     print("  weight_kg   %s  (ожид. %s)  %s" % (r["weight_kg"], e["weight_kg"], "ok" if ok_weight else "FAIL"))
     if materials:
-        print("  material    code=%s  name=%s  quantity=%s  (ожид. code=%s, name содержит '%s', qty ~%s)  %s"
-              % (mat.get("code"), (mat.get("name") or "")[:40], mat.get("quantity"),
-                 em["code"], em["name_substring"], em["quantity_approx"],
-                 "ok" if (ok_mat_code and ok_mat_name and ok_mat_q) else "FAIL"))
+        print(
+            "  material    code=%s  name=%s  quantity=%s  (ожид. code=%s, name содержит '%s', qty ~%s)  %s"
+            % (
+                mat.get("code"),
+                (mat.get("name") or "")[:40],
+                mat.get("quantity"),
+                em["code"],
+                em["name_substring"],
+                em["quantity_approx"],
+                "ok" if (ok_mat_code and ok_mat_name and ok_mat_q) else "FAIL",
+            )
+        )
+        assert "title" in mat
     else:
         print("  material    (нет в результате)  FAIL")
 
@@ -408,5 +432,8 @@ def test_expected_values_print_sheet_lamination(ref_result_3):
     assert ok_lam_present, "ламинат Laminat32G отсутствует в materials"
     assert ok_paper_name, f"paper name должен содержать '{em_paper['name_substring']}'"
     assert ok_lam_name, f"lamination name должен содержать '{em_lam['name_substring']}'"
+    # Оба материала должны иметь title для UI
+    assert "title" in paper
+    assert "title" in lam
     assert ok_paper_q, f"paper quantity: got {paper.get('quantity')}, expected ~{em_paper['quantity_approx']}"
     assert ok_lam_q, f"lamination quantity: got {lam.get('quantity')}, expected ~{em_lam['quantity_approx']}"

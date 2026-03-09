@@ -317,7 +317,8 @@ class CutPlotterCalculator(BaseCalculator):
                 materials_out = [
                     {
                         "code": material.code,
-                        "name": material.name,
+                        "name": material.description,
+                        "title": material.title,
                         "quantity": round(len_material_mm / 1000.0, 2),
                         "unit": "m",
                     }
@@ -326,7 +327,8 @@ class CutPlotterCalculator(BaseCalculator):
                 materials_out = [
                     {
                         "code": material.code,
-                        "name": material.name,
+                        "name": material.description,
+                        "title": material.title,
                         "quantity": num_sheet,
                         "unit": "sheet",
                     }

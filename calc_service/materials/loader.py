@@ -82,6 +82,24 @@ def parse_cost(raw_cost: Any) -> Tuple[Optional[float], Optional[List[Tuple[floa
 def load_catalog(filename: str) -> MaterialCatalog:
     """
     Загрузить каталог материалов из файла data/materials/{filename}.
+
+    Поддерживаются два формата JSON:
+    - новый:
+        "PVC3": {
+            "title": "...",
+            "description": "...",
+            "cost": ...,
+            "cost_date": "...",
+            "cost_source": "...",
+            ...
+        }
+    - старый:
+        "PVC3": {
+            "name": "...",
+            "cost": ...,
+            ...
+        }
+      В этом случае description берётся из name, а title формируется автоматически.
     """
     path = DATA_DIR / filename
     if not path.is_file():
@@ -123,13 +141,22 @@ def load_catalog(filename: str) -> MaterialCatalog:
             if roll_width is None and is_roll and sizes:
                 roll_width = float(sizes[0][0])
 
+            # Поля наименования (новый формат) + обратная совместимость.
+            raw_description = merged.get("description") or merged.get("name") or code
+            raw_title = merged.get("title") or raw_description
+            # Ограничиваем длину title для UI.
+            title = str(raw_title)[:50]
+
             spec = MaterialSpec(
                 code=code,
                 group=group_id,
-                name=merged.get("name", code),
+                title=title,
+                description=str(raw_description),
                 category=category,
                 cost=cost,
                 cost_tiers=cost_tiers,
+                cost_date=merged.get("cost_date"),
+                cost_source=merged.get("cost_source"),
                 sizes=sizes,
                 min_size=min_size,
                 is_roll=is_roll,

@@ -145,6 +145,10 @@ def test_calculate_basic(result):
     assert result["price"] >= 0
     assert result["time_hours"] >= 0
     assert result["time_ready"] >= 0
+    materials = result.get("materials") or []
+    for m in materials:
+        assert "name" in m
+        assert "title" in m
 
 
 def test_expected_values_roll(ref_result_roll, ref_params_roll):

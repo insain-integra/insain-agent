@@ -237,13 +237,16 @@ class CutRollerCalculator(BaseCalculator):
         if material_mode == "isMaterial" and best_size is not None:
             qty = best_len / 1000.0 if best_size[1] == 0 else best_num_sheet
             unit = "mm" if best_size[1] == 0 else "sheet"
-            materials_out.append({
-                "code": material_id,
-                "name": material.name,
-                "size_mm": best_size,
-                "quantity": qty,
-                "unit": unit,
-            })
+            materials_out.append(
+                {
+                    "code": material_id,
+                    "name": material.description,
+                    "title": material.title,
+                    "size_mm": best_size,
+                    "quantity": qty,
+                    "unit": unit,
+                }
+            )
 
         return {
             "cost": float(cost),
