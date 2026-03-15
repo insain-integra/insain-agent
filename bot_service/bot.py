@@ -5,6 +5,7 @@ Telegram-бот Insain: ИИ-ассистент с расчётом стоимо
 from __future__ import annotations
 
 import asyncio
+import html
 import logging
 import os
 from pathlib import Path
@@ -146,6 +147,7 @@ async def handle_text(message: Message):
 
     await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
+    # История диалога для LLM (используется agent.chat)
     history = user_histories.get(user_id) or []
 
     try:
@@ -168,9 +170,10 @@ async def handle_text(message: Message):
         history = history[-20:]
     user_histories[user_id] = history
 
-    # Отправить ответ (разбить при необходимости)
+    # Отправить ответ (разбить при необходимости). Экранируем HTML, чтобы < > & в тексте
+    # (например из-за глюка LLM или ссылок) не ломали parse_mode="HTML".
     for part in split_message(reply):
-        await message.answer(part, parse_mode="HTML")
+        await message.answer(html.escape(part), parse_mode="HTML")
 
 
 async def main():

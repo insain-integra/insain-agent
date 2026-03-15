@@ -58,6 +58,7 @@ def list_calculators() -> list[Dict[str, str]]:
             "description": calc.description,
         }
         for calc in CALCULATORS.values()
+        if getattr(calc, "is_public", True)
     ]
 
 

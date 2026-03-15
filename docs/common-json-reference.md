@@ -26,7 +26,7 @@
     "marginLaser": 0.0,
     "marginMilling": 0.0,
     "marginSticker": 0.0,
-    "marginBadge": 0.20,
+    "marginBadge": 0.15,
     "marginStickerPoly": 0.20,
     "marginMetalPins": 0.4,
     "marginButtonPins": -0.1,
@@ -92,7 +92,7 @@
 | marginLaser | 0.0 | 0.55 | Лазерная резка |
 | marginMilling | 0.0 | 0.55 | Фрезерная резка |
 | marginSticker | 0.0 | 0.55 | Наклейки |
-| marginBadge | 0.20 | **0.75** | Бейджи |
+| marginBadge | 0.15 | **0.70** | Бейджи |
 | marginStickerPoly | 0.20 | **0.75** | Полимерные наклейки |
 | marginMetalPins | 0.4 | **0.95** | Металлические значки |
 | marginButtonPins | -0.1 | **0.45** | Закатные значки *(скидка)* |

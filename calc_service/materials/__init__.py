@@ -9,6 +9,7 @@ from .loader import load_catalog
 hardsheet: MaterialCatalog = load_catalog("hardsheet.json")
 roll: MaterialCatalog = load_catalog("roll.json")
 sheet: MaterialCatalog = load_catalog("sheet.json")
+offset_promo: MaterialCatalog = load_catalog("offset_promo.json")
 laminat: MaterialCatalog = load_catalog("laminat.json")
 profile: MaterialCatalog = load_catalog("profile.json")
 presswall: MaterialCatalog = load_catalog("presswall.json")
@@ -17,12 +18,23 @@ magnet: MaterialCatalog = load_catalog("magnet.json")
 keychain: MaterialCatalog = load_catalog("keychain.json")
 mug: MaterialCatalog = load_catalog("mug.json")
 misc: MaterialCatalog = load_catalog("misc.json")
+epoxy: MaterialCatalog = load_catalog("epoxy.json")
+attachment: MaterialCatalog = load_catalog("attachment.json")
+pack: MaterialCatalog = load_catalog("pack.json")
+pocket: MaterialCatalog = load_catalog("pocket.json")
+flag: MaterialCatalog = load_catalog("flag.json")
+pins: MaterialCatalog = load_catalog("pins.json")
+tape: MaterialCatalog = load_catalog("tape.json")
+plaque: MaterialCatalog = load_catalog("plaque.json")
+puzzle: MaterialCatalog = load_catalog("puzzle.json")
+pennant: MaterialCatalog = load_catalog("pennant.json")
 
 
 ALL_MATERIALS: Dict[str, MaterialCatalog] = {
     "hardsheet": hardsheet,
     "roll": roll,
     "sheet": sheet,
+    "offset_promo": offset_promo,
     "laminat": laminat,
     "profile": profile,
     "presswall": presswall,
@@ -31,6 +43,16 @@ ALL_MATERIALS: Dict[str, MaterialCatalog] = {
     "keychain": keychain,
     "mug": mug,
     "misc": misc,
+    "epoxy": epoxy,
+    "attachment": attachment,
+    "pack": pack,
+    "pocket": pocket,
+    "flag": flag,
+    "pins": pins,
+    "tape": tape,
+    "plaque": plaque,
+    "puzzle": puzzle,
+    "pennant": pennant,
 }
 
 

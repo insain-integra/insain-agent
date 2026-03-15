@@ -219,11 +219,18 @@ class TokenAnalyzer:
             "cost_estimate_rub": cost_estimate_rub,
         }
 
+        # В лог по умолчанию кладём breakdown/total + метаданные.
+        # Для отладки полезно также видеть сырые messages и tools,
+        # поэтому добавляем их в поле "debug".
         return {
             "timestamp": timestamp,
             "metadata": metadata,
             "breakdown": breakdown,
             "total": total,
+            "debug": {
+                "messages": messages,
+                "tools": tools,
+            },
         }
 
     def log_response(
@@ -282,6 +289,18 @@ class TokenAnalyzer:
         with path.open("a", encoding="utf-8") as f:
             json.dump(log_entry, f, ensure_ascii=False)
             f.write("\n")
+
+        # Дополнительно: отдельный подробный лог-файл на каждый запрос.
+        # Удобно для анализа конкретного диалога (видно все messages, tools и метаданные).
+        ts = str(log_entry.get("timestamp") or datetime.utcnow().isoformat())
+        safe_ts = ts.replace(":", "-").replace(".", "-")
+        per_request_path = path.parent / f"llm_request_{safe_ts}.json"
+        try:
+            with per_request_path.open("w", encoding="utf-8") as f_req:
+                json.dump(log_entry, f_req, ensure_ascii=False, indent=2)
+        except Exception:
+            # Логирование не должно ломать основной поток, поэтому ошибки здесь глотаем.
+            pass
 
 
 @dataclass

@@ -60,6 +60,10 @@ class BaseCalculator(ABC):
     slug: str = ""
     name: str = ""
     description: str = ""
+    # По умолчанию калькулятор публичный (виден в /api/v1/calculators и агенту).
+    # Базовые/служебные калькуляторы можно пометить is_public = False,
+    # чтобы они не светились менеджеру, но оставались доступны по slug для внутренних вызовов.
+    is_public: bool = True
 
     @abstractmethod
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:

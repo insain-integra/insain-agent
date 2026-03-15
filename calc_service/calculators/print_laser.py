@@ -53,6 +53,8 @@ class PrintLaserCalculator(BaseCalculator):
     slug = "print_laser"
     name = "Лазерная печать"
     description = "Расчёт стоимости лазерной печати на листовом материале (принтер Konica Minolta и др.)."
+    # Базовый калькулятор для внутренних расчётов; менеджеру напрямую не показывается.
+    is_public = False
 
     def get_param_schema(self) -> Dict[str, Any]:
         """

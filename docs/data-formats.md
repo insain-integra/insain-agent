@@ -8,7 +8,7 @@
 Каждый JSON-файл материалов содержит группы.
 Группа — это семейство вариантов с общими параметрами.
 
-```json
+```json5
 {
   "PVCUnextStrong": {
     "Default": {
@@ -18,12 +18,16 @@
       "unitDensity": "гсм3"
     },
     "PVC3": {
-      "name": "ПВХ Unext Strong 3 мм",
+      "title": "ПВХ белый 3мм",
+      "description": "ПВХ Unext Strong 3 мм",
       "cost": 750,
+      "cost_date": "2025-03-24",      // дата обновления прайса (опционально)
+      "cost_source": "ТрастФМ",       // источник прайса (опционально)
       "thickness": 3
     },
     "PVC5": {
-      "name": "ПВХ Unext Strong 5 мм",
+      "title": "ПВХ белый 5мм",
+      "description": "ПВХ Unext Strong 5 мм",
       "cost": 1182,
       "thickness": 5
     }
@@ -33,10 +37,13 @@
 
 Как читает loader.py:
 
-Для каждого варианта (PVC3, PVC5) берёт его поля
-Недостающие поля берёт из Default (size, minSize, density...)
-Default не хранится как отдельный объект
-Результат: MaterialSpec с полным набором полей
+- Для каждого варианта (`PVC3`, `PVC5`) берёт его поля.
+- Недостающие поля берёт из `Default` (size, minSize, density...).
+- `Default` не хранится как отдельный объект.
+- Старое поле `name` (если ещё встречается в старых файлах) трактуется как `description`,
+  а `title` генерируется из `description`, если не задан явно.
+- Результат: `MaterialSpec` с полным набором полей:
+  `code`, `group`, `title`, `description`, `cost`, `cost_tiers`, `cost_date`, `cost_source`, `sizes` и т.д.
 
 ### Размеры: три формата
 

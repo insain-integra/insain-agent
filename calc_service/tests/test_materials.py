@@ -19,8 +19,8 @@ def test_load_hardsheet():
 
 def test_load_all_material_files():
     json_files = sorted(DATA_DIR.glob("*.json"))
-    # В текущей структуре materials/ ожидается 21 файл материалов.
-    assert len(json_files) == 21
+    # В текущей структуре materials/ ожидается 22 файла (в т.ч. offset_promo.json).
+    assert len(json_files) == 22
 
     total = 0
     for path in json_files:

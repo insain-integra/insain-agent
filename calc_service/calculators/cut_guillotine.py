@@ -31,6 +31,9 @@ class CutGuillotineCalculator(BaseCalculator):
     slug = "cut_guillotine"
     name = "Гильотинная резка"
     description = "Расчёт стоимости резки листов на гильотине (размер изделия, размер листа, материал)."
+    # Базовый калькулятор, используется внутри других (например, print_sheet),
+    # менеджеру напрямую не показывается.
+    is_public = False
 
     def get_param_schema(self) -> Dict[str, Any]:
         """

@@ -64,13 +64,20 @@ Wiki → парсер → PostgreSQL (pgvector + эмбеддинги)
 
 ## LLM
 Основной: Google Gemini 2.5 Flash
-Бесплатно, 500 req/day
-Через openai SDK с совместимым base_url
+Бесплатно, обращение через openai‑совместимый SDK (`openai` + `base_url`).
 
-Fallback: YandexGPT 4
-Платный (~1500 ₽/мес)
-Автопереключение после 3 ошибок Gemini
-Cooldown 5 минут
+Кэширование промптов (context caching) Gemini позволяет дешевле тарифицировать повторяющийся контекст (system + tools). Подробнее: [gemini-prompt-caching.md](gemini-prompt-caching.md).
+
+Режим работы провайдера задаётся переменной окружения `LLM_MODE` в `.env`:
+
+- `mixed`  — **по умолчанию**. Сначала вызывается Gemini с поддержкой tools.  
+  При **любой ошибке** Gemini (в т.ч. 429, quota, network) провайдер автоматически
+  переключается на YandexGPT (если заданы `YANDEX_API_KEY` и `YANDEX_FOLDER_ID`).
+- `gemini` — только Gemini. Ошибки не перехватываются, fallback не используется.
+- `yandex` — только YandexGPT (нативный API Yandex Cloud, без tools).
+
+YandexGPT платный (~400 ₽ за 1М токенов вход+выход по умолчанию в расчётах),
+используется как fallback в режиме `mixed` или как основной в режиме `yandex`.
 
 Кодинг: Cursor ($20/мес) — редактор с ИИ
 Aider (бесплатно + Gemini) — автогенерация калькуляторов
@@ -84,12 +91,15 @@ wiki_cache — кэш статей Wiki (slug, title, content, updated_at)
 ЭТАП 2:
 wiki_embeddings — pgvector для поиска по базе знаний
 ## API эндпоинты
-POST /api/v1/calc/{slug} — расчёт калькулятора
-GET /api/v1/options/{slug} — опции для форм на сайте
-GET /api/v1/calculators — список всех калькуляторов
-GET /api/v1/materials — справочник материалов
-GET /api/v1/materials/{cat} — материалы по категории
-GET /api/v1/equipment — справочник оборудования
+
+- `POST /api/v1/calc/{slug}` — расчёт калькулятора
+- `GET /api/v1/options/{slug}` — опции для форм на сайте (материалы, режимы)
+- `GET /api/v1/calculators` — список всех калькуляторов (slug, name, description)
+- `GET /api/v1/param_schema/{slug}` — детальная схема параметров калькулятора
+  (для агента и фронтенда: required, defaults, источники данных)
+- `GET /api/v1/tool_schema/{slug}` — компактная схема инструмента для function calling (LLM)
+- `POST /api/v1/choices` — поиск вариантов для параметров с choices
+  (например, материалы по запросу "акрил 3мм" для параметра `material`)
 
 ## Ежемесячные расходы
 VPS (2GB RAM) — 700 ₽

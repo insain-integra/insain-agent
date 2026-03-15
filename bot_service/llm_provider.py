@@ -52,21 +52,33 @@ GOOGLE_API_KEY = (
     os.getenv("GOOGLE_API_KEY", "").strip()
     or os.getenv("GEMINI_API_KEY", "").strip()
 )
+GOOGLE_BASE_URL = os.getenv(
+    "GOOGLE_BASE_URL",
+    "https://generativelanguage.googleapis.com/v1beta/openai/",
+).strip()
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip() or "gemini-2.5-flash"
 
-# Режим работы LLM: mixed | gemini | yandex
+# AITunnel (OpenAI-совместимый прокси над Gemini)
+AITUNNEL_API_KEY = os.getenv("AITUNNEL_API_KEY", "").strip()
+AITUNNEL_BASE_URL = os.getenv("AITUNNEL_BASE_URL", "").strip()
+AITUNNEL_MODEL = os.getenv("AITUNNEL_MODEL", "").strip() or GEMINI_MODEL
+
+# Режим работы LLM: mixed | gemini | aitunnel | yandex
 LLM_MODE = os.getenv("LLM_MODE", "mixed").strip().lower() or "mixed"
-if LLM_MODE not in ("mixed", "gemini", "yandex"):
+if LLM_MODE not in ("mixed", "gemini", "aitunnel", "yandex"):
     LLM_MODE = "mixed"
 
 # Таймаут запроса к API, секунды
 CHAT_TIMEOUT = 30
 
-# YandexGPT fallback
+# YandexGPT fallback (используем нативный TextGeneration API, без tools)
 YANDEX_API_KEY = os.getenv("YANDEX_API_KEY", "").strip()
 YANDEX_FOLDER_ID = os.getenv("YANDEX_FOLDER_ID", "").strip()
-YANDEX_MODEL_URI = f"gpt://{YANDEX_FOLDER_ID}/yandexgpt/latest" if YANDEX_FOLDER_ID else ""
-YANDEX_COMPLETION_URL = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
+YANDEX_BASE_URL = os.getenv("YANDEX_BASE_URL", "").strip() or "https://llm.api.cloud.yandex.net"
+YANDEX_MODEL = os.getenv("YANDEX_MODEL", "").strip() or (
+    f"gpt://{YANDEX_FOLDER_ID}/yandexgpt/latest" if YANDEX_FOLDER_ID else ""
+)
+YANDEX_COMPLETION_URL = f"{YANDEX_BASE_URL.rstrip('/')}/foundationModels/v1/completion"
 
 
 def _is_quota_error(exc: BaseException) -> bool:
@@ -77,8 +89,12 @@ def _is_quota_error(exc: BaseException) -> bool:
 
 class YandexGPTProvider:
     """
-    YandexGPT через нативный API Yandex Cloud.
-    Поддерживает только текстовый ответ (tools не передаются в API).
+    YandexGPT через нативный API Yandex Cloud (TextGeneration).
+
+    Используется как fallback-провайдер БЕЗ tools:
+    - на вход принимает messages (OpenAI-совместимый формат),
+    - tools игнорируются,
+    - на выходе возвращает только {"content": str, "tool_calls": None}.
     """
 
     def __init__(
@@ -90,7 +106,7 @@ class YandexGPTProvider:
     ):
         self.api_key = (api_key or YANDEX_API_KEY).strip()
         self.folder_id = (folder_id or YANDEX_FOLDER_ID).strip()
-        self.model_uri = model_uri or (f"gpt://{self.folder_id}/yandexgpt/latest" if self.folder_id else "")
+        self.model_uri = (model_uri or YANDEX_MODEL).strip()
         self.timeout = timeout
 
     def _is_available(self) -> bool:
@@ -102,14 +118,16 @@ class YandexGPTProvider:
         tools: Optional[List[Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
         """
-        Запрос к YandexGPT. tools игнорируются (API не поддерживает в том же формате).
-        Возвращает {"content": str, "tool_calls": None}.
+        Запрос к YandexGPT. tools игнорируются (API не поддерживает их в том же формате).
+        Возвращает {"content": str|None, "tool_calls": None}.
         """
         if not self._is_available():
-            raise ValueError("YANDEX_API_KEY и YANDEX_FOLDER_ID не заданы для fallback.")
+            raise ValueError(
+                "YandexGPT недоступен: задайте YANDEX_API_KEY, YANDEX_FOLDER_ID и YANDEX_MODEL в .env"
+            )
 
         # Конвертация формата: role + content -> role + text
-        yandex_messages = []
+        yandex_messages: List[Dict[str, str]] = []
         for m in messages:
             role = (m.get("role") or "user").lower()
             if role == "system":
@@ -179,21 +197,29 @@ class LLMProvider:
         self,
         api_key: Optional[str] = None,
         model: Optional[str] = None,
-        base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai/",
+        base_url: str = GOOGLE_BASE_URL,
         timeout: float = CHAT_TIMEOUT,
         fallback_provider: Optional[YandexGPTProvider] = None,
         mode: Optional[str] = None,
     ):
-        self.api_key = (api_key or GOOGLE_API_KEY).strip()
-        self.model = (model or GEMINI_MODEL).strip() or GEMINI_MODEL
-        self.base_url = base_url.rstrip("/") + "/"
+        # Первичный провайдер: Gemini или AITunnel (оба OpenAI-совместимые).
+        # Конкретные ключ/URL/модель выбираем по LLM_MODE.
+        mode_value = (mode or LLM_MODE).strip().lower()
+        if mode_value not in ("mixed", "gemini", "aitunnel", "yandex"):
+            mode_value = "mixed"
+        self.mode = mode_value
+
+        if self.mode == "aitunnel":
+            self.api_key = (api_key or AITUNNEL_API_KEY or GOOGLE_API_KEY).strip()
+            self.model = (model or AITUNNEL_MODEL or GEMINI_MODEL).strip() or GEMINI_MODEL
+            self.base_url = (AITUNNEL_BASE_URL or base_url).rstrip("/") + "/"
+        else:
+            self.api_key = (api_key or GOOGLE_API_KEY).strip()
+            self.model = (model or GEMINI_MODEL).strip() or GEMINI_MODEL
+            self.base_url = (base_url or GOOGLE_BASE_URL).rstrip("/") + "/"
         self.timeout = timeout
         self._client: Optional[OpenAI] = None
         self._fallback = fallback_provider if fallback_provider is not None else YandexGPTProvider()
-        mode_value = (mode or LLM_MODE).strip().lower()
-        if mode_value not in ("mixed", "gemini", "yandex"):
-            mode_value = "mixed"
-        self.mode = mode_value
         self.analyzer = TokenAnalyzer()
 
     @property
@@ -231,7 +257,13 @@ class LLMProvider:
             kwargs["tools"] = tools
             kwargs["tool_choice"] = "auto"
 
-        provider_hint = "yandex" if self.mode == "yandex" else "gemini"
+        # Метка для логирования и токен-аналитики — какой провайдер мы пытаемся использовать
+        if self.mode == "yandex":
+            provider_hint = "yandex"
+        elif self.mode == "aitunnel":
+            provider_hint = "aitunnel"
+        else:
+            provider_hint = "gemini"
         request_log = self.analyzer.log_request(
             messages=messages,
             tools=tools,
@@ -289,7 +321,7 @@ class LLMProvider:
                         if "timeout" in err_msg.lower() or "timed out" in err_msg.lower():
                             raise ConnectionError("Таймаут запроса к модели. Попробуйте позже.") from e
                         if "api_key" in err_msg.lower() or "401" in err_msg or "403" in err_msg:
-                            raise ValueError("Неверный или отсутствующий API-ключ Google.") from e
+                            raise ValueError("Неверный или отсутствующий API-ключ LLM-провайдера (Gemini/AITunnel).") from e
                         raise RuntimeError(f"Ошибка API: {err_msg}") from e
 
             # обновляем провайдера в метаданных и логируем ответ
