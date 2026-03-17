@@ -187,6 +187,19 @@ def load_generic_catalog(filename: str) -> EquipmentCatalog:
         mph_table = _parse_pairs(raw_mph) if isinstance(raw_mph, (list, tuple)) and raw_mph and isinstance(raw_mph[0], (list, tuple)) else None
         mph_single = float(raw_mph) if isinstance(raw_mph, (int, float)) else 0.0
 
+        # Офсетная бумага: [[name, density, cost], ...]
+        raw_cost_paper = raw.get("costPaper")
+        cost_paper_table = None
+        if isinstance(raw_cost_paper, list) and raw_cost_paper:
+            try:
+                cost_paper_table = [
+                    (str(row[0]), float(row[1]), float(row[2]))
+                    for row in raw_cost_paper
+                    if isinstance(row, (list, tuple)) and len(row) >= 3
+                ]
+            except (TypeError, ValueError, IndexError):
+                cost_paper_table = None
+
         spec = EquipmentSpec(
             code=code,
             name=raw.get("name", code),
@@ -214,6 +227,16 @@ def load_generic_catalog(filename: str) -> EquipmentCatalog:
             meter_per_hour_table=mph_table,
             sheets_per_hour_table=sph_table,
             cost_print_sheet=cost_print_sheet,
+            cost_print_m2=_to_float(raw.get("costPrint")),
+            min_vol_print=_to_float(raw.get("minVolPrint")),
+            cost_paper_table=cost_paper_table,
+            adjust_paper=int(raw.get("adjustPaper", 0) or 0),
+            cost_adjust=_to_float(raw.get("costAdjust")),
+            cost_prepare_print=_to_float(raw.get("costPreparePrint")),
+            cost_offset_form=_to_float(raw.get("costOffsetForm")),
+            cost_prepare_offset=_to_float(raw.get("costPrepare")),
+            cost_prepare_cut=_to_float(raw.get("costPrepareCut")),
+            cost_cut_offset=_to_float(raw.get("costCut")),
         )
 
         catalog.add(spec)

@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -37,6 +39,7 @@ def _load_env() -> None:
 _load_env()
 
 from llm_provider import LLMProvider
+from knowledge_base import KnowledgeBase
 
 logger = logging.getLogger(__name__)
 
@@ -47,11 +50,33 @@ HTTP_TIMEOUT = 15.0
 
 SYSTEM_PROMPT = (
     "Ты — ассистент компании Инсайн. Рассчитываешь стоимость через калькуляторы (tools).\n"
+    "ВАЖНО: единственный источник правды о параметрах — tool_schema (properties, enum, required). "
+    "Игнорируй свои предыдущие ответы о том, какие параметры доступны или недоступны. "
+    "Если параметр есть в tool_schema — он доступен, даже если ранее ты говорил обратное.\n"
     "Для подбора material_id/lamination_id вызови search_materials(slug, query), из результата подставь id.\n"
     "Коды менеджеру не показывай. mode: 0=эконом, 1=стандарт, 2=экспресс (по умолчанию 1).\n"
     "При пересчёте (смена параметра) вызывай калькулятор заново. Результат покажу я — не придумывай цены и ссылки.\n"
+    "Если вопрос не про расчёт, а про компанию/процессы/услуги — вызови search_knowledge(query) для поиска в базе знаний.\n"
     "Ответы: plain text, без Markdown. Отвечай на русском."
 )
+
+SEARCH_KNOWLEDGE_TOOL: Dict[str, Any] = {
+    "type": "function",
+    "function": {
+        "name": "search_knowledge",
+        "description": (
+            "Поиск в базе знаний компании Инсайн (Wiki). "
+            "Используй для вопросов о компании, услугах, процессах, инструкциях — всего, что не касается расчёта стоимости."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Поисковый запрос на русском: тема, ключевые слова."},
+            },
+            "required": ["query"],
+        },
+    },
+}
 
 SEARCH_MATERIALS_TOOL: Dict[str, Any] = {
     "type": "function",
@@ -83,6 +108,7 @@ class InsainAgent:
     def __init__(self, calc_api_url: Optional[str] = None):
         self.calc_api_url = (calc_api_url or CALC_API_URL).rstrip("/")
         self.llm = LLMProvider()
+        self.kb = KnowledgeBase()
         self._calculators: List[Dict[str, Any]] = []
         self._tools: List[Dict[str, Any]] = []
         self._param_schemas: Dict[str, Dict[str, Any]] = {}
@@ -180,6 +206,49 @@ class InsainAgent:
                         "description": "Цветность печати. 4+0 — односторонняя цветная, 4+4 — двусторонняя цветная. Обязательно передавай при вызове (по умолчанию 4+0).",
                     }
 
+                # Металлические значки: крепления и упаковка.
+                # По умолчанию учитываем крепление игла-цанга (BC) и явно подсвечиваем LLM,
+                # какие коды чему соответствуют, чтобы не галлюцинировать.
+                if slug == "metal_pins":
+                    attachments = (opts or {}).get("attachments") or []
+                    packs = (opts or {}).get("packs") or []
+
+                    if "attachment_id" in props:
+                        # Базовое описание + варианты из /options.
+                        choices = {a.get("code"): (a.get("name") or a.get("code")) for a in attachments if isinstance(a, dict)}
+                        desc = (
+                            props.get("attachment_id", {}).get("description")
+                            or "Крепление значка (игла-цанга, булавка, магнит и т.п.)."
+                        )
+                        if choices:
+                            human = ", ".join(f"{code} — {name}" for code, name in choices.items())
+                            desc = f"{desc} Доступные варианты: {human}."
+
+                        props["attachment_id"] = {
+                            **(props.get("attachment_id") or {}),
+                            "type": "string",
+                            "default": "BC",
+                            "enum": sorted(list(choices.keys()) or ["BC", "BC2", "PinMetal", "SafetyPin", "Screw", "TieClip", "Magnet17", "Magnet4513"]),
+                            "description": desc,
+                        }
+
+                    if "pack_id" in props:
+                        pack_choices = {p.get("code"): (p.get("name") or p.get("code")) for p in packs if isinstance(p, dict)}
+                        desc_p = (
+                            props.get("pack_id", {}).get("description")
+                            or "Упаковка значков (пакетик, акриловая коробочка)."
+                        )
+                        if pack_choices:
+                            human_p = ", ".join(f"{code} — {name}" for code, name in pack_choices.items())
+                            desc_p = f"{desc_p} Доступные варианты: {human_p}."
+
+                        props["pack_id"] = {
+                            **(props.get("pack_id") or {}),
+                            "type": "string",
+                            "enum": sorted(list(pack_choices.keys()) or ["PolyBag", "AcrylicBox30", "AcrylicBox40", "AcrylicBox50"]),
+                            "description": desc_p,
+                        }
+
                 tools.append({
                     "type": "function",
                     "function": {
@@ -189,7 +258,7 @@ class InsainAgent:
                     },
                 })
 
-        self._tools = [SEARCH_MATERIALS_TOOL] + tools
+        self._tools = [SEARCH_KNOWLEDGE_TOOL, SEARCH_MATERIALS_TOOL] + tools
         logger.info(
             "Загружено калькуляторов: %s, tools: %s, materials по калькуляторам: %s",
             len(self._calculators),
@@ -209,6 +278,139 @@ class InsainAgent:
             if c.get("slug") == slug:
                 return c
         return {}
+
+    def _load_calendar_overrides(self) -> Dict[str, set]:
+        """
+        Загрузить рабочие/праздничные дни из calc_service/data/common.json.
+        workingDays — праздничные дни (будни, которые стали выходными),
+        weekEnd — выходные, которые стали рабочими.
+        """
+        if hasattr(self, "_calendar_overrides"):
+            return self._calendar_overrides  # type: ignore[attr-defined]
+
+        root = Path(__file__).resolve().parent.parent
+        common_path = root / "calc_service" / "data" / "common.json"
+        working_days: set[str] = set()
+        weekend_working: set[str] = set()
+        try:
+            text_lines: list[str] = []
+            with open(common_path, encoding="utf-8") as f:
+                for line in f:
+                    # Убираем комментарии // ...
+                    if "//" in line:
+                        line = line.split("//", 1)[0]
+                    if line.strip():
+                        text_lines.append(line)
+            data = json.loads("".join(text_lines))
+            calendar = data.get("calendar") or {}
+            working_days = set(calendar.get("workingDays") or [])
+            weekend_working = set(calendar.get("weekEnd") or [])
+        except Exception as e:
+            logger.warning("Не удалось загрузить календарь из common.json: %s", e)
+
+        self._calendar_overrides = {
+            "workingDays": working_days,
+            "weekEnd": weekend_working,
+        }
+        return self._calendar_overrides  # type: ignore[return-value]
+
+    def _is_business_day(self, dt: datetime) -> bool:
+        """
+        Рабочий день с учётом календаря:
+        - будни, которых нет в workingDays;
+        - выходные из weekEnd считаются рабочими.
+        Формат дат в common.json: "д.М" (например, "3.1").
+        """
+        overrides = self._load_calendar_overrides()
+        working_days: set[str] = overrides["workingDays"]
+        weekend_working: set[str] = overrides["weekEnd"]
+
+        day_str = f"{dt.day}.{dt.month}"
+        weekday = dt.weekday()  # 0=понедельник, 6=воскресенье
+
+        if 0 <= weekday <= 4:
+            # Будние: если день не в списке праздничных workingDays — рабочий.
+            return day_str not in working_days
+        # Выходные: если день отмечен как рабочий в weekEnd — рабочий.
+        return day_str in weekend_working
+
+    def _add_business_days(self, start: datetime, days: int) -> datetime:
+        """Добавить N рабочих дней с учётом праздников/рабочих выходных из common.json."""
+        if days == 0:
+            return start
+        step = 1 if days > 0 else -1
+        remaining = abs(days)
+        current = start
+        while remaining > 0:
+            current += timedelta(days=step)
+            if self._is_business_day(current):
+                remaining -= 1
+        return current
+
+    @staticmethod
+    def _ru_plural(n: int, one: str, few: str, many: str) -> str:
+        """Русские окончания по схеме из timeToWords."""
+        n = abs(int(n))
+        titles = (one, few, many)
+        cases = (2, 0, 1, 1, 1, 2)
+        if 5 <= n % 100 <= 20:
+            idx = 2
+        else:
+            idx = cases[n % 10 if n % 10 < 5 else 5]
+        return titles[idx]
+
+    @staticmethod
+    def _round_price(price: float, quantity: int, threshold: float = 100.0) -> float:
+        """
+        Округление цены по правилу insaincalc.round из js_legacy/common.js.
+        Себестоимость не меняем, только финальную цену.
+        """
+        try:
+            p = float(price)
+            q = int(quantity)
+        except (TypeError, ValueError):
+            return float(price or 0)
+        if p <= 0 or q <= 0:
+            return p
+
+        threshold_1 = threshold / q
+        module = max(10 ** math.ceil(math.log10(threshold_1)), 0.01)
+        item_price = p / q
+        new_item_price = math.ceil(item_price / module) * module
+        if abs(item_price - new_item_price) > threshold_1 and module > 0.01:
+            module /= 10
+            new_item_price = math.ceil(item_price / module) * module
+        new_item_price = round(new_item_price * 100) / 100.0
+        return new_item_price * q
+
+    def _format_time_ready_label(self, time_ready_hours: float) -> str:
+        """
+        Человекочитаемый срок готовности:
+        - < 8 часов → N рабочих часов (со склонениями)
+        - ≥ 8 часов → N рабочих дней + дата готовности от сегодняшнего дня.
+        """
+        try:
+            hours = max(0.0, float(time_ready_hours))
+        except (TypeError, ValueError):
+            return "срок не определён"
+
+        if hours <= 0:
+            return "срок не определён"
+
+        if hours < 8:
+            h = int(round(hours)) or 1
+            label = self._ru_plural(h, "рабочий час", "рабочих часа", "рабочих часов")
+            return f"{h} {label}"
+
+        # Переводим рабочие часы в дни, округляя вверх
+        days = int(hours // 8)
+        if hours % 8:
+            days += 1
+
+        ready_date = self._add_business_days(datetime.now(), days)
+        date_str = ready_date.strftime("%d.%m.%Y")
+        day_label = self._ru_plural(days, "рабочий день", "рабочих дня", "рабочих дней")
+        return f"≈ {days} {day_label} (до {date_str})"
 
     @staticmethod
     def _mode_label(mode: Any) -> str:
@@ -271,6 +473,15 @@ class InsainAgent:
         weight_kg = float(result.get("weight_kg") or 0)
         share_url = result.get("share_url") or ""
 
+        # Округляем финальную цену по бизнес-правилам (round из common.js), себестоимость не трогаем.
+        display_price = price
+        display_unit_price = unit_price
+        if quantity and price > 0:
+            rounded = self._round_price(price, quantity)
+            if rounded > 0:
+                display_price = rounded
+                display_unit_price = rounded / max(1, quantity)
+
         # Блок параметров расчёта (расширенный)
         params_lines: List[str] = []
         if quantity is not None:
@@ -284,7 +495,10 @@ class InsainAgent:
         if slug in ("print_sheet", "print_laser"):
             params_lines.append(f"Цветность печати\t{color}")
 
-        params_lines.append(f"Материал\t{material_title}")
+        # Материал: для большинства калькуляторов берём из первого материала,
+        # для металлических значков выводим отдельные поля ниже.
+        if not (slug == "metal_pins" and not materials):
+            params_lines.append(f"Материал\t{material_title}")
 
         # Ламинация — только если задана (второй материал в результате или lamination_id в args)
         if slug == "print_sheet":
@@ -298,17 +512,57 @@ class InsainAgent:
         mode = args.get("mode", 1)
         params_lines.append(f"Срочность\t{self._mode_label(mode)}")
 
+        # Доп. параметры для металлических значков — всегда явно показываем, что рассчитано.
+        if slug == "metal_pins":
+            process = (args.get("process") or "").strip() or "2d"
+            num_enamels = args.get("num_enamels")
+            plating = (args.get("plating") or "").strip() or "nickel"
+            metal = (args.get("metal") or "").strip() or "brass"
+            raw_attachment_id = (args.get("attachment_id") or "").strip()
+            raw_pack_id = (args.get("pack_id") or "").strip()
+
+            # Попробуем получить человекочитаемые названия крепления/упаковки из материалов расчёта.
+            attachment_label = ""
+            pack_label = ""
+            if materials:
+                for m in materials:
+                    code = (m.get("code") or "").strip()
+                    title = m.get("title") or m.get("name") or code
+                    if code and code == raw_attachment_id:
+                        attachment_label = f"{title} ({code})"
+                    if code and code == raw_pack_id:
+                        pack_label = f"{title} ({code})"
+
+            params_lines.append(f"Технология\t{process}")
+            if num_enamels is not None:
+                params_lines.append(f"Цветов эмали\t{num_enamels}")
+            params_lines.append(f"Покрытие\t{plating}")
+            params_lines.append(f"Металл\t{metal}")
+            if raw_attachment_id and attachment_label:
+                params_lines.append(f"Крепление\t{attachment_label}")
+            elif raw_attachment_id:
+                # Если код не распознан, лучше явно показать, что это неизвестное крепление, а не придумывать название.
+                params_lines.append(f"Крепление\tнеизвестное крепление (код {raw_attachment_id})")
+            if raw_pack_id and pack_label:
+                params_lines.append(f"Упаковка\t{pack_label}")
+            elif raw_pack_id:
+                params_lines.append(f"Упаковка\tкод {raw_pack_id}")
+
         lines: List[str] = []
         lines.append(calc_title)
         lines.append("")
         lines.append("\n".join(params_lines))
 
-        suspicious = (price == 0) or (cost == 0) or (time_hours == 0)
+        suspicious = (price == 0) or (cost == 0) or (time_hours == 0 and weight_kg == 0)
         lines.append("")
-        lines.append(f"💰 Цена: {price:.2f} ₽ ({unit_price:.2f} ₽/шт)" if price else "💰 Цена: 0 ₽")
+        if display_price:
+            lines.append(f"💰 Цена: {display_price:.2f} ₽ ({display_unit_price:.2f} ₽/шт)")
+        else:
+            lines.append("💰 Цена: 0 ₽")
         lines.append(f"💵 Себестоимость: {cost:.2f} ₽")
         lines.append(f"⏱ Время изготовления: {time_hours:.2f} ч")
-        lines.append(f"📅 Готовность: {time_ready:.2f} раб. часов")
+        time_ready_label = self._format_time_ready_label(time_ready)
+        lines.append(f"📅 Готовность: {time_ready_label}")
         lines.append(f"⚖️ Вес тиража: {weight_kg:.2f} кг")
 
         if materials:
@@ -359,9 +613,20 @@ class InsainAgent:
 
     def execute_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Выполнить инструмент: search_materials → POST /api/v1/choices;
-        calc_* → POST /api/v1/calc/{slug}.
+        Выполнить инструмент: search_knowledge → KB,
+        search_materials → POST /api/v1/choices, calc_* → POST /api/v1/calc/{slug}.
         """
+        if tool_name == "search_knowledge":
+            query = (arguments.get("query") or "").strip()
+            if not query:
+                return {"error": "Укажи запрос для поиска в базе знаний.", "results": []}
+            logger.info("execute_tool: search_knowledge query=%r", query)
+            results = self.kb.search(query, limit=5)
+            if not results:
+                return {"message": "По запросу ничего не найдено в базе знаний.", "results": []}
+            context = self.kb.get_context(query)
+            return {"results": results, "context": context}
+
         if tool_name == "search_materials":
             slug = (arguments.get("slug") or "").strip()
             query = (arguments.get("query") or "").strip()

@@ -80,6 +80,20 @@ class EquipmentSpec(BaseModel):
     sheets_per_hour_table: Optional[List[Tuple[float, float]]] = None  # [(density, sheets_per_hour), ...]
     cost_print_sheet: Optional[List[float]] = None  # [cost_bw, cost_color] руб./лист SRA3
 
+    # Широкоформатный принтер
+    cost_print_m2: float = 0.0  # себестоимость печати за м² (costPrint в JSON)
+    min_vol_print: float = 0.0  # минимальный объём печати, м² (minVolPrint в JSON)
+
+    # Офсетная печать (специфичные поля)
+    cost_paper_table: Optional[List[Tuple[str, float, float]]] = None  # costPaper: [[name, density, cost], ...]
+    adjust_paper: int = 0  # листов для приладки
+    cost_adjust: float = 0.0  # стоимость приладки
+    cost_prepare_print: float = 0.0  # стоимость подготовки печати
+    cost_offset_form: float = 0.0  # стоимость формы на 1 цвет
+    cost_prepare_offset: float = 0.0  # costPrepare в JSON (для офсета)
+    cost_prepare_cut: float = 0.0  # стоимость подготовки к резке
+    cost_cut_offset: float = 0.0  # стоимость резки пачки
+
     @property
     def depreciation_per_hour(self) -> float:
         """

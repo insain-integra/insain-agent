@@ -1,5 +1,7 @@
 .env
+.wiki_cookies.json
 __pycache__/
 postgres_data/
 .venv/
 logs/
+data/kb_cache.json

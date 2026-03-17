@@ -210,6 +210,11 @@ class PrintSheetCalculator(BaseCalculator):
                         "type": "boolean",
                         "description": "Двусторонняя ламинация (как в JS calcPrintSheet, по умолчанию true).",
                     },
+                    "no_cut": {
+                        "type": "boolean",
+                        "description": "Без резки (для бейджей — печать без гильотинной резки).",
+                        "default": False,
+                    },
                     "mode": {"type": "integer", "enum": [0, 1, 2], "default": 1},
                 },
                 "required": ["quantity", "width", "height", "material_id"],
@@ -341,26 +346,29 @@ class PrintSheetCalculator(BaseCalculator):
         time_lamination = 0.0
         time_cut_guillotine = 0.0
 
-        try:
-            cut_calc = CutGuillotineCalculator()
-            cut_params = {
-                "num_sheet": num_sheet,
-                "width": size[0],
-                "height": size[1],
-                "sheet_width": size_sheet[0],
-                "sheet_height": size_sheet[1],
-                "material_id": material_id,
-                "material_category": "sheet",
-                "margins": list(sum_margins),
-                "interval": interval,
-                "mode": mode.value,
-            }
-            cut_result = cut_calc.calculate(cut_params)
-            cost_cut_guillotine = float(cut_result.get("cost", 0))
-            time_cut_guillotine = float(cut_result.get("time_hours", 0))
-            price_cut_guillotine = float(cut_result.get("price", 0))
-        except Exception:
-            pass
+        no_cut = bool(params.get("no_cut", False))
+
+        if not no_cut:
+            try:
+                cut_calc = CutGuillotineCalculator()
+                cut_params = {
+                    "num_sheet": num_sheet,
+                    "width": size[0],
+                    "height": size[1],
+                    "sheet_width": size_sheet[0],
+                    "sheet_height": size_sheet[1],
+                    "material_id": material_id,
+                    "material_category": "sheet",
+                    "margins": list(sum_margins),
+                    "interval": interval,
+                    "mode": mode.value,
+                }
+                cut_result = cut_calc.calculate(cut_params)
+                cost_cut_guillotine = float(cut_result.get("cost", 0))
+                time_cut_guillotine = float(cut_result.get("time_hours", 0))
+                price_cut_guillotine = float(cut_result.get("price", 0))
+            except Exception:
+                pass
 
         # Ламинация (как в JS calcPrintSheet: по плёнке laminat, с выбором по размеру плёнки)
         lamination_result: Optional[Dict[str, Any]] = None
