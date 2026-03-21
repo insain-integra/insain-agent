@@ -56,6 +56,18 @@ class MetalPinsCalculator(BaseCalculator):
     slug = "metal_pins"
     name = "Металлические значки"
     description = "Расчёт металлических значков со штамповкой: заготовка, штамп, эмали, покрытие, доставка из Китая."
+    keywords = [
+        "значки",
+        "значок",
+        "металлические значки",
+        "металлический значок",
+        "pin",
+        "pins",
+        "badge",
+        "badges",
+        "значки штампованные",
+        "значки с эмалью",
+    ]
 
     def get_param_schema(self) -> Dict[str, Any]:
         return {

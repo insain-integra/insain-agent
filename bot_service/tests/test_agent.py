@@ -129,3 +129,154 @@ class TestInsainAgentModeLabel:
         assert InsainAgent._mode_label(1) == "стандарт"
         assert InsainAgent._mode_label(2) == "экспресс"
         assert InsainAgent._mode_label("invalid") == "стандарт"
+
+
+class TestRouterParsing:
+    """Роутер: разбор intent + calculator_slug."""
+
+    def test_parse_calculator_with_slug(self):
+        from agent import InsainAgent
+        out = {
+            "content": None,
+            "tool_calls": [
+                {
+                    "id": "1",
+                    "type": "function",
+                    "function": {
+                        "name": "route_request",
+                        "arguments": '{"intent": "calculator", "reason": "пересчёт", "calculator_slug": "print_sheet"}',
+                    },
+                }
+            ],
+        }
+        intent, slug = InsainAgent._parse_router_result(out)
+        assert intent == "calculator"
+        assert slug == "print_sheet"
+
+    def test_parse_knowledge_clears_slug(self):
+        from agent import InsainAgent
+        out = {
+            "tool_calls": [
+                {
+                    "function": {
+                        "name": "route_request",
+                        "arguments": '{"intent": "knowledge", "reason": "справка", "calculator_slug": ""}',
+                    }
+                }
+            ]
+        }
+        intent, slug = InsainAgent._parse_router_result(out)
+        assert intent == "knowledge"
+        assert slug is None
+
+    def test_parse_fallback_calculator_none_slug(self):
+        from agent import InsainAgent
+        intent, slug = InsainAgent._parse_router_result({"content": "", "tool_calls": []})
+        assert intent == "calculator"
+        assert slug is None
+
+    def test_parse_json_in_content(self):
+        from agent import InsainAgent
+        out = {
+            "content": 'Ответ: {"intent": "knowledge", "reason": "вопрос", "calculator_slug": ""}',
+            "tool_calls": None,
+        }
+        intent, slug = InsainAgent._parse_router_result(out)
+        assert intent == "knowledge"
+        assert slug is None
+
+    def test_parse_calculator_empty_slug(self):
+        from agent import InsainAgent
+        out = {
+            "tool_calls": [
+                {
+                    "function": {
+                        "name": "route_request",
+                        "arguments": '{"intent": "calculator", "reason": "не ясно", "calculator_slug": ""}',
+                    }
+                }
+            ]
+        }
+        intent, slug = InsainAgent._parse_router_result(out)
+        assert intent == "calculator"
+        assert slug is None
+
+
+class TestToolsForIntent:
+    def test_knowledge_returns_only_search_knowledge(self):
+        from agent import SEARCH_KNOWLEDGE_TOOL, SEARCH_MATERIALS_TOOL, InsainAgent
+        agent = InsainAgent.__new__(InsainAgent)
+        calc_ps = {"type": "function", "function": {"name": "calc_print_sheet"}}
+        agent._calc_tool_by_slug = {"print_sheet": calc_ps}
+        full = [SEARCH_KNOWLEDGE_TOOL, SEARCH_MATERIALS_TOOL, calc_ps]
+        result = agent._tools_for_intent("knowledge", None, full)
+        assert len(result) == 1
+        assert result[0] == SEARCH_KNOWLEDGE_TOOL
+
+    def test_calculator_with_slug_returns_narrow_set(self):
+        from agent import SEARCH_KNOWLEDGE_TOOL, SEARCH_MATERIALS_TOOL, InsainAgent
+        agent = InsainAgent.__new__(InsainAgent)
+        calc_ps = {"type": "function", "function": {"name": "calc_print_sheet"}}
+        agent._calc_tool_by_slug = {"print_sheet": calc_ps}
+        full = [SEARCH_KNOWLEDGE_TOOL, SEARCH_MATERIALS_TOOL, calc_ps]
+        narrow = agent._tools_for_intent("calculator", "print_sheet", full)
+        assert len(narrow) == 2
+        assert narrow[0] == SEARCH_MATERIALS_TOOL
+        assert narrow[1] == calc_ps
+
+    def test_calculator_without_slug_returns_full(self):
+        from agent import SEARCH_KNOWLEDGE_TOOL, SEARCH_MATERIALS_TOOL, InsainAgent
+        agent = InsainAgent.__new__(InsainAgent)
+        calc_ps = {"type": "function", "function": {"name": "calc_print_sheet"}}
+        agent._calc_tool_by_slug = {"print_sheet": calc_ps}
+        full = [SEARCH_KNOWLEDGE_TOOL, SEARCH_MATERIALS_TOOL, calc_ps]
+        result = agent._tools_for_intent("calculator", None, full)
+        assert len(result) == len(full)
+
+
+class TestSystemPromptForIntent:
+    def test_knowledge_prompt(self):
+        from agent import InsainAgent
+        agent = InsainAgent.__new__(InsainAgent)
+        agent._calc_tool_by_slug = {}
+        agent._calculators = []
+        agent._calc_llm_prompts = {}
+        agent._calculator_index = ""
+        prompt = agent._system_prompt_for_intent("knowledge", None)
+        assert "Wiki" in prompt or "база знаний" in prompt
+
+    def test_calculator_with_slug_prompt(self):
+        from agent import InsainAgent
+        agent = InsainAgent.__new__(InsainAgent)
+        agent._calc_tool_by_slug = {
+            "laser": {"type": "function", "function": {"name": "calc_laser"}}
+        }
+        agent._calculators = [{"slug": "laser", "name": "Лазерная резка", "description": "Лазер"}]
+        agent._calc_llm_prompts = {"laser": "Алгоритм лазера."}
+        agent._calculator_index = ""
+        prompt = agent._system_prompt_for_intent("calculator", "laser")
+        assert "laser" in prompt
+        assert "calc_laser" in prompt
+        assert "Алгоритм лазера" in prompt
+
+    def test_calculator_without_slug_uses_full(self):
+        from agent import InsainAgent
+        agent = InsainAgent.__new__(InsainAgent)
+        agent._calc_tool_by_slug = {}
+        agent._calculators = []
+        agent._calc_llm_prompts = {}
+        agent._calculator_index = "- laser — Лазер"
+        prompt = agent._system_prompt_for_intent("calculator", None)
+        assert "laser" in prompt
+
+
+class TestNormalizeChoicesParam:
+    def test_lamination_slug_maps_lamination_to_material(self):
+        from agent import InsainAgent
+        assert InsainAgent._normalize_choices_param("lamination", "lamination") == "material"
+        assert InsainAgent._normalize_choices_param("lamination", "material") == "material"
+
+    def test_other_slugs_unchanged(self):
+        from agent import InsainAgent
+        assert InsainAgent._normalize_choices_param("print_sheet", "lamination") == "lamination"
+        assert InsainAgent._normalize_choices_param("print_sheet", "material") == "material"

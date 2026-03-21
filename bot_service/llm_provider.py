@@ -255,7 +255,19 @@ class LLMProvider:
         }
         if tools:
             kwargs["tools"] = tools
-            kwargs["tool_choice"] = "auto"
+            # Принудительный tool_choice нужен только для router-шага:
+            # там один tool "route_request", и если модель вернёт plain-text,
+            # маршрутизация ломается (нет tool_calls).
+            # Для расчётных шагов (calc_*) оставляем "auto", чтобы не провоцировать
+            # несовместимости провайдера с forced tool_choice.
+            if len(tools) == 1:
+                fn_name = ((tools[0] or {}).get("function") or {}).get("name")
+                if fn_name == "route_request":
+                    kwargs["tool_choice"] = {"type": "function", "function": {"name": fn_name}}
+                else:
+                    kwargs["tool_choice"] = "auto"
+            else:
+                kwargs["tool_choice"] = "auto"
 
         # Метка для логирования и токен-аналитики — какой провайдер мы пытаемся использовать
         if self.mode == "yandex":

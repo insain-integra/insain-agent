@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from calculators import CALCULATORS, get_calculator
 from materials import ALL_MATERIALS, MaterialCatalog, MaterialSpec
@@ -49,13 +49,16 @@ async def log_requests(request: Request, call_next):
 
 
 @app.get("/api/v1/calculators")
-def list_calculators() -> list[Dict[str, str]]:
-    """Список калькуляторов: slug, name, description."""
+def list_calculators() -> list[Dict[str, Any]]:
+    """Список калькуляторов: slug, name, description, keywords."""
     return [
         {
             "slug": calc.slug,
             "name": calc.name,
             "description": calc.description,
+            # Ключевые слова используются агентом/фронтом как подсказки при выборе калькулятора.
+            # Поле опциональное, поэтому возвращаем только строковые значения.
+            "keywords": list(getattr(calc, "keywords", []) or []),
         }
         for calc in CALCULATORS.values()
         if getattr(calc, "is_public", True)
@@ -87,6 +90,13 @@ def get_tool_schema(slug: str) -> Dict[str, Any]:
     return calc.get_tool_schema()
 
 
+@app.get("/api/v1/llm_prompt/{slug}")
+def get_llm_prompt(slug: str) -> Dict[str, str]:
+    """Дополнительный промпт-алгоритм расчёта для LLM (пусто, если не задан)."""
+    calc = get_calculator(slug)  # KeyError → 404
+    return {"slug": slug, "prompt": calc.get_llm_prompt()}
+
+
 @app.post("/api/v1/calc/{slug}")
 def calc(slug: str, body: Dict[str, Any]) -> Dict[str, Any]:
     """Расчёт: JSON body с параметрами, возврат результата (cost, price, time_hours, ...)."""
@@ -99,7 +109,8 @@ class ChoicesRequest(BaseModel):
     param: str                   # имя параметра
     query: Optional[str] = None  # поисковый запрос
     filters: Optional[Dict[str, Any]] = None  # дополнительные фильтры
-    limit: int = 10
+    # Лимит позиций в ответе (агент запрашивает полный список подходящих под запрос)
+    limit: int = Field(default=500, ge=1, le=2000)
 
 
 class ChoiceItem(BaseModel):
