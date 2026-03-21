@@ -358,6 +358,18 @@ bash scripts/dev.sh start all       # то же из Git Bash
 
 Переменные: `CALC_HOST`, `CALC_PORT` (по умолчанию `127.0.0.1`, `8001`). PID: `.run/*.pid` (в `.gitignore`).
 
+### PDF для внешнего LLM (контекст проекта + агент + калькуляторы + данные)
+
+```Bash
+pip install fpdf2
+python scripts/export_agent_sources_pdf.py
+# → exports/insain-agent-context-YYYY-MM-DD.pdf
+# → exports/insain-latest-logs-YYYY-MM-DD.txt  (последние llm_request_*.json)
+# Опции: --no-context, --no-agent, --no-calc, --no-data, --portrait, --font-size, --out
+#        --logs-count 12, --logs-out путь, --no-logs-file, --logs-only (только .txt, без fpdf2)
+#        --logs-pdf-only — только PDF с последними логами (exports/insain-latest-logs-*.pdf)
+```
+
 ### Тесты
 
 ```Bash

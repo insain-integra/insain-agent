@@ -4,5 +4,6 @@ __pycache__/
 postgres_data/
 .venv/
 logs/
+exports/
 .run/
 data/kb_cache.json

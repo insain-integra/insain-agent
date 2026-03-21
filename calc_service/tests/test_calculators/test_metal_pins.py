@@ -94,6 +94,20 @@ def test_get_tool_schema(calc):
     assert "quantity" in schema["parameters"].get("properties", {})
 
 
+def test_get_llm_prompt(calc):
+    text = calc.get_llm_prompt()
+    assert len(text) > 80
+    assert "material_id" in text
+    assert "calc_metal_pins" in text
+
+
+def test_calculate_accepts_width_height_aliases(calc):
+    """LLM шлёт width/height вместо width_mm/height_mm — не должно падать."""
+    r = calc.execute({"quantity": 100, "width": 25, "height": 25})
+    assert r.get("price", 0) > 0
+    assert "width_mm=25" in (r.get("share_url") or "")
+
+
 # ── Эталонные тесты ──────────────────────────────────────────────────
 
 REF_PARAMS = {

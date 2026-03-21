@@ -148,6 +148,17 @@ class MetalPinsCalculator(BaseCalculator):
         "антик никель": "anticnickel",
     }
 
+    def get_llm_prompt(self) -> str:
+        return (
+            "Это металлические значки (штамповка), не листовка и не акриловый брелок.\n"
+            "Обязательны только тираж и размер (ширина и высота, мм). "
+            "Если пользователь назвал тираж и оба размера — сразу вызывай calc_metal_pins.\n"
+            "Поля metal, plating, process, крепление, упаковка — enum с default в схеме; "
+            "не спрашивай их, пока пользователь сам не попросит другой вариант.\n"
+            "Не спрашивай про листовой материал, акрил, ПВХ, меловку — для этого калькулятора "
+            "нет material_id; search_materials для «подобрать материал» не используй."
+        )
+
     def get_tool_schema(self) -> Dict[str, Any]:
         return {
             "name": "calc_" + self.slug,
@@ -198,11 +209,39 @@ class MetalPinsCalculator(BaseCalculator):
             },
         }
 
+    @staticmethod
+    def _normalize_input_params(params: Mapping[str, Any]) -> Dict[str, Any]:
+        """
+        Сайт/LLM иногда передают width/height вместо width_mm/height_mm — иначе float(None) → 500.
+        Квадрат: если задана только одна сторона, вторая = ей же.
+        """
+        p = dict(params)
+        if p.get("width_mm") is None and p.get("width") is not None:
+            p["width_mm"] = p.pop("width")
+        if p.get("height_mm") is None and p.get("height") is not None:
+            p["height_mm"] = p.pop("height")
+        wm, hm = p.get("width_mm"), p.get("height_mm")
+        if wm is not None and hm is None:
+            p["height_mm"] = wm
+        elif hm is not None and wm is None:
+            p["width_mm"] = hm
+        return p
+
     def _resolve_process_id(self, value: Any) -> int:
         if isinstance(value, int):
-            return value
+            return value if value > 0 else 1
         s = str(value).strip().lower()
-        return self.PROCESS_MAP.get(s, 0)
+        # 0 ломал выбор колонки в CostStamp (берётся размер вместо цены)
+        return self.PROCESS_MAP.get(s, 1)
+
+    def _coerce_mode(self, raw: Any) -> ProductionMode:
+        try:
+            v = int(raw)
+            if v in (0, 1, 2):
+                return ProductionMode(v)
+        except (TypeError, ValueError):
+            pass
+        return ProductionMode.STANDARD
 
     def _resolve_plating_id(self, value: Any) -> str:
         s = str(value).strip().lower()
@@ -214,8 +253,13 @@ class MetalPinsCalculator(BaseCalculator):
         tool = data.get("MetalPins", {})
         standart_t = tool.get("StandartT", [[30, 1.2], [40, 1.4], [60, 2.0], [80, 2.5], [100, 3.0]])
 
-        width = float(params.get("width_mm"))
-        height = float(params.get("height_mm"))
+        try:
+            width = float(params.get("width_mm"))
+            height = float(params.get("height_mm"))
+        except (TypeError, ValueError):
+            raise ValueError(
+                "Укажите ширину и высоту значка в мм: width_mm и height_mm (или width и height)."
+            ) from None
         thickness = _find_in_table(standart_t, math.sqrt((width**2 + height**2) / 2), 1)
 
         process_id = self._resolve_process_id(params.get("process", "2d"))
@@ -235,11 +279,12 @@ class MetalPinsCalculator(BaseCalculator):
         }]
 
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
+        params = self._normalize_input_params(params)
         n = int(params.get("quantity", 1))
         stamps = params.get("stamps", None)
         attachment_id = str(params.get("attachment_id", "") or "").strip()
         pack_id = str(params.get("pack_id", "") or "").strip()
-        mode = ProductionMode(int(params.get("mode", 1)))
+        mode = self._coerce_mode(params.get("mode", 1))
 
         if not stamps or not isinstance(stamps, list):
             stamps = self._build_stamps_from_params(params)
@@ -381,3 +426,11 @@ class MetalPinsCalculator(BaseCalculator):
             "weight_kg": weight_kg,
             "materials": materials_out,
         }
+
+    def execute(self, params: Mapping[str, Any]) -> Dict[str, Any]:
+        """Нормализуем имена полей до share_url (width → width_mm), чтобы ссылка совпадала с сайтом."""
+        norm = self._normalize_input_params(params)
+        result = dict(self.calculate(norm))
+        if "share_url" not in result:
+            result["share_url"] = self.make_share_url(norm)
+        return result

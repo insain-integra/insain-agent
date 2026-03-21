@@ -14,9 +14,11 @@ import json
 import logging
 import math
 import os
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from urllib.parse import parse_qs, urlparse
 
 import httpx
 
@@ -45,6 +47,7 @@ from llm_provider import LLMProvider
 from knowledge_base import KnowledgeBase
 from prompts import (
     build_calculator_index,
+    build_recalc_context,
     build_router_system_prompt,
     build_kb_system_prompt,
     build_calc_system_prompt,
@@ -126,6 +129,8 @@ class InsainAgent:
         self._calc_llm_prompts: Dict[str, str] = {}
         self._calculator_index: str = ""
         self._router_tool: Dict[str, Any] = {}
+        # Последний успешный расчёт per user (для пересчёта и восстановления slug)
+        self._user_calc_context: Dict[int, Dict[str, Any]] = {}
         self._load_calculators_and_tools()
 
     def _load_calculators_and_tools(self) -> None:
@@ -252,7 +257,8 @@ class InsainAgent:
             if fn.startswith("calc_"):
                 self._calc_tool_by_slug[fn[5:]] = t
 
-        self._calculator_index = build_calculator_index(self._calculators)
+        # Роутеру достаточно усечённого индекса (меньше токенов)
+        self._calculator_index = build_calculator_index(self._calculators, max_chars=5000)
         self._router_tool = self._build_router_tool()
         logger.info(
             "Загружено калькуляторов: %s, tools: %s",
@@ -311,7 +317,7 @@ class InsainAgent:
         return param
 
     def get_system_prompt(self) -> str:
-        return build_calc_system_prompt_full(self._calculator_index)
+        return build_calc_system_prompt_full(self._calculators)
 
     def get_tools(self) -> List[Dict[str, Any]]:
         return list(self._tools)
@@ -374,7 +380,9 @@ class InsainAgent:
                 pass
         return "calculator", None
 
-    def _router_classify(self, user_message: str, history: List[Dict[str, Any]]) -> tuple[str, Optional[str]]:
+    def _router_classify(
+        self, user_message: str, history: List[Dict[str, Any]], user_id: int = 0
+    ) -> tuple[str, Optional[str]]:
         if not self._router_tool:
             return "calculator", None
         try:
@@ -385,11 +393,264 @@ class InsainAgent:
             ]
             out = self.llm.chat(messages, tools=[self._router_tool])
             intent, slug = self._parse_router_result(out)
+            if intent == "calculator" and (
+                not slug or slug not in self._calc_tool_by_slug
+            ):
+                ctx = self._user_calc_context.get(user_id)
+                if ctx and ctx.get("slug"):
+                    prev = str(ctx["slug"]).strip()
+                    if prev in self._calc_tool_by_slug:
+                        slug = prev
+                        logger.info("Router: slug восстановлен из контекста: %s", slug)
             logger.info("Router: intent=%s slug=%s", intent, slug)
             return intent, slug
         except Exception as e:
-            logger.warning("Router classify failed: %s — fallback calculator, все tools", e)
+            logger.warning("Router classify failed: %s — fallback calculator, узкий набор tools", e)
             return "calculator", None
+
+    @staticmethod
+    def _user_message_suggests_recalc(user_message: str) -> bool:
+        """
+        Короткие уточнения пересчёта (тираж, цветность) — для forced calc без LLM.
+        Сообщения про смену материала/плотности не помечаем: их обрабатывает LLM + search_materials.
+        """
+        t = (user_message or "").strip().lower()
+        if not t:
+            return False
+        # Смена материала / плотности — не forced recalc
+        if re.search(r"\d+\s*гр", t) or re.search(r"\d+\s*г/м", t):
+            return False
+        if any(
+            word in t
+            for word in ("бумаг", "мелов", "глянц", "матов", "материал")
+        ):
+            return False
+        if re.search(r"\d+\s*шт", t):
+            return True
+        if re.search(r"\b[14]\s*\+\s*[014]\b", t) or re.search(r"\b4\+4\b", t):
+            return True
+        if re.match(r"^\s*\d+\s*шт\s*$", t):
+            return True
+        if any(x in t for x in ("посчитай", "пересчитай")) and (
+            re.search(r"\d+\s*шт", t) or re.search(r"\b[14]\s*\+\s*[014]\b", t)
+        ):
+            return True
+        return False
+
+    @staticmethod
+    def _router_context_continuation_message(user_message: str) -> bool:
+        """
+        Сообщение похоже на продолжение расчёта (восстановление slug в роутере).
+        Шире, чем _user_message_suggests_recalc: «посчитай 130гр» должно оставаться в калькуляторе,
+        но не запускать forced calc без LLM.
+        """
+        if InsainAgent._user_message_suggests_recalc(user_message):
+            return True
+        t = (user_message or "").strip().lower()
+        if not t:
+            return False
+        if any(x in t for x in ("посчитай", "пересчитай")) and re.search(r"\d", t):
+            return True
+        if re.search(r"\d+\s*гр", t) or re.search(r"\d+\s*г/м", t):
+            return True
+        return False
+
+    def _router_apply_context_override(
+        self,
+        intent: str,
+        slug: Optional[str],
+        user_message: str,
+        user_id: int,
+    ) -> tuple[str, Optional[str]]:
+        """
+        Если роутер вернул knowledge при активной calc-сессии, но реплика похожа на пересчёт —
+        принудительно calculator + slug из контекста (см. логи: «посчитай 4+4» → только Wiki).
+        """
+        ctx = self._user_calc_context.get(user_id)
+        if not ctx or not ctx.get("slug"):
+            return intent, slug
+        prev = str(ctx["slug"]).strip()
+        if prev not in self._calc_tool_by_slug:
+            return intent, slug
+        # Роутер явно выбрал другой калькулятор — не затираем
+        if intent == "calculator" and slug and slug in self._calc_tool_by_slug and slug != prev:
+            return intent, slug
+        if not self._router_context_continuation_message(user_message):
+            return intent, slug
+        if intent == "knowledge":
+            logger.info("Router: intent исправлен knowledge→calculator по контексту расчёта (%s)", prev)
+            return "calculator", prev
+        if intent == "calculator" and (not slug or slug not in self._calc_tool_by_slug):
+            logger.info("Router: slug восстановлен из контекста (override): %s", prev)
+            return "calculator", prev
+        return intent, slug
+
+    @staticmethod
+    def _params_from_share_url_in_text(text: str) -> Dict[str, Any]:
+        """Параметры из share-ссылки калькулятора в ответе ассистента (fallback, если LLM не вызывала tool)."""
+        out: Dict[str, Any] = {}
+        if not text or "insain.ru" not in text:
+            return out
+        m = re.search(r"https://[^\s)]+", text)
+        if not m:
+            return out
+        try:
+            q = parse_qs(urlparse(m.group(0)).query)
+        except Exception:
+            return out
+        if not q:
+            return out
+        def first(key: str) -> Optional[str]:
+            v = q.get(key)
+            return v[0] if v else None
+        if first("quantity"):
+            try:
+                out["quantity"] = int(first("quantity") or 0)
+            except (TypeError, ValueError):
+                pass
+        for dim, key in (("width", "width"), ("height", "height")):
+            if first(key):
+                try:
+                    out[dim] = float(first(key) or 0)
+                except (TypeError, ValueError):
+                    pass
+        mid = first("material_id")
+        if mid:
+            out["material_id"] = mid
+        ct = first("color_type") or first("color")
+        if ct:
+            c = ct.strip()
+            # В query string «+» декодируется как пробел (4+4 → «4 4»)
+            m = re.match(r"^([14])\s+([014])$", c)
+            if m:
+                c = f"{m.group(1)}+{m.group(2)}"
+            out["color"] = c
+        lam = first("lamination_id")
+        if lam:
+            out["lamination_id"] = lam
+        return out
+
+    @staticmethod
+    def _parse_print_sheet_from_assistant_block(text: str) -> Dict[str, Any]:
+        """Разбор последнего блока «Печать листовая» от ассистента (тираж/размер/цвет)."""
+        out: Dict[str, Any] = {}
+        if not text:
+            return out
+        m = re.search(r"Тираж\t(\d+)", text)
+        if m:
+            try:
+                out["quantity"] = int(m.group(1))
+            except (TypeError, ValueError):
+                pass
+        m = re.search(r"Ширина, мм\t(\d+)", text)
+        if m:
+            try:
+                out["width"] = float(m.group(1))
+            except (TypeError, ValueError):
+                pass
+        m = re.search(r"Высота, мм\t(\d+)", text)
+        if m:
+            try:
+                out["height"] = float(m.group(1))
+            except (TypeError, ValueError):
+                pass
+        m = re.search(r"Цветность печати\t([^\n]+)", text)
+        if m:
+            c = m.group(1).strip()
+            if c and c != "—":
+                out["color"] = c
+        return out
+
+    def _merge_params_for_recalc(
+        self,
+        slug: str,
+        ctx_params: Dict[str, Any],
+        user_message: str,
+        history: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """База из контекста + последний показанный расчёт в истории + правки из реплики пользователя."""
+        merged: Dict[str, Any] = dict(ctx_params or {})
+        # Последний блок расчёта / ссылка в истории (актуальнее застрявшего ctx после «галлюцинаций»)
+        for msg in reversed(history or []):
+            if msg.get("role") != "assistant":
+                continue
+            text = msg.get("content") or ""
+            if "💰 Цена:" in text or "insain.ru/calculator/" in text:
+                merged.update(self._params_from_share_url_in_text(text))
+                if slug == "print_sheet":
+                    merged.update(self._parse_print_sheet_from_assistant_block(text))
+                break
+
+        um = (user_message or "").strip()
+        mq = re.search(r"(\d+)\s*шт", um, re.I)
+        if mq:
+            try:
+                merged["quantity"] = int(mq.group(1))
+            except (TypeError, ValueError):
+                pass
+        cm = re.search(r"\b([14]\+[014])\b", um)
+        if cm and slug in ("print_sheet", "print_laser"):
+            merged["color"] = cm.group(1)
+        wh = re.search(r"(\d+)\s*[*xх]\s*(\d+)", um, re.I)
+        if wh and slug == "print_sheet":
+            try:
+                merged["width"] = float(wh.group(1))
+                merged["height"] = float(wh.group(2))
+            except (TypeError, ValueError):
+                pass
+        return merged
+
+    def _calc_params_sufficient(self, slug: str, params: Dict[str, Any]) -> bool:
+        tool = self._calc_tool_by_slug.get(slug)
+        if not tool:
+            return False
+        schema = (tool.get("function") or {}).get("parameters") or {}
+        required = schema.get("required")
+        if not isinstance(required, list):
+            return True
+        for key in required:
+            val = params.get(key)
+            if val is None:
+                return False
+            if isinstance(val, str) and not val.strip():
+                return False
+        return True
+
+    def _try_forced_calc(
+        self,
+        intent: str,
+        slug: Optional[str],
+        user_message: str,
+        user_id: int,
+        history: List[Dict[str, Any]],
+    ) -> Optional[str]:
+        """
+        Если модель вернула текст с «расчётом» без tool_calls — пересчитываем на сервере сами.
+        """
+        if intent != "calculator" or not slug or slug not in self._calc_tool_by_slug:
+            return None
+        if not self._user_message_suggests_recalc(user_message):
+            return None
+        ctx = self._user_calc_context.get(user_id)
+        if not ctx or ctx.get("slug") != slug:
+            return None
+        tool_name = (ctx.get("tool_name") or "").strip() or f"calc_{slug}"
+        base = dict(ctx.get("params") or {})
+        merged = self._merge_params_for_recalc(slug, base, user_message, history)
+        if not self._calc_params_sufficient(slug, merged):
+            logger.warning("Forced calc: недостаточно параметров slug=%s keys=%s", slug, list(merged.keys()))
+            return None
+        logger.info("Forced calc: вызов %s с аргументами %s", tool_name, merged)
+        result = self.execute_tool(tool_name, merged)
+        display_args = self._calc_args_for_display_and_storage(tool_name, merged)
+        if isinstance(result, dict) and "error" not in result:
+            cslug = tool_name[5:] if tool_name.startswith("calc_") else tool_name
+            self._user_calc_context[user_id] = {
+                "slug": cslug,
+                "tool_name": tool_name,
+                "params": dict(display_args),
+            }
+        return self._format_calc_result(tool_name, display_args, result)
 
     def _tools_for_intent(
         self, intent: str, slug: Optional[str], full_tools: List[Dict[str, Any]]
@@ -399,24 +660,34 @@ class InsainAgent:
         if intent == "calculator":
             if slug and slug in self._calc_tool_by_slug:
                 return [SEARCH_MATERIALS_TOOL, self._calc_tool_by_slug[slug]]
-            logger.warning("Router: неизвестный или пустой slug %r — полный набор tools", slug)
-            return list(full_tools)
+            logger.warning(
+                "Router: неизвестный или пустой slug %r — узкий набор (без всех calc_*)",
+                slug,
+            )
+            return [SEARCH_KNOWLEDGE_TOOL, SEARCH_MATERIALS_TOOL]
         return list(full_tools)
 
-    def _system_prompt_for_intent(self, intent: str, slug: Optional[str]) -> str:
+    def _system_prompt_for_intent(
+        self, intent: str, slug: Optional[str], user_id: int = 0
+    ) -> str:
         if intent == "knowledge":
             return build_kb_system_prompt()
         if intent == "calculator" and slug and slug in self._calc_tool_by_slug:
             meta = self._find_calculator_meta(slug)
             tool_name = (self._calc_tool_by_slug[slug].get("function") or {}).get("name") or f"calc_{slug}"
             calc_prompt = self._calc_llm_prompts.get(slug, "")
+            recalc_append = ""
+            ctx = self._user_calc_context.get(user_id)
+            if ctx and ctx.get("slug") == slug and isinstance(ctx.get("params"), dict):
+                recalc_append = build_recalc_context(ctx["params"], slug)
             return build_calc_system_prompt(
                 slug=slug,
                 tool_name=tool_name,
                 calculator_description=meta.get("description", ""),
                 calculator_prompt=calc_prompt,
+                recalc_append=recalc_append,
             )
-        return build_calc_system_prompt_full(self._calculator_index)
+        return build_calc_system_prompt_full(self._calculators)
 
     def _find_calculator_meta(self, slug: str) -> Dict[str, Any]:
         for c in self._calculators:
@@ -685,7 +956,10 @@ class InsainAgent:
 
         return "\n".join(lines).strip()
 
-    def _execute_search_materials(self, slug: str, query: str, param: str = "material") -> Dict[str, Any]:
+    def _execute_search_materials_single(
+        self, slug: str, query: str, param: str = "material"
+    ) -> Dict[str, Any]:
+        """Один запрос к /choices без fallback (для внутренних повторов)."""
         param = self._normalize_choices_param(slug, param)
         try:
             with httpx.Client(timeout=HTTP_TIMEOUT) as client:
@@ -715,6 +989,138 @@ class InsainAgent:
         except Exception as e:
             logger.exception("search_materials: %s", e)
             return {"error": str(e), "items": []}
+
+    @staticmethod
+    def _fallback_queries_print_sheet_material(query: str) -> List[str]:
+        """
+        Каталог ищет по «меловка 115», а LLM часто шлёт «Мелованная бумага 115 г/м²» → пустой ответ.
+        """
+        q = (query or "").strip()
+        candidates: List[str] = []
+        if q:
+            candidates.append(q)
+        if q and "мелованн" in q.lower():
+            candidates.append(re.sub(r"мелованн[а-я]*", "меловка", q, flags=re.I))
+        m = re.search(r"(\d{2,3})", q)
+        if m:
+            g = m.group(1)
+            candidates.extend(
+                [
+                    f"меловка {g}",
+                    f"меловка {g}г",
+                    f"меловка {g} г/м",
+                    g,
+                ]
+            )
+        candidates.extend(["меловка", "мел"])
+        seen: set[str] = set()
+        out: List[str] = []
+        for c in candidates:
+            c = c.strip()
+            if c and c not in seen:
+                seen.add(c)
+                out.append(c)
+        return out
+
+    def _execute_search_materials(self, slug: str, query: str, param: str = "material") -> Dict[str, Any]:
+        param_norm = self._normalize_choices_param(slug, param)
+        queries: List[str] = [(query or "").strip()]
+        if slug == "print_sheet" and param_norm == "material":
+            queries = self._fallback_queries_print_sheet_material(query)
+
+        last: Dict[str, Any] = {"items": [], "hint": ""}
+        for i, q in enumerate(queries):
+            last = self._execute_search_materials_single(slug, q, param)
+            if last.get("error"):
+                return last
+            items = last.get("items") or []
+            if items:
+                if i > 0:
+                    logger.info(
+                        "search_materials: найдено по fallback-запросу %r (было пусто для %r)",
+                        q,
+                        (query or "").strip(),
+                    )
+                return last
+        return last
+
+    @staticmethod
+    def _material_id_looks_suspicious(material_id: str) -> bool:
+        """Эвристика: LLM выдумывает snake_case вроде paper_coated_115 вместо PaperCoated115M."""
+        mid = (material_id or "").strip()
+        if not mid:
+            return True
+        if re.match(r"^[A-Z][a-zA-Z0-9]+$", mid) and mid[0].isupper():
+            return False
+        if "_" in mid and mid == mid.lower():
+            return True
+        if re.match(r"^[a-z][a-z0-9_]*$", mid) and "_" in mid:
+            return True
+        if "paper_coated" in mid.lower() or mid.startswith("paper_"):
+            return True
+        return False
+
+    def _resolve_print_sheet_material_id(self) -> Optional[str]:
+        """Подставить material_id из каталога, если LLM передал несуществующий код."""
+        for q in ["меловка 115", "115", "меловка", "мел"]:
+            r = self._execute_search_materials_single("print_sheet", q, "material")
+            if r.get("error"):
+                continue
+            items = r.get("items") or []
+            if items:
+                rid = (items[0].get("id") or "").strip()
+                if rid:
+                    return rid
+        return None
+
+    @staticmethod
+    def _normalize_metal_pins_calc_args(arguments: Dict[str, Any]) -> Dict[str, Any]:
+        """LLM часто шлёт width/height вместо width_mm/height_mm — иначе calc_service даёт HTTP 500."""
+        out = dict(arguments)
+        if out.get("width_mm") is None and out.get("width") is not None:
+            out["width_mm"] = out.pop("width")
+        if out.get("height_mm") is None and out.get("height") is not None:
+            out["height_mm"] = out.pop("height")
+        wm, hm = out.get("width_mm"), out.get("height_mm")
+        if wm is not None and hm is None:
+            out["height_mm"] = wm
+        elif hm is not None and wm is None:
+            out["width_mm"] = hm
+        return out
+
+    def _normalize_print_sheet_calc_args(self, arguments: Dict[str, Any]) -> Dict[str, Any]:
+        """Сайт/LLM иногда шлют color_mode вместо color; material_id — выдуманный snake_case."""
+        out = dict(arguments)
+        if "color_mode" in out and not (out.get("color") or "").strip():
+            cm = str(out.pop("color_mode") or "").strip()
+            if cm in ("40", "4+0"):
+                out["color"] = "4+0"
+            elif cm in ("44", "4+4"):
+                out["color"] = "4+4"
+            elif cm in ("11", "1+1"):
+                out["color"] = "1+1"
+            elif "+" in cm:
+                out["color"] = cm
+        mid = str(out.get("material_id") or "").strip()
+        if self._material_id_looks_suspicious(mid):
+            resolved = self._resolve_print_sheet_material_id()
+            if resolved:
+                logger.info("print_sheet: заменён подозрительный material_id %r → %r", mid, resolved)
+                out["material_id"] = resolved
+        return out
+
+    def _calc_args_for_display_and_storage(
+        self, calc_tool_name: str, raw_args: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Те же правки, что перед POST в calc, чтобы контекст и текст ответа не содержали выдуманный id."""
+        if not calc_tool_name.startswith("calc_"):
+            return dict(raw_args)
+        cslug = calc_tool_name[5:]
+        if cslug == "print_sheet":
+            return self._normalize_print_sheet_calc_args(dict(raw_args))
+        if cslug == "metal_pins":
+            return self._normalize_metal_pins_calc_args(dict(raw_args))
+        return dict(raw_args)
 
     def execute_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         if tool_name == "search_knowledge":
@@ -746,17 +1152,38 @@ class InsainAgent:
         logger.info("execute_tool: %s -> slug=%s, args=%s", tool_name, slug, list(arguments.keys()))
 
         try:
+            payload = dict(arguments)
+            if slug == "print_sheet":
+                payload = self._normalize_print_sheet_calc_args(payload)
+            elif slug == "metal_pins":
+                payload = self._normalize_metal_pins_calc_args(payload)
             with httpx.Client(timeout=HTTP_TIMEOUT) as client:
-                r = client.post(f"{self.calc_api_url}/api/v1/calc/{slug}", json=arguments)
+                r = client.post(f"{self.calc_api_url}/api/v1/calc/{slug}", json=payload)
                 r.raise_for_status()
                 result = r.json()
                 logger.info("tool result keys: %s", list(result.keys()))
                 return result
         except httpx.HTTPStatusError as e:
-            if e.response.status_code == 400:
-                detail = (e.response.json() or {}).get("detail", str(e))
-                return {"error": detail}
-            return {"error": "Ошибка расчёта"}
+            if e.response.status_code in (400, 422):
+                try:
+                    body = e.response.json() or {}
+                except Exception:
+                    body = {}
+                detail = body.get("detail", str(e))
+                if isinstance(detail, list):
+                    msgs: List[str] = []
+                    for item in detail:
+                        if isinstance(item, dict):
+                            msg = item.get("msg") or str(item)
+                            msgs.append(msg)
+                        else:
+                            msgs.append(str(item))
+                    detail = "; ".join(msgs)
+                elif isinstance(detail, dict):
+                    detail = str(detail)
+                return {"error": str(detail)}
+            logger.warning("Calc API HTTP %s: %s", e.response.status_code, e)
+            return {"error": f"Ошибка расчёта (HTTP {e.response.status_code})"}
         except (httpx.ConnectError, httpx.TimeoutException) as e:
             logger.warning("Calc API недоступен: %s", e)
             return {"error": "Сервис расчётов временно недоступен, попробуйте позже"}
@@ -764,7 +1191,12 @@ class InsainAgent:
             logger.exception("execute_tool: %s", e)
             return {"error": str(e)}
 
-    def chat(self, user_message: str, history: Optional[List[Dict[str, Any]]] = None) -> str:
+    def chat(
+        self,
+        user_message: str,
+        history: Optional[List[Dict[str, Any]]] = None,
+        user_id: int = 0,
+    ) -> str:
         history = history or []
         if len(history) > MAX_HISTORY_MESSAGES:
             history = history[-MAX_HISTORY_MESSAGES:]
@@ -773,13 +1205,16 @@ class InsainAgent:
         if not full_tools:
             return "Сервис расчётов временно недоступен, попробуйте позже."
 
+        intent = "calculator"
+        slug: Optional[str] = None
         if AGENT_USE_ROUTER:
-            intent, slug = self._router_classify(user_message, history)
+            intent, slug = self._router_classify(user_message, history, user_id=user_id)
+            intent, slug = self._router_apply_context_override(intent, slug, user_message, user_id)
             tools = self._tools_for_intent(intent, slug, full_tools)
-            system_prompt = self._system_prompt_for_intent(intent, slug)
+            system_prompt = self._system_prompt_for_intent(intent, slug, user_id=user_id)
         else:
             tools = full_tools
-            system_prompt = build_calc_system_prompt_full(self._calculator_index)
+            system_prompt = build_calc_system_prompt_full(self._calculators)
 
         messages: List[Dict[str, Any]] = [
             {"role": "system", "content": system_prompt},
@@ -797,6 +1232,9 @@ class InsainAgent:
         tool_calls = result.get("tool_calls")
 
         if not tool_calls:
+            forced = self._try_forced_calc(intent, slug, user_message, user_id, history)
+            if forced is not None:
+                return forced.strip()
             return (content or "").strip() or "Нет ответа."
 
         max_rounds = 5
@@ -839,7 +1277,15 @@ class InsainAgent:
                     calc_result = tool_result
 
             if calc_tool_name and calc_result is not None:
-                return self._format_calc_result(calc_tool_name, calc_args, calc_result)
+                display_args = self._calc_args_for_display_and_storage(calc_tool_name, calc_args)
+                if "error" not in calc_result:
+                    cslug = calc_tool_name[5:] if calc_tool_name.startswith("calc_") else calc_tool_name
+                    self._user_calc_context[user_id] = {
+                        "slug": cslug,
+                        "tool_name": calc_tool_name,
+                        "params": dict(display_args),
+                    }
+                return self._format_calc_result(calc_tool_name, display_args, calc_result)
 
             try:
                 result = self.llm.chat(messages, tools=tools)

@@ -224,20 +224,23 @@ class TestToolsForIntent:
         assert narrow[0] == SEARCH_MATERIALS_TOOL
         assert narrow[1] == calc_ps
 
-    def test_calculator_without_slug_returns_full(self):
+    def test_calculator_without_slug_returns_minimal(self):
         from agent import SEARCH_KNOWLEDGE_TOOL, SEARCH_MATERIALS_TOOL, InsainAgent
         agent = InsainAgent.__new__(InsainAgent)
         calc_ps = {"type": "function", "function": {"name": "calc_print_sheet"}}
         agent._calc_tool_by_slug = {"print_sheet": calc_ps}
         full = [SEARCH_KNOWLEDGE_TOOL, SEARCH_MATERIALS_TOOL, calc_ps]
         result = agent._tools_for_intent("calculator", None, full)
-        assert len(result) == len(full)
+        assert len(result) == 2
+        assert result[0] == SEARCH_KNOWLEDGE_TOOL
+        assert result[1] == SEARCH_MATERIALS_TOOL
 
 
 class TestSystemPromptForIntent:
     def test_knowledge_prompt(self):
         from agent import InsainAgent
         agent = InsainAgent.__new__(InsainAgent)
+        agent._user_calc_context = {}
         agent._calc_tool_by_slug = {}
         agent._calculators = []
         agent._calc_llm_prompts = {}
@@ -248,6 +251,7 @@ class TestSystemPromptForIntent:
     def test_calculator_with_slug_prompt(self):
         from agent import InsainAgent
         agent = InsainAgent.__new__(InsainAgent)
+        agent._user_calc_context = {}
         agent._calc_tool_by_slug = {
             "laser": {"type": "function", "function": {"name": "calc_laser"}}
         }
@@ -259,15 +263,116 @@ class TestSystemPromptForIntent:
         assert "calc_laser" in prompt
         assert "Алгоритм лазера" in prompt
 
-    def test_calculator_without_slug_uses_full(self):
+    def test_calculator_without_slug_uses_short_fallback(self):
         from agent import InsainAgent
         agent = InsainAgent.__new__(InsainAgent)
         agent._calc_tool_by_slug = {}
-        agent._calculators = []
+        agent._calculators = [{"slug": "laser", "name": "Лазерная резка"}]
         agent._calc_llm_prompts = {}
-        agent._calculator_index = "- laser — Лазер"
+        agent._user_calc_context = {}
         prompt = agent._system_prompt_for_intent("calculator", None)
-        assert "laser" in prompt
+        assert "Калькулятор для текущего запроса" in prompt or "не выбран" in prompt
+        assert "Лазерная" in prompt or "laser" in prompt
+
+
+class TestRecalcHeuristics:
+    """Эвристики пересчёта без LLM (логи: tool_calls_count=0 при «500 шт»)."""
+
+    def test_user_message_suggests_recalc(self):
+        from agent import InsainAgent
+
+        assert InsainAgent._user_message_suggests_recalc("посчитай 500шт")
+        assert InsainAgent._user_message_suggests_recalc("посчитай 4+4")
+        assert not InsainAgent._user_message_suggests_recalc("посчитай 130гр")
+        assert not InsainAgent._user_message_suggests_recalc("посчитай матовую бумагу 130гр")
+        assert not InsainAgent._user_message_suggests_recalc("привет")
+        assert not InsainAgent._user_message_suggests_recalc("что такое ламинация")
+
+    def test_router_continuation_includes_material_change(self):
+        from agent import InsainAgent
+
+        assert InsainAgent._router_context_continuation_message("посчитай 130гр")
+        assert InsainAgent._router_context_continuation_message("посчитай 500шт")
+
+    def test_router_override_knowledge_to_calculator(self):
+        from agent import InsainAgent
+
+        agent = InsainAgent.__new__(InsainAgent)
+        agent._calc_tool_by_slug = {"print_sheet": {}}
+        agent._user_calc_context = {
+            1: {"slug": "print_sheet", "tool_name": "calc_print_sheet", "params": {"quantity": 100}},
+        }
+        intent, slug = agent._router_apply_context_override("knowledge", None, "посчитай 4+4", 1)
+        assert intent == "calculator"
+        assert slug == "print_sheet"
+
+    def test_router_override_knowledge_material_density(self):
+        from agent import InsainAgent
+
+        agent = InsainAgent.__new__(InsainAgent)
+        agent._calc_tool_by_slug = {"print_sheet": {}}
+        agent._user_calc_context = {
+            1: {"slug": "print_sheet", "tool_name": "calc_print_sheet", "params": {"quantity": 100}},
+        }
+        intent, slug = agent._router_apply_context_override("knowledge", None, "посчитай 130гр", 1)
+        assert intent == "calculator"
+        assert slug == "print_sheet"
+
+    def test_merge_params_prefers_url_and_user_quantity(self):
+        from agent import InsainAgent
+
+        agent = InsainAgent.__new__(InsainAgent)
+        ctx = {
+            "quantity": 100,
+            "width": 100.0,
+            "height": 100.0,
+            "material_id": "PaperCoated115M",
+            "color": "4+0",
+        }
+        history = [
+            {
+                "role": "assistant",
+                "content": (
+                    "Печать листовая\n\nТираж\t200\n"
+                    "🔗 Ссылка для клиента:\n"
+                    "https://insain.ru/calculator/print_sheet/?height=100&material_id=PaperCoated115M"
+                    "&quantity=200&width=100&color_type=4+4"
+                ),
+            }
+        ]
+        merged = agent._merge_params_for_recalc("print_sheet", ctx, "посчитай 500шт", history)
+        assert merged["quantity"] == 500
+        assert merged["material_id"] == "PaperCoated115M"
+        assert merged.get("color") == "4+4"
+
+
+class TestMaterialSearchFallback:
+    """Fallback поиска материалов и подстановка id (логи: пустой search → выдуманный paper_coated_115)."""
+
+    def test_fallback_queries_includes_melovka_short(self):
+        from agent import InsainAgent
+
+        q = InsainAgent._fallback_queries_print_sheet_material("Мелованная бумага 115 г/м²")
+        assert "меловка 115" in q
+        assert q[0] == "Мелованная бумага 115 г/м²"
+
+    def test_material_id_suspicious(self):
+        from agent import InsainAgent
+
+        assert InsainAgent._material_id_looks_suspicious("paper_coated_115")
+        assert InsainAgent._material_id_looks_suspicious("")
+        assert not InsainAgent._material_id_looks_suspicious("PaperCoated115M")
+        assert not InsainAgent._material_id_looks_suspicious("PVC3")
+
+
+class TestBuildRecalcContext:
+    def test_build_recalc_context(self):
+        from prompts import build_recalc_context
+
+        s = build_recalc_context({"quantity": 100, "width": 50}, "print_sheet")
+        assert "print_sheet" in s
+        assert "quantity" in s
+        assert "100" in s
 
 
 class TestNormalizeChoicesParam:

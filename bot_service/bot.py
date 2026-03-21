@@ -134,6 +134,7 @@ async def cmd_help(message: Message):
 async def cmd_clear(message: Message):
     user_id = message.from_user.id if message.from_user else 0
     user_histories[user_id] = []
+    agent._user_calc_context.pop(user_id, None)
     await message.answer("История диалога очищена.", parse_mode="HTML")
 
 
@@ -152,7 +153,9 @@ async def handle_text(message: Message):
 
     try:
         loop = asyncio.get_event_loop()
-        reply = await loop.run_in_executor(None, lambda: agent.chat(text, history=history))
+        reply = await loop.run_in_executor(
+            None, lambda: agent.chat(text, history=history, user_id=user_id)
+        )
     except Exception as e:
         logger.exception("agent.chat error: %s", e)
         await message.answer("Произошла ошибка, попробуйте ещё раз.", parse_mode="HTML")
