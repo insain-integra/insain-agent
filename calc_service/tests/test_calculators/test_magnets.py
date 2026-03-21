@@ -1,5 +1,5 @@
 """
-Тесты калькулятора магнитов (magnets).
+Тесты калькуляторов магнитов: magnet_acrylic, magnet_laminated.
 """
 
 from __future__ import annotations
@@ -13,7 +13,12 @@ _calc_service = Path(__file__).resolve().parent.parent.parent
 if _calc_service.name == "calc_service" and str(_calc_service) not in sys.path:
     sys.path.insert(0, str(_calc_service))
 
-from calculators.magnets import MagnetsCalculator
+from calculators.magnets import (
+    LAMINATED_MAGNET_VINYL_CODES,
+    MagnetAcrylicCalculator,
+    MagnetLaminatedCalculator,
+    calc_laminated_magnets,
+)
 
 
 def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
@@ -22,14 +27,13 @@ def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
 
 @pytest.fixture(scope="module")
 def calc():
-    return MagnetsCalculator()
+    return MagnetAcrylicCalculator()
 
 
 @pytest.fixture(scope="module")
 def base_params():
     return {
         "quantity": 100,
-        "magnet_type": "acrylic",
         "magnet_id": "MagnetAcrylic6565",
         "color": 1,
         "is_packing": True,
@@ -46,7 +50,7 @@ def result(calc, base_params):
 
 
 def test_slug(calc):
-    assert calc.slug == "magnets"
+    assert calc.slug == "magnet_acrylic"
 
 
 def test_calculate_basic(result):
@@ -76,21 +80,20 @@ def test_share_url(result):
     if result is None:
         pytest.skip("расчёт не выполнен")
     assert "share_url" in result
-    assert "magnets" in result["share_url"]
+    assert "magnet_acrylic" in result["share_url"]
 
 
 def test_get_tool_schema(calc):
     schema = calc.get_tool_schema()
-    assert schema.get("name") == "calc_magnets"
+    assert schema.get("name") == "calc_magnet_acrylic"
     assert "parameters" in schema
     assert "quantity" in schema["parameters"].get("properties", {})
 
 
-# ── Эталонные тесты ──────────────────────────────────────────────────
+# ── Эталонные тесты (акрил) ───────────────────────────────────────────
 
 REF_PARAMS = {
     "quantity": 100,
-    "magnet_type": "acrylic",
     "magnet_id": "MagnetAcrylic6565",
     "color": 1,
     "is_packing": True,
@@ -120,7 +123,7 @@ def ref_result(calc):
         return None
 
 
-def test_expected_values_magnets(ref_result):
+def test_expected_values_magnet_acrylic(ref_result):
     if ref_result is None:
         pytest.skip("расчёт эталонного кейса не выполнен")
     r = ref_result
@@ -141,9 +144,10 @@ def test_expected_values_magnets(ref_result):
     ok_mat_q = _cmp(float(mat_match.get("quantity") or 0), float(em["quantity_approx"]), 0.15) if mat_match else False
 
     print("")
-    print("  [magnets] quantity=%s  |  type=%s  |  magnet_id=%s  |  mode=%s"
-          % (REF_PARAMS["quantity"], REF_PARAMS["magnet_type"],
-             REF_PARAMS["magnet_id"], REF_PARAMS["mode"]))
+    print(
+        "  [magnet_acrylic] quantity=%s  |  magnet_id=%s  |  mode=%s"
+        % (REF_PARAMS["quantity"], REF_PARAMS["magnet_id"], REF_PARAMS["mode"])
+    )
     print("  ---")
     print("  cost        %s  (ожид. %s)  %s" % (r["cost"], e["cost"], "ok" if ok_cost else "FAIL"))
     print("  price       %s  (ожид. %s)  %s" % (r["price"], e["price"], "ok" if ok_price else "FAIL"))
@@ -173,3 +177,82 @@ def test_expected_values_magnets(ref_result):
     assert ok_mat_code, f"material code {em['code']} не найден в materials"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat_match.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+# ── Отдельные калькуляторы magnet_acrylic / magnet_laminated ─────────
+
+
+@pytest.fixture(scope="module")
+def calc_acrylic():
+    return MagnetAcrylicCalculator()
+
+
+@pytest.fixture(scope="module")
+def calc_laminated():
+    return MagnetLaminatedCalculator()
+
+
+def test_magnet_acrylic_slug_and_execute(calc_acrylic):
+    assert calc_acrylic.slug == "magnet_acrylic"
+    r = calc_acrylic.execute(
+        {
+            "quantity": 100,
+            "magnet_id": "MagnetAcrylic6565",
+            "color": 1,
+            "is_packing": True,
+            "mode": 1,
+        }
+    )
+    assert "cost" in r and "share_url" in r
+    assert "magnet_acrylic" in r["share_url"]
+    schema = calc_acrylic.get_tool_schema()
+    assert schema.get("name") == "calc_magnet_acrylic"
+
+
+def test_magnet_acrylic_invalid_magnet_id_raises(calc_acrylic):
+    with pytest.raises(ValueError, match="Неверный код заготовки"):
+        calc_acrylic.execute(
+            {
+                "quantity": 1,
+                "magnet_id": "TotallyFakeCode999",
+                "color": 1,
+                "is_packing": True,
+                "mode": 1,
+            }
+        )
+
+
+def test_magnet_laminated_slug_and_execute(calc_laminated):
+    assert calc_laminated.slug == "magnet_laminated"
+    r = calc_laminated.execute(
+        {
+            "quantity": 50,
+            "magnet_id": "MagnetVinil04",
+            "width_mm": 90,
+            "height_mm": 54,
+            "mode": 1,
+        }
+    )
+    assert "cost" in r and "share_url" in r
+    assert "magnet_laminated" in r["share_url"]
+    schema = calc_laminated.get_tool_schema()
+    assert schema.get("name") == "calc_magnet_laminated"
+
+
+def test_magnet_laminated_vinyl_only_three_codes(calc_laminated):
+    schema = calc_laminated.get_param_schema()
+    magnet_param = next(p for p in schema["params"] if p["name"] == "magnet_id")
+    ids = {c["id"] for c in magnet_param["choices"]["inline"]}
+    assert ids == set(LAMINATED_MAGNET_VINYL_CODES)
+
+
+def test_laminated_magnets_reject_glue_vinyl():
+    with pytest.raises(ValueError, match="Укажите толщину магнитного винила"):
+        calc_laminated_magnets(
+            {
+                "quantity": 10,
+                "magnet_id": "MagnetVinilGlue04",
+                "width_mm": 50,
+                "height_mm": 50,
+            }
+        )

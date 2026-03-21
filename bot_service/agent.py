@@ -133,6 +133,159 @@ class InsainAgent:
         self._user_calc_context: Dict[int, Dict[str, Any]] = {}
         self._load_calculators_and_tools()
 
+    @staticmethod
+    def _enrich_tool_props_from_param_schema_inline_choices(
+        props: Dict[str, Any], param_schema: Dict[str, Any]
+    ) -> None:
+        """
+        Дополняет properties tool_schema: enum + описание из get_param_schema().params[].choices.inline.
+
+        Нужно для заготовок (magnet_id, keychain_id и т.п.): LLM видит допустимые id и title.
+        Не трогает поля, у которых в tool_schema уже задан enum (например color для print_sheet).
+        """
+        params_list = param_schema.get("params")
+        if not isinstance(params_list, list):
+            return
+        for pdef in params_list:
+            pname = (pdef.get("name") or "").strip()
+            if not pname or pname not in props:
+                continue
+            choices_def = pdef.get("choices")
+            if not isinstance(choices_def, dict):
+                continue
+            inline = choices_def.get("inline")
+            if not inline or not isinstance(inline, list):
+                continue
+            if (props.get(pname) or {}).get("enum"):
+                continue
+            enum_values: List[Any] = []
+            human_parts: List[str] = []
+            for item in inline:
+                if not isinstance(item, dict):
+                    continue
+                item_id = item.get("id")
+                if item_id is None:
+                    continue
+                item_title = item.get("title") or item.get("name")
+                if item_title is None:
+                    item_title = str(item_id)
+                enum_values.append(item_id)
+                human_parts.append(f"{item_id} — {item_title}")
+            if not enum_values:
+                continue
+            orig = props.get(pname) or {}
+            existing_desc = (orig.get("description") or "").strip()
+            choices_desc = "Доступные варианты: " + ", ".join(human_parts) + "."
+            desc = f"{existing_desc} {choices_desc}".strip() if existing_desc else choices_desc
+            props[pname] = {**orig, "enum": enum_values, "description": desc}
+
+    @staticmethod
+    def sanitize_llm_reply_for_display(text: str) -> str:
+        """
+        Убирает артефакты ответа модели (Gemini/AITunnel: <ctrl46> вместо «:»)
+        и утечки внутренних id в скобках (id: PaperCoated115M).
+        """
+        if not text or not isinstance(text, str):
+            return (text or "").strip() if isinstance(text, str) else ""
+        s = text
+        s = re.sub(r"<ctrl\d+>", ":", s)
+        s = re.sub(r"(?im)^\s*title\s*:\s*", "", s)
+        # После замены ctrl иногда получается «title::» → одна двоеточие
+        s = re.sub(r":{2,}", ":", s)
+        s = re.sub(r"\s*\(id:\s*[A-Za-z][A-Za-z0-9_]*\)", "", s)
+        return s.strip()
+
+    @staticmethod
+    def _parse_numbered_choice_lines(text: str) -> List[str]:
+        """Строки вида «1. Вариант» → список вариантов по возрастанию номера."""
+        if not text:
+            return []
+        found: List[tuple[int, str]] = []
+        for m in re.finditer(r"(?m)^\s*(\d+)\.\s+(.+?)\s*$", text):
+            try:
+                n = int(m.group(1))
+            except ValueError:
+                continue
+            title = (m.group(2) or "").strip()
+            if title:
+                found.append((n, title))
+        found.sort(key=lambda x: x[0])
+        return [t for _, t in found]
+
+    def _try_force_print_sheet_material_choice(
+        self,
+        user_message: str,
+        history: List[Dict[str, Any]],
+        user_id: int,
+    ) -> Optional[str]:
+        """
+        Пользователь ответил номером на список вариантов бумаги — без второго круга LLM.
+        Ищем по точному title из последнего сообщения ассистента и вызываем calc_print_sheet.
+        """
+        um = (user_message or "").strip()
+        if not um.isdigit():
+            return None
+        choice_idx = int(um) - 1
+        if choice_idx < 0:
+            return None
+
+        last_assistant = ""
+        for m in reversed(history or []):
+            if m.get("role") == "assistant":
+                last_assistant = (m.get("content") or "").strip()
+                break
+        if not last_assistant:
+            return None
+
+        titles = self._parse_numbered_choice_lines(last_assistant)
+        # Только явное различение (≥2 пункта), иначе риск ложного срабатывания на чужие списки.
+        if len(titles) < 2 or choice_idx >= len(titles):
+            return None
+
+        chosen_title = titles[choice_idx]
+        r = self._execute_search_materials_single("print_sheet", chosen_title, "material")
+        if r.get("error"):
+            return None
+        items = r.get("items") or []
+        if len(items) != 1:
+            return None
+        mid = (items[0].get("id") or "").strip()
+        if not mid:
+            return None
+
+        user_blob = "\n".join(
+            (m.get("content") or "").strip()
+            for m in (history or [])
+            if m.get("role") == "user"
+        )
+        merged = self._merge_params_for_recalc("print_sheet", {}, user_blob, history or [])
+        merged["material_id"] = mid
+        merged.setdefault("color", "4+0")
+
+        if not self._calc_params_sufficient("print_sheet", merged):
+            logger.info(
+                "print_sheet: выбор по номеру — не хватает полей для calc: %s",
+                list(merged.keys()),
+            )
+            return None
+
+        tool_name = "calc_print_sheet"
+        payload = self._normalize_print_sheet_calc_args(dict(merged))
+        logger.info(
+            "print_sheet: принудительный расчёт после выбора №%s → material_id=%s",
+            um,
+            mid,
+        )
+        result = self.execute_tool(tool_name, payload)
+        display_args = self._calc_args_for_display_and_storage(tool_name, payload)
+        if isinstance(result, dict) and "error" not in result:
+            self._user_calc_context[user_id] = {
+                "slug": "print_sheet",
+                "tool_name": tool_name,
+                "params": dict(display_args),
+            }
+        return self._format_calc_result(tool_name, display_args, result)
+
     def _load_calculators_and_tools(self) -> None:
         try:
             with httpx.Client(timeout=HTTP_TIMEOUT) as client:
@@ -204,6 +357,10 @@ class InsainAgent:
                         "description": "Цветность печати. 4+0 — односторонняя цветная, 4+4 — двусторонняя цветная. Обязательно передавай при вызове (по умолчанию 4+0).",
                     }
 
+                param_schema = self._param_schemas.get(slug)
+                if param_schema:
+                    self._enrich_tool_props_from_param_schema_inline_choices(props, param_schema)
+
                 if slug == "metal_pins":
                     attachments = (opts or {}).get("attachments") or []
                     packs = (opts or {}).get("packs") or []
@@ -260,10 +417,12 @@ class InsainAgent:
         # Роутеру достаточно усечённого индекса (меньше токенов)
         self._calculator_index = build_calculator_index(self._calculators, max_chars=5000)
         self._router_tool = self._build_router_tool()
+        loaded_slugs = sorted(self._calc_tool_by_slug.keys())
         logger.info(
-            "Загружено калькуляторов: %s, tools: %s",
+            "Загружено калькуляторов: %s, tools: %s, calc_slugs: %s",
             len(self._calculators),
             len(self._tools),
+            loaded_slugs,
         )
 
     def _reset_state(self) -> None:
@@ -380,6 +539,28 @@ class InsainAgent:
                 pass
         return "calculator", None
 
+    def _heuristic_magnet_slug(self, user_message: str) -> Optional[str]:
+        """
+        Явные формулировки про магниты — стабильный slug, если API отдал калькуляторы.
+        Иначе роутер часто оставляет пустой slug → в tools попадает search_knowledge без calc_*.
+        """
+        t = (user_message or "").strip().lower()
+        if not t:
+            return None
+        has_magnet = "магнит" in t or "magnet" in t
+        if not has_magnet:
+            return None
+        # Ламинированные / винил (без «акрилового» магнита)
+        if "magnet_laminated" in self._calc_tool_by_slug:
+            if ("ламинирован" in t and "магнит" in t) or (
+                "магнит" in t and "винил" in t and "акрил" not in t and "акрилов" not in t
+            ):
+                return "magnet_laminated"
+        if "magnet_acrylic" in self._calc_tool_by_slug:
+            if "акрил" in t or "акрилов" in t:
+                return "magnet_acrylic"
+        return None
+
     def _router_classify(
         self, user_message: str, history: List[Dict[str, Any]], user_id: int = 0
     ) -> tuple[str, Optional[str]]:
@@ -402,6 +583,16 @@ class InsainAgent:
                     if prev in self._calc_tool_by_slug:
                         slug = prev
                         logger.info("Router: slug восстановлен из контекста: %s", slug)
+            # Эвристика магнитов: роутер часто даёт пустой slug или knowledge при явных формулировках
+            mh = self._heuristic_magnet_slug(user_message)
+            if mh:
+                if intent == "knowledge":
+                    intent = "calculator"
+                    slug = mh
+                    logger.info("Router: knowledge→calculator, эвристика магнитов → %s", mh)
+                elif intent == "calculator" and (not slug or slug not in self._calc_tool_by_slug):
+                    slug = mh
+                    logger.info("Router: slug по эвристике магнитов → %s", mh)
             logger.info("Router: intent=%s slug=%s", intent, slug)
             return intent, slug
         except Exception as e:
@@ -461,11 +652,20 @@ class InsainAgent:
         slug: Optional[str],
         user_message: str,
         user_id: int,
+        history: Optional[List[Dict[str, Any]]] = None,
     ) -> tuple[str, Optional[str]]:
         """
         Если роутер вернул knowledge при активной calc-сессии, но реплика похожа на пересчёт —
         принудительно calculator + slug из контекста (см. логи: «посчитай 4+4» → только Wiki).
+
+        Дополнительно: продолжение диалога про акриловые магниты («какие заготовки», размеры)
+        без успешного расчёта — принудительно magnet_acrylic, иначе уходит в Wiki без calc_*.
         """
+        history = history or []
+        intent, slug = self._router_magnet_thread_override(
+            intent, slug, user_message, history
+        )
+
         ctx = self._user_calc_context.get(user_id)
         if not ctx or not ctx.get("slug"):
             return intent, slug
@@ -483,6 +683,53 @@ class InsainAgent:
         if intent == "calculator" and (not slug or slug not in self._calc_tool_by_slug):
             logger.info("Router: slug восстановлен из контекста (override): %s", prev)
             return "calculator", prev
+        return intent, slug
+
+    def _router_magnet_thread_override(
+        self,
+        intent: str,
+        slug: Optional[str],
+        user_message: str,
+        history: List[Dict[str, Any]],
+    ) -> tuple[str, Optional[str]]:
+        """Удерживаем magnet_acrylic в треде про акриловые магниты (заготовки, размеры в мм)."""
+        if "magnet_acrylic" not in self._calc_tool_by_slug:
+            return intent, slug
+        t = (user_message or "").strip().lower()
+        if not t:
+            return intent, slug
+        blob_u = " ".join(
+            (m.get("content") or "").lower()
+            for m in history[-12:]
+            if m.get("role") == "user"
+        )
+        blob_a = " ".join(
+            (m.get("content") or "").lower()
+            for m in history[-12:]
+            if m.get("role") == "assistant"
+        )
+        blob = f"{blob_u} {blob_a}"
+        # Не перехватываем тред про ламинированные магниты
+        if "ламинирован" in blob and "магнит" in blob:
+            return intent, slug
+        if "ламинирован" in t or ("винил" in t and "магнит" in t):
+            return intent, slug
+        acrylic_thread = ("магнит" in blob and ("акрил" in blob or "акрилов" in blob)) or (
+            "магнит" in blob_u and ("акрил" in blob_u or "акрилов" in blob_u)
+        )
+        if not acrylic_thread:
+            return intent, slug
+        asks_blanks = "заготовк" in t or (
+            "какие есть" in t and ("заготов" in t or "магнит" in t or "вариант" in t)
+        )
+        asks_dims = bool(re.search(r"\d+\s*[*xх]\s*\d+", t))
+        if asks_blanks or asks_dims:
+            logger.info(
+                "Router: magnet_acrylic — продолжение диалога (заготовки/размеры), было intent=%s slug=%s",
+                intent,
+                slug,
+            )
+            return "calculator", "magnet_acrylic"
         return intent, slug
 
     @staticmethod
@@ -976,8 +1223,10 @@ class InsainAgent:
                 data = r.json()
                 items = data.get("items") or []
                 hint = (
-                    "Подставь выбранный id в соответствующее поле вызова calc_*. "
-                    "Пользователю покажи только title."
+                    "Подставь выбранный id в вызов calc_* (material_id / lamination_id). "
+                    "Пользователю показывай только title, без id. "
+                    "Если пользователь ответил одной цифрой на твой нумерованный список — "
+                    "сразу вызови search_materials с query равным полному title этого пункта."
                 )
                 return {"items": items, "hint": hint}
         except httpx.HTTPStatusError as e:
@@ -1182,8 +1431,34 @@ class InsainAgent:
                 elif isinstance(detail, dict):
                     detail = str(detail)
                 return {"error": str(detail)}
-            logger.warning("Calc API HTTP %s: %s", e.response.status_code, e)
-            return {"error": f"Ошибка расчёта (HTTP {e.response.status_code})"}
+            body_preview = (e.response.text or "")[:500]
+            logger.warning(
+                "Calc API HTTP %s url=%s body[:500]=%r",
+                e.response.status_code,
+                str(e.request.url),
+                body_preview,
+            )
+            err_out = f"Ошибка расчёта (HTTP {e.response.status_code})"
+            if e.response.status_code == 404:
+                ct = (e.response.headers.get("content-type") or "").lower()
+                if "text/html" in ct:
+                    err_out = (
+                        "Сервис расчётов вернул 404 (часто неверный CALC_API_URL или прокси). "
+                        "Проверьте адрес API и nginx."
+                    )
+                else:
+                    try:
+                        detail = (e.response.json() or {}).get("detail")
+                        ds = str(detail) if detail is not None else ""
+                        if "неизвестный калькулятор" in ds.lower() or "unknown" in ds.lower():
+                            err_out = (
+                                "Калькулятор на сервере расчётов не найден — "
+                                "вероятно, устаревший деплой calc_service. "
+                                "Сверьте: python bot_service/check_calc_registry.py"
+                            )
+                    except Exception:
+                        pass
+            return {"error": err_out}
         except (httpx.ConnectError, httpx.TimeoutException) as e:
             logger.warning("Calc API недоступен: %s", e)
             return {"error": "Сервис расчётов временно недоступен, попробуйте позже"}
@@ -1209,12 +1484,21 @@ class InsainAgent:
         slug: Optional[str] = None
         if AGENT_USE_ROUTER:
             intent, slug = self._router_classify(user_message, history, user_id=user_id)
-            intent, slug = self._router_apply_context_override(intent, slug, user_message, user_id)
+            intent, slug = self._router_apply_context_override(
+                intent, slug, user_message, user_id, history
+            )
             tools = self._tools_for_intent(intent, slug, full_tools)
             system_prompt = self._system_prompt_for_intent(intent, slug, user_id=user_id)
         else:
             tools = full_tools
             system_prompt = build_calc_system_prompt_full(self._calculators)
+
+        if AGENT_USE_ROUTER and intent == "calculator" and slug == "print_sheet":
+            forced_choice = self._try_force_print_sheet_material_choice(
+                user_message, history, user_id
+            )
+            if forced_choice is not None:
+                return self.sanitize_llm_reply_for_display(forced_choice)
 
         messages: List[Dict[str, Any]] = [
             {"role": "system", "content": system_prompt},
@@ -1234,8 +1518,10 @@ class InsainAgent:
         if not tool_calls:
             forced = self._try_forced_calc(intent, slug, user_message, user_id, history)
             if forced is not None:
-                return forced.strip()
-            return (content or "").strip() or "Нет ответа."
+                return self.sanitize_llm_reply_for_display(forced.strip())
+            return self.sanitize_llm_reply_for_display(
+                (content or "").strip() or "Нет ответа."
+            )
 
         max_rounds = 5
         while tool_calls and max_rounds > 0:
@@ -1285,7 +1571,9 @@ class InsainAgent:
                         "tool_name": calc_tool_name,
                         "params": dict(display_args),
                     }
-                return self._format_calc_result(calc_tool_name, display_args, calc_result)
+                return self.sanitize_llm_reply_for_display(
+                    self._format_calc_result(calc_tool_name, display_args, calc_result)
+                )
 
             try:
                 result = self.llm.chat(messages, tools=tools)
@@ -1295,7 +1583,10 @@ class InsainAgent:
             content = result.get("content")
             tool_calls = result.get("tool_calls") or []
 
-        return (content or "").strip() or "Не удалось выполнить расчёт. Попробуйте уточнить параметры."
+        return self.sanitize_llm_reply_for_display(
+            (content or "").strip()
+            or "Не удалось выполнить расчёт. Попробуйте уточнить параметры."
+        )
 
 
 if __name__ == "__main__":

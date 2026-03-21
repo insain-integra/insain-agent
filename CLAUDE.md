@@ -377,6 +377,14 @@ pytest calc_service/tests/ -v
 pytest bot_service/tests/ -v
 ```
 
+**Сверка локального реестра калькуляторов с задеплоенным API** (нужен запущенный `calc_service` и `CALC_API_URL`):
+
+```Bash
+python bot_service/check_calc_registry.py
+```
+
+Сравнивает slug из `calc_service/calculators` (публичные) с `GET /api/v1/calculators`, при совпадении списков делает smoke `POST /api/v1/calc/magnet_acrylic`. Полная проверка `tool_schema` для всех slug: `CALC_CHECK_FULL=1 python bot_service/check_calc_registry.py`.
+
 ### Инфраструктура (планируется, см. `infra/`)
 
 ```Bash

@@ -184,7 +184,7 @@ calcFlag.js          → calculators/flag.py
 calcPennant.js       → calculators/pennant.py
 calcMug.js           → calculators/mug.py
 calcPuzzle.js        → calculators/puzzle.py
-calcMagnets.js       → calculators/magnets.py
+calcMagnets.js       → calculators/magnets.py (`magnet_acrylic`, `magnet_laminated`)
 calcKeychain.js      → calculators/keychain.py
 calcMetalPins.js     → calculators/metal_pins.py
 calcAcrilycPrizes.js → calculators/acrylic_prizes.py

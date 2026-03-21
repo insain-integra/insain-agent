@@ -318,6 +318,33 @@ class TestRecalcHeuristics:
         assert intent == "calculator"
         assert slug == "print_sheet"
 
+    def test_heuristic_magnet_slug_acrylic(self):
+        from agent import InsainAgent
+
+        agent = InsainAgent.__new__(InsainAgent)
+        agent._calc_tool_by_slug = {"magnet_acrylic": {}, "magnet_laminated": {}}
+        assert agent._heuristic_magnet_slug("посчитай магниты акриловые") == "magnet_acrylic"
+        assert agent._heuristic_magnet_slug("ламинированные магниты 100 шт") == "magnet_laminated"
+
+    def test_router_magnet_thread_override_blanks(self):
+        from agent import InsainAgent
+
+        agent = InsainAgent.__new__(InsainAgent)
+        agent._calc_tool_by_slug = {"magnet_acrylic": {}}
+        agent._user_calc_context = {}
+        history = [
+            {"role": "user", "content": "посчитай акриловые магниты"},
+            {
+                "role": "assistant",
+                "content": "Нужен тираж. Какой размер магнита?",
+            },
+        ]
+        intent, slug = agent._router_apply_context_override(
+            "knowledge", None, "какие есть заготовки", 0, history
+        )
+        assert intent == "calculator"
+        assert slug == "magnet_acrylic"
+
     def test_merge_params_prefers_url_and_user_quantity(self):
         from agent import InsainAgent
 
@@ -373,6 +400,82 @@ class TestBuildRecalcContext:
         assert "print_sheet" in s
         assert "quantity" in s
         assert "100" in s
+
+
+class TestSanitizeLlmReplyForDisplay:
+    def test_ctrl_tokens_become_colons(self):
+        from agent import InsainAgent
+
+        raw = "title:<ctrl46>Уточните материал:<ctrl46>\n1. Меловка матовая"
+        out = InsainAgent.sanitize_llm_reply_for_display(raw)
+        assert "<ctrl" not in out
+        assert "Уточните материал:" in out or "Уточните материал" in out
+
+    def test_strips_id_parentheses(self):
+        from agent import InsainAgent
+
+        s = "1. Мат (id: PaperCoated115M)"
+        out = InsainAgent.sanitize_llm_reply_for_display(s)
+        assert "PaperCoated115M" not in out
+        assert "(id:" not in out.lower()
+
+
+class TestParseNumberedChoiceLines:
+    def test_two_variants(self):
+        from agent import InsainAgent
+
+        text = (
+            "Выберите:\n"
+            "1. Меловка матовая 115г/м²\n"
+            "2. Меловка глянцевая 115г/м²"
+        )
+        titles = InsainAgent._parse_numbered_choice_lines(text)
+        assert len(titles) == 2
+        assert "матовая" in titles[0]
+        assert "глянцевая" in titles[1]
+
+
+class TestEnrichToolPropsFromParamSchemaInlineChoices:
+    def test_adds_enum_and_description_from_inline(self):
+        from agent import InsainAgent
+
+        props = {
+            "magnet_id": {"type": "string", "description": "Код заготовки"},
+        }
+        param_schema = {
+            "params": [
+                {
+                    "name": "magnet_id",
+                    "choices": {
+                        "inline": [
+                            {"id": "MagnetAcrylic6565", "title": "Квадрат 65×65"},
+                            {"id": "MagnetAcrylic5277", "title": "Прямоугольник 52×77"},
+                        ]
+                    },
+                }
+            ]
+        }
+        InsainAgent._enrich_tool_props_from_param_schema_inline_choices(props, param_schema)
+        assert props["magnet_id"]["enum"] == ["MagnetAcrylic6565", "MagnetAcrylic5277"]
+        assert "MagnetAcrylic6565" in props["magnet_id"]["description"]
+        assert "Квадрат 65×65" in props["magnet_id"]["description"]
+
+    def test_skips_when_enum_already_set(self):
+        from agent import InsainAgent
+
+        props = {
+            "color": {"type": "string", "enum": ["4+0", "4+4"], "description": "fixed"},
+        }
+        param_schema = {
+            "params": [
+                {
+                    "name": "color",
+                    "choices": {"inline": [{"id": "1+0", "title": "x"}]},
+                }
+            ]
+        }
+        InsainAgent._enrich_tool_props_from_param_schema_inline_choices(props, param_schema)
+        assert props["color"]["enum"] == ["4+0", "4+4"]
 
 
 class TestNormalizeChoicesParam:
