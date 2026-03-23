@@ -231,9 +231,8 @@ class TestToolsForIntent:
         agent._calc_tool_by_slug = {"print_sheet": calc_ps}
         full = [SEARCH_KNOWLEDGE_TOOL, SEARCH_MATERIALS_TOOL, calc_ps]
         result = agent._tools_for_intent("calculator", None, full)
-        assert len(result) == 2
+        assert len(result) == 1
         assert result[0] == SEARCH_KNOWLEDGE_TOOL
-        assert result[1] == SEARCH_MATERIALS_TOOL
 
 
 class TestSystemPromptForIntent:
@@ -245,7 +244,9 @@ class TestSystemPromptForIntent:
         agent._calculators = []
         agent._calc_llm_prompts = {}
         agent._calculator_index = ""
-        prompt = agent._system_prompt_for_intent("knowledge", None)
+        agent._products = []
+        agent._product_by_slug = {}
+        prompt = agent._system_prompt_for_intent("knowledge", None, None)
         assert "Wiki" in prompt or "база знаний" in prompt
 
     def test_calculator_with_slug_prompt(self):
@@ -258,7 +259,9 @@ class TestSystemPromptForIntent:
         agent._calculators = [{"slug": "laser", "name": "Лазерная резка", "description": "Лазер"}]
         agent._calc_llm_prompts = {"laser": "Алгоритм лазера."}
         agent._calculator_index = ""
-        prompt = agent._system_prompt_for_intent("calculator", "laser")
+        agent._products = []
+        agent._product_by_slug = {}
+        prompt = agent._system_prompt_for_intent("calculator", None, "laser")
         assert "laser" in prompt
         assert "calc_laser" in prompt
         assert "Алгоритм лазера" in prompt
@@ -270,8 +273,10 @@ class TestSystemPromptForIntent:
         agent._calculators = [{"slug": "laser", "name": "Лазерная резка"}]
         agent._calc_llm_prompts = {}
         agent._user_calc_context = {}
-        prompt = agent._system_prompt_for_intent("calculator", None)
-        assert "Калькулятор для текущего запроса" in prompt or "не выбран" in prompt
+        agent._products = []
+        agent._product_by_slug = {}
+        prompt = agent._system_prompt_for_intent("calculator", None, None)
+        assert "не определён" in prompt or "не выбран" in prompt
         assert "Лазерная" in prompt or "laser" in prompt
 
 
@@ -300,11 +305,11 @@ class TestRecalcHeuristics:
         agent = InsainAgent.__new__(InsainAgent)
         agent._calc_tool_by_slug = {"print_sheet": {}}
         agent._user_calc_context = {
-            1: {"slug": "print_sheet", "tool_name": "calc_print_sheet", "params": {"quantity": 100}},
+            1: {"slug": "print_sheet", "product_slug": "print_sheet", "tool_name": "calc_print_sheet", "params": {"quantity": 100}},
         }
-        intent, slug = agent._router_apply_context_override("knowledge", None, "посчитай 4+4", 1)
+        intent, ps, cs = agent._router_apply_context_override("knowledge", None, None, "посчитай 4+4", 1)
         assert intent == "calculator"
-        assert slug == "print_sheet"
+        assert cs == "print_sheet"
 
     def test_router_override_knowledge_material_density(self):
         from agent import InsainAgent
@@ -312,11 +317,11 @@ class TestRecalcHeuristics:
         agent = InsainAgent.__new__(InsainAgent)
         agent._calc_tool_by_slug = {"print_sheet": {}}
         agent._user_calc_context = {
-            1: {"slug": "print_sheet", "tool_name": "calc_print_sheet", "params": {"quantity": 100}},
+            1: {"slug": "print_sheet", "product_slug": "print_sheet", "tool_name": "calc_print_sheet", "params": {"quantity": 100}},
         }
-        intent, slug = agent._router_apply_context_override("knowledge", None, "посчитай 130гр", 1)
+        intent, ps, cs = agent._router_apply_context_override("knowledge", None, None, "посчитай 130гр", 1)
         assert intent == "calculator"
-        assert slug == "print_sheet"
+        assert cs == "print_sheet"
 
     def test_heuristic_magnet_slug_acrylic(self):
         from agent import InsainAgent
@@ -339,11 +344,11 @@ class TestRecalcHeuristics:
                 "content": "Нужен тираж. Какой размер магнита?",
             },
         ]
-        intent, slug = agent._router_apply_context_override(
-            "knowledge", None, "какие есть заготовки", 0, history
+        intent, ps, cs = agent._router_apply_context_override(
+            "knowledge", None, None, "какие есть заготовки", 0, history
         )
         assert intent == "calculator"
-        assert slug == "magnet_acrylic"
+        assert cs == "magnet_acrylic"
 
     def test_merge_params_prefers_url_and_user_quantity(self):
         from agent import InsainAgent

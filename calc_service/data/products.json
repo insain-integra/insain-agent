@@ -1,0 +1,538 @@
+[
+  {
+    "product_slug": "badge_laser_engraving",
+    "title": "Бейджи с лазерной гравировкой",
+    "base_calc_slug": "badge",
+    "url": "https://insain.ru/catalog/bejdzhi-s-lazernoj-gravirovkoj/",
+    "category": "badges",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50,
+      "material_id": "ROWMARKLASERMAX",
+      "is_print": false,
+      "is_uv_print": false
+    },
+    "keywords": ["бейдж", "бейджи", "гравировка", "лазерная гравировка", "именной бейдж"],
+    "disambiguation": "Бейджи из двухслойного пластика или акрила с лазерной гравировкой текста/логотипа. Без цветной печати."
+  },
+  {
+    "product_slug": "badge_uv_print",
+    "title": "Бейджи с УФ-печатью",
+    "base_calc_slug": "badge",
+    "url": "https://insain.ru/catalog/bejdzhi-s-uf-pechatyu/",
+    "category": "badges",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50,
+      "material_id": "AcrylWhite3",
+      "is_print": true,
+      "is_uv_print": true,
+      "color": "4+0"
+    },
+    "keywords": ["бейдж", "бейджи", "уф", "уф-печать", "цветной бейдж"],
+    "disambiguation": "Бейджи с полноцветной УФ-печатью на акриле/пластике/фанере."
+  },
+  {
+    "product_slug": "badge_poly_fill",
+    "title": "Бейджи с полимерной заливкой",
+    "base_calc_slug": "badge",
+    "url": "https://insain.ru/catalog/bejdzhi-s-polimernoj-zalivkoj/",
+    "category": "badges",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50,
+      "material_id": "AcrylWhite3",
+      "is_print": true,
+      "is_uv_print": false
+    },
+    "keywords": ["бейдж", "бейджи", "полимерная заливка", "эпоксидная", "смола"],
+    "disambiguation": "Бейджи с полимерной (эпоксидной) заливкой на акриле или пластике. Объёмный эффект."
+  },
+  {
+    "product_slug": "pins_wood",
+    "title": "Значки деревянные",
+    "base_calc_slug": "badge",
+    "url": "https://insain.ru/catalog/znachki-derevyannye/",
+    "category": "badges",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50,
+      "material_id": "Plywood3",
+      "is_print": true,
+      "is_uv_print": true,
+      "color": "4+0",
+      "attachment_id": "BC"
+    },
+    "keywords": ["значки", "значок", "деревянный", "фанера", "дерево"],
+    "disambiguation": "Значки из фанеры с УФ-печатью и лазерной резкой. Крепление игла-цанга по умолчанию."
+  },
+  {
+    "product_slug": "pins_plastic_engraving",
+    "title": "Значки пластиковые с гравировкой",
+    "base_calc_slug": "badge",
+    "url": "https://insain.ru/catalog/znachki-plastikovye-s-gravirovkoj/",
+    "category": "badges",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50,
+      "material_id": "AcrylWhite3",
+      "is_print": false,
+      "is_uv_print": false,
+      "attachment_id": "BC"
+    },
+    "keywords": ["значки", "значок", "пластиковый", "гравировка", "акрил"],
+    "disambiguation": "Значки из акрила/пластика с лазерной гравировкой. Без цветной печати."
+  },
+  {
+    "product_slug": "pins_plastic_uv",
+    "title": "Значки пластиковые с УФ-печатью",
+    "base_calc_slug": "badge",
+    "url": "https://insain.ru/catalog/znachki-plastikovye-s-uf-pechatyu/",
+    "category": "badges",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50,
+      "material_id": "AcrylWhite3",
+      "is_print": true,
+      "is_uv_print": true,
+      "color": "4+0",
+      "attachment_id": "BC"
+    },
+    "keywords": ["значки", "значок", "пластиковый", "уф", "акрил", "цветной"],
+    "disambiguation": "Значки из акрила/пластика с полноцветной УФ-печатью. Крепление игла-цанга."
+  },
+  {
+    "product_slug": "pins_polymer",
+    "title": "Значки полимерные",
+    "base_calc_slug": "badge",
+    "url": "https://insain.ru/catalog/znachki-polimernye/",
+    "category": "badges",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50,
+      "material_id": "AcrylWhite3",
+      "is_print": true,
+      "is_uv_print": false,
+      "attachment_id": "BC"
+    },
+    "keywords": ["значки", "значок", "полимерный", "эпоксидный", "заливка"],
+    "disambiguation": "Значки с полимерной (эпоксидной) заливкой на акриле или пластике. Объёмный эффект."
+  },
+  {
+    "product_slug": "pins_metal_enamel",
+    "title": "Значки металлические с эмалями",
+    "base_calc_slug": "metal_pins",
+    "url": "https://insain.ru/catalog/znachki-metallicheskie-s-emalyami/",
+    "category": "badges",
+    "defaults": {
+      "quantity": 100,
+      "width_mm": 20,
+      "height_mm": 20,
+      "metal": "brass",
+      "plating": "nickel",
+      "process": "2d",
+      "attachment_id": "BC"
+    },
+    "keywords": ["значки", "значок", "металл", "металлический", "эмаль", "латунь", "штамповка"],
+    "disambiguation": "Значки из металла (латунь/алюминий/сталь) со штамповкой и эмалями. Не путать с пластиковыми/деревянными значками (те на badge)."
+  },
+  {
+    "product_slug": "keychain_acrylic",
+    "title": "Акриловые брелоки",
+    "base_calc_slug": "keychain",
+    "url": "https://insain.ru/catalog/kalkulyator-akrilovyh-brelokov/",
+    "category": "souvenir",
+    "defaults": {
+      "quantity": 100,
+      "color": "4+0"
+    },
+    "keywords": ["брелок", "брелоки", "акриловый", "акрил"],
+    "disambiguation": "Акриловые брелоки с УФ-печатью. Заготовка выбирается из каталога (не произвольный размер)."
+  },
+  {
+    "product_slug": "acrylic_prizes",
+    "title": "Акриловые призы",
+    "base_calc_slug": "acrylic_prizes",
+    "url": "https://insain.ru/catalog/kalkulyator-akrilovyh-prizov/",
+    "category": "souvenir",
+    "defaults": {
+      "quantity": 100
+    },
+    "keywords": ["приз", "призы", "акриловый", "награда", "статуэтка", "кубок"],
+    "disambiguation": "Акриловые призы / награды из нескольких слоёв акрила с лазерной резкой и гравировкой."
+  },
+  {
+    "product_slug": "notebook",
+    "title": "Блокноты",
+    "base_calc_slug": "notebook",
+    "url": "https://insain.ru/catalog/kalkulyator-bloknotov/",
+    "category": "print",
+    "defaults": {
+      "quantity": 100,
+      "cover_material_id": "PaperCoated250M",
+      "inner_material_id": "VHI80",
+      "inner_num_sheet": 48
+    },
+    "keywords": ["блокнот", "блокноты", "тетрадь", "записная книжка"],
+    "disambiguation": "Блокноты на пружине (металлическая проволока): обложка + внутренний блок."
+  },
+  {
+    "product_slug": "pennant_paper",
+    "title": "Вымпелы бумажные",
+    "base_calc_slug": "pennant",
+    "url": "https://insain.ru/catalog/kalkulyator-vympelov-bumazhnyh/",
+    "category": "souvenir",
+    "defaults": {
+      "quantity": 100,
+      "material_id": "PaperCoated170M"
+    },
+    "keywords": ["вымпел", "вымпелы", "бумажный"],
+    "disambiguation": "Бумажные вымпелы из мелованной бумаги с цветной печатью и опциональной ламинацией."
+  },
+  {
+    "product_slug": "calendar_quarterly",
+    "title": "Квартальные календари",
+    "base_calc_slug": "calendar",
+    "url": "https://insain.ru/catalog/kalkulyator-kvartalnyh-kalendarej/",
+    "category": "calendar",
+    "defaults": {
+      "quantity": 100,
+      "calendar_type": "quarterly"
+    },
+    "keywords": ["календарь", "квартальный", "трёхблочный", "настенный календарь"],
+    "disambiguation": "Квартальные (настенные трёхблочные) календари: шапка + 3 блока + подложка."
+  },
+  {
+    "product_slug": "calendar_flip",
+    "title": "Перекидные календари",
+    "base_calc_slug": "calendar",
+    "url": "https://insain.ru/catalog/kalkulyator-perekidnyh-kalendarej/",
+    "category": "calendar",
+    "defaults": {
+      "quantity": 100,
+      "calendar_type": "flip"
+    },
+    "keywords": ["календарь", "перекидной", "настенный", "плакатный"],
+    "disambiguation": "Перекидные настенные календари на пружине: 12–14 листов мелованной бумаги."
+  },
+  {
+    "product_slug": "calendar_table_flip",
+    "title": "Настольные перекидные календари",
+    "base_calc_slug": "calendar",
+    "url": "https://insain.ru/catalog/kalkulyator-nastolnyh-perekidnyh-kalendarej/",
+    "category": "calendar",
+    "defaults": {
+      "quantity": 100,
+      "calendar_type": "desk"
+    },
+    "keywords": ["календарь", "настольный", "перекидной", "домик"],
+    "disambiguation": "Настольные перекидные календари (домик) на пружине."
+  },
+  {
+    "product_slug": "magnet_vinyl",
+    "title": "Магниты виниловые (ламинированные)",
+    "base_calc_slug": "magnet_laminated",
+    "url": "https://insain.ru/catalog/kulkulyator-magnitov-vinilovyh/",
+    "category": "souvenir",
+    "defaults": {
+      "quantity": 100,
+      "width_mm": 50,
+      "height_mm": 50,
+      "magnet_id": "MagnetVinil04"
+    },
+    "keywords": ["магнит", "магниты", "виниловый", "ламинированный", "на холодильник"],
+    "disambiguation": "Виниловые (ламинированные) магниты с печатью. Произвольный размер в мм. НЕ акриловые."
+  },
+  {
+    "product_slug": "plaque",
+    "title": "Наградные плакетки",
+    "base_calc_slug": "plaque",
+    "url": "https://insain.ru/catalog/kalkulyator-nagradnyh-plaketok/",
+    "category": "souvenir",
+    "defaults": {
+      "quantity": 1,
+      "material_id": "AcrylWhite3",
+      "application": "isUVPrint"
+    },
+    "keywords": ["плакетка", "плакетки", "наградная", "диплом", "благодарность"],
+    "disambiguation": "Наградные плакетки (дипломы, благодарности) на основе акрила/фанеры/алюминия с УФ-печатью или гравировкой."
+  },
+  {
+    "product_slug": "heat_press",
+    "title": "Нанесение на одежду",
+    "base_calc_slug": "heat_press",
+    "url": "https://insain.ru/catalog/kalkulyator-naneseniya-na-odezhdu/",
+    "category": "production",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50,
+      "transfer_type": "film",
+      "item_type": "tshirt"
+    },
+    "keywords": ["нанесение", "одежда", "футболка", "термоперенос", "термопресс", "сублимация", "DTF"],
+    "disambiguation": "Нанесение на одежду (футболки, кепки, зонты, сумки): термоперенос плёнкой, сублимация, DTF и др."
+  },
+  {
+    "product_slug": "puzzle",
+    "title": "Пазлы",
+    "base_calc_slug": "puzzle",
+    "url": "https://insain.ru/catalog/kalkulyator-pazlov/",
+    "category": "souvenir",
+    "defaults": {
+      "quantity": 1,
+      "puzzle_id": "Puzzle300420"
+    },
+    "keywords": ["пазл", "пазлы", "мозаика"],
+    "disambiguation": "Пазлы с печатью: заготовка выбирается из каталога (фиксированные размеры)."
+  },
+  {
+    "product_slug": "cards_plastic",
+    "title": "Пластиковые карты",
+    "base_calc_slug": "cards",
+    "url": "https://insain.ru/catalog/kalkulyator-plastikovyh-kart/",
+    "category": "print",
+    "defaults": {
+      "quantity": 100,
+      "material_id": "White",
+      "color": "4+0"
+    },
+    "keywords": ["карта", "карты", "пластиковая карта", "визитка пластиковая", "дисконтная"],
+    "disambiguation": "Пластиковые карты (дисконтные, клубные, визитные): нумерация, штрихкод, тиснение фольгой, магнитная полоса."
+  },
+  {
+    "product_slug": "presswall",
+    "title": "Прессволлы",
+    "base_calc_slug": "presswall",
+    "url": "https://insain.ru/catalog/kalkulyator-pressvolov/",
+    "category": "outdoor",
+    "defaults": {
+      "quantity": 1
+    },
+    "keywords": ["прессволл", "пресс-волл", "фотозона", "бренд-волл"],
+    "disambiguation": "Прессволлы (фотозоны): конструкция + баннер с печатью."
+  },
+  {
+    "product_slug": "rollup",
+    "title": "Роллапы",
+    "base_calc_slug": "rollup",
+    "url": "https://insain.ru/catalog/kalkulyator-rollapov/",
+    "category": "outdoor",
+    "defaults": {
+      "quantity": 1
+    },
+    "keywords": ["роллап", "ролл-ап", "roll-up", "мобильный стенд"],
+    "disambiguation": "Роллапы (мобильные стенды с вытяжным механизмом): конструкция + постер."
+  },
+  {
+    "product_slug": "stand",
+    "title": "Стенды информационные",
+    "base_calc_slug": "tablets",
+    "url": "https://insain.ru/catalog/kalkulyator-stendov/",
+    "category": "outdoor",
+    "defaults": {
+      "quantity": 1,
+      "width": 1000,
+      "height": 1000,
+      "material_id": "PVC3"
+    },
+    "keywords": ["стенд", "стенды", "информационный стенд", "доска объявлений"],
+    "disambiguation": "Информационные стенды большого формата из ПВХ с УФ-печатью. Опционально: карманы, профиль-рамка, подвес."
+  },
+  {
+    "product_slug": "mug_sublimation",
+    "title": "Кружки с сублимацией",
+    "base_calc_slug": "mug",
+    "url": "https://insain.ru/catalog/kalkulyator-sublimaczionnoj-pechati-na-kruzhki/",
+    "category": "souvenir",
+    "defaults": {
+      "quantity": 1,
+      "mug_id": "MugStandartWhite"
+    },
+    "keywords": ["кружка", "кружки", "сублимация", "печать на кружке"],
+    "disambiguation": "Кружки с сублимационной печатью. Заготовка выбирается из каталога (белые, цветные, с полем)."
+  },
+  {
+    "product_slug": "tablets",
+    "title": "Таблички с УФ-печатью",
+    "base_calc_slug": "tablets",
+    "url": "https://insain.ru/catalog/tablichki-s-uf-pechatyu/",
+    "category": "outdoor",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50,
+      "material_id": "PVC3",
+      "application": "isUVPrint",
+      "color": "4+0"
+    },
+    "keywords": ["табличка", "таблички", "информационная табличка", "вывеска"],
+    "disambiguation": "Таблички (информационные, навигационные, офисные) из ПВХ/акрила/поликарбоната с УФ-печатью. Опционально: карманы, профиль, клеевой слой."
+  },
+  {
+    "product_slug": "embossing",
+    "title": "Тиснение",
+    "base_calc_slug": "embossing",
+    "url": "https://insain.ru/catalog/kalkulyator-tisneniya/",
+    "category": "production",
+    "defaults": {
+      "quantity": 100,
+      "cliche_width_mm": 50,
+      "cliche_height_mm": 50
+    },
+    "keywords": ["тиснение", "фольга", "конгрев", "блинт", "слепое тиснение"],
+    "disambiguation": "Тиснение (блинтовое / фольгой) на бумаге, коже, эко-коже. Нужен размер клише и тираж."
+  },
+  {
+    "product_slug": "flag_paper",
+    "title": "Флажки бумажные",
+    "base_calc_slug": "flag",
+    "url": "https://insain.ru/catalog/kalkulyator-flazhkov-bumazhnyh/",
+    "category": "souvenir",
+    "defaults": {
+      "quantity": 100,
+      "material_id": "PaperCoated115M"
+    },
+    "keywords": ["флажок", "флажки", "бумажный", "настольный флажок"],
+    "disambiguation": "Бумажные настольные флажки из мелованной бумаги с печатью и опциональной ламинацией."
+  },
+  {
+    "product_slug": "hashtag",
+    "title": "Хештеги",
+    "base_calc_slug": "tablets",
+    "url": "https://insain.ru/catalog/kalkulyator-heshtegov/",
+    "category": "outdoor",
+    "defaults": {
+      "quantity": 1,
+      "width": 1000,
+      "height": 100,
+      "material_id": "PVC5",
+      "cut_method": "isCutLaser"
+    },
+    "keywords": ["хештег", "хэштег", "hashtag", "буквы", "объёмные буквы"],
+    "disambiguation": "Хештеги и объёмные буквы из ПВХ/акрила/фанеры. Лазерная или фрезерная резка. Ширина=длина хештега, высота=высота букв."
+  },
+  {
+    "product_slug": "shild",
+    "title": "Шильды",
+    "base_calc_slug": "shild",
+    "url": "https://insain.ru/catalog/kalkulyator-shildov/",
+    "category": "outdoor",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50,
+      "material_id": "AcrylWhite3"
+    },
+    "keywords": ["шильд", "шильды", "шильдик", "маркировка"],
+    "disambiguation": "Шильды (маркировочные таблички) из акрила/фанеры/алюминия с УФ-печатью или гравировкой. Опционально клеевой слой."
+  },
+  {
+    "product_slug": "laser",
+    "title": "Лазерная гравировка и резка",
+    "base_calc_slug": "laser",
+    "url": "https://insain.ru/catalog/lazernaya-gravirovka-i-rezka/",
+    "category": "production",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50
+    },
+    "keywords": ["лазер", "лазерная резка", "лазерная гравировка", "гравировка", "резка"],
+    "disambiguation": "Лазерная резка и/или гравировка на акриле, ПВХ, фанере, двухслойном пластике. Произвольный размер."
+  },
+  {
+    "product_slug": "print_sheet",
+    "title": "Листовки под заказ",
+    "base_calc_slug": "print_sheet",
+    "url": "https://insain.ru/catalog/listovki-pod-zakaz/",
+    "category": "print",
+    "defaults": {
+      "quantity": 100,
+      "width": 210,
+      "height": 297,
+      "color": "4+0"
+    },
+    "keywords": ["листовка", "листовки", "визитки", "флаер", "буклет", "печать", "листовая печать", "цифровая печать"],
+    "disambiguation": "Цифровая листовая печать: листовки, визитки, флаеры, буклеты. Опционально: ламинация, нумерация, штрихкод, скругление, биговка."
+  },
+  {
+    "product_slug": "poly_sticker",
+    "title": "Наклейки с полимерной заливкой",
+    "base_calc_slug": "poly_sticker",
+    "url": "https://insain.ru/catalog/naklejki-s-polimernoj-zalivkoj/",
+    "category": "sticker",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50,
+      "material_id": "RaflatacMW"
+    },
+    "keywords": ["наклейка", "наклейки", "полимерная", "эпоксидная", "объёмная наклейка"],
+    "disambiguation": "Наклейки (одиночные) с полимерной эпоксидной заливкой на самоклеящейся плёнке."
+  },
+  {
+    "product_slug": "sticker_pack_poly",
+    "title": "Стикерпаки с полимерной заливкой",
+    "base_calc_slug": "poly_sticker_pack",
+    "url": "https://insain.ru/catalog/stikerpaki-s-polimernoj-zalivkoj/",
+    "category": "sticker",
+    "defaults": {
+      "quantity": 100,
+      "width": 50,
+      "height": 50,
+      "material_id": "RaflatacMW"
+    },
+    "keywords": ["стикерпак", "стикер-пак", "набор наклеек", "стикеры"],
+    "disambiguation": "Стикерпаки (наборы наклеек на одном листе) с полимерной заливкой."
+  },
+  {
+    "product_slug": "pad_print",
+    "title": "Тампопечать",
+    "base_calc_slug": "pad_print",
+    "url": "https://insain.ru/catalog/tampopechat/",
+    "category": "production",
+    "defaults": {
+      "quantity": 100,
+      "color": "1"
+    },
+    "keywords": ["тампопечать", "тампо", "нанесение", "промышленная печать"],
+    "disambiguation": "Тампопечать на сувенирах (ручки, зажигалки, USB и т.п.): 1–2 цвета на пластике/металле/стекле."
+  },
+  {
+    "product_slug": "uv_print",
+    "title": "УФ-печать на сувениры",
+    "base_calc_slug": "uv_print",
+    "url": "https://insain.ru/catalog/uf-pechat-na-suveniry/",
+    "category": "production",
+    "defaults": {
+      "quantity": 100,
+      "width": 60,
+      "height": 7
+    },
+    "keywords": ["уф-печать", "уф печать", "ультрафиолет", "печать на сувенирах", "печать на ручках"],
+    "disambiguation": "УФ-печать на плоских и цилиндрических сувенирах (ручки, зажигалки, коробки). Задаётся размер области печати и размер изделия."
+  },
+  {
+    "product_slug": "print_wide",
+    "title": "Широкоформатная печать",
+    "base_calc_slug": "print_roll",
+    "url": "https://insain.ru/catalog/shirokoformatnaya-pechat-na-zakaz/",
+    "category": "outdoor",
+    "defaults": {
+      "quantity": 1,
+      "width": 1000,
+      "height": 1000,
+      "material_id": "ORAJET3640"
+    },
+    "keywords": ["широкоформат", "широкоформатная", "баннер", "плакат", "постер", "наклейка на стену", "обои"],
+    "disambiguation": "Широкоформатная (рулонная) печать: баннеры, постеры, плёнки, обои, сетка. Размер в мм."
+  }
+]

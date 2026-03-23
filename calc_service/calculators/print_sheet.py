@@ -1,7 +1,8 @@
 """
 Калькулятор ЦИФРОВОЙ ЛИСТОВОЙ ПЕЧАТИ.
 
-Считает листовую продукцию (листовки, визитки и т.п.): материал, печать, опционально ламинация.
+Считает листовую продукцию (листовки, визитки и т.п.): материал, печать, опционально ламинация,
+опционально постпечать: нумерация, штрихкод, переменные данные, скругление углов, пробивка отверстий, биговка.
 Резка в расчёт входит по умолчанию, в описаниях не упоминается.
 
 Использовать, когда менеджер просит: «листовки», «листовки с ламинацией», «визитки с ламинацией»
@@ -18,6 +19,7 @@ from calculators.cut_guillotine import CutGuillotineCalculator
 from calculators.lamination import LaminationCalculator, LAMINATOR_CODE
 from common.helpers import calc_weight
 from common.layout import layout_on_sheet
+from common.process_tools import calc_crease, calc_punching, calc_rounding
 from common.markups import (
     MARGIN_MATERIAL,
     MARGIN_MIN,
@@ -31,6 +33,110 @@ from materials import sheet as sheet_catalog
 from materials import get_material as get_material_any
 
 PRINTER_CODE = "KMBizhubC220"
+
+# Доп. опции постпечати — как в js_legacy/calc/calcPrintSheet.js (costOptions).
+# Фиксированные надбавки за шт. (себестоимость / цена до marginPrintSheet).
+_OPTION_NUMBERING_COST_PER_UNIT = 0.75
+_OPTION_NUMBERING_PRICE_PER_UNIT = 1.0
+_OPTION_NUMBERING_TIME_H = 0.05
+_OPTION_BARCODE_COST_PER_UNIT = 1.0
+_OPTION_BARCODE_PRICE_PER_UNIT = 2.0
+_OPTION_BARCODE_TIME_H = 0.1
+_OPTION_VARIABLE_DATA_COST_PER_UNIT = 3.0
+_OPTION_VARIABLE_DATA_PRICE_PER_UNIT = 5.0
+_OPTION_VARIABLE_DATA_TIME_H = 0.1
+
+_MAX_HOLES_PER_ITEM = 50
+_MAX_CREASE_LINES = 20
+
+
+def _coerce_bool(v: Any) -> bool:
+    if v is True:
+        return True
+    if v is False or v is None:
+        return False
+    if isinstance(v, (int, float)):
+        return v != 0
+    if isinstance(v, str):
+        return v.strip().lower() in ("1", "true", "yes", "да", "on")
+    return False
+
+
+def _coerce_nonneg_int(v: Any, default: int = 0) -> int:
+    try:
+        n = int(v)
+        return max(0, n)
+    except (TypeError, ValueError):
+        return default
+
+
+def _print_sheet_extra_options(
+    params: Mapping[str, Any],
+    quantity: int,
+    size: List[float],
+    material_id: str,
+    mode_value: int,
+) -> tuple[float, float, float]:
+    """
+    Доп. опции постпечати (как costOptions в calcPrintSheet.js).
+
+    Возвращает (себестоимость опций, цена-вклад до marginPrintSheet, время, ч).
+    """
+    opt_cost = 0.0
+    opt_price = 0.0
+    opt_time = 0.0
+
+    if _coerce_bool(params.get("option_numbering")) or _coerce_bool(params.get("is_number")):
+        opt_cost += _OPTION_NUMBERING_COST_PER_UNIT * quantity
+        opt_price += _OPTION_NUMBERING_PRICE_PER_UNIT * quantity
+        opt_time += _OPTION_NUMBERING_TIME_H
+
+    if _coerce_bool(params.get("option_barcode")) or _coerce_bool(params.get("is_barcode")):
+        opt_cost += _OPTION_BARCODE_COST_PER_UNIT * quantity
+        opt_price += _OPTION_BARCODE_PRICE_PER_UNIT * quantity
+        opt_time += _OPTION_BARCODE_TIME_H
+
+    if _coerce_bool(params.get("option_variable_data")) or _coerce_bool(params.get("is_variables")):
+        opt_cost += _OPTION_VARIABLE_DATA_COST_PER_UNIT * quantity
+        opt_price += _OPTION_VARIABLE_DATA_PRICE_PER_UNIT * quantity
+        opt_time += _OPTION_VARIABLE_DATA_TIME_H
+
+    if _coerce_bool(params.get("option_rounding")) or _coerce_bool(params.get("is_rounding")):
+        r = calc_rounding(quantity, material_id, mode_value)
+        opt_cost += r.cost
+        opt_price += r.price
+        opt_time += r.time_hours
+
+    holes = _coerce_nonneg_int(
+        params.get("holes_per_item", params.get("is_hole")),
+        0,
+    )
+    if holes > 0:
+        holes = min(holes, _MAX_HOLES_PER_ITEM)
+        r = calc_punching(quantity * holes, material_id, mode_value)
+        opt_cost += r.cost
+        opt_price += r.price
+        opt_time += r.time_hours
+
+    crease = _coerce_nonneg_int(
+        params.get("crease_lines_per_item", params.get("is_crease")),
+        0,
+    )
+    if crease > 0:
+        crease = min(crease, _MAX_CREASE_LINES)
+        try:
+            r = calc_crease(quantity, crease, size, material_id, mode_value)
+            opt_cost += r.cost
+            opt_price += r.price
+            opt_time += r.time_hours
+        except ValueError:
+            raise ValueError(
+                "Биговка: размер изделия не помещается в допустимый формат для оборудования. "
+                "Уменьшите размер или отключите опцию crease_lines_per_item."
+            ) from None
+
+    opt_time = math.ceil(opt_time * 100) / 100.0
+    return opt_cost, opt_price, opt_time
 
 
 def _cost_per_sheet_laser(color: str, cost_list: Optional[List[float]]) -> float:
@@ -57,24 +163,10 @@ class PrintSheetCalculator(BaseCalculator):
     slug = "print_sheet"
     name = "Печать листовая"
     description = (
-        "Расчёт листовой печати (листовки, визитки и т.п.): материал, печать, опционально ламинация. "
+        "Расчёт листовой печати (листовки, визитки и т.п.): материал, печать, опционально ламинация, "
+        "опции: нумерация, штрихкод, переменные данные, скругление, пробивка отверстий (число на изделие), биговка. "
         "Использовать, когда нужна печать продукции, в том числе «листовки с ламинацией»."
     )
-    keywords = [
-        "листовки",
-        "листовка",
-        "flyer",
-        "флаер",
-        "флаеры",
-        "листовая печать",
-        "визитки",
-        "визитка",
-        "буклет",
-        "буклеты",
-        "печать на листах",
-        "цифровая печать",
-    ]
-
     def get_param_schema(self) -> Dict[str, Any]:
         """
         Детальная схема параметров для листовой печати.
@@ -172,11 +264,69 @@ class PrintSheetCalculator(BaseCalculator):
                         ]
                     },
                 },
+                {
+                    "name": "option_numbering",
+                    "type": "boolean",
+                    "required": False,
+                    "default": False,
+                    "title": "Нумерация",
+                    "description": "Последовательная нумерация экземпляров (как isNumber в JS).",
+                },
+                {
+                    "name": "option_barcode",
+                    "type": "boolean",
+                    "required": False,
+                    "default": False,
+                    "title": "Штрихкод",
+                    "description": "Добавить штрихкод на каждое изделие (isBarcode).",
+                },
+                {
+                    "name": "option_variable_data",
+                    "type": "boolean",
+                    "required": False,
+                    "default": False,
+                    "title": "Переменные данные",
+                    "description": "Персонализация / переменные поля в макете (isVariables).",
+                },
+                {
+                    "name": "option_rounding",
+                    "type": "boolean",
+                    "required": False,
+                    "default": False,
+                    "title": "Скругление углов",
+                    "description": "Скругление углов заготовки после печати (isRounding).",
+                },
+                {
+                    "name": "holes_per_item",
+                    "type": "integer",
+                    "required": False,
+                    "default": 0,
+                    "title": "Отверстий на изделие",
+                    "description": "Пробивка: количество отверстий на одно изделие; 0 — без пробивки (аналог isHole в JS).",
+                    "validation": {"min": 0, "max": _MAX_HOLES_PER_ITEM},
+                },
+                {
+                    "name": "crease_lines_per_item",
+                    "type": "integer",
+                    "required": False,
+                    "default": 0,
+                    "title": "Линий биговки на изделие",
+                    "description": "Биговка/перфорация: число линий на одно изделие; 0 — без биговки (isCrease).",
+                    "validation": {"min": 0, "max": _MAX_CREASE_LINES},
+                },
             ],
             "param_groups": {
                 "main": ["quantity", "width_mm", "height_mm"],
                 "material": ["material"],
                 "processing": ["color", "lamination", "lamination_double_side"],
+                "extras": [
+                    "option_numbering",
+                    "option_barcode",
+                    "option_variable_data",
+                    "option_rounding",
+                    "holes_per_item",
+                    "crease_lines_per_item",
+                ],
                 "mode": ["mode"],
             },
         }
@@ -228,6 +378,40 @@ class PrintSheetCalculator(BaseCalculator):
                         "type": "boolean",
                         "description": "Без резки (для бейджей — печать без гильотинной резки).",
                         "default": False,
+                    },
+                    "option_numbering": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": "Нумерация экземпляров (постпечать).",
+                    },
+                    "option_barcode": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": "Штрихкод на каждое изделие.",
+                    },
+                    "option_variable_data": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": "Переменные данные / персонализация в макете.",
+                    },
+                    "option_rounding": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": "Скругление углов после печати.",
+                    },
+                    "holes_per_item": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": _MAX_HOLES_PER_ITEM,
+                        "default": 0,
+                        "description": "Число пробиваемых отверстий на одно изделие; 0 — не считать пробивку.",
+                    },
+                    "crease_lines_per_item": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": _MAX_CREASE_LINES,
+                        "default": 0,
+                        "description": "Число линий биговки на одно изделие; 0 — не считать биговку.",
                     },
                     "mode": {"type": "integer", "enum": [0, 1, 2], "default": 1},
                 },
@@ -425,7 +609,18 @@ class PrintSheetCalculator(BaseCalculator):
             except Exception:
                 lamination_result = None
 
-        cost = cost_material + cost_cut + cost_print_total + cost_lamination + cost_cut_guillotine
+        opt_cost, opt_price, opt_time = _print_sheet_extra_options(
+            params, quantity, size, material_id, mode.value
+        )
+
+        cost = (
+            cost_material
+            + cost_cut
+            + cost_print_total
+            + cost_lamination
+            + cost_cut_guillotine
+            + opt_cost
+        )
         # JS: result.price = (costMaterial*(1+marginMaterial) + costCut.price + costPrint.price + costLamination.price + costCutGuillotine.price + costOptions.price) * (1+marginPrintSheet)
         # costPrint.price (calcPrintLaser): costPrint*(1+marginMaterial+marginPrintLaser) + costOperator*(1+marginOperation+marginPrintLaser)
         price_material = cost_material * (1 + MARGIN_MATERIAL)
@@ -434,10 +629,16 @@ class PrintSheetCalculator(BaseCalculator):
             1 + MARGIN_OPERATION + margin_print_laser
         )
         margin_print_sheet = get_margin("marginPrintSheet")
-        price = (price_material + price_print + price_cut_guillotine + price_lamination) * (1 + margin_print_sheet)
+        price = (
+            price_material
+            + price_print
+            + price_cut_guillotine
+            + price_lamination
+            + opt_price
+        ) * (1 + margin_print_sheet)
         price = math.ceil(price)
 
-        time_total = time_print + time_cut + time_lamination + time_cut_guillotine
+        time_total = time_print + time_cut + time_lamination + time_cut_guillotine + opt_time
         # В JS: result.time = Math.ceil((costCut.time+costPrint.time+costLamination.time+costCutGuillotine.time+costOptions.time)*100)/100
         # Используем такое же округление вверх до сотых.
         time_hours = math.ceil(time_total * 100) / 100.0

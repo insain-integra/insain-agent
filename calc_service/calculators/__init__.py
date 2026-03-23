@@ -23,6 +23,7 @@ from .print_sheet import PrintSheetCalculator
 from .print_wide import PrintWideCalculator
 from .sticker import StickerCalculator
 from .poly_sticker import PolyStickerCalculator
+from .poly_sticker_pack import PolyStickerPackCalculator
 from .uv_print import UVPrintCalculator
 from .uv_badge import UVBadgeCalculator
 from .cards import CardsCalculator
@@ -45,6 +46,7 @@ from .calendar_calc import CalendarCalculator
 from .heat_press import HeatPressCalculator
 from .canvas import CanvasCalculator
 from .tablets import TabletsCalculator
+from .plaque import PlaqueCalculator
 from .shild import ShildCalculator
 
 CALCULATORS: Dict[str, BaseCalculator] = {
@@ -62,6 +64,7 @@ CALCULATORS: Dict[str, BaseCalculator] = {
     "print_offset": PrintOffsetCalculator(),
     "sticker": StickerCalculator(),
     "poly_sticker": PolyStickerCalculator(),
+    "poly_sticker_pack": PolyStickerPackCalculator(),
     "uv_print": UVPrintCalculator(),
     "uv_badge": UVBadgeCalculator(),
     "cards": CardsCalculator(),
@@ -86,6 +89,7 @@ CALCULATORS: Dict[str, BaseCalculator] = {
     "canvas": CanvasCalculator(),
     "tablets": TabletsCalculator(),
     "shild": ShildCalculator(),
+    "plaque": PlaqueCalculator(),
 }
 
 

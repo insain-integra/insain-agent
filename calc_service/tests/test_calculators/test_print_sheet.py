@@ -437,3 +437,50 @@ def test_expected_values_print_sheet_lamination(ref_result_3):
     assert "title" in lam
     assert ok_paper_q, f"paper quantity: got {paper.get('quantity')}, expected ~{em_paper['quantity_approx']}"
     assert ok_lam_q, f"lamination quantity: got {lam.get('quantity')}, expected ~{em_lam['quantity_approx']}"
+
+
+def test_print_sheet_option_numbering_increases_totals(calc, base_params):
+    """Нумерация: +0.75*qty к себестоимости и +1.0*qty к ценовой части до marginPrintSheet (как JS)."""
+    base = dict(base_params)
+    r0 = calc.calculate(base)
+    r1 = calc.calculate({**base, "option_numbering": True})
+    assert r1["cost"] > r0["cost"]
+    assert r1["price"] >= r0["price"]
+    assert r1["time_hours"] >= r0["time_hours"]
+    q = int(base["quantity"])
+    assert abs((r1["cost"] - r0["cost"]) - 0.75 * q) < 0.01
+
+
+def test_print_sheet_option_rounding_and_holes(calc, base_params):
+    base = dict(base_params)
+    r0 = calc.calculate(base)
+    r_r = calc.calculate({**base, "option_rounding": True})
+    assert r_r["cost"] > r0["cost"]
+    r_h = calc.calculate({**base, "holes_per_item": 2})
+    assert r_h["cost"] > r0["cost"]
+
+
+def test_print_sheet_crease_lines(calc, base_params):
+    base = dict(base_params)
+    r0 = calc.calculate(base)
+    r_c = calc.calculate({**base, "crease_lines_per_item": 2})
+    assert r_c["cost"] > r0["cost"]
+    assert r_c["time_hours"] >= r0["time_hours"]
+
+
+def test_print_sheet_legacy_js_keys_still_work(calc, base_params):
+    """Совместимость с именами из calcPrintSheet.js (is_number, is_hole, is_crease)."""
+    base = dict(base_params)
+    r = calc.calculate(
+        {
+            **base,
+            "is_number": True,
+            "is_barcode": True,
+            "is_variables": True,
+            "is_rounding": True,
+            "is_hole": 1,
+            "is_crease": 1,
+        }
+    )
+    assert r["cost"] > 0
+    assert r["price"] > 0

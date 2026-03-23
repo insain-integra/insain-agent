@@ -290,14 +290,6 @@ class MagnetAcrylicCalculator(BaseCalculator):
         "Расчёт акриловых магнитов: заготовка только из каталога (фиксированные формы и размеры), "
         "печать вставки, установка, упаковка. Произвольные мм не задаются."
     )
-    keywords = [
-        "акриловые магниты",
-        "магнит акриловый",
-        "магниты акриловые",
-        "acrylic magnet",
-        "магнит с акрилом",
-    ]
-
     def get_param_schema(self) -> Dict[str, Any]:
         choices = _acrylic_choices()
         return {
@@ -431,14 +423,6 @@ class MagnetLaminatedCalculator(BaseCalculator):
         "Ширина и высота изделия в мм. Толщина винила на выбор: 0.4 / 0.7 / 0.9 мм (MagnetVinil04, 07, 09). "
         "Ламинация по умолчанию — глянец 32 мкм (Laminat32G). Упаковка (зип-лок) по умолчанию не включена."
     )
-    keywords = [
-        "ламинированные магниты",
-        "магнит ламинированный",
-        "магнит на виниле",
-        "магнитный винил",
-        "laminated magnet",
-    ]
-
     def get_param_schema(self) -> Dict[str, Any]:
         vchoices = _laminated_vinyl_choices()
         return {

@@ -47,6 +47,7 @@ from llm_provider import LLMProvider
 from knowledge_base import KnowledgeBase
 from prompts import (
     build_calculator_index,
+    build_product_index,
     build_recalc_context,
     build_router_system_prompt,
     build_kb_system_prompt,
@@ -129,6 +130,10 @@ class InsainAgent:
         self._calc_llm_prompts: Dict[str, str] = {}
         self._calculator_index: str = ""
         self._router_tool: Dict[str, Any] = {}
+        # Product-first routing
+        self._products: List[Dict[str, Any]] = []
+        self._product_by_slug: Dict[str, Dict[str, Any]] = {}
+        self._product_index: str = ""
         # Последний успешный расчёт per user (для пересчёта и восстановления slug)
         self._user_calc_context: Dict[int, Dict[str, Any]] = {}
         self._load_calculators_and_tools()
@@ -414,16 +419,40 @@ class InsainAgent:
             if fn.startswith("calc_"):
                 self._calc_tool_by_slug[fn[5:]] = t
 
-        # Роутеру достаточно усечённого индекса (меньше токенов)
+        # Загрузка продуктов (product-first routing)
+        self._load_products()
+        # Роутеру: индекс продуктов (если загружены) или калькуляторов (fallback)
+        if self._products:
+            self._product_index = build_product_index(self._products, max_chars=8000)
         self._calculator_index = build_calculator_index(self._calculators, max_chars=5000)
         self._router_tool = self._build_router_tool()
         loaded_slugs = sorted(self._calc_tool_by_slug.keys())
         logger.info(
-            "Загружено калькуляторов: %s, tools: %s, calc_slugs: %s",
+            "Загружено калькуляторов: %s, tools: %s, продуктов: %s, calc_slugs: %s",
             len(self._calculators),
             len(self._tools),
+            len(self._products),
             loaded_slugs,
         )
+
+    def _load_products(self) -> None:
+        """Загрузить продукты из calc_service API."""
+        try:
+            with httpx.Client(timeout=HTTP_TIMEOUT) as client:
+                r = client.get(f"{self.calc_api_url}/api/v1/products")
+                r.raise_for_status()
+                self._products = r.json()
+        except (httpx.ConnectError, httpx.TimeoutException) as e:
+            logger.warning("Products API недоступен: %s — fallback на калькуляторы", e)
+            self._products = []
+        except Exception as e:
+            logger.warning("Ошибка загрузки продуктов: %s", e)
+            self._products = []
+        self._product_by_slug = {}
+        for p in self._products:
+            slug = (p.get("product_slug") or "").strip()
+            if slug and p.get("available", True):
+                self._product_by_slug[slug] = p
 
     def _reset_state(self) -> None:
         self._calculators = []
@@ -431,19 +460,32 @@ class InsainAgent:
         self._calc_tool_by_slug = {}
         self._calc_llm_prompts = {}
         self._calculator_index = ""
+        self._product_index = ""
+        self._products = []
+        self._product_by_slug = {}
         self._router_tool = {}
         self._param_schemas = {}
         self._options_by_slug = {}
         self.calculator_materials = {}
 
     def _build_router_tool(self) -> Dict[str, Any]:
-        slugs = sorted({str(c.get("slug") or "").strip() for c in self._calculators if c.get("slug")})
+        # Product-first: enum из product_slugs (если продукты загружены)
+        if self._product_by_slug:
+            slugs = sorted(self._product_by_slug.keys())
+        else:
+            slugs = sorted({str(c.get("slug") or "").strip() for c in self._calculators if c.get("slug")})
         slug_enum: List[str] = [""] + slugs
+        slug_field = "product_slug" if self._product_by_slug else "calculator_slug"
+        slug_desc = (
+            "При knowledge — пустая строка. При calculator — slug продукта или пустая строка, если неясно."
+            if self._product_by_slug else
+            "При knowledge — пустая строка. При calculator — slug калькулятора или пустая строка, если неясно."
+        )
         return {
             "type": "function",
             "function": {
                 "name": "route_request",
-                "description": "Классифицируй запрос: база знаний (knowledge) или расчёт (calculator) с указанием slug.",
+                "description": "Классифицируй запрос: база знаний (knowledge) или расчёт (calculator) с указанием продукта.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -452,17 +494,17 @@ class InsainAgent:
                             "enum": ["knowledge", "calculator"],
                             "description": "knowledge — Wiki; calculator — смета.",
                         },
-                        "calculator_slug": {
+                        slug_field: {
                             "type": "string",
                             "enum": slug_enum,
-                            "description": "При knowledge — пустая строка. При calculator — slug калькулятора или пустая строка, если неясно.",
+                            "description": slug_desc,
                         },
                         "reason": {
                             "type": "string",
                             "description": "Краткое обоснование на русском.",
                         },
                     },
-                    "required": ["intent", "reason", "calculator_slug"],
+                    "required": ["intent", "reason", slug_field],
                 },
             },
         }
@@ -506,7 +548,12 @@ class InsainAgent:
     def _parse_router_result(llm_result: Dict[str, Any]) -> tuple[str, Optional[str]]:
         def _normalize(args: Dict[str, Any]) -> tuple[str, Optional[str]]:
             intent = str(args.get("intent") or "").strip().lower()
-            slug = str(args.get("calculator_slug") or "").strip() or None
+            # Поддерживаем оба поля: product_slug (новый) и calculator_slug (старый)
+            slug = (
+                str(args.get("product_slug") or "").strip()
+                or str(args.get("calculator_slug") or "").strip()
+                or None
+            )
             if intent == "knowledge":
                 return "knowledge", None
             if intent == "calculator":
@@ -541,8 +588,10 @@ class InsainAgent:
 
     def _heuristic_magnet_slug(self, user_message: str) -> Optional[str]:
         """
+        DEPRECATED: дублирование правил disambiguation в роутер-промте.
+        Оставлено как safety net до стабилизации product-first routing.
+
         Явные формулировки про магниты — стабильный slug, если API отдал калькуляторы.
-        Иначе роутер часто оставляет пустой slug → в tools попадает search_knowledge без calc_*.
         """
         t = (user_message or "").strip().lower()
         if not t:
@@ -561,48 +610,91 @@ class InsainAgent:
                 return "magnet_acrylic"
         return None
 
+    def _resolve_slug(self, raw_slug: Optional[str]) -> tuple[Optional[str], Optional[str]]:
+        """
+        Резолвинг slug из роутера → (product_slug, calc_slug).
+
+        Поддерживает оба режима:
+        - product_slug → base_calc_slug из _product_by_slug
+        - calc_slug напрямую (fallback, если продукты не загружены)
+        """
+        if not raw_slug:
+            return None, None
+        s = raw_slug.strip()
+        # Попытка найти как product_slug
+        product = self._product_by_slug.get(s)
+        if product:
+            base = (product.get("base_calc_slug") or "").strip()
+            if base in self._calc_tool_by_slug:
+                return s, base
+            logger.warning("Product %s → base_calc_slug %s не найден в калькуляторах", s, base)
+            return s, None
+        # Fallback: может быть calc_slug напрямую (старый режим)
+        if s in self._calc_tool_by_slug:
+            return None, s
+        return None, None
+
     def _router_classify(
         self, user_message: str, history: List[Dict[str, Any]], user_id: int = 0
-    ) -> tuple[str, Optional[str]]:
+    ) -> tuple[str, Optional[str], Optional[str]]:
+        """
+        Классификация: (intent, product_slug, calc_slug).
+
+        product_slug — slug из products.json (или None).
+        calc_slug — базовый калькулятор для tool selection.
+        """
         if not self._router_tool:
-            return "calculator", None
+            return "calculator", None, None
         try:
-            router_system = build_router_system_prompt(self._calculator_index)
+            # Индекс: продукты (если загружены), иначе калькуляторы
+            idx = self._product_index or self._calculator_index
+            router_system = build_router_system_prompt(idx)
             messages = [
                 {"role": "system", "content": router_system},
                 {"role": "user", "content": self._router_user_content(user_message, history)},
             ]
             out = self.llm.chat(messages, tools=[self._router_tool])
-            intent, slug = self._parse_router_result(out)
-            if intent == "calculator" and (
-                not slug or slug not in self._calc_tool_by_slug
-            ):
+            intent, raw_slug = self._parse_router_result(out)
+            product_slug, calc_slug = self._resolve_slug(raw_slug)
+
+            # Восстановление из контекста при пустом slug
+            if intent == "calculator" and not calc_slug:
                 ctx = self._user_calc_context.get(user_id)
-                if ctx and ctx.get("slug"):
-                    prev = str(ctx["slug"]).strip()
-                    if prev in self._calc_tool_by_slug:
-                        slug = prev
-                        logger.info("Router: slug восстановлен из контекста: %s", slug)
-            # Эвристика магнитов: роутер часто даёт пустой slug или knowledge при явных формулировках
+                if ctx:
+                    prev_product = (ctx.get("product_slug") or "").strip()
+                    prev_calc = (ctx.get("slug") or "").strip()
+                    if prev_product and prev_product in self._product_by_slug:
+                        product_slug = prev_product
+                        p = self._product_by_slug[prev_product]
+                        calc_slug = (p.get("base_calc_slug") or "").strip()
+                        logger.info("Router: восстановлен product_slug из контекста: %s → %s", product_slug, calc_slug)
+                    elif prev_calc and prev_calc in self._calc_tool_by_slug:
+                        calc_slug = prev_calc
+                        logger.info("Router: восстановлен calc_slug из контекста: %s", calc_slug)
+
+            # Эвристика магнитов (временно, до стабилизации product routing)
             mh = self._heuristic_magnet_slug(user_message)
             if mh:
                 if intent == "knowledge":
                     intent = "calculator"
-                    slug = mh
+                    calc_slug = mh
+                    product_slug = None
                     logger.info("Router: knowledge→calculator, эвристика магнитов → %s", mh)
-                elif intent == "calculator" and (not slug or slug not in self._calc_tool_by_slug):
-                    slug = mh
+                elif intent == "calculator" and not calc_slug:
+                    calc_slug = mh
+                    product_slug = None
                     logger.info("Router: slug по эвристике магнитов → %s", mh)
-            logger.info("Router: intent=%s slug=%s", intent, slug)
-            return intent, slug
+
+            logger.info("Router: intent=%s product=%s calc=%s", intent, product_slug, calc_slug)
+            return intent, product_slug, calc_slug
         except Exception as e:
-            logger.warning("Router classify failed: %s — fallback calculator, узкий набор tools", e)
-            return "calculator", None
+            logger.warning("Router classify failed: %s — fallback calculator", e)
+            return "calculator", None, None
 
     @staticmethod
     def _user_message_suggests_recalc(user_message: str) -> bool:
         """
-        Короткие уточнения пересчёта (тираж, цветность) — для forced calc без LLM.
+        Короткие уточнения пересчёта (тираж, цветность, постпечатные опции) — для forced calc без LLM.
         Сообщения про смену материала/плотности не помечаем: их обрабатывает LLM + search_materials.
         """
         t = (user_message or "").strip().lower()
@@ -624,6 +716,22 @@ class InsainAgent:
             return True
         if any(x in t for x in ("посчитай", "пересчитай")) and (
             re.search(r"\d+\s*шт", t) or re.search(r"\b[14]\s*\+\s*[014]\b", t)
+        ):
+            return True
+        # Постпечатные опции (print_sheet): нумерация, штрихкод, скругление и т.д.
+        if re.search(
+            r"(добав|включ|нужн|хоч)\w*\s+(нумерац|штрихкод|баркод|скруглен|перемен|биговк|перфорац)",
+            t,
+        ):
+            return True
+        if re.search(
+            r"(убер|без|убра|отключ)\w*\s*(нумерац|штрихкод|баркод|ламинац|скруглен|перемен|биговк)",
+            t,
+        ):
+            return True
+        if re.search(
+            r"с\s+(нумерац|штрихкод|баркод|скруглен|биговк|перфорац)",
+            t,
         ):
             return True
         return False
@@ -649,41 +757,43 @@ class InsainAgent:
     def _router_apply_context_override(
         self,
         intent: str,
-        slug: Optional[str],
+        product_slug: Optional[str],
+        calc_slug: Optional[str],
         user_message: str,
         user_id: int,
         history: Optional[List[Dict[str, Any]]] = None,
-    ) -> tuple[str, Optional[str]]:
+    ) -> tuple[str, Optional[str], Optional[str]]:
         """
         Если роутер вернул knowledge при активной calc-сессии, но реплика похожа на пересчёт —
-        принудительно calculator + slug из контекста (см. логи: «посчитай 4+4» → только Wiki).
-
-        Дополнительно: продолжение диалога про акриловые магниты («какие заготовки», размеры)
-        без успешного расчёта — принудительно magnet_acrylic, иначе уходит в Wiki без calc_*.
+        принудительно calculator + slug из контекста.
         """
         history = history or []
-        intent, slug = self._router_magnet_thread_override(
-            intent, slug, user_message, history
+        # Магнитная эвристика (временно)
+        intent_m, cs_m = self._router_magnet_thread_override(
+            intent, calc_slug, user_message, history
         )
+        if cs_m != calc_slug:
+            intent, calc_slug = intent_m, cs_m
 
         ctx = self._user_calc_context.get(user_id)
-        if not ctx or not ctx.get("slug"):
-            return intent, slug
-        prev = str(ctx["slug"]).strip()
-        if prev not in self._calc_tool_by_slug:
-            return intent, slug
-        # Роутер явно выбрал другой калькулятор — не затираем
-        if intent == "calculator" and slug and slug in self._calc_tool_by_slug and slug != prev:
-            return intent, slug
+        if not ctx:
+            return intent, product_slug, calc_slug
+        prev_calc = (ctx.get("slug") or "").strip()
+        prev_product = (ctx.get("product_slug") or "").strip()
+        if not prev_calc or prev_calc not in self._calc_tool_by_slug:
+            return intent, product_slug, calc_slug
+        # Роутер явно выбрал другой продукт/калькулятор — не затираем
+        if intent == "calculator" and calc_slug and calc_slug in self._calc_tool_by_slug and calc_slug != prev_calc:
+            return intent, product_slug, calc_slug
         if not self._router_context_continuation_message(user_message):
-            return intent, slug
+            return intent, product_slug, calc_slug
         if intent == "knowledge":
-            logger.info("Router: intent исправлен knowledge→calculator по контексту расчёта (%s)", prev)
-            return "calculator", prev
-        if intent == "calculator" and (not slug or slug not in self._calc_tool_by_slug):
-            logger.info("Router: slug восстановлен из контекста (override): %s", prev)
-            return "calculator", prev
-        return intent, slug
+            logger.info("Router: intent исправлен knowledge→calculator по контексту расчёта (%s)", prev_calc)
+            return "calculator", prev_product or product_slug, prev_calc
+        if intent == "calculator" and (not calc_slug or calc_slug not in self._calc_tool_by_slug):
+            logger.info("Router: slug восстановлен из контекста (override): product=%s calc=%s", prev_product, prev_calc)
+            return "calculator", prev_product or product_slug, prev_calc
+        return intent, product_slug, calc_slug
 
     def _router_magnet_thread_override(
         self,
@@ -692,7 +802,7 @@ class InsainAgent:
         user_message: str,
         history: List[Dict[str, Any]],
     ) -> tuple[str, Optional[str]]:
-        """Удерживаем magnet_acrylic в треде про акриловые магниты (заготовки, размеры в мм)."""
+        """DEPRECATED: safety net для удержания magnet_acrylic в треде, до стабилизации product routing."""
         if "magnet_acrylic" not in self._calc_tool_by_slug:
             return intent, slug
         t = (user_message or "").strip().lower()
@@ -845,6 +955,51 @@ class InsainAgent:
                 merged["height"] = float(wh.group(2))
             except (TypeError, ValueError):
                 pass
+        # Постпечатные опции (пока только print_sheet)
+        if slug == "print_sheet":
+            if re.search(r"(добав|включ|нужн|хоч|с\s)\w*\s*нумерац", um, re.I):
+                merged["option_numbering"] = True
+            elif re.search(r"(убер|без|убра|отключ)\w*\s*нумерац", um, re.I):
+                merged["option_numbering"] = False
+
+            if re.search(r"(добав|включ|нужн|хоч|с\s)\w*\s*(штрихкод|баркод)", um, re.I):
+                merged["option_barcode"] = True
+            elif re.search(r"(убер|без|убра|отключ)\w*\s*(штрихкод|баркод)", um, re.I):
+                merged["option_barcode"] = False
+
+            if re.search(r"(добав|включ|нужн|хоч|с\s)\w*\s*(перемен|персонализ)", um, re.I):
+                merged["option_variable_data"] = True
+            elif re.search(r"(убер|без|убра|отключ)\w*\s*(перемен|персонализ)", um, re.I):
+                merged["option_variable_data"] = False
+
+            if re.search(r"(добав|включ|нужн|хоч|с\s)\w*\s*скруглен", um, re.I):
+                merged["option_rounding"] = True
+            elif re.search(r"(убер|без|убра|отключ)\w*\s*скруглен", um, re.I):
+                merged["option_rounding"] = False
+
+            # Биговка: «добавь биговку» → 1, «добавь 2 биговки» → 2, «убери биговку» → 0
+            bm = re.search(r"(добав|включ|нужн|хоч|с\s)\w*\s*(\d+)?\s*биговк", um, re.I)
+            if bm:
+                merged["crease_lines_per_item"] = int(bm.group(2)) if bm.group(2) else 1
+            elif re.search(r"(убер|без|убра|отключ)\w*\s*биговк", um, re.I):
+                merged["crease_lines_per_item"] = 0
+
+            # Перфорация/пробивка: «добавь перфорацию» → 1, «3 отверстия» → 3
+            hm = re.search(r"(добав|включ|нужн|хоч|с\s)\w*\s*(\d+)?\s*(перфорац|пробивк|отверст)", um, re.I)
+            if not hm:
+                hm = re.search(r"(\d+)\s*(перфорац|пробивк|отверст)", um, re.I)
+            if hm:
+                digits = [g for g in hm.groups() if g and g.isdigit()]
+                merged["holes_per_item"] = int(digits[0]) if digits else 1
+            elif re.search(r"(убер|без|убра|отключ)\w*\s*(перфорац|пробивк|отверст)", um, re.I):
+                merged["holes_per_item"] = 0
+
+            # Ламинация: снять или включить по умолчанию
+            if re.search(r"(убер|без|убра|отключ)\w*\s*ламинац", um, re.I):
+                merged.pop("lamination_id", None)
+            elif re.search(r"(добав|включ|нужн|хоч|с\s)\w*\s*ламинац", um, re.I):
+                if not merged.get("lamination_id"):
+                    merged["lamination_id"] = "Laminat32G"
         return merged
 
     def _calc_params_sufficient(self, slug: str, params: Dict[str, Any]) -> bool:
@@ -866,7 +1021,7 @@ class InsainAgent:
     def _try_forced_calc(
         self,
         intent: str,
-        slug: Optional[str],
+        calc_slug: Optional[str],
         user_message: str,
         user_id: int,
         history: List[Dict[str, Any]],
@@ -874,18 +1029,18 @@ class InsainAgent:
         """
         Если модель вернула текст с «расчётом» без tool_calls — пересчитываем на сервере сами.
         """
-        if intent != "calculator" or not slug or slug not in self._calc_tool_by_slug:
+        if intent != "calculator" or not calc_slug or calc_slug not in self._calc_tool_by_slug:
             return None
         if not self._user_message_suggests_recalc(user_message):
             return None
         ctx = self._user_calc_context.get(user_id)
-        if not ctx or ctx.get("slug") != slug:
+        if not ctx or ctx.get("slug") != calc_slug:
             return None
-        tool_name = (ctx.get("tool_name") or "").strip() or f"calc_{slug}"
+        tool_name = (ctx.get("tool_name") or "").strip() or f"calc_{calc_slug}"
         base = dict(ctx.get("params") or {})
-        merged = self._merge_params_for_recalc(slug, base, user_message, history)
-        if not self._calc_params_sufficient(slug, merged):
-            logger.warning("Forced calc: недостаточно параметров slug=%s keys=%s", slug, list(merged.keys()))
+        merged = self._merge_params_for_recalc(calc_slug, base, user_message, history)
+        if not self._calc_params_sufficient(calc_slug, merged):
+            logger.warning("Forced calc: недостаточно параметров slug=%s keys=%s", calc_slug, list(merged.keys()))
             return None
         logger.info("Forced calc: вызов %s с аргументами %s", tool_name, merged)
         result = self.execute_tool(tool_name, merged)
@@ -894,47 +1049,62 @@ class InsainAgent:
             cslug = tool_name[5:] if tool_name.startswith("calc_") else tool_name
             self._user_calc_context[user_id] = {
                 "slug": cslug,
+                "product_slug": ctx.get("product_slug") or "",
                 "tool_name": tool_name,
                 "params": dict(display_args),
             }
         return self._format_calc_result(tool_name, display_args, result)
 
     def _tools_for_intent(
-        self, intent: str, slug: Optional[str], full_tools: List[Dict[str, Any]]
+        self, intent: str, calc_slug: Optional[str], full_tools: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         if intent == "knowledge":
             return [SEARCH_KNOWLEDGE_TOOL]
         if intent == "calculator":
-            if slug and slug in self._calc_tool_by_slug:
-                return [SEARCH_MATERIALS_TOOL, self._calc_tool_by_slug[slug]]
-            logger.warning(
-                "Router: неизвестный или пустой slug %r — узкий набор (без всех calc_*)",
-                slug,
-            )
-            return [SEARCH_KNOWLEDGE_TOOL, SEARCH_MATERIALS_TOOL]
+            if calc_slug and calc_slug in self._calc_tool_by_slug:
+                return [SEARCH_MATERIALS_TOOL, self._calc_tool_by_slug[calc_slug]]
+            # Fallback без calc tools — агент уточнит тип продукта
+            return [SEARCH_KNOWLEDGE_TOOL]
         return list(full_tools)
 
     def _system_prompt_for_intent(
-        self, intent: str, slug: Optional[str], user_id: int = 0
+        self,
+        intent: str,
+        product_slug: Optional[str],
+        calc_slug: Optional[str],
+        user_id: int = 0,
     ) -> str:
         if intent == "knowledge":
             return build_kb_system_prompt()
-        if intent == "calculator" and slug and slug in self._calc_tool_by_slug:
-            meta = self._find_calculator_meta(slug)
-            tool_name = (self._calc_tool_by_slug[slug].get("function") or {}).get("name") or f"calc_{slug}"
-            calc_prompt = self._calc_llm_prompts.get(slug, "")
+        if intent == "calculator" and calc_slug and calc_slug in self._calc_tool_by_slug:
+            meta = self._find_calculator_meta(calc_slug)
+            tool_name = (self._calc_tool_by_slug[calc_slug].get("function") or {}).get("name") or f"calc_{calc_slug}"
+            calc_prompt = self._calc_llm_prompts.get(calc_slug, "")
             recalc_append = ""
             ctx = self._user_calc_context.get(user_id)
-            if ctx and ctx.get("slug") == slug and isinstance(ctx.get("params"), dict):
-                recalc_append = build_recalc_context(ctx["params"], slug)
+            if ctx and ctx.get("slug") == calc_slug and isinstance(ctx.get("params"), dict):
+                recalc_append = build_recalc_context(ctx["params"], calc_slug)
+            # Product context (defaults, title, disambiguation)
+            product_title = ""
+            product_defaults: Optional[Dict[str, Any]] = None
+            product_disambiguation = ""
+            if product_slug:
+                product = self._product_by_slug.get(product_slug)
+                if product:
+                    product_title = product.get("title") or ""
+                    product_defaults = product.get("defaults") or None
+                    product_disambiguation = product.get("disambiguation") or ""
             return build_calc_system_prompt(
-                slug=slug,
+                slug=calc_slug,
                 tool_name=tool_name,
                 calculator_description=meta.get("description", ""),
                 calculator_prompt=calc_prompt,
                 recalc_append=recalc_append,
+                product_title=product_title,
+                product_defaults=product_defaults,
+                product_disambiguation=product_disambiguation,
             )
-        return build_calc_system_prompt_full(self._calculators)
+        return build_calc_system_prompt_full(self._calculators, products=self._products or None)
 
     def _find_calculator_meta(self, slug: str) -> Dict[str, Any]:
         for c in self._calculators:
@@ -1481,19 +1651,20 @@ class InsainAgent:
             return "Сервис расчётов временно недоступен, попробуйте позже."
 
         intent = "calculator"
-        slug: Optional[str] = None
+        product_slug: Optional[str] = None
+        calc_slug: Optional[str] = None
         if AGENT_USE_ROUTER:
-            intent, slug = self._router_classify(user_message, history, user_id=user_id)
-            intent, slug = self._router_apply_context_override(
-                intent, slug, user_message, user_id, history
+            intent, product_slug, calc_slug = self._router_classify(user_message, history, user_id=user_id)
+            intent, product_slug, calc_slug = self._router_apply_context_override(
+                intent, product_slug, calc_slug, user_message, user_id, history
             )
-            tools = self._tools_for_intent(intent, slug, full_tools)
-            system_prompt = self._system_prompt_for_intent(intent, slug, user_id=user_id)
+            tools = self._tools_for_intent(intent, calc_slug, full_tools)
+            system_prompt = self._system_prompt_for_intent(intent, product_slug, calc_slug, user_id=user_id)
         else:
             tools = full_tools
-            system_prompt = build_calc_system_prompt_full(self._calculators)
+            system_prompt = build_calc_system_prompt_full(self._calculators, products=self._products or None)
 
-        if AGENT_USE_ROUTER and intent == "calculator" and slug == "print_sheet":
+        if AGENT_USE_ROUTER and intent == "calculator" and calc_slug == "print_sheet":
             forced_choice = self._try_force_print_sheet_material_choice(
                 user_message, history, user_id
             )
@@ -1516,7 +1687,7 @@ class InsainAgent:
         tool_calls = result.get("tool_calls")
 
         if not tool_calls:
-            forced = self._try_forced_calc(intent, slug, user_message, user_id, history)
+            forced = self._try_forced_calc(intent, calc_slug, user_message, user_id, history)
             if forced is not None:
                 return self.sanitize_llm_reply_for_display(forced.strip())
             return self.sanitize_llm_reply_for_display(
@@ -1568,6 +1739,7 @@ class InsainAgent:
                     cslug = calc_tool_name[5:] if calc_tool_name.startswith("calc_") else calc_tool_name
                     self._user_calc_context[user_id] = {
                         "slug": cslug,
+                        "product_slug": product_slug or "",
                         "tool_name": calc_tool_name,
                         "params": dict(display_args),
                     }

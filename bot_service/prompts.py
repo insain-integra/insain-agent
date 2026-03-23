@@ -2,11 +2,11 @@
 Промпты для LLM-агента Insain.
 
 Архитектура двухэтапная:
-1) Роутер — классификация запроса (knowledge / calculator + slug).
+1) Роутер — классификация запроса (knowledge / calculator + product_slug).
 2) Исполнитель — узкий system prompt + только нужные tools.
 
-Все промпты универсальны: нет костылей под конкретный калькулятор.
-Калькулятор-специфичная логика приходит через `calculator_prompt` из API.
+Product-first: роутер выбирает product_slug (обёртка над калькулятором),
+исполнитель получает base_calc tool + product-specific defaults и промт.
 """
 
 from __future__ import annotations
@@ -14,12 +14,80 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 
+# ---------------------------------------------------------------------------
+#  Product index (для роутера)
+# ---------------------------------------------------------------------------
+
+def build_product_index(
+    products: List[Dict[str, Any]],
+    max_chars: int = 8000,
+) -> str:
+    """Справочник продуктов для роутера: product_slug — title. disambiguation [keywords]."""
+    lines: List[str] = []
+    for p in products:
+        slug = (p.get("product_slug") or "").strip()
+        if not slug:
+            continue
+        if not p.get("available", True):
+            continue
+        title = (p.get("title") or slug).strip()
+        dis = (p.get("disambiguation") or "").strip()
+        kws = p.get("keywords") or []
+        kw_str = ", ".join(str(x) for x in kws[:6]) if kws else ""
+        block = f"- {slug} — {title}"
+        if dis:
+            block += f". {dis}"
+        if kw_str:
+            block += f" [{kw_str}]"
+        lines.append(block)
+    text = "\n".join(lines).strip()
+    if len(text) > max_chars:
+        return text[: max_chars - 80] + "\n\n[… справочник обрезан …]"
+    return text
+
+
+def build_product_categories(
+    products: List[Dict[str, Any]],
+) -> str:
+    """Категории продуктов для fallback-промта (без calc tools)."""
+    cats: Dict[str, List[str]] = {}
+    cat_labels = {
+        "print": "Печатная продукция",
+        "outdoor": "Наружная реклама и навигация",
+        "badges": "Бейджи и значки",
+        "souvenir": "Сувенирная продукция",
+        "calendar": "Календари",
+        "sticker": "Наклейки",
+        "production": "Промышленная обработка",
+    }
+    for p in products:
+        if not p.get("available", True):
+            continue
+        cat = p.get("category") or "other"
+        title = p.get("title") or p.get("product_slug", "")
+        cats.setdefault(cat, []).append(title)
+    lines: List[str] = []
+    for key, label in cat_labels.items():
+        items = cats.get(key)
+        if not items:
+            continue
+        lines.append(f"• {label}: {', '.join(items)}")
+    other = cats.get("other")
+    if other:
+        lines.append(f"• Другое: {', '.join(other)}")
+    return "\n".join(lines) or "(продукты не загружены)"
+
+
+# ---------------------------------------------------------------------------
+#  Backward-compat: старые функции (используются, если продукты не загружены)
+# ---------------------------------------------------------------------------
+
 def build_calculator_index(
     calculators: List[Dict[str, Any]],
     max_chars: int = 12000,
     only_slug: Optional[str] = None,
 ) -> str:
-    """Краткий справочник: slug — название. описание. Ключевые слова."""
+    """DEPRECATED: используй build_product_index. Краткий справочник калькуляторов."""
     lines: List[str] = []
     for c in calculators:
         slug = (c.get("slug") or "").strip()
@@ -47,7 +115,7 @@ def build_calculator_categories_short(
     calculators: List[Dict[str, Any]],
     max_items: int = 40,
 ) -> str:
-    """Только названия услуг для fallback (без длинных описаний и keywords)."""
+    """DEPRECATED: используй build_product_categories."""
     lines: List[str] = []
     for c in calculators[:max_items]:
         slug = (c.get("slug") or "").strip()
@@ -58,8 +126,12 @@ def build_calculator_categories_short(
     return "\n".join(lines).strip() or "(калькуляторы не загружены)"
 
 
+# ---------------------------------------------------------------------------
+#  Recalc context
+# ---------------------------------------------------------------------------
+
 def build_recalc_context(prev_params: Dict[str, Any], slug: str) -> str:
-    """Блок для system prompt: параметры предыдущего успешного расчёта (для пересчёта)."""
+    """Блок для system prompt: параметры предыдущего успешного расчёта."""
     lines = [f"=== ПРЕДЫДУЩИЙ РАСЧЁТ ({slug}) ==="]
     lines.append("Используй эти параметры как базу, меняй только то, что просит пользователь:")
     for k, v in sorted(prev_params.items()):
@@ -68,41 +140,66 @@ def build_recalc_context(prev_params: Dict[str, Any], slug: str) -> str:
     return "\n".join(lines)
 
 
+# ---------------------------------------------------------------------------
+#  Router system prompt (product-first)
+# ---------------------------------------------------------------------------
+
 def build_router_system_prompt(
     calculator_index: str,
     kb_description: str = "внутренняя Wiki: компания, процессы, сроки, технологии, инструкции",
 ) -> str:
-    """System prompt для роутера: intent + calculator_slug, без полных tool_schema."""
+    """
+    System prompt для роутера: intent + product_slug.
+
+    calculator_index может быть как product_index, так и старым calc_index.
+    """
     idx = (calculator_index or "").strip()
     return (
         "Ты — классификатор запросов менеджера рекламно-производственной компании Инсайн.\n"
         "Проанализируй текущее сообщение пользователя с учётом контекста диалога.\n"
         "Обязательно вызови функцию route_request.\n\n"
+
         "=== ПРАВИЛА КЛАССИФИКАЦИИ ===\n"
         "intent — строго одно из двух:\n"
-        "- knowledge — справочный вопрос без числового расчёта: "
+        "- knowledge — справочный вопрос без числового расчёта "
         f"({kb_description}).\n"
-        "- calculator — любой запрос, связанный со сметой, стоимостью, тиражом, расчётом, "
-        "пересчётом, сравнением вариантов, выбором материала под заказ.\n\n"
-        "calculator_slug:\n"
+        "- calculator — любой запрос со сметой, стоимостью, тиражом, расчётом, "
+        "пересчётом, выбором материала под заказ.\n\n"
+
+        "product_slug:\n"
         "- При intent=knowledge — пустая строка.\n"
-        "- При intent=calculator — slug одного наиболее подходящего калькулятора из списка ниже. "
-        "Если однозначно определить нельзя — пустая строка (агент уточнит у пользователя).\n\n"
+        "- При intent=calculator — slug ОДНОГО наиболее подходящего продукта из списка ниже.\n"
+        "- Если однозначно определить нельзя — пустая строка (агент уточнит у пользователя).\n\n"
+
+        "=== РАЗЛИЧЕНИЕ ПОХОЖИХ ПРОДУКТОВ ===\n"
+        "«значки» без уточнения → pins_metal_enamel (металлические по умолчанию).\n"
+        "«значки деревянные/из фанеры» → pins_wood.\n"
+        "«значки пластиковые с гравировкой» → pins_plastic_engraving.\n"
+        "«значки пластиковые/акриловые с печатью/УФ» → pins_plastic_uv.\n"
+        "«значки полимерные/эпоксидные» → pins_polymer.\n"
+        "«бейджи с гравировкой» → badge_laser_engraving.\n"
+        "«бейджи с УФ» → badge_uv_print.\n"
+        "«бейджи с заливкой» → badge_poly_fill.\n"
+        "«магниты акриловые» → (ищи magnet_acrylic если есть, иначе knowledge).\n"
+        "«магниты ламинированные/виниловые» → magnet_vinyl.\n"
+        "«таблички» → tablets; «стенды» → stand; «хештеги» → hashtag; «шильды» → shild.\n"
+        "«листовки/визитки/флаеры» → print_sheet.\n"
+        "«широкоформат/баннер/постер» → print_wide.\n\n"
+
         "=== КОНТЕКСТ ДИАЛОГА ===\n"
-        "Если в истории уже обсуждался расчёт (листовки, значки, тираж и т.п.) "
-        "и пользователь меняет параметр или просит пересчёт — intent=calculator, "
-        "calculator_slug тот же, что был в расчёте.\n"
-        "Слово «значки» без уточнения «брелок», «акрил», «наклейка» — чаще всего "
-        "металлические значки (slug metal_pins), не путай с листовой печатью или акрилом.\n"
-        "Магниты: «акриловые магниты», «магнит акриловый» → calculator_slug magnet_acrylic "
-        "(размер НЕ вводится в мм произвольно — только выбор заготовки из каталога; нужны тираж и заготовка). "
-        "«ламинированные магниты», «магнит на виниле» → magnet_laminated (тираж + ширина и высота в мм + винил).\n"
+        "Если в истории обсуждался расчёт и пользователь меняет параметр или просит пересчёт — "
+        "intent=calculator, product_slug тот же, что был.\n"
         "Короткие реплики («да», «ок», «1», число) в контексте расчёта → intent=calculator.\n"
-        "Короткие реплики без контекста расчёта → intent=knowledge (безопаснее).\n\n"
-        f"=== ДОСТУПНЫЕ КАЛЬКУЛЯТОРЫ ===\n{idx}\n\n"
+        "Короткие реплики без контекста → intent=knowledge (безопаснее).\n\n"
+
+        f"=== ДОСТУПНЫЕ ПРОДУКТЫ ===\n{idx}\n\n"
         f"=== БАЗА ЗНАНИЙ ===\n{kb_description}"
     )
 
+
+# ---------------------------------------------------------------------------
+#  KB system prompt (без изменений)
+# ---------------------------------------------------------------------------
 
 def build_kb_system_prompt() -> str:
     """System prompt только для Wiki."""
@@ -118,83 +215,80 @@ def build_kb_system_prompt() -> str:
     )
 
 
+# ---------------------------------------------------------------------------
+#  Calc system prompt (пошаговый алгоритм + product context)
+# ---------------------------------------------------------------------------
+
 def build_calc_system_prompt(
     slug: str,
     tool_name: str,
     calculator_description: str = "",
     calculator_prompt: str = "",
     recalc_append: str = "",
+    product_title: str = "",
+    product_defaults: Optional[Dict[str, Any]] = None,
+    product_disambiguation: str = "",
 ) -> str:
-    """System prompt для расчёта одним калькулятором + опциональный алгоритм из get_llm_prompt()."""
+    """
+    System prompt для расчёта одним калькулятором.
+
+    Пошаговый алгоритм вместо стены правил.
+    Product context (title, defaults, disambiguation) подставляется из ProductSpec.
+    """
     parts: List[str] = [
-        "Ты — ассистент рекламно-производственной компании Инсайн. "
-        f"Работаешь с калькулятором «{slug}».",
+        "Ты — ассистент рекламно-производственной компании Инсайн.",
     ]
-    if calculator_description:
-        parts.append(f"Описание: {calculator_description}")
+
+    if product_title:
+        parts.append(f"Продукт: «{product_title}».")
+        if product_disambiguation:
+            parts.append(product_disambiguation)
+    elif calculator_description:
+        parts.append(f"Калькулятор: {calculator_description}")
     parts.append("")
 
-    parts.append(
-        "=== ТВОЯ ЗАДАЧА ===\n"
-        f"Собери параметры и вызови инструмент {tool_name}.\n"
-        "ГЛАВНОЕ ПРАВИЛО: как только все обязательные параметры (required в tool_schema) собраны — "
-        "НЕМЕДЛЕННО вызывай инструмент. Не спрашивай ничего дополнительного.\n"
-        "Опциональные параметры имеют значения по умолчанию (default) и НЕ требуют уточнения, "
-        "если пользователь сам их не упомянул.\n"
-        "Если не хватает обязательных параметров — задай уточняющий вопрос на простом языке."
-    )
-    parts.append("")
+    # Product defaults
+    if product_defaults:
+        defaults_lines = []
+        for k, v in sorted(product_defaults.items()):
+            defaults_lines.append(f"  {k} = {v}")
+        parts.append(
+            "=== DEFAULTS (подставляй, если пользователь не указал иное) ===\n"
+            + "\n".join(defaults_lines)
+        )
+        parts.append("")
 
+    # Пошаговый алгоритм (текст адаптируется к наличию DEFAULTS)
+    has_defaults = bool(product_defaults)
+    step1_source = "из сообщения пользователя и DEFAULTS выше" if has_defaults else "из сообщения пользователя"
+    step3_qualifier = " и нет в DEFAULTS" if has_defaults else ""
     parts.append(
-        "=== КАК СПРАШИВАТЬ ПАРАМЕТРЫ ===\n"
-        "Говори с пользователем простым языком. Он менеджер, не программист.\n"
-        "Спрашивай про тираж, размер, режим — по необходимости.\n"
-        "Про бумагу / листовой материал («на какой бумаге?», ламинацию) спрашивай ТОЛЬКО если "
-        "в tool_schema в required есть material_id или lamination_id (или пользователь сам упомянул бумагу).\n"
-        "Если в required есть magnet_id — это заготовка из каталога калькулятора (не бумага и не Wiki). "
-        "Перечисли пользователю варианты из enum в схеме инструмента краткими названиями/размерами; "
-        "не проси произвольные ширину/высоту в мм, если в схеме нет width_mm/height_mm.\n"
-        "ЗАПРЕЩЕНО показывать пользователю имена полей из tool_schema: "
-        "quantity, width, height, material_id, lamination_id, mode, color и т.п.\n"
-        "Вместо «material_id» говори «бумага» или «материал», вместо «quantity» — «тираж»."
-    )
-    parts.append("")
-
-    parts.append(
-        "=== МАТЕРИАЛЫ (алгоритм) ===\n"
-        "Этот алгоритм применяется ТОЛЬКО если в required у инструмента есть material_id или lamination_id.\n"
-        "Если ни material_id, ни lamination_id НЕТ в required — НЕ спрашивай про материал/бумагу, "
-        "НЕ вызывай search_materials. Параметры metal, plating, process и другие enum подставляй "
-        "из default в tool_schema, пока пользователь не попросит другое.\n"
-        "Если в required есть material_id/lamination_id:\n"
-        "1. Для полей material_id, lamination_id нужны внутренние id из каталога.\n"
-        "2. Пользователь описал материал словами («115гр», «меловка», «ПВХ 3мм» и т.п.) — "
-        "СРАЗУ вызови search_materials(slug, query, param), не откладывай.\n"
-        "3. Пользователю показывай только title из результата, никогда не показывай id.\n"
-        "4. Если search_materials вернул несколько вариантов — перечисли их (только title) и попроси выбрать.\n"
-        "5. Если вернулся ровно один вариант — подставь id и вызывай расчёт без лишних вопросов."
-    )
-    parts.append("")
-
-    parts.append(
-        "=== ПЕРЕСЧЁТ ===\n"
-        "При изменении параметров пользователем:\n"
-        "1. Возьми ВСЕ параметры из предыдущего расчёта (они в истории).\n"
-        "2. Замени только те, которые пользователь изменил.\n"
-        f"3. Вызови {tool_name} с полным набором аргументов.\n"
-        "Никогда не воспроизводи результат расчёта из памяти — всегда вызывай инструмент."
+        "=== ПОШАГОВЫЙ АЛГОРИТМ ===\n"
+        f"ШАГ 1. Извлеки параметры {step1_source}.\n"
+        f"ШАГ 2. Проверь, все ли required-поля заполнены (из tool_schema {tool_name}).\n"
+        f"  - Если ДА → НЕМЕДЛЕННО вызывай {tool_name}. НЕ спрашивай опциональные.\n"
+        f"  - Если НЕТ → задай ОДИН уточняющий вопрос (самый важный параметр).\n"
+        f"ШАГ 3. Если material_id в required{step3_qualifier}:\n"
+        f"  - Пользователь назвал материал словами → СРАЗУ вызови "
+        f"search_materials(slug=\"{slug}\", query=\"описание материала\").\n"
+        f"  - search_materials вернул 1 вариант → подставь id, вызови {tool_name}.\n"
+        f"  - search_materials вернул несколько → перечисли title, попроси выбрать.\n"
+        f"ШАГ 4. Пересчёт: возьми ВСЕ параметры из предыдущего расчёта, замени "
+        f"только то, что изменил пользователь, вызови {tool_name}.\n"
+        f"  - Если пользователь меняет материал словами (плотность, название) → "
+        f"ОБЯЗАТЕЛЬНО вызови search_materials(slug=\"{slug}\", query=\"...\"), "
+        f"чтобы получить правильный id. НИКОГДА не угадывай material_id.\n"
     )
     parts.append("")
 
     parts.append(
         "=== ЗАПРЕТЫ ===\n"
-        "- Не придумывай цены, себестоимость, сроки, вес — их возвращает только калькулятор.\n"
-        "- НИКОГДА не показывай пользователю внутренние коды и имена полей "
-        "(material_id, lamination_id, quantity, width, height, slug, enum-коды, id из каталога).\n"
-        "- Не говори «поиск ничего не нашёл», если не вызывал search_materials.\n"
-        "- Не спрашивай у пользователя «ID материала» — ищи его сам через search_materials "
-        "(только если material_id/lamination_id в required; иначе search_materials не нужен).\n"
-        "- Блоки с ценами и ссылками в истории — результат сервера; не копируй их.\n"
+        "- Не придумывай цены, сроки, вес, названия материалов — только из калькулятора или search_materials.\n"
+        "- Не показывай пользователю коды (material_id, slug, enum-коды).\n"
+        "- Не предлагай материалы «по памяти» — ВСЕГДА вызывай search_materials для получения актуального списка.\n"
+        "- Не спрашивай опциональные параметры, если пользователь их не упомянул.\n"
+        "- Не задавай больше одного вопроса за раз.\n"
+        "- Блоки с ценами в истории — старые ответы; для нового расчёта вызови tool.\n"
         "- mode: 0=эконом, 1=стандарт, 2=экспресс; по умолчанию 1."
     )
     parts.append("")
@@ -212,28 +306,36 @@ def build_calc_system_prompt(
     return "\n".join(parts)
 
 
-def build_calc_system_prompt_full(calculators: List[Dict[str, Any]]) -> str:
-    """Fallback: slug не определён — короткий список категорий."""
-    cats = build_calculator_categories_short(calculators)
+# ---------------------------------------------------------------------------
+#  Fallback (product не определён)
+# ---------------------------------------------------------------------------
+
+def build_calc_system_prompt_full(
+    calculators: List[Dict[str, Any]],
+    products: Optional[List[Dict[str, Any]]] = None,
+) -> str:
+    """
+    Fallback: продукт не определён — категории для уточнения (~500 токенов).
+
+    Если products переданы — используются категории продуктов.
+    Иначе — старый формат из калькуляторов.
+    """
+    if products:
+        cats = build_product_categories(products)
+    else:
+        cats = build_calculator_categories_short(calculators)
+
     return (
         "Ты — ассистент рекламно-производственной компании Инсайн. "
-        "Помогаешь менеджеру рассчитать стоимость через калькуляторы.\n\n"
+        "Помогаешь менеджеру рассчитать стоимость.\n\n"
         "=== СИТУАЦИЯ ===\n"
-        "Калькулятор для текущего запроса ещё не выбран (slug не определён).\n"
-        "Спроси у пользователя, какая продукция или услуга нужна: листовки, визитки, наклейки, "
-        "лазерная резка, широкоформат, значки и т.п.\n"
-        "Не перечисляй пользователю длинные технические списки — достаточно уточняющего вопроса.\n\n"
-        "=== ОРИЕНТИР (категории, кратко) ===\n"
-        f"{cats}\n\n"
-        "=== ПАРАМЕТРЫ ===\n"
-        "Собирай параметры из сообщения и истории. Не придумывай значения.\n"
-        "ЗАПРЕЩЕНО показывать имена полей (quantity, width, material_id и т.п.).\n"
-        "Когда станет ясен тип продукта — дальше сработает узкий режим с нужным калькулятором.\n"
-        "mode: 0=эконом, 1=стандарт, 2=экспресс; по умолчанию 1.\n\n"
+        "Тип продукции ещё не определён.\n"
+        "Спроси у пользователя, что именно нужно, кратким уточняющим вопросом.\n"
+        "Не перечисляй длинные списки — назови 2-3 примера из подходящей категории.\n\n"
+        f"=== КАТЕГОРИИ ПРОДУКЦИИ ===\n{cats}\n\n"
         "=== ЗАПРЕТЫ ===\n"
         "- Не придумывай цены, себестоимость, сроки.\n"
-        "- Не показывай внутренние коды и имена полей.\n"
-        "- Не спрашивай «ID материала» — при поиске материала будет search_materials.\n"
-        "- Блоки с ценами в истории — старые ответы сервера; для нового расчёта нужен вызов калькулятора.\n\n"
+        "- Не показывай внутренние коды.\n"
+        "- Не вызывай калькулятор, пока не ясен тип продукта.\n\n"
         "Формат ответа: plain text, без Markdown. Язык: русский."
     )

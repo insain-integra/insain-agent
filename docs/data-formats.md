@@ -163,7 +163,7 @@ calcPrintWide.js     → calculators/print_wide.py
 calcPrintRoll.js     → calculators/print_roll.py
 calcUVPrint.js       → calculators/print_uv.py
 calcPrintOffset.js   → calculators/print_offset.py
-calcPrintSheet.js    → calculators/print_sheet.py
+calcPrintSheet.js    → calculators/print_sheet.py (в т.ч. costOptions: нумерация, штрихкод, переменные данные, скругление, пробивка, биговка — см. `option_*`, `holes_per_item`, `crease_lines_per_item` и алиасы `is_*` из JS)
 calcPrintInkJet.js   → calculators/print_inkjet.py
 calcPrintLaser.js    → calculators/print_laser.py
 calcCanvas.js        → calculators/canvas.py

@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 
 from calculators import CALCULATORS, get_calculator
 from materials import ALL_MATERIALS, MaterialCatalog, MaterialSpec
+from products import ALL_PRODUCTS, get_product, list_available as list_available_products
 
 logging.basicConfig(
     level=logging.INFO,
@@ -95,6 +96,19 @@ def get_llm_prompt(slug: str) -> Dict[str, str]:
     """Дополнительный промпт-алгоритм расчёта для LLM (пусто, если не задан)."""
     calc = get_calculator(slug)  # KeyError → 404
     return {"slug": slug, "prompt": calc.get_llm_prompt()}
+
+
+@app.get("/api/v1/products")
+def list_products() -> list[Dict[str, Any]]:
+    """Список доступных продуктов для маршрутизации агента."""
+    return [p.to_api_dict() for p in list_available_products()]
+
+
+@app.get("/api/v1/product/{product_slug}")
+def get_product_detail(product_slug: str) -> Dict[str, Any]:
+    """Полная информация о продукте: defaults, url, base_calc_slug и т.д."""
+    product = get_product(product_slug)  # KeyError → 404
+    return product.to_api_dict_full()
 
 
 @app.post("/api/v1/calc/{slug}")
