@@ -136,6 +136,9 @@ class InsainAgent:
         self._product_index: str = ""
         # Последний успешный расчёт per user (для пересчёта и восстановления slug)
         self._user_calc_context: Dict[int, Dict[str, Any]] = {}
+        # Активный продукт/калькулятор per user (фиксируем сразу после роутинга).
+        # Нужен, чтобы короткие ответы ("1", "да", "500") не возвращали к прошлому продукту.
+        self._user_active_calc_target: Dict[int, Dict[str, str]] = {}
         self._load_calculators_and_tools()
 
     @staticmethod
@@ -281,8 +284,7 @@ class InsainAgent:
         )
         result = self.execute_tool(tool_name, payload)
         display_args = self._calc_args_for_display_and_storage(tool_name, payload)
-        prev_ctx = self._user_calc_context.get(user_id) or {}
-        ps = (prev_ctx.get("product_slug") or "").strip() or None
+        ps = self._resolve_product_for_format(user_id, tool_name)
         if isinstance(result, dict) and "error" not in result:
             self._user_calc_context[user_id] = {
                 "slug": "print_sheet",
@@ -660,18 +662,22 @@ class InsainAgent:
 
             # Восстановление из контекста при пустом slug
             if intent == "calculator" and not calc_slug:
-                ctx = self._user_calc_context.get(user_id)
-                if ctx:
-                    prev_product = (ctx.get("product_slug") or "").strip()
+                active = self._user_active_calc_target.get(user_id) or {}
+                prev_product = (active.get("product_slug") or "").strip()
+                prev_calc = (active.get("calc_slug") or "").strip()
+                if not prev_calc:
+                    ctx = self._user_calc_context.get(user_id) or {}
+                    prev_product = prev_product or (ctx.get("product_slug") or "").strip()
                     prev_calc = (ctx.get("slug") or "").strip()
+                if prev_product or prev_calc:
                     if prev_product and prev_product in self._product_by_slug:
                         product_slug = prev_product
                         p = self._product_by_slug[prev_product]
                         calc_slug = (p.get("base_calc_slug") or "").strip()
-                        logger.info("Router: восстановлен product_slug из контекста: %s → %s", product_slug, calc_slug)
+                        logger.info("Router: восстановлен product_slug из активного контекста: %s → %s", product_slug, calc_slug)
                     elif prev_calc and prev_calc in self._calc_tool_by_slug:
                         calc_slug = prev_calc
-                        logger.info("Router: восстановлен calc_slug из контекста: %s", calc_slug)
+                        logger.info("Router: восстановлен calc_slug из активного контекста: %s", calc_slug)
 
             # Эвристика магнитов (временно, до стабилизации product routing)
             mh = self._heuristic_magnet_slug(user_message)
@@ -715,9 +721,7 @@ class InsainAgent:
             return True
         if re.match(r"^\s*\d+\s*шт\s*$", t):
             return True
-        if any(x in t for x in ("посчитай", "пересчитай")) and (
-            re.search(r"\d+\s*шт", t) or re.search(r"\b[14]\s*\+\s*[014]\b", t)
-        ):
+        if any(x in t for x in ("посчитай", "пересчитай")):
             return True
         # Постпечатные опции (print_sheet): нумерация, штрихкод, скругление и т.д.
         if re.search(
@@ -777,10 +781,12 @@ class InsainAgent:
             intent, calc_slug = intent_m, cs_m
 
         ctx = self._user_calc_context.get(user_id)
-        if not ctx:
-            return intent, product_slug, calc_slug
-        prev_calc = (ctx.get("slug") or "").strip()
-        prev_product = (ctx.get("product_slug") or "").strip()
+        active = self._user_active_calc_target.get(user_id) or {}
+        prev_calc = (active.get("calc_slug") or "").strip()
+        prev_product = (active.get("product_slug") or "").strip()
+        if (not prev_calc or prev_calc not in self._calc_tool_by_slug) and ctx:
+            prev_calc = (ctx.get("slug") or "").strip()
+            prev_product = prev_product or (ctx.get("product_slug") or "").strip()
         if not prev_calc or prev_calc not in self._calc_tool_by_slug:
             return intent, product_slug, calc_slug
         # Роутер явно выбрал другой продукт/калькулятор — не затираем
@@ -842,6 +848,42 @@ class InsainAgent:
             )
             return "calculator", "magnet_acrylic"
         return intent, slug
+
+    def _reset_last_success_on_calc_switch(
+        self,
+        user_id: int,
+        intent: str,
+        calc_slug: Optional[str],
+    ) -> None:
+        """
+        При явной смене калькулятора сбрасываем last_success контекст, чтобы
+        параметры прошлого калькулятора не протекали в новый.
+        """
+        if intent != "calculator" or not calc_slug:
+            return
+        ctx = self._user_calc_context.get(user_id)
+        if not ctx:
+            return
+        prev_calc = (ctx.get("slug") or "").strip()
+        if prev_calc and prev_calc != calc_slug:
+            logger.info(
+                "Switch calc: очищен last_success контекст user=%s %s -> %s",
+                user_id,
+                prev_calc,
+                calc_slug,
+            )
+            self._user_calc_context.pop(user_id, None)
+
+    def _share_url_matches_slug(self, text: str, slug: str) -> bool:
+        """Проверяет, что share-ссылка в тексте ассистента относится к калькулятору slug."""
+        m = re.search(r"insain\.ru/calculator/([a-z0-9_-]+)", text)
+        if not m:
+            return True  # нет ссылки — не блокируем
+        url_slug = m.group(1)
+        if url_slug == slug:
+            return True
+        # product_slug в URL может отличаться от base calc_slug
+        return self._product_calc_matches(url_slug, slug)
 
     @staticmethod
     def _params_from_share_url_in_text(text: str) -> Dict[str, Any]:
@@ -919,6 +961,23 @@ class InsainAgent:
                 out["color"] = c
         return out
 
+    def _allowed_params_for_slug(self, slug: str) -> Optional[set]:
+        """Whitelist допустимых имён параметров для калькулятора (из tool_schema)."""
+        tool = self._calc_tool_by_slug.get(slug)
+        if not tool:
+            return None
+        props = ((tool.get("function") or {}).get("parameters") or {}).get("properties")
+        if not isinstance(props, dict):
+            return None
+        return set(props.keys())
+
+    def _filter_params_by_schema(self, slug: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Оставить только параметры, допустимые для данного калькулятора."""
+        allowed = self._allowed_params_for_slug(slug)
+        if allowed is None:
+            return params
+        return {k: v for k, v in params.items() if k in allowed}
+
     def _merge_params_for_recalc(
         self,
         slug: str,
@@ -928,13 +987,16 @@ class InsainAgent:
     ) -> Dict[str, Any]:
         """База из контекста + последний показанный расчёт в истории + правки из реплики пользователя."""
         merged: Dict[str, Any] = dict(ctx_params or {})
-        # Последний блок расчёта / ссылка в истории (актуальнее застрявшего ctx после «галлюцинаций»)
+        # Последний блок расчёта / ссылка в истории — берём только если относится к текущему calc_slug
         for msg in reversed(history or []):
             if msg.get("role") != "assistant":
                 continue
             text = msg.get("content") or ""
             if "💰 Цена:" in text or "insain.ru/calculator/" in text:
-                merged.update(self._params_from_share_url_in_text(text))
+                url_params = self._params_from_share_url_in_text(text)
+                if url_params and not self._share_url_matches_slug(text, slug):
+                    break
+                merged.update(url_params)
                 if slug == "print_sheet":
                     merged.update(self._parse_print_sheet_from_assistant_block(text))
                 break
@@ -1001,7 +1063,7 @@ class InsainAgent:
             elif re.search(r"(добав|включ|нужн|хоч|с\s)\w*\s*ламинац", um, re.I):
                 if not merged.get("lamination_id"):
                     merged["lamination_id"] = "Laminat32G"
-        return merged
+        return self._filter_params_by_schema(slug, merged)
 
     def _calc_params_sufficient(self, slug: str, params: Dict[str, Any]) -> bool:
         tool = self._calc_tool_by_slug.get(slug)
@@ -1046,7 +1108,7 @@ class InsainAgent:
         logger.info("Forced calc: вызов %s с аргументами %s", tool_name, merged)
         result = self.execute_tool(tool_name, merged)
         display_args = self._calc_args_for_display_and_storage(tool_name, merged)
-        ps = (ctx.get("product_slug") or "").strip() or None
+        ps = self._resolve_product_for_format(user_id, tool_name)
         if isinstance(result, dict) and "error" not in result:
             cslug = tool_name[5:] if tool_name.startswith("calc_") else tool_name
             self._user_calc_context[user_id] = {
@@ -1068,6 +1130,53 @@ class InsainAgent:
             # Fallback без calc tools — агент уточнит тип продукта
             return [SEARCH_KNOWLEDGE_TOOL]
         return list(full_tools)
+
+    def _build_enum_mapping_block(self, calc_slug: str) -> str:
+        """
+        Автогенерация блока маппинга enum-параметров из param_schema.
+
+        Для каждого enum-поля с choices.inline (кроме material_id, lamination_id, mode, color)
+        строит явную таблицу «человеко-понятное значение → код», чтобы
+        слабые модели надёжно маппили текст пользователя на enum-значения.
+        """
+        SKIP_FIELDS = {"material_id", "lamination_id", "mode", "color"}
+        schema = self._param_schemas.get(calc_slug)
+        if not schema:
+            return ""
+        params_list = schema.get("params")
+        if not isinstance(params_list, list):
+            return ""
+        blocks: List[str] = []
+        for pdef in params_list:
+            field_name = (pdef.get("name") or "").strip()
+            if not field_name or field_name in SKIP_FIELDS:
+                continue
+            choices_def = pdef.get("choices")
+            if not isinstance(choices_def, dict):
+                continue
+            inline = choices_def.get("inline")
+            if not inline or not isinstance(inline, list) or len(inline) < 2:
+                continue
+            field_title = (pdef.get("title") or field_name).strip()
+            mapping_lines: List[str] = []
+            for item in inline:
+                if not isinstance(item, dict):
+                    continue
+                item_id = item.get("id")
+                if item_id is None:
+                    continue
+                item_title = (item.get("title") or str(item_id)).strip()
+                mapping_lines.append(f"  «{item_title}» → {item_id}")
+            if len(mapping_lines) < 2:
+                continue
+            block = (
+                f"МАППИНГ «{field_name}» ({field_title}):\n"
+                + "\n".join(mapping_lines)
+                + "\nПри упоминании пользователем любого из значений слева — "
+                "СРАЗУ подставь код справа и вызови калькулятор. НЕ спрашивай подтверждение."
+            )
+            blocks.append(block)
+        return "\n\n".join(blocks)
 
     def _system_prompt_for_intent(
         self,
@@ -1096,6 +1205,7 @@ class InsainAgent:
                     product_title = product.get("title") or ""
                     product_defaults = product.get("defaults") or None
                     product_disambiguation = product.get("disambiguation") or ""
+            enum_mapping = self._build_enum_mapping_block(calc_slug)
             return build_calc_system_prompt(
                 slug=calc_slug,
                 tool_name=tool_name,
@@ -1105,6 +1215,7 @@ class InsainAgent:
                 product_title=product_title,
                 product_defaults=product_defaults,
                 product_disambiguation=product_disambiguation,
+                enum_mapping=enum_mapping,
             )
         return build_calc_system_prompt_full(self._calculators, products=self._products or None)
 
@@ -1552,6 +1663,35 @@ class InsainAgent:
                 out["material_id"] = resolved
         return out
 
+    def _product_calc_matches(self, product_slug: str, calc_slug: str) -> bool:
+        """product_slug консистентен с calc_slug (через base_calc_slug из products.json)?"""
+        product = self._product_by_slug.get(product_slug)
+        if not product:
+            return product_slug == calc_slug
+        base = (product.get("base_calc_slug") or "").strip()
+        return base == calc_slug or product_slug == calc_slug
+
+    def _resolve_product_for_format(
+        self, user_id: int, calc_tool_name: str
+    ) -> Optional[str]:
+        """
+        Единый резолвер product_slug для форматирования результата calc_*.
+        Приоритет: active_route → last_success_context. Проверяет консистентность с calc.
+        """
+        calc_slug = calc_tool_name[5:] if calc_tool_name.startswith("calc_") else calc_tool_name
+
+        active = self._user_active_calc_target.get(user_id) or {}
+        ps = (active.get("product_slug") or "").strip()
+        if ps and self._product_calc_matches(ps, calc_slug):
+            return ps
+
+        ctx = self._user_calc_context.get(user_id) or {}
+        ps = (ctx.get("product_slug") or "").strip()
+        if ps and self._product_calc_matches(ps, calc_slug):
+            return ps
+
+        return None
+
     def _apply_product_defaults(
         self, product_slug: str, args: Dict[str, Any]
     ) -> Dict[str, Any]:
@@ -1699,6 +1839,12 @@ class InsainAgent:
             intent, product_slug, calc_slug = self._router_apply_context_override(
                 intent, product_slug, calc_slug, user_message, user_id, history
             )
+            self._reset_last_success_on_calc_switch(user_id, intent, calc_slug)
+            if intent == "calculator" and calc_slug and calc_slug in self._calc_tool_by_slug:
+                self._user_active_calc_target[user_id] = {
+                    "product_slug": (product_slug or "").strip(),
+                    "calc_slug": calc_slug,
+                }
             tools = self._tools_for_intent(intent, calc_slug, full_tools)
             system_prompt = self._system_prompt_for_intent(intent, product_slug, calc_slug, user_id=user_id)
         else:
@@ -1791,16 +1937,17 @@ class InsainAgent:
 
             if calc_tool_name and calc_result is not None:
                 display_args = self._calc_args_for_display_and_storage(calc_tool_name, calc_args)
+                ps = self._resolve_product_for_format(user_id, calc_tool_name)
                 if "error" not in calc_result:
                     cslug = calc_tool_name[5:] if calc_tool_name.startswith("calc_") else calc_tool_name
                     self._user_calc_context[user_id] = {
                         "slug": cslug,
-                        "product_slug": product_slug or "",
+                        "product_slug": ps or "",
                         "tool_name": calc_tool_name,
                         "params": dict(display_args),
                     }
                 return self.sanitize_llm_reply_for_display(
-                    self._format_calc_result(calc_tool_name, display_args, calc_result, product_slug=product_slug)
+                    self._format_calc_result(calc_tool_name, display_args, calc_result, product_slug=ps)
                 )
 
             try:

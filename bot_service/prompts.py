@@ -231,6 +231,7 @@ def build_calc_system_prompt(
     product_title: str = "",
     product_defaults: Optional[Dict[str, Any]] = None,
     product_disambiguation: str = "",
+    enum_mapping: str = "",
 ) -> str:
     """
     System prompt для расчёта одним калькулятором.
@@ -310,6 +311,10 @@ def build_calc_system_prompt(
     if calculator_prompt:
         parts.append("")
         parts.append(f"=== АЛГОРИТМ РАСЧЁТА ({slug}) ===\n{calculator_prompt}")
+
+    if enum_mapping:
+        parts.append("")
+        parts.append(f"=== ПОДСТАНОВКА ПАРАМЕТРОВ ===\n{enum_mapping}")
 
     return "\n".join(parts)
 
