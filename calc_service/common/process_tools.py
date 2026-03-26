@@ -678,6 +678,49 @@ def calc_manual_roll(
 
 
 # ══════════════════════════════════════════════════════════════════════
+#  НАКАТКА НА ЛАМИНАТОРЕ (прикатка листов к основе)
+# ══════════════════════════════════════════════════════════════════════
+
+LAMINATION_ROLL_CODE = "FGKFM360"
+
+def calc_lamination_roll(num_sheet: int, size_sheet: Sequence[float], mode: int = 1) -> ProcessResult:
+    """
+    Накатка отпечатанных листов на основу через ламинатор (аналог calcLaminationRoll из JS).
+    Используется при изготовлении магнитов, бейджей и т.п.
+    """
+    from equipment import laminator as laminator_catalog
+
+    try:
+        laminator = laminator_catalog.get(LAMINATION_ROLL_CODE)
+    except KeyError:
+        return ProcessResult()
+
+    defects = laminator.get_defect_rate(float(num_sheet))
+    if mode > 1:
+        defects += defects * (mode - 1)
+    num_with_defects = math.ceil(num_sheet * (1 + defects))
+
+    meter_per_hour = 25.0
+    layout = layout_on_roll(1, list(size_sheet), laminator.max_size or [330, 0], 0)
+    length_m = (layout.get("length", 1000) or 1000) / 1000.0
+    if length_m <= 0:
+        length_m = 0.5
+    sheet_per_hour = max(1, meter_per_hour / length_m)
+
+    time_prepare = (laminator.time_prepare or 0.1) * mode
+    time_roll = num_with_defects / sheet_per_hour + time_prepare
+    cost_roll = laminator.depreciation_per_hour * time_roll
+    cost_operator = time_roll * laminator.operator_cost_per_hour
+
+    cost = cost_roll + cost_operator
+    margin_lam = get_margin("marginLamination") or 0
+    price = (cost_roll + cost_operator) * (1 + MARGIN_OPERATION + margin_lam)
+
+    time_hours = math.ceil(time_roll * 100) / 100
+    return ProcessResult(cost=cost, price=price, time_hours=time_hours, time_ready=time_hours)
+
+
+# ══════════════════════════════════════════════════════════════════════
 #  ПОЛИМЕРНАЯ ЗАЛИВКА
 # ══════════════════════════════════════════════════════════════════════
 

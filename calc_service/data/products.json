@@ -245,10 +245,28 @@
       "quantity": 100,
       "width_mm": 50,
       "height_mm": 50,
-      "magnet_id": "MagnetVinil04"
+      "magnet_id": "MagnetVinil04",
+      "shape": "rectangular"
     },
     "keywords": ["магнит", "магниты", "виниловый", "ламинированный", "на холодильник"],
     "disambiguation": "Виниловые (ламинированные) магниты с печатью. Произвольный размер в мм. НЕ акриловые."
+  },
+  {
+    "product_slug": "magnet_polymer",
+    "title": "Магниты с полимерной заливкой",
+    "base_calc_slug": "magnet_laminated",
+    "url": "",
+    "category": "souvenir",
+    "defaults": {
+      "quantity": 100,
+      "width_mm": 50,
+      "height_mm": 50,
+      "magnet_id": "MagnetVinil04",
+      "is_epoxy": true,
+      "shape": "rectangular"
+    },
+    "keywords": ["магнит", "магниты", "полимерный", "эпоксидный", "заливка", "полимерная заливка"],
+    "disambiguation": "Магниты с полимерной (эпоксидной) заливкой на магнитном виниле. Произвольный размер в мм. Обёртка над калькулятором ламинированных магнитов с параметром is_epoxy=true."
   },
   {
     "product_slug": "plaque",

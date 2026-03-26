@@ -281,13 +281,16 @@ class InsainAgent:
         )
         result = self.execute_tool(tool_name, payload)
         display_args = self._calc_args_for_display_and_storage(tool_name, payload)
+        prev_ctx = self._user_calc_context.get(user_id) or {}
+        ps = (prev_ctx.get("product_slug") or "").strip() or None
         if isinstance(result, dict) and "error" not in result:
             self._user_calc_context[user_id] = {
                 "slug": "print_sheet",
+                "product_slug": ps or "",
                 "tool_name": tool_name,
                 "params": dict(display_args),
             }
-        return self._format_calc_result(tool_name, display_args, result)
+        return self._format_calc_result(tool_name, display_args, result, product_slug=ps)
 
     def _load_calculators_and_tools(self) -> None:
         try:
@@ -1043,15 +1046,16 @@ class InsainAgent:
         logger.info("Forced calc: вызов %s с аргументами %s", tool_name, merged)
         result = self.execute_tool(tool_name, merged)
         display_args = self._calc_args_for_display_and_storage(tool_name, merged)
+        ps = (ctx.get("product_slug") or "").strip() or None
         if isinstance(result, dict) and "error" not in result:
             cslug = tool_name[5:] if tool_name.startswith("calc_") else tool_name
             self._user_calc_context[user_id] = {
                 "slug": cslug,
-                "product_slug": ctx.get("product_slug") or "",
+                "product_slug": ps or "",
                 "tool_name": tool_name,
                 "params": dict(display_args),
             }
-        return self._format_calc_result(tool_name, display_args, result)
+        return self._format_calc_result(tool_name, display_args, result, product_slug=ps)
 
     def _tools_for_intent(
         self, intent: str, calc_slug: Optional[str], full_tools: List[Dict[str, Any]]
@@ -1227,6 +1231,7 @@ class InsainAgent:
         tool_name: str,
         args: Dict[str, Any],
         result: Dict[str, Any],
+        product_slug: Optional[str] = None,
     ) -> str:
         slug = tool_name
         if slug.startswith("calc_"):
@@ -1236,8 +1241,13 @@ class InsainAgent:
             err = str(result.get("error") or "Неизвестная ошибка.")
             return f"Не удалось выполнить расчёт: {err}"
 
-        meta = self._find_calculator_meta(slug)
-        calc_title = meta.get("name") or slug
+        # Product-first: заголовок и slug для URL берём из продукта, а не калькулятора
+        product = self._product_by_slug.get(product_slug or "") if product_slug else None
+        if product:
+            calc_title = product.get("title") or product.get("product_slug") or slug
+        else:
+            meta = self._find_calculator_meta(slug)
+            calc_title = meta.get("name") or slug
 
         quantity = args.get("quantity") or args.get("num_sheet") or args.get("n") or args.get("count")
         try:
@@ -1265,6 +1275,8 @@ class InsainAgent:
         time_ready = float(result.get("time_ready") or 0)
         weight_kg = float(result.get("weight_kg") or 0)
         share_url = result.get("share_url") or ""
+        if share_url and product_slug and product_slug != slug:
+            share_url = share_url.replace(f"/calculator/{slug}", f"/calculator/{product_slug}")
 
         display_price = price
         display_unit_price = unit_price
@@ -1540,6 +1552,23 @@ class InsainAgent:
                 out["material_id"] = resolved
         return out
 
+    def _apply_product_defaults(
+        self, product_slug: str, args: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Подставить product defaults для ключей, которые LLM не передала в tool call."""
+        product = self._product_by_slug.get(product_slug)
+        if not product:
+            return args
+        defaults = product.get("defaults") or {}
+        if not defaults:
+            return args
+        merged = dict(args)
+        for k, v in defaults.items():
+            if k not in merged:
+                merged[k] = v
+                logger.debug("Product defaults: %s=%r (product=%s)", k, v, product_slug)
+        return merged
+
     def _calc_args_for_display_and_storage(
         self, calc_tool_name: str, raw_args: Dict[str, Any]
     ) -> Dict[str, Any]:
@@ -1744,6 +1773,9 @@ class InsainAgent:
                 except json.JSONDecodeError:
                     args = {}
 
+                if name.startswith("calc_") and product_slug:
+                    args = self._apply_product_defaults(product_slug, args)
+
                 tool_result = self.execute_tool(name, args)
                 tc_id = tc.get("id", f"tc_{tool_calls.index(tc)}")
                 messages.append({
@@ -1768,7 +1800,7 @@ class InsainAgent:
                         "params": dict(display_args),
                     }
                 return self.sanitize_llm_reply_for_display(
-                    self._format_calc_result(calc_tool_name, display_args, calc_result)
+                    self._format_calc_result(calc_tool_name, display_args, calc_result, product_slug=product_slug)
                 )
 
             try:

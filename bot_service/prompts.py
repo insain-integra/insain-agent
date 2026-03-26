@@ -184,6 +184,7 @@ def build_router_system_prompt(
         "«бейджи с заливкой» → badge_poly_fill.\n"
         "«магниты акриловые» → (ищи magnet_acrylic если есть, иначе knowledge).\n"
         "«магниты ламинированные/виниловые» → magnet_vinyl.\n"
+        "«магниты полимерные/эпоксидные/с заливкой» → magnet_polymer.\n"
         "«таблички» → tablets; «стенды» → stand; «хештеги» → hashtag; «шильды» → shild.\n"
         "«листовки/визитки/флаеры» → print_sheet.\n"
         "«широкоформат/баннер/постер» → print_wide.\n\n"

@@ -17,53 +17,12 @@ from calculators.uv_print import UVPrintCalculator
 from common.helpers import calc_weight
 from common.layout import layout_on_sheet
 from common.markups import BASE_TIME_READY, MARGIN_MATERIAL, MARGIN_OPERATION, get_margin, get_time_ready
-from common.process_tools import calc_attachment, calc_packing
-from equipment import laminator as laminator_catalog
+from common.process_tools import calc_attachment, calc_lamination_roll, calc_packing
 from materials import hardsheet as hardsheet_catalog, sheet as sheet_catalog
 
 DEFAULT_PRINT_MATERIAL = "RaflatacMW"
 DEFAULT_LAMINATION = "Laminat32G"
 SIZE_SHEET_BADGE = [320, 450]
-LAMINATOR_CODE = "FGKFM360"
-
-
-def _calc_lamination_roll(num_sheet: int, size_sheet: List[float], mode: int) -> Dict[str, Any]:
-    """
-    Накатка отпечатанных листов на основу (аналог calcLaminationRoll из JS).
-    """
-    try:
-        laminator = laminator_catalog.get(LAMINATOR_CODE)
-    except KeyError:
-        return {"cost": 0.0, "price": 0.0, "time_hours": 0.0, "time_ready": 0.0}
-
-    defects = laminator.get_defect_rate(float(num_sheet))
-    if mode > 1:
-        defects += defects * (mode - 1)
-    num_with_defects = math.ceil(num_sheet * (1 + defects))
-
-    meter_per_hour = 25.0
-    from common.layout import layout_on_roll
-    layout = layout_on_roll(1, size_sheet, laminator.max_size or [330, 0], 0)
-    length_m = (layout.get("length", 1000) or 1000) / 1000.0
-    if length_m <= 0:
-        length_m = 0.5
-    sheet_per_hour = max(1, meter_per_hour / length_m)
-
-    time_prepare = (laminator.time_prepare or 0.1) * mode
-    time_roll = num_with_defects / sheet_per_hour + time_prepare
-    cost_roll = laminator.depreciation_per_hour * time_roll
-    cost_operator = time_roll * laminator.operator_cost_per_hour
-
-    cost = cost_roll + cost_operator
-    margin_lam = get_margin("marginLamination") or 0
-    price = (cost_roll + cost_operator) * (1 + MARGIN_OPERATION + margin_lam)
-
-    return {
-        "cost": cost,
-        "price": price,
-        "time_hours": math.ceil(time_roll * 100) / 100,
-        "time_ready": time_roll,
-    }
 
 
 class BadgeCalculator(BaseCalculator):
@@ -228,10 +187,10 @@ class BadgeCalculator(BaseCalculator):
             materials_out.extend(laser_result1.get("materials") or [])
 
             # Накатка
-            roll_result = _calc_lamination_roll(num_sheet, SIZE_SHEET_BADGE, mode.value)
-            cost_roll = roll_result["cost"]
-            price_roll = roll_result["price"]
-            time_roll = roll_result["time_hours"]
+            roll_pr = calc_lamination_roll(num_sheet, SIZE_SHEET_BADGE, mode.value)
+            cost_roll = roll_pr.cost
+            price_roll = roll_pr.price
+            time_roll = roll_pr.time_hours
 
         # Лазерная резка изделий
         laser_calc = LaserCalculator()
