@@ -1,0 +1,49 @@
+Калькулятор: Калькулятор флажков бумажных
+URL: https://insain.ru/catalog/kalkulyator-flazhkov-bumazhnyh/
+Функция расчёта: calcFlagPaper
+Параметров: 5
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2256
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Размер
+  ezfc_id: 2258
+  element_name: dpdsize
+  Тип: select
+  Варианты:
+    • 148х105мм (value=0, code=148,105)
+    • 200х90мм (value=1, code=200,99)
+    • 210х148мм (value=2, code=210,148)
+
+Параметр 3: Бумага
+  ezfc_id: 2263
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • 115гр (value=0, code=PaperCoated115M)
+    • 170гр (value=1, code=PaperCoated170M)
+    • 200гр (value=2, code=PaperCoated200M)
+    • 250гр (value=3, code=PaperCoated250M)
+
+Параметр 4: Ламинация
+  ezfc_id: 2264
+  element_name: dpdcoverlaminat
+  Тип: select
+  Варианты:
+    • нет (value=0)
+    • глянцевая, 32 мкм (value=1, code=Laminat32G)
+    • матовая, 32 мкм (value=2, code=Laminat32M)
+
+Параметр 5: Цветность
+  ezfc_id: 2282
+  element_name: dpdcolor
+  Тип: select
+  Варианты:
+    • 4+0 (value=0, code=4+0)
+    • 4+4 (value=1, code=4+4)
+

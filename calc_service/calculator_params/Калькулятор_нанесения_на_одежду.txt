@@ -1,0 +1,119 @@
+Калькулятор: Калькулятор нанесения на одежду
+URL: https://insain.ru/catalog/kalkulyator-naneseniya-na-odezhdu/
+Функция расчёта: calcHeatPress
+Параметров: 14
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 1539
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Ширина нанесения, мм
+  ezfc_id: 1540
+  element_name: numw
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 3: Высота нанесения, мм
+  ezfc_id: 1541
+  element_name: numh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 4: Тип изделия
+  ezfc_id: 1542
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • Футболка/поло/рубашка (value=0, code=tshirt)
+    • Толстовка (value=1, code=clothes)
+    • Бейсболка (value=2, code=hat)
+    • Зонт (value=3, code=ambrella)
+    • Сумка/рюкзак (value=4, code=bag)
+
+Параметр 5: Способ нанесения
+  ezfc_id: 1546
+  element_name: dpdheatpress
+  Тип: select
+  Варианты:
+    • нанесение пленками (value=0, code=film)
+    • сублимационная печать по синтетике (value=1, code=sublimation)
+    • пленка с полноцветной сублимационной печатью (value=2, code=filmSublimation)
+    • пленка с полноцветной экосольвентной печатью (value=3, code=filmEcosolvent)
+    • печать полноцветная термобумагой (value=4, code=paperLaser)
+    • шелкотрансферная печать (value=5, code=silk)
+    • DTF-печать (value=6, code=dtf)
+
+Параметр 6: Пленка для аппликации
+  ezfc_id: 1555
+  element_name: dpdapplicationmaterial
+  Тип: select
+  Варианты:
+    • Термопленка POLI-FLEX, серия PREMIUM, белая/черная (value=0, code=POLIFLEXPREMIUMBW)
+    • Термопленка POLI-FLEX, серия PREMIUM, цветная (value=1, code=POLIFLEXPREMIUMCOLOR)
+    • Термопленка декоративная (металлик, голографические, глиттерные) (value=2, code=POLIFLEXIMAGE)
+
+Параметр 7: Кол-во цветов
+  ezfc_id: 1558
+  element_name: numfilm
+  Тип: tel
+  Варианты:
+    • value=1
+
+Параметр 8: setmaxsize
+  ezfc_id: 1559
+  element_name: setmaxsize
+  Тип: text
+  Варианты:
+    • Свободный ввод
+
+Параметр 9: Размер элементов, мм
+  ezfc_id: 1561
+  element_name: numsizeitem
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 10: Плотность элементов
+  ezfc_id: 1562
+  element_name: numdensity
+  Тип: tel
+  Варианты:
+    • value=25
+
+Параметр 11: Форма наклейки
+  ezfc_id: 1563
+  element_name: dpdfilmdifficulty
+  Тип: select
+  Варианты:
+    • Простая форма (value=0, code=1)
+    • Сложная форма (value=1, code=1.3)
+    • Сложная форма с внутренними элементами (value=2, code=1.7)
+
+Параметр 12: Кол-во цветов
+  ezfc_id: 1590
+  element_name: numsilkcolor
+  Тип: tel
+  Варианты:
+    • value=1
+
+Параметр 13: rdocolortshirt
+  ezfc_id: 1591
+  element_name: rdocolortshirt
+  Тип: radio
+  Варианты:
+    • белая ткань (value=0, code=0)
+    • цветная ткань (value=1, code=1)
+
+Параметр 14: ckbmaterialcostomer
+  ezfc_id: 2283
+  element_name: ckbmaterialcostomer
+  Тип: checkbox
+  Варианты:
+    • Изделие заказчика +25% (value=0, code=isMaterialCustomer)
+

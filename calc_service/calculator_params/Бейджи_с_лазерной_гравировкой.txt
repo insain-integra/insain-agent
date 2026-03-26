@@ -1,0 +1,122 @@
+Калькулятор: Бейджи с лазерной гравировкой
+URL: https://insain.ru/catalog/bejdzhi-s-lazernoj-gravirovkoj/
+Функция расчёта: calcBadge
+Параметров: 14
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2595
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Ширина, мм
+  ezfc_id: 2596
+  element_name: numw
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 3: Высота, мм
+  ezfc_id: 2597
+  element_name: numh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 4: Материал основы
+  ezfc_id: 2598
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • Двухслойный пластик для гравирования ROWMARK LASERMAX, акрил, 2 слоя, 1220 х 600 мм x 1.6 ммслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=0, code=ROWMARKLASERMAX)
+    • Акрил молочный Plexiglas XT 3мм (value=1, code=AcrylWhite3)
+    • Акрил прозрачный Plexiglas XT 2мм (value=2, code=AcrylTrans2)
+    • Акрил прозрачный Plexiglas XT 3мм (value=3, code=AcrylTrans3)
+    • Акрил цветной Plexiglas XT 3мм (value=4, code=AcrylColor3)
+    • Фанера сорт 2/2 3мм (value=5, code=Plywood3)
+    • Фанера сорт 2/2 4мм (value=6, code=Plywood4)
+    • Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=7, code=ZENOMARKLASER)
+
+Параметр 5: Сложность форма бейджа
+  ezfc_id: 2599
+  element_name: dpddifficulty
+  Тип: select
+  Варианты:
+    • простая (value=0, code=1)
+    • сложная (value=1, code=1.3)
+
+Параметр 6: chkpocket
+  ezfc_id: 2600
+  element_name: chkpocket
+  Тип: checkbox
+  Варианты:
+    • Окошко для имени (value=0, code=Pocket)
+
+Параметр 7: chkgrave
+  ezfc_id: 2603
+  element_name: chkgrave
+  Тип: checkbox
+  Варианты:
+    • Гравировка (value=0, code=isGrave)
+
+Параметр 8: Ширина, мм
+  ezfc_id: 2604
+  element_name: numgravew
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 9: Высота, мм
+  ezfc_id: 2605
+  element_name: numgraveh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 10: chkuvprint
+  ezfc_id: 2607
+  element_name: chkuvprint
+  Тип: checkbox
+  Варианты:
+    • УФ-печать (value=0, code=isUVPrint)
+
+Параметр 11: Цветность
+  ezfc_id: 2608
+  element_name: dpdcolor
+  Тип: select
+  Варианты:
+    • полноцвет (value=0, code=4+0)
+    • полноцвет + белый (value=1, code=4+1)
+    • белый (value=2, code=1+0)
+
+Параметр 12: chkepoxy
+  ezfc_id: 2609
+  element_name: chkepoxy
+  Тип: checkbox
+  Варианты:
+    • Полимерная заливка смолой (value=0, code=isEpoxy)
+
+Параметр 13: Крепление
+  ezfc_id: 2610
+  element_name: dpdattachment
+  Тип: select
+  Варианты:
+    • без крепления (value=0, code=No)
+    • игла-цанга (value=1, code=BC)
+    • булавка металлическая 20мм (value=2, code=PinMetall20)
+    • булавка металлическая 25мм (value=3, code=PinMetall25)
+    • булавка металлическая 30мм (value=4, code=PinMetall30)
+    • булавка пластиковая 30мм с самокл.основной" (value=5, code=PinPlastic)
+    • магнитное крепление с клеевым слоем, 45*13мм (value=6, code=Magnet4513)
+    • магнитное крепление с клеевым слоем, круг 17мм (value=7, code=Magnet17)
+    • клеевой слой 3М 0.05мм (value=8, code=AdhesiveLayer50)
+
+Параметр 14: chkpacking
+  ezfc_id: 2611
+  element_name: chkpacking
+  Тип: checkbox
+  Варианты:
+    • Упаковка (value=0, code=isPacking)
+

@@ -1,0 +1,237 @@
+Калькулятор: Калькулятор стендов
+URL: https://insain.ru/catalog/kalkulyator-stendov/
+Функция расчёта: calcTablets
+Параметров: 27
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 1924
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=1
+
+Параметр 2: Ширина, мм
+  ezfc_id: 1925
+  element_name: numw
+  Тип: text
+  Варианты:
+    • value=1000
+
+Параметр 3: Высота, мм
+  ezfc_id: 1926
+  element_name: numh
+  Тип: text
+  Варианты:
+    • value=1000
+
+Параметр 4: Материал
+  ezfc_id: 1927
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • не задан материал (value=0)
+    • ПВХ Unext Strong 3 мм (value=1, code=PVC3)
+    • ПВХ Unext Strong 5 мм (value=2, code=PVC5)
+    • ПВХ Unext Strong 8 мм (value=3, code=PVC8)
+    • ПВХ Unext Strong 10 мм (value=4, code=PVC10)
+    • АКП Altec белый 3мм (стенка 0.3мм) (value=5, code=ACPWhite3)
+    • ПВХ Unext Strong 3 мм цветной (value=6, code=PVCColor3)
+    • ПВХ Unext Strong 5 мм цветной (value=7, code=PVCColor5)
+
+Параметр 5: Способ нанесения фона
+  ezfc_id: 1934
+  element_name: dpdapplication
+  Тип: select
+  Варианты:
+    • без нанесения (value=0, code=noApplication)
+    • УФ-печать (value=1, code=isUVPrint)
+    • пленка с экосольвентной печатью (value=2, code=isECOPrint)
+    • пленка с латексной печатью (value=3, code=isLatexPrint)
+    • пленка цветная/металлизированная (value=4, code=isBackgroundFilm)
+
+Параметр 6: Цветность печати
+  ezfc_id: 1936
+  element_name: dpdcolor
+  Тип: select
+  Варианты:
+    • полноцвет (value=0, code=4+0)
+    • полноцвет + белый (value=1, code=4+1)
+    • белый (value=2, code=1+0)
+
+Параметр 7: Параметры ламинации
+  ezfc_id: 1937
+  element_name: dpdrollwidelaminat
+  Тип: select
+  Варианты:
+    • нет (value=0, code=No)
+    • глянцевая (value=1, code=LaminatDLCLAM)
+    • матовая (value=2, code=LaminatDLCLAM)
+
+Параметр 8: Обработка края
+  ezfc_id: 1938
+  element_name: dpdedge
+  Тип: select
+  Варианты:
+    • подрезка (value=0, code=isCutEdge)
+    • подгибка (value=1, code=isBendEdge)
+
+Параметр 9: Нанесение аппликации пленками
+  ezfc_id: 1940
+  element_name: dpdapplicationmaterial
+  Тип: select
+  Варианты:
+    • нет (value=0, code=0)
+    • Плёнка AVERY, серия 500, белая (value=1, code=Avery500w)
+    • Плёнка AVERY, серия 500, цветная (value=2, code=Avery500c)
+    • Пленка ORACAL 352 металлик (value=3, code=Oracal352)
+    • Плёнка транслюцентная LG, серия LT4000 (value=4, code=LGLT4000)
+    • Плёнка светонакапливающая ФЭС-24, ГОСТ 2009, жёлто-зелёная, для сольвентной печати (value=5, code=FES24)
+    • Плёнка световозвращающая DMP 2000, белая, 1.24 м (value=6, code=DMP2000)
+    • Плёнка световозвращающая ТМ3100, красная, 1.24 м (value=7, code=TM3100)
+
+Параметр 10: Ширина, мм
+  ezfc_id: 1941
+  element_name: numapplicationw
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 11: Высота, мм
+  ezfc_id: 1942
+  element_name: numapplicationh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 12: Кол-во цветов
+  ezfc_id: 1943
+  element_name: numfilm
+  Тип: tel
+  Варианты:
+    • value=1
+
+Параметр 13: setmaxsize
+  ezfc_id: 1944
+  element_name: setmaxsize
+  Тип: text
+  Варианты:
+    • Свободный ввод
+
+Параметр 14: Размер элементов, мм
+  ezfc_id: 1946
+  element_name: numsizeitem
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 15: Плотность элементов
+  ezfc_id: 1947
+  element_name: numdensity
+  Тип: tel
+  Варианты:
+    • value=25
+
+Параметр 16: Форма наклейки
+  ezfc_id: 1948
+  element_name: dpdfilmdifficulty
+  Тип: select
+  Варианты:
+    • Простая форма (value=0, code=1)
+    • Сложная форма (value=1, code=1.3)
+    • Сложная форма с внутренними элементами (value=2, code=1.7)
+
+Параметр 17: Материал для фона
+  ezfc_id: 1949
+  element_name: dpdbackgroudmaterial
+  Тип: select
+  Варианты:
+    • Плёнка AVERY, серия 500, белая (value=0, code=Avery500w)
+    • Плёнка AVERY, серия 500, цветная (value=1, code=Avery500c)
+    • Пленка ORACAL 352 металлик (value=2, code=Oracal352)
+    • Плёнка транслюцентная LG, серия LT4000 (value=3, code=LGLT4000)
+    • Плёнка светонакапливающая ФЭС-24, ГОСТ 2009, жёлто-зелёная, для сольвентной печати (value=4, code=FES24)
+    • Плёнка световозвращающая DMP 2000, белая, 1.24 м (value=5, code=DMP2000)
+    • Плёнка световозвращающая ТМ3100, красная, 1.24 м (value=6, code=TM3100)
+
+Параметр 18: Ширина, мм
+  ezfc_id: 2008
+  element_name: numprintw
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 19: Высота, мм
+  ezfc_id: 2009
+  element_name: numprinth
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 20: ckbsize
+  ezfc_id: 2318
+  element_name: ckbsize
+  Тип: checkbox
+  Варианты:
+    • Задать размеры фона (value=0, code=1)
+
+Параметр 21: Профиль
+  ezfc_id: 2871
+  element_name: dpdprofile
+  Тип: select
+  Варианты:
+    • нет (value=0, code=no)
+    • алюминиевый профиль (value=1, code=AluFrame2Plus)
+
+Параметр 22: Подвес
+  ezfc_id: 2872
+  element_name: dpdhanger
+  Тип: select
+  Варианты:
+    • нет (value=0, code=no)
+    • Подвес стальной Н35, универсальный (value=1, code=HangerH35)
+    • Ухо-подвеска с петлей для настенного монтажа панелей (value=2, code=HangerEar)
+
+Параметр 23: Количество подвесов
+  ezfc_id: 2873
+  element_name: numhangers
+  Тип: tel
+  Варианты:
+    • value=2, placeholder=2
+
+Параметр 24: frmsetpockets
+  ezfc_id: 2933
+  element_name: frmsetpockets
+  Тип: select
+  Варианты:
+    • Карман А5 (value=0, code=PocketPETA5V)
+    • Карман А4 (value=1, code=PocketPETA4V)
+    • Карман А3 (value=2, code=PocketPETA3V)
+    • Карман объемный акриловый А4 (value=3, code=PocketAcrylicA4V)
+    • Карман объемный акриловый А5 (value=4, code=PocketAcrylicA5V)
+    • Карман объемный акриловый Евро (value=5, code=PocketAcrylicEuroV)
+    • Карман на дистанционных держателях А4 вертикальный, ПЭТ 2мм (value=6, code=PocketStandoffА4V)
+    • Карман на металлических держателях А4 вертикальный, ПЭТ 2мм (value=7, code=PocketMetalCapА4V)
+
+Параметр 25: Доп. поверхности
+  ezfc_id: 2959
+  element_name: dpd
+  Тип: select
+  Варианты:
+    • нет (value=0, code=no)
+    • резина ЕВА-пласт 5мм (value=1, code=EVAFoam5)
+
+Параметр 26: Ширина, мм
+  ezfc_id: 2960
+  element_name: numfoamw
+  Тип: tel
+  Варианты:
+    • value=500
+
+Параметр 27: Высота, мм
+  ezfc_id: 2961
+  element_name: numfoamh
+  Тип: tel
+  Варианты:
+    • value=500
+

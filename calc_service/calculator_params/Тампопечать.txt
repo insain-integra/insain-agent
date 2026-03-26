@@ -1,0 +1,64 @@
+Калькулятор: Тампопечать
+URL: https://insain.ru/catalog/tampopechat/
+Функция расчёта: calcPadPrint
+Параметров: 7
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 1433
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Тип изделия
+  ezfc_id: 1434
+  element_name: dpdpreset
+  Тип: select
+  Варианты:
+    • Ручка, брелок, зажигалка (value=0, code=isSmallItems)
+    • Кружка, бокал (value=1, code=isLargeItems)
+    • Нестандартное изделие (value=2, code=isLargeItems)
+
+Параметр 3: Цветность печати
+  ezfc_id: 1435
+  element_name: dpdcolor
+  Тип: select
+  Варианты:
+    • 1 цвет (value=0, code=1)
+    • 2 цвета (value=1, code=2)
+
+Параметр 4: Материал поверхности
+  ezfc_id: 1442
+  element_name: dpdsurfacematerial
+  Тип: select
+  Варианты:
+    • не указан (value=0, code=no)
+    • Пластик (value=1, code=isPlastic)
+    • Металл (value=2, code=isMetall)
+    • Стекло (value=3, code=isGlass)
+    • Камень (value=4, code=isStone)
+    • Кожа (value=5, code=isLeather)
+    • Керамика (value=6, code=isCeramic)
+
+Параметр 5: ckbpantone
+  ezfc_id: 1444
+  element_name: ckbpantone
+  Тип: checkbox
+  Варианты:
+    • Печать по Pantone (value=0, code=true)
+
+Параметр 6: ckbmaterialcustomer
+  ezfc_id: 1445
+  element_name: ckbmaterialcustomer
+  Тип: checkbox
+  Варианты:
+    • Изделие заказчика + 25% (value=0, code=true)
+
+Параметр 7: ckbpacking
+  ezfc_id: 1446
+  element_name: ckbpacking
+  Тип: checkbox
+  Варианты:
+    • Распаковка и упаковка изделий (value=0, code=true)
+

@@ -1,0 +1,33 @@
+Калькулятор: Калькулятор акриловых призов
+URL: https://insain.ru/catalog/kalkulyator-akrilovyh-prizov/
+Функция расчёта: calcAcrilycPrizes
+Параметров: 2
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 3071
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: материал
+  ezfc_id: 3100
+  element_name: frmbazislayers
+  Тип: select
+  Варианты:
+    • Акрил прозрачный Plexiglas XT 3мм (value=0, code=AcrylTrans3)
+    • Акрил прозрачный Plexiglas XT 5мм (value=1, code=AcrylTrans5)
+    • Акрил прозрачный Plexiglas XT 8мм (value=2, code=AcrylTrans8)
+    • Акрил прозрачный Plexiglas XT 10мм (value=3, code=AcrylTrans10)
+    • Акрил молочный Plexiglas XT 3мм (value=4, code=AcrylWhite3)
+    • Акрил молочный Plexiglas XT 5мм (value=5, code=AcrylWhite5)
+    • Акрил молочный Plexiglas XT 8мм (value=6, code=AcrylWhite8)
+    • Акрил молочный Plexiglas XT 10мм (value=7, code=AcrylWhite10)
+    • Акрил цветной Plexiglas XT 3мм (value=8, code=AcrylColor3)
+    • Акрил цветной Plexiglas XT 5мм (value=9, code=AcrylColor5)
+    • Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=10, code=ZENOMARKLASER)
+    • Двухслойный пластик для гравирования SHENGWEI (value=11, code=SHENGWEI)
+    • Двухслойный пластик для гравирования ROWMARK LASERMAX (value=12, code=ROWMARKLASERMAX)
+    • Двухслойный пластик для гравирования ROWMARK LASERMAX (value=13, code=ROWMARKLASERMAX3)
+

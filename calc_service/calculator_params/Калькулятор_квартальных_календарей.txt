@@ -1,0 +1,49 @@
+Калькулятор: Калькулятор квартальных календарей
+URL: https://insain.ru/catalog/kalkulyator-kvartalnyh-kalendarej/
+Функция расчёта: calcCalendarQuarterly
+Параметров: 5
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2049
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Размер
+  ezfc_id: 2050
+  element_name: dpdsize
+  Тип: select
+  Варианты:
+    • Мини (210х297мм) (value=0, code=Mini)
+    • Миди (335х250 мм) (value=1, code=Midi)
+    • Макси (370х290мм) (value=2, code=Maxi)
+
+Параметр 3: Рекламные поля
+  ezfc_id: 2055
+  element_name: dpdfield
+  Тип: select
+  Варианты:
+    • без рекламных полей (value=0)
+    • одно рекламное поле (value=1, code=1)
+    • три рекламных поля (value=2, code=3)
+    • три рекламных поля и боковые (value=3, code=3Plus)
+
+Параметр 4: Дизайн блока
+  ezfc_id: 2056
+  element_name: dpdblock
+  Тип: select
+  Варианты:
+    • офсетная сетка, 80гр (value=0, code=Offset)
+    • мелованная сетка, 90гр (value=1, code=Mel)
+
+Параметр 5: Ламинация
+  ezfc_id: 2057
+  element_name: dpdcoverlaminat
+  Тип: select
+  Варианты:
+    • нет (value=0)
+    • глянцевая, 32 мкм (value=1, code=Laminat32G)
+    • матовая, 32 мкм (value=2, code=Laminat32M)
+

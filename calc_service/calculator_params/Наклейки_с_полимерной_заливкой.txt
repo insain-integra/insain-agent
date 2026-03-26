@@ -1,0 +1,60 @@
+Калькулятор: Наклейки с полимерной заливкой
+URL: https://insain.ru/catalog/naklejki-s-polimernoj-zalivkoj/
+Функция расчёта: calcPolySticker
+Параметров: 6
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 1067
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Ширина, мм
+  ezfc_id: 1068
+  element_name: numw
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 3: Высота, мм
+  ezfc_id: 1069
+  element_name: numh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 4: Форма наклейки
+  ezfc_id: 1072
+  element_name: dpddifficulty
+  Тип: select
+  Варианты:
+    • простая (value=0, code=1)
+    • сложная (value=1, code=1.3)
+
+Параметр 5: Материал
+  ezfc_id: 1076
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 матовая белая 215 г/м (value=0, code=RaflatacMW)
+    • Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 матовая прозрачная 196г/м (value=1, code=RaflatacMT)
+    • Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 глянцевая белая 212г/м (value=2, code=RaflatacGW)
+    • Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 глянцевая прозрачная 211г/м (value=3, code=RaflatacGT)
+    • Плёнка ORAJET 3640, белая/прозрачная/глянцевая/матовая (value=4, code=ORAJET3640)
+    • Плёнка AVERY, серия 500, белая (value=5, code=Avery500w)
+    • Плёнка AVERY, серия 500, цветная (value=6, code=Avery500c)
+    • Пленка ORACAL 352 металлик (value=7, code=Oracal352)
+    • Плёнка транслюцентная LG, серия LT4000 (value=8, code=LGLT4000)
+
+Параметр 6: Способ печати
+  ezfc_id: 1077
+  element_name: dpdprint
+  Тип: select
+  Варианты:
+    • Без печати (value=0, code=No)
+    • Цифровая лазерная печать (value=1, code=KMBizhubC220)
+    • Интерьерная экосольвентная (value=2, code=Technojet160ECO)
+    • Интерьерная латексная (value=3, code=HPLatex335)
+

@@ -1,0 +1,31 @@
+Калькулятор: Калькулятор акриловых брелоков
+URL: https://insain.ru/catalog/kalkulyator-akrilovyh-brelokov/
+Функция расчёта: calcAcrylicKeychain
+Параметров: 3
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2964
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Форма
+  ezfc_id: 2965
+  element_name: dpdblank
+  Тип: select
+  Варианты:
+    • квадрат 39х39 мм (value=0, code=KeychainAcrylic3939)
+    • бочонок 35х58 мм (value=1, code=KeychainAcrylic3558)
+    • прямоугольник 40х56 мм (value=2, code=KeychainAcrylic4056)
+    • круг 40мм (value=3, code=KeychainAcrylic4040)
+
+Параметр 3: Цветность
+  ezfc_id: 2985
+  element_name: dpdcolor
+  Тип: select
+  Варианты:
+    • односторонние (value=0, code=4+0)
+    • двухсторонние (value=1, code=4+4)
+

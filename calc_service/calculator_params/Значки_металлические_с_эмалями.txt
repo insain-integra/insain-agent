@@ -1,0 +1,233 @@
+Калькулятор: Значки металлические с эмалями
+URL: https://insain.ru/catalog/znachki-metallicheskie-s-emalyami/
+Функция расчёта: calcMetalPins
+Параметров: 25
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 1222
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Ширина, мм
+  ezfc_id: 1223
+  element_name: numw1
+  Тип: tel
+  Варианты:
+    • value=20
+
+Параметр 3: Вид значка
+  ezfc_id: 1225
+  element_name: dpdform
+  Тип: select
+  Варианты:
+    • простой (value=0, code=1)
+    • двухсторонний (value=1, code=2)
+    • двухсоставной (value=2, code=3)
+
+Параметр 4: Упаковка
+  ezfc_id: 1227
+  element_name: dpdpacking
+  Тип: select
+  Варианты:
+    • Полиэтиленовый пакетик (value=0, code=PolyBag)
+    • Акриловая коробочка 30х30х15мм (value=1, code=AcrylicBox30)
+    • Акриловая коробочка 40х40х15мм (value=2, code=AcrylicBox40)
+    • Акриловая коробочка 50х50х15мм (value=3, code=AcrylicBox50)
+
+Параметр 5: Покрытие
+  ezfc_id: 1229
+  element_name: dpdplating1
+  Тип: select
+  Варианты:
+    • серебро (value=0, code=silver)
+    • античное серебро (value=1, code=anticsilver)
+    • никель (value=2, code=nickel)
+    • античный никель (value=3, code=anticnickel)
+    • черный никель (value=4, code=blacknickel)
+    • черненый никель (value=5, code=dyednickel)
+    • золото (value=6, code=gold)
+    • античное золото (value=7, code=anticgold)
+    • медь (value=8, code=cooper)
+    • античная медь (value=9, code=anticcooper)
+    • серебро и золото (value=10, code=silvergold)
+    • бронза (value=11, code=bronze)
+    • античная бронза (value=12, code=anticbronze)
+
+Параметр 6: Крепление
+  ezfc_id: 1230
+  element_name: dpdattachment
+  Тип: select
+  Варианты:
+    • без крепления (value=0, code=No)
+    • игла-цанга (value=1, code=BC)
+    • двойная цанга (value=2, code=BC2)
+    • булавка металлическая (value=3, code=PinMetal)
+    • безопасная булавка (value=4, code=SafetyPinMetall)
+    • винтовое крепление (value=5, code=Screw)
+    • двухсторонний скотч (value=6, code=Scotch)
+    • магнитное крепление с клеевым слоем, 45*13мм (value=7, code=Magnet4513)
+    • магнитное крепление с клеевым слоем, круг 17мм (value=8, code=Magnet17)
+    • зажим для галстука (value=9, code=TieClip)
+
+Параметр 7: Технология
+  ezfc_id: 1252
+  element_name: dpdprocess1
+  Тип: select
+  Варианты:
+    • штамповка 2D (value=0, code=1)
+    • штамповка 3D (value=1, code=2)
+    • литье 2D/3D (value=2, code=3)
+    • штамповка и офсетная печать (value=3, code=4)
+    • штамповка и шелкография (value=4, code=5)
+
+Параметр 8: Металл
+  ezfc_id: 1254
+  element_name: dpdmetall1
+  Тип: select
+  Варианты:
+    • латунь (value=0, code=brass)
+    • алюминий (value=1, code=aluminium)
+    • сталь (value=2, code=steel)
+    • нержавейка (value=3, code=stainlesssteel)
+
+Параметр 9: Количество эмалей
+  ezfc_id: 1255
+  element_name: numenamels1
+  Тип: tel
+  Варианты:
+    • value=0, placeholder=0
+
+Параметр 10: ckbthinkness1
+  ezfc_id: 1256
+  element_name: ckbthinkness1
+  Тип: checkbox
+  Варианты:
+    • Задать толщину (value=0, code=1)
+
+Параметр 11: Толщина, мм
+  ezfc_id: 1258
+  element_name: numt1
+  Тип: tel
+  Варианты:
+    • value=1.2
+
+Параметр 12: Высота, мм
+  ezfc_id: 1261
+  element_name: numh1
+  Тип: tel
+  Варианты:
+    • value=20
+
+Параметр 13: Ширина, мм
+  ezfc_id: 1274
+  element_name: numw2
+  Тип: tel
+  Варианты:
+    • value=20
+
+Параметр 14: Высота, мм
+  ezfc_id: 1275
+  element_name: numh2
+  Тип: tel
+  Варианты:
+    • value=20
+
+Параметр 15: ckbthinkness2
+  ezfc_id: 1276
+  element_name: ckbthinkness2
+  Тип: checkbox
+  Варианты:
+    • Задать толщину (value=0, code=1)
+
+Параметр 16: Толщина, мм
+  ezfc_id: 1277
+  element_name: numt2
+  Тип: tel
+  Варианты:
+    • value=1.2
+
+Параметр 17: Металл
+  ezfc_id: 1279
+  element_name: dpdmetall2
+  Тип: select
+  Варианты:
+    • латунь (value=0, code=brass)
+    • алюминий (value=1, code=aluminium)
+    • сталь (value=2, code=steel)
+    • нержавейка (value=3, code=stainlesssteel)
+
+Параметр 18: Технология
+  ezfc_id: 1280
+  element_name: dpdprocess2
+  Тип: select
+  Варианты:
+    • штамповка 2D (value=0, code=1)
+    • штамповка 3D (value=1, code=2)
+    • литье 2D/3D (value=2, code=3)
+    • штамповка и офсетная печать (value=3, code=4)
+    • штамповка и шелкография (value=4, code=5)
+
+Параметр 19: Покрытие
+  ezfc_id: 1281
+  element_name: dpdplating2
+  Тип: select
+  Варианты:
+    • серебро (value=0, code=silver)
+    • античное серебро (value=1, code=anticsilver)
+    • никель (value=2, code=nickel)
+    • античный никель (value=3, code=anticnickel)
+    • черный никель (value=4, code=blacknickel)
+    • черненый никель (value=5, code=dyednickel)
+    • золото (value=6, code=gold)
+    • античное золото (value=7, code=anticgold)
+    • медь (value=8, code=cooper)
+    • античная медь (value=9, code=anticcooper)
+    • серебро и золото (value=10, code=silvergold)
+    • бронза (value=11, code=bronze)
+    • античная бронза (value=12, code=anticbronze)
+
+Параметр 20: Количество эмалей
+  ezfc_id: 1282
+  element_name: numenamels2
+  Тип: tel
+  Варианты:
+    • value=0
+
+Параметр 21: Толщина, мм
+  ezfc_id: 1289
+  element_name: sbtstandartt1
+  Тип: text
+  Варианты:
+    • Свободный ввод
+
+Параметр 22: Толщина, мм
+  ezfc_id: 1292
+  element_name: sbtstandartt2
+  Тип: text
+  Варианты:
+    • Свободный ввод
+
+Параметр 23: ckbepoxy1
+  ezfc_id: 3125
+  element_name: ckbepoxy1
+  Тип: checkbox
+  Варианты:
+    • Эпоксидная смола (value=0, code=1)
+
+Параметр 24: ckbepoxy2
+  ezfc_id: 3126
+  element_name: ckbepoxy2
+  Тип: checkbox
+  Варианты:
+    • Эпоксидная смола (value=0, code=1)
+
+Параметр 25: ckbmould
+  ezfc_id: 3312
+  element_name: ckbmould
+  Тип: checkbox
+  Варианты:
+    • Штамп есть (value=0, code=1)
+

@@ -258,14 +258,12 @@ class InsainAgent:
         if not mid:
             return None
 
-        user_blob = "\n".join(
-            (m.get("content") or "").strip()
-            for m in (history or [])
-            if m.get("role") == "user"
-        )
-        merged = self._merge_params_for_recalc("print_sheet", {}, user_blob, history or [])
+        ctx = self._user_calc_context.get(user_id) or {}
+        base_params = dict(ctx.get("params") or {})
+        merged = self._merge_params_for_recalc("print_sheet", base_params, um, history or [])
         merged["material_id"] = mid
-        merged.setdefault("color", "4+0")
+        if "color" not in merged:
+            merged["color"] = "4+0"
 
         if not self._calc_params_sufficient("print_sheet", merged):
             logger.info(
@@ -1464,6 +1462,20 @@ class InsainAgent:
         return last
 
     @staticmethod
+    def _response_contains_price_hallucination(content: str) -> bool:
+        """Текст LLM содержит цены/расчёт — признак галлюцинации, если calc_* не вызывался."""
+        if not content:
+            return False
+        t = content.strip()
+        if re.search(r"\d[\d\s.,]*\s*₽", t):
+            return True
+        if re.search(r"\d[\d\s.,]*\s*руб", t, re.I):
+            return True
+        if re.search(r"(цена|стоимость|итого)\s*[:=]?\s*\d", t, re.I):
+            return True
+        return False
+
+    @staticmethod
     def _material_id_looks_suspicious(material_id: str) -> bool:
         """Эвристика: LLM выдумывает snake_case вроде paper_coated_115 вместо PaperCoated115M."""
         mid = (material_id or "").strip()
@@ -1690,9 +1702,21 @@ class InsainAgent:
             forced = self._try_forced_calc(intent, calc_slug, user_message, user_id, history)
             if forced is not None:
                 return self.sanitize_llm_reply_for_display(forced.strip())
-            return self.sanitize_llm_reply_for_display(
-                (content or "").strip() or "Нет ответа."
-            )
+            text = (content or "").strip() or "Нет ответа."
+            if (
+                intent == "calculator"
+                and calc_slug
+                and self._response_contains_price_hallucination(text)
+            ):
+                logger.warning(
+                    "Hallucination guard: LLM вернула цены без вызова calc_*, slug=%s",
+                    calc_slug,
+                )
+                return (
+                    "Не удалось выполнить расчёт — калькулятор не был вызван. "
+                    "Попробуйте переформулировать запрос или уточнить параметры."
+                )
+            return self.sanitize_llm_reply_for_display(text)
 
         max_rounds = 5
         while tool_calls and max_rounds > 0:
@@ -1755,10 +1779,24 @@ class InsainAgent:
             content = result.get("content")
             tool_calls = result.get("tool_calls") or []
 
-        return self.sanitize_llm_reply_for_display(
+        final_text = (
             (content or "").strip()
             or "Не удалось выполнить расчёт. Попробуйте уточнить параметры."
         )
+        if (
+            intent == "calculator"
+            and calc_slug
+            and self._response_contains_price_hallucination(final_text)
+        ):
+            logger.warning(
+                "Hallucination guard (loop): LLM вернула цены без вызова calc_*, slug=%s",
+                calc_slug,
+            )
+            return (
+                "Не удалось выполнить расчёт — калькулятор не был вызван. "
+                "Попробуйте переформулировать запрос или уточнить параметры."
+            )
+        return self.sanitize_llm_reply_for_display(final_text)
 
 
 if __name__ == "__main__":

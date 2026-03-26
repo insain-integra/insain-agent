@@ -1,0 +1,89 @@
+Калькулятор: Калькулятор пластиковых карт
+URL: https://insain.ru/catalog/kalkulyator-plastikovyh-kart/
+Функция расчёта: calcPlasticCards
+Параметров: 11
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2286
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Цветность печати
+  ezfc_id: 2288
+  element_name: dpdcolor
+  Тип: select
+  Варианты:
+    • 4+0 (value=0, code=4+0)
+    • 4+4 (value=1, code=4+4)
+
+Параметр 3: Пластик
+  ezfc_id: 2289
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • Пластик белый (value=0, code=White)
+    • Пластик золотой, серебряный,прозрачный, перламутровый (value=1, code=Design)
+    • Пластик с чипом EM Marine (value=2, code=ChipEMMarine)
+    • Пластик с чипом Mifare (value=3, code=ChipMifare)
+
+Параметр 4: Ламинация
+  ezfc_id: 2290
+  element_name: dpdlaminat
+  Тип: select
+  Варианты:
+    • глянец (value=0, code=gloss)
+    • матовая (value=1, code=matte)
+    • софт-тач (value=2, code=touch)
+
+Параметр 5: ckbnumber
+  ezfc_id: 2292
+  element_name: ckbnumber
+  Тип: checkbox
+  Варианты:
+    • Нумерация (value=0, code=true)
+
+Параметр 6: ckbbarcode
+  ezfc_id: 2293
+  element_name: ckbbarcode
+  Тип: checkbox
+  Варианты:
+    • Штрихкод (value=0, code=true)
+
+Параметр 7: ckbvariables
+  ezfc_id: 2294
+  element_name: ckbvariables
+  Тип: checkbox
+  Варианты:
+    • Переменные данные/ФИО (value=0, code=true)
+
+Параметр 8: ckbembossingfoil
+  ezfc_id: 2295
+  element_name: ckbembossingfoil
+  Тип: checkbox
+  Варианты:
+    • Эмбоссинг (value=0, code=true)
+
+Параметр 9: ckbmagneticstripehico
+  ezfc_id: 2296
+  element_name: ckbmagneticstripehico
+  Тип: checkbox
+  Варианты:
+    • Магнитная полоса HiCo (value=0, code=true)
+
+Параметр 10: ckbsignaturestrip
+  ezfc_id: 2315
+  element_name: ckbsignaturestrip
+  Тип: checkbox
+  Варианты:
+    • Полоса для подписи (value=0, code=true)
+
+Параметр 11: ckbscratchpanel
+  ezfc_id: 2316
+  element_name: ckbscratchpanel
+  Тип: checkbox
+  Варианты:
+    • Нанесение скретч-панели (value=0, code=true)
+

@@ -1,0 +1,67 @@
+Калькулятор: Калькулятор шильдов
+URL: https://insain.ru/catalog/kalkulyator-shildov/
+Функция расчёта: calcTablets
+Параметров: 7
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2721
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Ширина, мм
+  ezfc_id: 2722
+  element_name: numw
+  Тип: text
+  Варианты:
+    • value=50
+
+Параметр 3: Высота, мм
+  ezfc_id: 2723
+  element_name: numh
+  Тип: text
+  Варианты:
+    • value=50
+
+Параметр 4: Материал
+  ezfc_id: 2724
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • не задан материал (value=0)
+    • Акрил молочный Plexiglas XT 3мм (value=1, code=AcrylWhite3)
+    • Акрил цветной Plexiglas XT 3мм (value=2, code=AcrylColor3)
+    • Фанера сорт 2/2 3мм (value=3, code=Plywood3)
+    • Алюминий для сублимации 305х600х0 (value=4, code=AluminiumSU055)
+    • Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=5, code=ZENOMARKLASER)
+    • Двухслойный пластик для гравирования SHENGWEI 1200 x 600 x 1.5 мм. (value=6, code=SHENGWEI)
+    • Двухслойный пластик для гравирования ROWMARK LASERMAX акрил 2 слоя (value=7, code=ROWMARKLASERMAX)
+    • Двухслойный пластик для гравирования ROWMARK LASERMAX акрил 2 слоя (value=8, code=ROWMARKLASERMAX3)
+
+Параметр 5: Способ раскроя
+  ezfc_id: 2728
+  element_name: dpdcut
+  Тип: select
+  Варианты:
+    • раскрой на лазере (value=0, code=isCutLaser)
+    • раскрой на гильотине по металлу (value=1, code=isCutManualMetal)
+
+Параметр 6: Способ нанесения
+  ezfc_id: 2731
+  element_name: dpdapplication
+  Тип: select
+  Варианты:
+    • без нанесения (value=0, code=noApplication)
+    • УФ-печать (value=1, code=isUVPrint)
+    • Гравировка (value=2, code=isGrave)
+    • Сублимационная печать (value=3, code=isSublimation)
+
+Параметр 7: chkadhesivelayer
+  ezfc_id: 2751
+  element_name: chkadhesivelayer
+  Тип: checkbox
+  Варианты:
+    • Клеевой слой (value=0, code=1)
+

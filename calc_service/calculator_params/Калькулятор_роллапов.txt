@@ -1,0 +1,41 @@
+Калькулятор: Калькулятор роллапов
+URL: https://insain.ru/catalog/kalkulyator-rollapov/
+Функция расчёта: calcRollup
+Параметров: 4
+============================================================
+
+Параметр 1: Кол-во
+  ezfc_id: 2019
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=1
+
+Параметр 2: Размер роллапа
+  ezfc_id: 2020
+  element_name: dpdsize
+  Тип: select
+  Варианты:
+    • 0,85х2,0м (value=0, code=85)
+    • 1,0х2,0м (value=1, code=100)
+    • 1,2х2,0м (value=2, code=120)
+    • 1,5х2,0м (value=3, code=150)
+    • 2,0х2,0м (value=4, code=200)
+
+Параметр 3: Тип роллапа
+  ezfc_id: 2024
+  element_name: dpdrollup
+  Тип: select
+  Варианты:
+    • эконом (value=0, code=econom)
+    • стандарт (value=1, code=standart)
+    • премиум (value=2, code=premium)
+
+Параметр 4: Постер
+  ezfc_id: 2043
+  element_name: dpdposter
+  Тип: select
+  Варианты:
+    • нет (value=0)
+    • Скроллерная бумага (1,27, 200 мкр, белая, матовая, полипропилен) (value=1, code=ScrollPaper200)
+

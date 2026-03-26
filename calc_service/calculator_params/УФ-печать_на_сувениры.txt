@@ -1,0 +1,117 @@
+Калькулятор: УФ-печать на сувениры
+URL: https://insain.ru/catalog/uf-pechat-na-suveniry/
+Функция расчёта: calcUVPrint
+Параметров: 14
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 890
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Вид поверхности
+  ezfc_id: 891
+  element_name: dpdsurfaceprint
+  Тип: select
+  Варианты:
+    • Печать по плоской поверхности (value=0, code=isPlain)
+    • Круговая печать (value=1, code=isAround)
+
+Параметр 3: Ширина изделия, мм
+  ezfc_id: 893
+  element_name: numitemw
+  Тип: tel
+  Варианты:
+    • value=150
+
+Параметр 4: Высота печати, мм
+  ezfc_id: 894
+  element_name: numh
+  Тип: tel
+  Варианты:
+    • value=7
+
+Параметр 5: Цветность печати
+  ezfc_id: 895
+  element_name: dpdcolor
+  Тип: select
+  Варианты:
+    • Полноцвет (value=0, code=4+0)
+    • Полноцвет + белый (value=1, code=4+1)
+    • Белый (value=2, code=1+0)
+
+Параметр 6: Материал поверхности
+  ezfc_id: 896
+  element_name: dpdsurfacematerial
+  Тип: select
+  Варианты:
+    • не указан (value=0, code=no)
+    • Пластик (value=1, code=isPlastic)
+    • Металл (value=2, code=isMetall)
+    • Стекло (value=3, code=isGlass)
+    • Камень (value=4, code=isStone)
+    • Кожа (value=5, code=isLeather)
+    • Керамика (value=6, code=isCeramic)
+
+Параметр 7: ckbnumber
+  ezfc_id: 901
+  element_name: ckbnumber
+  Тип: checkbox
+  Варианты:
+    • Нумерация (value=0, code=true)
+
+Параметр 8: ckbbarcode
+  ezfc_id: 902
+  element_name: ckbbarcode
+  Тип: checkbox
+  Варианты:
+    • Штрихкод (value=0, code=true)
+
+Параметр 9: ckbvariables
+  ezfc_id: 903
+  element_name: ckbvariables
+  Тип: checkbox
+  Варианты:
+    • Переменные данные/ФИО (value=0, code=true)
+
+Параметр 10: Высота изделия, мм
+  ezfc_id: 931
+  element_name: numitemh
+  Тип: tel
+  Варианты:
+    • value=15
+
+Параметр 11: Ширина печати, мм
+  ezfc_id: 932
+  element_name: numw
+  Тип: tel
+  Варианты:
+    • value=60
+
+Параметр 12: Прессет
+  ezfc_id: 933
+  element_name: dpdpreset
+  Тип: select
+  Варианты:
+    • Ручной ввод (value=0, code=0)
+    • Ручка (value=1, code=60,7,150,20,2)
+    • Брелок (value=2, code=30,30,75,50,2)
+    • Зажигалка (value=3, code=55,13,85,25,2)
+
+Параметр 13: Разрешение печати
+  ezfc_id: 934
+  element_name: dpdresolution
+  Тип: select
+  Варианты:
+    • Разрешение 720dpi (value=0, code=1)
+    • Разрешение 1440dpi (value=1, code=2)
+
+Параметр 14: ckbmaterialcustomer
+  ezfc_id: 3009
+  element_name: ckbmaterialcustomer
+  Тип: checkbox
+  Варианты:
+    • Изделие заказчика +25% (value=0, code=true)
+

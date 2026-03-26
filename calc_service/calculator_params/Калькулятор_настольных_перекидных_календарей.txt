@@ -1,0 +1,58 @@
+Калькулятор: Калькулятор настольных перекидных календарей
+URL: https://insain.ru/catalog/kalkulyator-nastolnyh-perekidnyh-kalendarej/
+Функция расчёта: calcCalendarTableFlip
+Параметров: 6
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2661
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Размер
+  ezfc_id: 2663
+  element_name: dpdsize
+  Тип: select
+  Варианты:
+    • 210х110мм горизонтальный (value=0, code=TableFlip210110)
+    • 140х170мм вертикальный (value=1, code=TableFlip140170)
+    • 210х148мм горизонтальный (value=2, code=TableFlip210148)
+
+Параметр 3: Перекидной блок
+  ezfc_id: 2666
+  element_name: dpdblock
+  Тип: select
+  Варианты:
+    • 6 листов 4+4 (value=0, code=DoubleSide6)
+    • 7 листов 4+4 (value=1, code=DoubleSide7)
+    • 13 листов 4+0 (value=2, code=OneSide13)
+    • 14 листов 4+0 (value=3, code=OneSide14)
+    • 14 листов 4+0 (value=4, code=OneSide14)
+
+Параметр 4: Бумага блока
+  ezfc_id: 2667
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • 115гр (value=0, code=PaperCoated115M)
+    • 130гр (value=1, code=PaperCoated130M)
+    • 170гр (value=2, code=PaperCoated170M)
+
+Параметр 5: Ламинация
+  ezfc_id: 2668
+  element_name: dpdcoverlaminat
+  Тип: select
+  Варианты:
+    • нет (value=0)
+    • глянцевая, 32 мкм (value=1, code=Laminat32G)
+    • матовая, 32 мкм (value=2, code=Laminat32M)
+
+Параметр 6: ckbcolor
+  ezfc_id: 2687
+  element_name: ckbcolor
+  Тип: checkbox
+  Варианты:
+    • Печать на основе (value=0, code=4+0)
+

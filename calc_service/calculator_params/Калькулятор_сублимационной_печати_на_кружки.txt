@@ -1,0 +1,38 @@
+Калькулятор: Калькулятор сублимационной печати на кружки
+URL: https://insain.ru/catalog/kalkulyator-sublimaczionnoj-pechati-na-kruzhki/
+Функция расчёта: calcMug
+Параметров: 4
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 1594
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=1
+
+Параметр 2: Тип кружки
+  ezfc_id: 1597
+  element_name: dpdtypemug
+  Тип: select
+  Варианты:
+    • Стандартная белая (value=0, code=MugStandartWhite)
+    • С цветной каемкой и ручкой (value=1, code=MugColorBorderHandle)
+    • Цветная внутри с цветной ручкой (value=2, code=MugColorInnerHandle)
+    • Цветная внутри (value=3, code=MugColorInner)
+    • Цветная с белым полем (value=4, code=MugColorField)
+
+Параметр 3: ckbdifferent
+  ezfc_id: 1599
+  element_name: ckbdifferent
+  Тип: checkbox
+  Варианты:
+    • Разные макеты (value=0, code=true)
+
+Параметр 4: ckbpacking
+  ezfc_id: 1601
+  element_name: ckbpacking
+  Тип: checkbox
+  Варианты:
+    • Распаковка и упаковка изделий (value=0, code=true)
+

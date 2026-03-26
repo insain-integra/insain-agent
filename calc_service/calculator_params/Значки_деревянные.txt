@@ -1,0 +1,122 @@
+Калькулятор: Значки деревянные
+URL: https://insain.ru/catalog/znachki-derevyannye/
+Функция расчёта: calcBadge
+Параметров: 14
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2467
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Материал основы
+  ezfc_id: 2468
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • Акрил молочный Plexiglas XT 3мм (value=0, code=AcrylWhite3)
+    • Акрил прозрачный Plexiglas XT 2мм (value=1, code=AcrylTrans2)
+    • Акрил прозрачный Plexiglas XT 3мм (value=2, code=AcrylTrans3)
+    • Акрил цветной Plexiglas XT 3мм (value=3, code=AcrylColor3)
+    • Фанера сорт 2/2 3мм (value=4, code=Plywood3)
+    • Фанера сорт 2/2 4мм (value=5, code=Plywood4)
+    • ПЭТ 0.7мм (value=6, code=PET07)
+    • ПЭТ 1.0мм (value=7, code=PET10)
+    • Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=8, code=ZENOMARKLASER)
+
+Параметр 3: Ширина, мм
+  ezfc_id: 2469
+  element_name: numw
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 4: Высота, мм
+  ezfc_id: 2470
+  element_name: numh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 5: Сложность форма значка
+  ezfc_id: 2471
+  element_name: dpddifficulty
+  Тип: select
+  Варианты:
+    • простая (value=0, code=1)
+    • сложная (value=1, code=1.3)
+
+Параметр 6: chkpocket
+  ezfc_id: 2473
+  element_name: chkpocket
+  Тип: checkbox
+  Варианты:
+    • Окошко для имени (value=0, code=Pocket)
+
+Параметр 7: chkpacking
+  ezfc_id: 2474
+  element_name: chkpacking
+  Тип: checkbox
+  Варианты:
+    • Упаковка (value=0, code=isPacking)
+
+Параметр 8: Крепление
+  ezfc_id: 2476
+  element_name: dpdattachment
+  Тип: select
+  Варианты:
+    • без крепления (value=0, code=No)
+    • игла-цанга (value=1, code=BC)
+    • булавка металлическая 20мм (value=2, code=PinMetall20)
+    • булавка металлическая 25мм (value=3, code=PinMetall25)
+    • булавка металлическая 30мм (value=4, code=PinMetall30)
+    • булавка пластиковая 30мм с самокл.основной" (value=5, code=PinPlastic)
+    • магнитное крепление с клеевым слоем, 45*13мм (value=6, code=Magnet4513)
+    • магнитное крепление с клеевым слоем, круг 17мм (value=7, code=Magnet17)
+
+Параметр 9: chkepoxy
+  ezfc_id: 2495
+  element_name: chkepoxy
+  Тип: checkbox
+  Варианты:
+    • Полимерная заливка смолой (value=0, code=isEpoxy)
+
+Параметр 10: chkgrave
+  ezfc_id: 2496
+  element_name: chkgrave
+  Тип: checkbox
+  Варианты:
+    • Гравировка (value=0, code=isGrave)
+
+Параметр 11: chkuvprint
+  ezfc_id: 2497
+  element_name: chkuvprint
+  Тип: checkbox
+  Варианты:
+    • УФ-печать (value=0, code=isUVPrint)
+
+Параметр 12: Ширина, мм
+  ezfc_id: 2498
+  element_name: numgravew
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 13: Высота, мм
+  ezfc_id: 2499
+  element_name: numgraveh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 14: Цветность
+  ezfc_id: 2500
+  element_name: dpdcolor
+  Тип: select
+  Варианты:
+    • полноцвет (value=0, code=4+0)
+    • полноцвет + белый (value=1, code=4+1)
+    • белый (value=2, code=1+0)
+

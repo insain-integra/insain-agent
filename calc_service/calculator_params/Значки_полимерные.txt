@@ -1,0 +1,107 @@
+Калькулятор: Значки полимерные
+URL: https://insain.ru/catalog/znachki-polimernye/
+Функция расчёта: calcBadge
+Параметров: 9
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2437
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Ширина, мм
+  ezfc_id: 2438
+  element_name: numw
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 3: Высота, мм
+  ezfc_id: 2439
+  element_name: numh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 4: Сложность форма значка
+  ezfc_id: 2440
+  element_name: dpddifficulty
+  Тип: select
+  Варианты:
+    • простая (value=0, code=1)
+    • сложная (value=1, code=1.3)
+
+Параметр 5: chkpocket
+  ezfc_id: 2441
+  element_name: chkpocket
+  Тип: checkbox
+  Варианты:
+    • Окошко для имени (value=0, code=Pocket)
+
+Параметр 6: chkpacking
+  ezfc_id: 2442
+  element_name: chkpacking
+  Тип: checkbox
+  Варианты:
+    • Упаковка (value=0, code=isPacking)
+
+Параметр 7: Материал основы
+  ezfc_id: 2444
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • Акрил молочный Plexiglas XT 3мм (value=0, code=AcrylWhite3)
+    • Акрил прозрачный Plexiglas XT 2мм (value=1, code=AcrylTrans2)
+    • Акрил прозрачный Plexiglas XT 3мм (value=2, code=AcrylTrans3)
+    • Акрил цветной Plexiglas XT 3мм (value=3, code=AcrylColor3)
+    • Фанера сорт 2/2 3мм (value=4, code=Plywood3)
+    • Фанера сорт 2/2 4мм (value=5, code=Plywood4)
+    • ПЭТ 0.7мм (value=6, code=PET07)
+    • ПЭТ 1.0мм (value=7, code=PET10)
+    • Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=8, code=ZENOMARKLASER)
+    • Металлическая заготовка (value=9, code=MetalBlank)
+
+Параметр 8: Крепление
+  ezfc_id: 2445
+  element_name: dpdattachment
+  Тип: select
+  Варианты:
+    • без крепления (value=0, code=No)
+    • игла-цанга (value=1, code=BC)
+    • булавка металлическая 20мм (value=2, code=PinMetall20)
+    • булавка металлическая 25мм (value=3, code=PinMetall25)
+    • булавка металлическая 30мм (value=4, code=PinMetall30)
+    • булавка пластиковая 30мм с самокл.основной" (value=5, code=PinPlastic)
+    • магнитное крепление с клеевым слоем, 45*13мм (value=6, code=Magnet4513)
+    • магнитное крепление с клеевым слоем, круг 17мм (value=7, code=Magnet17)
+
+Параметр 9: Форма и размеры
+  ezfc_id: 2464
+  element_name: dpdmetallblank
+  Тип: select
+  Варианты:
+    • круг 13мм (value=0, code=MetalPins13)
+    • круг 15мм (value=1, code=MetalPins15)
+    • круг 17.3мм (value=2, code=MetalPins17)
+    • круг 21мм (value=3, code=MetalPins21)
+    • круг 25мм (value=4, code=MetalPins25)
+    • круг 30мм (value=5, code=MetalPins30)
+    • круг 35мм (value=6, code=MetalPins35)
+    • квадрат 13x13мм (value=7, code=MetalPins1313)
+    • квадрат 17x17мм (value=8, code=MetalPins1717)
+    • квадрат 21x21мм (value=9, code=MetalPins2121)
+    • квадрат 25x25мм (value=10, code=MetalPins2525)
+    • прямоугольник 17x12мм (value=11, code=MetalPins1712)
+    • прямоугольник 20х17мм (value=12, code=MetalPins2017)
+    • прямоугольник 24.5х20мм (value=13, code=MetalPins2520)
+    • прямоугольник 33x13мм (value=14, code=MetalPins3313)
+    • овал 21x12мм (value=15, code=MetalPins2112)
+    • овал 28х15мм (value=16, code=MetalPins2815)
+    • овал 27х20мм (value=17, code=MetalPins2720)
+    • флаг 27x20мм (value=18, code=MetalPinsFlag2720)
+    • флаг 30x25мм (value=19, code=MetalPinsFlag3025)
+    • флаг двойной 20x15мм (value=20, code=MetalPinsFlagDouble)
+    • герб 22x30мм (value=21, code=MetalPinsFlagEmblem)
+

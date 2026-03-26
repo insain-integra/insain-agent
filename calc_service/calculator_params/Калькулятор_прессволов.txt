@@ -1,0 +1,68 @@
+Калькулятор: Калькулятор прессволов
+URL: https://insain.ru/catalog/kalkulyator-pressvolov/
+Функция расчёта: calcPresswall
+Параметров: 7
+============================================================
+
+Параметр 1: Кол-во
+  ezfc_id: 1843
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=1
+
+Параметр 2: Размер прессвола
+  ezfc_id: 1844
+  element_name: dpdpresswall
+  Тип: select
+  Варианты:
+    • 3,0х2,0м (value=0, code=Joker30_20_eyelet)
+    • 3,0х2,5м (value=1, code=Joker30_25_eyelet)
+    • 2,5х2,5м (value=2, code=Joker25_25_eyelet)
+    • 2,5х2,0м (value=3, code=Joker25_20_eyelet)
+    • 2,0х2,0м (value=4, code=Joker20_20_eyelet)
+    • 1,0х2,0м (value=5, code=Joker10_20_eyelet)
+    • 4,0х3,0м (двойная труба) (value=6, code=Tritix40_30_eyelet)
+
+Параметр 3: Способ крепления
+  ezfc_id: 1845
+  element_name: dpdattachment
+  Тип: select
+  Варианты:
+    • люверсы (value=0, code=isEyelet)
+    • карман (value=1, code=isPocket)
+
+Параметр 4: Баннер
+  ezfc_id: 1879
+  element_name: dpdbanner
+  Тип: select
+  Варианты:
+    • без баннера (value=0)
+    • ламинированный, 440гр (value=1, code=BannerFronlitLamin440)
+    • литой, 400гр (value=2, code=BannerFronlitCoat400)
+
+Параметр 5: Сумка для транспортировки
+  ezfc_id: 1880
+  element_name: dpdbag
+  Тип: select
+  Варианты:
+    • не нужна (value=0)
+    • Сумка переноска для чехла, 160х15х15см, оксфорд (value=1, code=bag160)
+    • Сумка переноска для чехла, 210х15х15см, оксфорд (value=2, code=bag210)
+
+Параметр 6: Кол-во дней
+  ezfc_id: 1882
+  element_name: numdays
+  Тип: tel
+  Варианты:
+    • value=2
+
+Параметр 7: rdopresswal
+  ezfc_id: 1883
+  element_name: rdopresswal
+  Тип: radio
+  Варианты:
+    • изготовить прессвол (value=0, code=isPresswall)
+    • взять на прокат (value=1, code=isRent)
+    • свой прессвол (value=2, code=noPresswall)
+

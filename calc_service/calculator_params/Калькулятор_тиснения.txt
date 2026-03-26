@@ -1,0 +1,90 @@
+Калькулятор: Калькулятор тиснения
+URL: https://insain.ru/catalog/kalkulyator-tisneniya/
+Функция расчёта: calcEmbossing
+Параметров: 11
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 3278
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Изделие
+  ezfc_id: 3279
+  element_name: dpdpreset
+  Тип: select
+  Варианты:
+    • Другое (value=0, code=0)
+    • Ежедневник А5 (value=1, code=diary)
+    • Планнинг (value=2, code=planning)
+    • Картхолдер (value=3, code=cardholder)
+
+Параметр 3: Тип тиснения
+  ezfc_id: 3280
+  element_name: dpdembossing
+  Тип: select
+  Варианты:
+    • блинт (value=0, code=blind)
+    • серебро/золото (value=1, code=foil)
+
+Параметр 4: Ширина клише, мм
+  ezfc_id: 3281
+  element_name: numw
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 5: Высота клише, мм
+  ezfc_id: 3282
+  element_name: numh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 6: Ширина изделия, мм
+  ezfc_id: 3285
+  element_name: numitemw
+  Тип: tel
+  Варианты:
+    • value=150
+
+Параметр 7: Высота изделия, мм
+  ezfc_id: 3286
+  element_name: numitemh
+  Тип: tel
+  Варианты:
+    • value=200
+
+Параметр 8: Материал поверхности
+  ezfc_id: 3287
+  element_name: dpdsurfacematerial
+  Тип: select
+  Варианты:
+    • не указан (value=0, code=no)
+    • Бумага/картон (value=1, code=isPaper)
+    • Кожа (value=2, code=isLeather)
+    • Кожзам (value=3, code=isLeatherECO)
+
+Параметр 9: ckbcliche
+  ezfc_id: 3291
+  element_name: ckbcliche
+  Тип: checkbox
+  Варианты:
+    • Изготовить клише (value=0, code=true)
+
+Параметр 10: ckbpacking
+  ezfc_id: 3292
+  element_name: ckbpacking
+  Тип: checkbox
+  Варианты:
+    • Упаковка изделия (value=0, code=true)
+
+Параметр 11: ckbmaterialcustomer
+  ezfc_id: 3311
+  element_name: ckbmaterialcustomer
+  Тип: checkbox
+  Варианты:
+    • Изделие заказчика +25% (value=0, code=true)
+

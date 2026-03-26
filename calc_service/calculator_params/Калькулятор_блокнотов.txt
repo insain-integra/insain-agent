@@ -1,0 +1,143 @@
+Калькулятор: Калькулятор блокнотов
+URL: https://insain.ru/catalog/kalkulyator-bloknotov/
+Функция расчёта: calcNotebook
+Параметров: 14
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 1796
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Размер блокнота
+  ezfc_id: 1797
+  element_name: dpdformat
+  Тип: select
+  Варианты:
+    • А4 (210х297мм) (value=0, code=210,297)
+    • А5 (148x210мм) (value=1, code=148,210)
+    • А6 (105x148мм) (value=2, code=105,148)
+    • А7 (74x105мм) (value=3, code=74,105)
+
+Параметр 3: Цветность обложки
+  ezfc_id: 1798
+  element_name: dpdcovercolor
+  Тип: select
+  Варианты:
+    • 4+0 (value=0, code=4+0)
+    • 4+4 (value=1, code=4+4)
+    • 1+0 (value=2, code=1+0)
+    • 1+1 (value=3, code=1+1)
+
+Параметр 4: Материал обложки
+  ezfc_id: 1799
+  element_name: dpdcovermaterial
+  Тип: select
+  Варианты:
+    • матовая 250гр (value=0, code=PaperCoated250M)
+    • глянцевая 250гр (value=1, code=PaperCoated250G)
+    • матовая 300гр (value=2, code=PaperCoated300M)
+    • глянцевая 300гр (value=3, code=PaperCoated300G)
+    • Маджестик 290г/м (value=4, code=MAJESTIC)
+    • Лен Супервайс 280г/м (value=5, code=SUPERWAIS)
+    • Крафтовая бумага 290гр (value=6, code=ECOLINER290)
+    • Тач кавер 301г/м (value=7, code=TOUCHCAVER)
+
+Параметр 5: Ламинация
+  ezfc_id: 1800
+  element_name: dpdcoverlaminat
+  Тип: select
+  Варианты:
+    • нет (value=0)
+    • глянцевая, 32 мкм (value=1, code=Laminat32G)
+    • матовая, 32 мкм (value=2, code=Laminat32M)
+    • глянцевая, 75 мкм (value=3, code=Laminat75G)
+    • матовая, 75 мкм (value=4, code=Laminat75M)
+
+Параметр 6: Способ брошюровки
+  ezfc_id: 1825
+  element_name: dpdbinding
+  Тип: select
+  Варианты:
+    • металлическая пружина (value=0, code=metallwire)
+
+Параметр 7: Сторона брошюровки
+  ezfc_id: 1826
+  element_name: dpdedge
+  Тип: select
+  Варианты:
+    • короткая (value=0, code=short)
+    • широкая (value=1, code=long)
+
+Параметр 8: Материал подложки
+  ezfc_id: 1832
+  element_name: dpdbackingmaterial
+  Тип: select
+  Варианты:
+    • матовая 250гр (value=0, code=PaperCoated250M)
+    • глянцевая 250гр (value=1, code=PaperCoated250G)
+    • матовая 300гр (value=2, code=PaperCoated300M)
+    • глянцевая 300гр (value=3, code=PaperCoated300G)
+    • Маджестик 290г/м (value=4, code=MAJESTIC)
+    • Лен Супервайс 280г/м (value=5, code=SUPERWAIS)
+    • Крафтовая бумага 290гр (value=6, code=ECOLINER290)
+    • Тач кавер 301г/м (value=7, code=TOUCHCAVER)
+
+Параметр 9: Цветность подложки
+  ezfc_id: 1833
+  element_name: dpdbackingcolor
+  Тип: select
+  Варианты:
+    • 0+0 (value=0, code=0+0)
+    • 4+0 (value=1, code=4+0)
+    • 4+4 (value=2, code=4+4)
+    • 1+0 (value=3, code=1+0)
+    • 1+1 (value=4, code=1+1)
+
+Параметр 10: Ламинация
+  ezfc_id: 1834
+  element_name: dpdbackinglaminat
+  Тип: select
+  Варианты:
+    • нет (value=0)
+    • глянцевая, 32 мкм (value=1, code=Laminat32G)
+    • матовая, 32 мкм (value=2, code=Laminat32M)
+    • глянцевая, 75 мкм (value=3, code=Laminat75G)
+    • матовая, 75 мкм (value=4, code=Laminat75M)
+
+Параметр 11: Материал блока
+  ezfc_id: 1837
+  element_name: dpdinnermaterial
+  Тип: select
+  Варианты:
+    • 80гр, вхи (value=0, code=VHI80)
+    • 115 г/м, матовая (value=1, code=PaperCoated115M)
+    • 170 г/м, матовая (value=2, code=PaperCoated170M)
+
+Параметр 12: Цветность блока
+  ezfc_id: 1838
+  element_name: dpdinnercolor
+  Тип: select
+  Варианты:
+    • 0+0 (value=0, code=0+0)
+    • 4+0 (value=1, code=4+0)
+    • 4+4 (value=2, code=4+4)
+    • 1+0 (value=3, code=1+0)
+    • 1+1 (value=4, code=1+1)
+
+Параметр 13: Кол-во листов в блоке
+  ezfc_id: 1840
+  element_name: numsheet
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 14: ckbprintlaser
+  ezfc_id: 2007
+  element_name: ckbprintlaser
+  Тип: checkbox
+  Варианты:
+    • Цифровая печать (value=0, code=isPrintLaser)
+

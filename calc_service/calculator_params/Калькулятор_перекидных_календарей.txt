@@ -1,0 +1,62 @@
+Калькулятор: Калькулятор перекидных календарей
+URL: https://insain.ru/catalog/kalkulyator-perekidnyh-kalendarej/
+Функция расчёта: calcCalendarFlip
+Параметров: 6
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2154
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Вид
+  ezfc_id: 2156
+  element_name: dpdsize
+  Тип: select
+  Варианты:
+    • А3 (297х420мм) (value=0, code=297,420)
+    • А4 (210х297мм) (value=1, code=210,297)
+    • А5 (148х210мм) (value=2, code=148,210)
+
+Параметр 3: Блок
+  ezfc_id: 2160
+  element_name: dpdblock
+  Тип: select
+  Варианты:
+    • 6 листов 4+4 (value=0, code=DoubleSide6)
+    • 7 листов 4+4 (value=1, code=DoubleSide7)
+    • 12 листов 4+4 (value=2, code=DoubleSide12)
+    • 13 листов 4+4 (value=3, code=DoubleSide13)
+    • 12 листов 4+0 (value=4, code=OneSide12)
+    • 13 листов 4+0 (value=5, code=OneSide13)
+    • 14 листов 4+0 (value=6, code=OneSide14)
+
+Параметр 4: Ламинация
+  ezfc_id: 2161
+  element_name: dpdcoverlaminat
+  Тип: select
+  Варианты:
+    • нет (value=0)
+    • глянцевая, 32 мкм (value=1, code=Laminat32G)
+    • матовая, 32 мкм (value=2, code=Laminat32M)
+
+Параметр 5: Бумага
+  ezfc_id: 2179
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • 170гр (value=0, code=PaperCoated170M)
+    • 200гр (value=1, code=PaperCoated200M)
+    • 250гр (value=2, code=PaperCoated250M)
+    • 300гр (value=3, code=PaperCoated300M)
+
+Параметр 6: Ориентация
+  ezfc_id: 2686
+  element_name: dpdedge
+  Тип: select
+  Варианты:
+    • книжная (value=0, code=short)
+    • альбомная (value=1, code=long)
+

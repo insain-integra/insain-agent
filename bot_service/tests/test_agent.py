@@ -397,6 +397,56 @@ class TestMaterialSearchFallback:
         assert not InsainAgent._material_id_looks_suspicious("PVC3")
 
 
+class TestHallucinationGuard:
+    """Тесты детектора галлюцинированных цен."""
+
+    def test_detects_ruble_sign(self):
+        from agent import InsainAgent
+
+        assert InsainAgent._response_contains_price_hallucination("Цена: 2 900 ₽")
+        assert InsainAgent._response_contains_price_hallucination("Итого 5000₽")
+
+    def test_detects_rub_word(self):
+        from agent import InsainAgent
+
+        assert InsainAgent._response_contains_price_hallucination("Стоимость 1500 руб.")
+        assert InsainAgent._response_contains_price_hallucination("от 300 рублей")
+
+    def test_detects_price_label(self):
+        from agent import InsainAgent
+
+        assert InsainAgent._response_contains_price_hallucination("Цена: 1200")
+        assert InsainAgent._response_contains_price_hallucination("стоимость = 800")
+        assert InsainAgent._response_contains_price_hallucination("Итого: 5000")
+
+    def test_passes_clarifying_question(self):
+        from agent import InsainAgent
+
+        assert not InsainAgent._response_contains_price_hallucination(
+            "Какая плотность бумаги вас интересует?"
+        )
+
+    def test_passes_material_list(self):
+        from agent import InsainAgent
+
+        assert not InsainAgent._response_contains_price_hallucination(
+            "1. Меловка матовая 200г/м²\n2. Меловка глянцевая 200г/м²"
+        )
+
+    def test_passes_empty(self):
+        from agent import InsainAgent
+
+        assert not InsainAgent._response_contains_price_hallucination("")
+        assert not InsainAgent._response_contains_price_hallucination(None)
+
+    def test_passes_size_question(self):
+        from agent import InsainAgent
+
+        assert not InsainAgent._response_contains_price_hallucination(
+            "Укажите размер изделия в миллиметрах."
+        )
+
+
 class TestBuildRecalcContext:
     def test_build_recalc_context(self):
         from prompts import build_recalc_context

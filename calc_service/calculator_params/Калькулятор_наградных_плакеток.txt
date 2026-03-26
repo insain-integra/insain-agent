@@ -1,0 +1,48 @@
+Калькулятор: Калькулятор наградных плакеток
+URL: https://insain.ru/catalog/kalkulyator-nagradnyh-plaketok/
+Функция расчёта: calcPlaque
+Параметров: 4
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2773
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=1
+
+Параметр 2: Материал пластины
+  ezfc_id: 2776
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • не задан материал (value=0)
+    • Акрил молочный Plexiglas XT 3мм (value=1, code=AcrylWhite3)
+    • Акрил цветной Plexiglas XT 3мм (value=2, code=AcrylColor3)
+    • Фанера сорт 2/2 3мм (value=3, code=Plywood3)
+    • Алюминий для сублимации 305х600х0 (value=4, code=AluminiumSU055)
+    • Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=5, code=ZENOMARKLASER)
+    • Двухслойный пластик для гравирования SHENGWEI 1200 x 600 x 1.5 мм. (value=6, code=SHENGWEI)
+    • Двухслойный пластик для гравирования ROWMARK LASERMAX акрил 2 слоя (value=7, code=ROWMARKLASERMAX)
+    • Двухслойный пластик для гравирования ROWMARK LASERMAX акрил 2 слоя (value=8, code=ROWMARKLASERMAX3)
+
+Параметр 3: Формат плакетки
+  ezfc_id: 2778
+  element_name: dpdformat
+  Тип: select
+  Варианты:
+    • Формат основы 230 х 300 мм (пластина 195 х 265 мм) (value=0, code=Plaque2330)
+    • Формат основы 200 х 250 мм (пластина 165 х 190 мм) (value=1, code=Plaque2025)
+    • Формат основы 150 х 200 мм (пластина 115 х 165 мм) (value=2, code=Plaque1520)
+    • Формат основы 300 х 380 мм (пластина 260 х 340 мм) (value=3, code=Plaque3038)
+
+Параметр 4: Способ нанесения
+  ezfc_id: 2779
+  element_name: dpdapplication
+  Тип: select
+  Варианты:
+    • без нанесения (value=0, code=noApplication)
+    • УФ-печать (value=1, code=isUVPrint)
+    • Гравировка (value=2, code=isGrave)
+    • Сублимационная печать (value=3, code=isSublimation)
+

@@ -1,0 +1,82 @@
+Калькулятор: Калькулятор хештегов
+URL: https://insain.ru/catalog/kalkulyator-heshtegov/
+Функция расчёта: calcTablets
+Параметров: 9
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2099
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=1
+
+Параметр 2: Длинна хештега, мм
+  ezfc_id: 2100
+  element_name: numw
+  Тип: text
+  Варианты:
+    • value=1000
+
+Параметр 3: Высота букв, мм
+  ezfc_id: 2101
+  element_name: numh
+  Тип: text
+  Варианты:
+    • value=100
+
+Параметр 4: Материал
+  ezfc_id: 2102
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • ПВХ Unext Strong 5 мм (value=0, code=PVC5)
+    • ПВХ Unext Strong 8 мм (value=1, code=PVC8)
+    • ПВХ Unext Strong 10 мм (value=2, code=PVC10)
+    • Акрил молочный Plexiglas XT 5мм (value=3, code=AcrylWhite5)
+    • Акрил молочный Plexiglas XT 8мм (value=4, code=AcrylWhite8)
+    • Акрил молочный Plexiglas XT 10мм (value=5, code=AcrylWhite10)
+    • Акрил прозрачный Plexiglas XT 5мм (value=6, code=AcrylTrans5)
+    • Акрил прозрачный Plexiglas XT 8мм (value=7, code=AcrylTrans8)
+    • Акрил прозрачный Plexiglas XT 10мм (value=8, code=AcrylTrans10)
+    • Фанера сорт 2/2 4мм (value=9, code=Plywood4)
+
+Параметр 5: Способ раскроя
+  ezfc_id: 2106
+  element_name: dpdcut
+  Тип: select
+  Варианты:
+    • раскрой на лазере (value=0, code=isCutLaser)
+    • раскрой на фрезере (value=1, code=isCutMilling)
+
+Параметр 6: Способ нанесения
+  ezfc_id: 2109
+  element_name: dpdapplication
+  Тип: select
+  Варианты:
+    • без нанесения (value=0, code=noApplication)
+    • УФ-печать (value=1, code=isUVPrint)
+
+Параметр 7: Цветность печати
+  ezfc_id: 2111
+  element_name: dpdcolor
+  Тип: select
+  Варианты:
+    • полноцвет (value=0, code=4+0)
+    • полноцвет + белый (value=1, code=4+1)
+    • белый (value=2, code=1+0)
+
+Параметр 8: Текст
+  ezfc_id: 2148
+  element_name: inptext
+  Тип: text
+  Варианты:
+    • value=#хештег, placeholder=#хештег
+
+Параметр 9: Set
+  ezfc_id: 2151
+  element_name: set
+  Тип: text
+  Варианты:
+    • Свободный ввод
+

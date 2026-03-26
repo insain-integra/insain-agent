@@ -1,0 +1,93 @@
+Калькулятор: Калькулятор магнитов виниловых
+URL: https://insain.ru/catalog/kulkulyator-magnitov-vinilovyh/
+Функция расчёта: calcMagnetLamination
+Параметров: 11
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 2222
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Форма магнита
+  ezfc_id: 2223
+  element_name: dpdshape
+  Тип: select
+  Варианты:
+    • прямоугольная (value=0, code=rectangular)
+    • стандартная из каталога (value=1, code=standart)
+    • не стандартная (value=2, code=nonstandart)
+
+Параметр 3: Толщина магнитного слоя
+  ezfc_id: 2225
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • 0.4 мм (value=0, code=MagnetVinil04)
+    • 0.7 мм (value=1, code=MagnetVinil07)
+    • 0.9 мм (value=2, code=MagnetVinil09)
+
+Параметр 4: Ламинация
+  ezfc_id: 2226
+  element_name: dpdlaminat
+  Тип: select
+  Варианты:
+    • нет (value=0)
+    • глянцевая, 32 мкм (value=1, code=Laminat32G)
+    • матовая, 32 мкм (value=2, code=Laminat32M)
+    • глянцевая, 75 мкм (value=3, code=Laminat75G)
+    • матовая, 75 мкм (value=4, code=Laminat75M)
+
+Параметр 5: ckbnumber
+  ezfc_id: 2228
+  element_name: ckbnumber
+  Тип: checkbox
+  Варианты:
+    • Нумерация (value=0, code=true)
+
+Параметр 6: ckbbarcode
+  ezfc_id: 2229
+  element_name: ckbbarcode
+  Тип: checkbox
+  Варианты:
+    • Штрихкод (value=0, code=true)
+
+Параметр 7: ckbvariables
+  ezfc_id: 2230
+  element_name: ckbvariables
+  Тип: checkbox
+  Варианты:
+    • Переменные данные/ФИО (value=0, code=true)
+
+Параметр 8: ckbrounding
+  ezfc_id: 2231
+  element_name: ckbrounding
+  Тип: checkbox
+  Варианты:
+    • Скругление (4 угла) (value=0, code=true)
+
+Параметр 9: Ширина, мм
+  ezfc_id: 2251
+  element_name: numw
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 10: Высота, мм
+  ezfc_id: 2252
+  element_name: numh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 11: Сложность формы
+  ezfc_id: 2355
+  element_name: dpddifficulty
+  Тип: select
+  Варианты:
+    • простая (value=0, code=1)
+    • с вогнутостями (value=1, code=1.5)
+    • с пустотами (value=2, code=2)
+

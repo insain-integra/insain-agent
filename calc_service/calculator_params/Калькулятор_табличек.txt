@@ -1,0 +1,284 @@
+Калькулятор: Калькулятор табличек
+URL: https://insain.ru/catalog/tablichki-s-uf-pechatyu/
+Функция расчёта: calcTablets
+Параметров: 28
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 1336
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Ширина, мм
+  ezfc_id: 1337
+  element_name: numw
+  Тип: text
+  Варианты:
+    • value=50
+
+Параметр 3: Материал
+  ezfc_id: 1339
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • не задан материал (value=0)
+    • АКП Altec белый 3мм (стенка 0.3мм) (value=1, code=ACPWhite3)
+    • АКП Altec цветной 3мм (стенка 0.3мм) (value=2, code=ACPColor3)
+    • ПВХ Unext Strong 3 мм (value=3, code=PVC3)
+    • ПВХ Unext Strong 5 мм (value=4, code=PVC5)
+    • ПВХ Unext Strong 8 мм (value=5, code=PVC8)
+    • ПВХ Unext Strong 10 мм (value=6, code=PVC10)
+    • ПВХ Unext Color 3 мм (value=7, code=PVCColor3)
+    • ПВХ Unext Color 5 мм (value=8, code=PVCColor5)
+    • Поликарбонат монолитный прозрачный NOVATTRO 1.5мм (value=9, code=Polycarbonate1)
+    • Поликарбонат монолитный прозрачный NOVATTRO 2мм (value=10, code=Polycarbonate2)
+    • Поликарбонат монолитный прозрачный NOVATTRO 3мм (value=11, code=Polycarbonate3)
+    • Поликарбонат монолитный прозрачный NOVATTRO 5мм (value=12, code=Polycarbonate4)
+    • Полистирол белый ударопрочный GEBAU HIPS 1мм (value=13, code=Polystirol1)
+    • Полистирол белый ударопрочный GEBAU HIPS 2мм (value=14, code=Polystirol2)
+    • Полистирол белый ударопрочный GEBAU HIPS 3мм (value=15, code=Polystirol3)
+    • Полистирол белый ударопрочный GEBAU HIPS 4мм (value=16, code=Polystirol4)
+    • Акрил молочный Plexiglas XT 3мм (value=17, code=AcrylWhite3)
+    • Акрил молочный Plexiglas XT 5мм (value=18, code=AcrylWhite5)
+    • Акрил молочный Plexiglas XT 8мм (value=19, code=AcrylWhite8)
+    • Акрил молочный Plexiglas XT 10мм (value=20, code=AcrylWhite10)
+    • Акрил прозрачный Plexiglas XT 2мм (value=21, code=AcrylTrans2)
+    • Акрил прозрачный Plexiglas XT 3мм (value=22, code=AcrylTrans3)
+    • Акрил прозрачный Plexiglas XT 5мм (value=23, code=AcrylTrans5)
+    • Акрил прозрачный Plexiglas XT 8мм (value=24, code=AcrylTrans8)
+    • Акрил прозрачный Plexiglas XT 10мм (value=25, code=AcrylTrans10)
+    • Акрил цветной Plexiglas XT 3мм (value=26, code=AcrylColor3)
+    • Акрил цветной Plexiglas XT 5мм (value=27, code=AcrylColor5)
+    • Фанера сорт 2/2 3мм (value=28, code=Plywood3)
+    • Фанера сорт 2/2 4мм (value=29, code=Plywood4)
+    • ПЭТ 0.3мм (value=30, code=PET03)
+    • ПЭТ 0.5мм (value=31, code=PET05)
+    • ПЭТ 0.7мм (value=32, code=PET07)
+    • ПЭТ 1.0мм (value=33, code=PET10)
+    • ПЭТ 1.5мм (value=34, code=PET15)
+    • ПЭТ 2.0мм (value=35, code=PET20)
+    • Пенокартон 5мм (value=36, code=Foamboard5)
+    • Пенополистирол 5мм (value=37, code=FoamPolystirol5)
+    • Алюминий для сублимации 305х600х0,55мм (value=38, code=AluminiumSU055)
+    • Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=39, code=ZENOMARKLASER)
+    • Двухслойный пластик для гравирования SHENGWEI, 1200 x 600 x 1.5 мм. (value=40, code=SHENGWEI)
+    • Двухслойный пластик для гравирования ROWMARK LASERMAX, акрил, 2 слоя, 1220 х 600 мм x 1.6 мм (value=41, code=ROWMARKLASERMAX)
+    • Двухслойный пластик для гравирования ROWMARK LASERMAX, акрил, 2 слоя, 1220 х 600 мм x 3.2 мм (value=42, code=ROWMARKLASERMAX3)
+
+Параметр 4: Материал в цене
+  ezfc_id: 1340
+  element_name: rdomaterial
+  Тип: select
+  Варианты:
+    • учитывать (value=0, code=isMaterial)
+    • не учитывать (value=1, code=noMaterial)
+    • материал заказчика +25% к услуге (value=2, code=isMaterialCustomer)
+
+Параметр 5: Параметры раскроя
+  ezfc_id: 1342
+  element_name: dpddifficulty
+  Тип: select
+  Варианты:
+    • простая форма (value=0, code=1)
+    • сложная форма (value=1, code=1.3)
+    • задать длину резки (value=2, code=isLenCut)
+
+Параметр 6: Способ нанесения
+  ezfc_id: 1368
+  element_name: dpdapplication
+  Тип: select
+  Варианты:
+    • без нанесения (value=0, code=noApplication)
+    • УФ-печать (value=1, code=isUVPrint)
+    • пленка с экосольвентной печатью (value=2, code=isECOPrint)
+    • пленка с латексной печатью (value=3, code=isLatexPrint)
+    • аппликация пленками (value=4, code=isFilm)
+    • сублимационная печать (value=5, code=isSublimation)
+
+Параметр 7: Способ раскроя
+  ezfc_id: 1371
+  element_name: dpdcut
+  Тип: select
+  Варианты:
+    • ручной раскрой на Keencut (value=0, code=isCutManual)
+    • раскрой на лазере (value=1, code=isCutLaser)
+    • раскрой на фрезере (value=2, code=isCutMilling)
+    • раскрой на гильотине по металлу (value=3, code=isCutManualMetal)
+
+Параметр 8: Высота, мм
+  ezfc_id: 1373
+  element_name: numh
+  Тип: text
+  Варианты:
+    • value=50
+
+Параметр 9: Группы типов раскроя
+  ezfc_id: 1375
+  element_name: dpdtypecut
+  Тип: select
+  Варианты:
+    • все виды (value=0, code=0)
+    • ручная (value=1, code=0)
+    • ручная и фрезеровка (value=2, code=0)
+    • лазер и фрезеровка (value=3, code=0)
+    • фрезеровка (value=4, code=0)
+    • ручная резка по металлу (value=5, code=0)
+
+Параметр 10: Цветность печати
+  ezfc_id: 1378
+  element_name: dpdcolor
+  Тип: select
+  Варианты:
+    • полноцвет (value=0, code=4+0)
+    • полноцвет + белый (value=1, code=4+1)
+    • белый (value=2, code=1+0)
+
+Параметр 11: Ширина, мм
+  ezfc_id: 1419
+  element_name: numapplicationw
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 12: Высота, мм
+  ezfc_id: 1420
+  element_name: numapplicationh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 13: setmaxsize
+  ezfc_id: 1421
+  element_name: setmaxsize
+  Тип: text
+  Варианты:
+    • Свободный ввод
+
+Параметр 14: Форма наклейки
+  ezfc_id: 1423
+  element_name: dpdfilmdifficulty
+  Тип: select
+  Варианты:
+    • Простая форма (value=0, code=1)
+    • Сложная форма (value=1, code=1.3)
+    • Сложная форма с внутренними элементами (value=2, code=1.7)
+
+Параметр 15: Размер элементов, мм
+  ezfc_id: 1424
+  element_name: numsizeitem
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 16: Плотность элементов
+  ezfc_id: 1425
+  element_name: numdensity
+  Тип: tel
+  Варианты:
+    • value=25
+
+Параметр 17: Оклейка фона таблички
+  ezfc_id: 1427
+  element_name: dpdbackgroudmaterial
+  Тип: select
+  Варианты:
+    • без оклейки (value=0, code=0)
+    • Плёнка AVERY, серия 500, белая (value=1, code=Avery500w)
+    • Плёнка AVERY, серия 500, цветная (value=2, code=Avery500c)
+    • Пленка ORACAL 352 металлик (value=3, code=Oracal352)
+    • Плёнка транслюцентная LG, серия LT4000 (value=4, code=LGLT4000)
+    • Плёнка светонакапливающая ФЭС-24, ГОСТ 2009, жёлто-зелёная, для сольвентной печати (value=5, code=FES24)
+    • Плёнка световозвращающая DMP 2000, белая, 1.24 м (value=6, code=DMP2000)
+    • Плёнка световозвращающая ТМ3100, красная, 1.24 м (value=7, code=TM3100)
+
+Параметр 18: Параметры ламинации
+  ezfc_id: 1429
+  element_name: dpdrollwidelaminat
+  Тип: select
+  Варианты:
+    • нет (value=0, code=No)
+    • глянцевая (value=1, code=LaminatDLCLAM)
+    • матовая (value=2, code=LaminatDLCLAM)
+
+Параметр 19: Кол-во цветов
+  ezfc_id: 1430
+  element_name: numfilm
+  Тип: tel
+  Варианты:
+    • value=1
+
+Параметр 20: Длинна реза, мм
+  ezfc_id: 1468
+  element_name: numlencut
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 21: Обработка края
+  ezfc_id: 1477
+  element_name: dpdedge
+  Тип: select
+  Варианты:
+    • подрезка (value=0, code=isCutEdge)
+    • подгибка (value=1, code=isBendEdge)
+
+Параметр 22: Обработка края
+  ezfc_id: 1483
+  element_name: dpdbackroundedge
+  Тип: select
+  Варианты:
+    • подрезка (value=0, code=isCutEdge)
+    • подгибка (value=1, code=isBendEdge)
+
+Параметр 23: Пленка для аппликации
+  ezfc_id: 1484
+  element_name: dpdapplicationmaterial
+  Тип: select
+  Варианты:
+    • нет (value=0, code=0)
+    • Плёнка AVERY, серия 500, белая (value=1, code=Avery500w)
+    • Плёнка AVERY, серия 500, цветная (value=2, code=Avery500c)
+    • Пленка ORACAL 352 металлик (value=3, code=Oracal352)
+    • Плёнка транслюцентная LG, серия LT4000 (value=4, code=LGLT4000)
+    • Плёнка светонакапливающая ФЭС-24, ГОСТ 2009, жёлто-зелёная, для сольвентной печати (value=5, code=FES24)
+    • Плёнка световозвращающая DMP 2000, белая, 1.24 м (value=6, code=DMP2000)
+    • Плёнка световозвращающая ТМ3100, красная, 1.24 м (value=7, code=TM3100)
+
+Параметр 24: ckbshaft
+  ezfc_id: 1533
+  element_name: ckbshaft
+  Тип: checkbox
+  Варианты:
+    • Пластиковое древко (value=0, code=true)
+
+Параметр 25: Длинна,м
+  ezfc_id: 1534
+  element_name: numlengthshaft
+  Тип: tel
+  Варианты:
+    • value=1
+
+Параметр 26: chkadhesivelayer
+  ezfc_id: 2718
+  element_name: chkadhesivelayer
+  Тип: checkbox
+  Варианты:
+    • Клеевой слой (value=0, code=1)
+
+Параметр 27: Детализация печати
+  ezfc_id: 2770
+  element_name: dpdresolution
+  Тип: select
+  Варианты:
+    • стандартное качество (value=0, code=1)
+    • высокое качество (value=1, code=2)
+
+Параметр 28: ckbdoubleapplication
+  ezfc_id: 3313
+  element_name: ckbdoubleapplication
+  Тип: checkbox
+  Варианты:
+    • Нанесение с двух сторон (value=0, code=1)
+

@@ -1,0 +1,4494 @@
+[
+  {
+    "url": "https://insain.ru/catalog/",
+    "title": "Каталог",
+    "function": "НЕ НАЙДЕНО",
+    "params": []
+  },
+  {
+    "url": "https://insain.ru/catalog/bejdzhi-s-lazernoj-gravirovkoj/",
+    "title": "Бейджи с лазерной гравировкой",
+    "function": "calcBadge",
+    "params": [
+      {
+        "ezfc_id": "2595",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2596",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2597",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2598",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал основы",
+        "options": [
+          "Двухслойный пластик для гравирования ROWMARK LASERMAX, акрил, 2 слоя, 1220 х 600 мм x 1.6 ммслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=0, code=ROWMARKLASERMAX)",
+          "Акрил молочный Plexiglas XT 3мм (value=1, code=AcrylWhite3)",
+          "Акрил прозрачный Plexiglas XT 2мм (value=2, code=AcrylTrans2)",
+          "Акрил прозрачный Plexiglas XT 3мм (value=3, code=AcrylTrans3)",
+          "Акрил цветной Plexiglas XT 3мм (value=4, code=AcrylColor3)",
+          "Фанера сорт 2/2 3мм (value=5, code=Plywood3)",
+          "Фанера сорт 2/2 4мм (value=6, code=Plywood4)",
+          "Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=7, code=ZENOMARKLASER)"
+        ]
+      },
+      {
+        "ezfc_id": "2599",
+        "element_name": "dpddifficulty",
+        "type": "select",
+        "label": "Сложность форма бейджа",
+        "options": [
+          "простая (value=0, code=1)",
+          "сложная (value=1, code=1.3)"
+        ]
+      },
+      {
+        "ezfc_id": "2600",
+        "element_name": "chkpocket",
+        "type": "checkbox",
+        "label": "chkpocket",
+        "options": [
+          "Окошко для имени (value=0, code=Pocket)"
+        ]
+      },
+      {
+        "ezfc_id": "2603",
+        "element_name": "chkgrave",
+        "type": "checkbox",
+        "label": "chkgrave",
+        "options": [
+          "Гравировка (value=0, code=isGrave)"
+        ]
+      },
+      {
+        "ezfc_id": "2604",
+        "element_name": "numgravew",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2605",
+        "element_name": "numgraveh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2607",
+        "element_name": "chkuvprint",
+        "type": "checkbox",
+        "label": "chkuvprint",
+        "options": [
+          "УФ-печать (value=0, code=isUVPrint)"
+        ]
+      },
+      {
+        "ezfc_id": "2608",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность",
+        "options": [
+          "полноцвет (value=0, code=4+0)",
+          "полноцвет + белый (value=1, code=4+1)",
+          "белый (value=2, code=1+0)"
+        ]
+      },
+      {
+        "ezfc_id": "2609",
+        "element_name": "chkepoxy",
+        "type": "checkbox",
+        "label": "chkepoxy",
+        "options": [
+          "Полимерная заливка смолой (value=0, code=isEpoxy)"
+        ]
+      },
+      {
+        "ezfc_id": "2610",
+        "element_name": "dpdattachment",
+        "type": "select",
+        "label": "Крепление",
+        "options": [
+          "без крепления (value=0, code=No)",
+          "игла-цанга (value=1, code=BC)",
+          "булавка металлическая 20мм (value=2, code=PinMetall20)",
+          "булавка металлическая 25мм (value=3, code=PinMetall25)",
+          "булавка металлическая 30мм (value=4, code=PinMetall30)",
+          "булавка пластиковая 30мм с самокл.основной\" (value=5, code=PinPlastic)",
+          "магнитное крепление с клеевым слоем, 45*13мм (value=6, code=Magnet4513)",
+          "магнитное крепление с клеевым слоем, круг 17мм (value=7, code=Magnet17)",
+          "клеевой слой 3М 0.05мм (value=8, code=AdhesiveLayer50)"
+        ]
+      },
+      {
+        "ezfc_id": "2611",
+        "element_name": "chkpacking",
+        "type": "checkbox",
+        "label": "chkpacking",
+        "options": [
+          "Упаковка (value=0, code=isPacking)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/bejdzhi-s-polimernoj-zalivkoj/",
+    "title": "Бейджи с полимерной заливкой",
+    "function": "calcBadge",
+    "params": [
+      {
+        "ezfc_id": "2565",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2566",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал основы",
+        "options": [
+          "Акрил молочный Plexiglas XT 3мм (value=0, code=AcrylWhite3)",
+          "Акрил прозрачный Plexiglas XT 2мм (value=1, code=AcrylTrans2)",
+          "Акрил прозрачный Plexiglas XT 3мм (value=2, code=AcrylTrans3)",
+          "Акрил цветной Plexiglas XT 3мм (value=3, code=AcrylColor3)",
+          "Фанера сорт 2/2 3мм (value=4, code=Plywood3)",
+          "Фанера сорт 2/2 4мм (value=5, code=Plywood4)",
+          "ПЭТ 0.7мм (value=6, code=PET07)",
+          "ПЭТ 1.0мм (value=7, code=PET10)",
+          "Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=8, code=ZENOMARKLASER)"
+        ]
+      },
+      {
+        "ezfc_id": "2567",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2568",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2569",
+        "element_name": "dpddifficulty",
+        "type": "select",
+        "label": "Сложность форма бейджа",
+        "options": [
+          "простая (value=0, code=1)",
+          "сложная (value=1, code=1.3)"
+        ]
+      },
+      {
+        "ezfc_id": "2570",
+        "element_name": "dpdmetallblank",
+        "type": "select",
+        "label": "Форма и размеры",
+        "options": [
+          "круг 13мм (value=0, code=MetalPins13)",
+          "круг 15мм (value=1, code=MetalPins15)",
+          "круг 17.3мм (value=2, code=MetalPins17)",
+          "круг 21мм (value=3, code=MetalPins21)",
+          "круг 25мм (value=4, code=MetalPins25)",
+          "круг 30мм (value=5, code=MetalPins30)",
+          "круг 35мм (value=6, code=MetalPins35)",
+          "квадрат 13x13мм (value=7, code=MetalPins1313)",
+          "квадрат 17x17мм (value=8, code=MetalPins1717)",
+          "квадрат 21x21мм (value=9, code=MetalPins2121)",
+          "квадрат 25x25мм (value=10, code=MetalPins2525)",
+          "прямоугольник 17x12мм (value=11, code=MetalPins1712)",
+          "прямоугольник 20х17мм (value=12, code=MetalPins2017)",
+          "прямоугольник 24.5х20мм (value=13, code=MetalPins2520)",
+          "прямоугольник 33x13мм (value=14, code=MetalPins3313)",
+          "овал 21x12мм (value=15, code=MetalPins2112)",
+          "овал 28х15мм (value=16, code=MetalPins2815)",
+          "овал 27х20мм (value=17, code=MetalPins2720)",
+          "флаг 27x20мм (value=18, code=MetalPinsFlag2720)",
+          "флаг 30x25мм (value=19, code=MetalPinsFlag3025)",
+          "флаг двойной 20x15мм (value=20, code=MetalPinsFlagDouble)",
+          "герб 22x30мм (value=21, code=MetalPinsFlagEmblem)"
+        ]
+      },
+      {
+        "ezfc_id": "2571",
+        "element_name": "chkpocket",
+        "type": "checkbox",
+        "label": "chkpocket",
+        "options": [
+          "Окошко для имени (value=0, code=Pocket)"
+        ]
+      },
+      {
+        "ezfc_id": "2572",
+        "element_name": "chkpacking",
+        "type": "checkbox",
+        "label": "chkpacking",
+        "options": [
+          "Упаковка (value=0, code=isPacking)"
+        ]
+      },
+      {
+        "ezfc_id": "2574",
+        "element_name": "dpdattachment",
+        "type": "select",
+        "label": "Крепление",
+        "options": [
+          "без крепления (value=0, code=No)",
+          "игла-цанга (value=1, code=BC)",
+          "булавка металлическая 20мм (value=2, code=PinMetall20)",
+          "булавка металлическая 25мм (value=3, code=PinMetall25)",
+          "булавка металлическая 30мм (value=4, code=PinMetall30)",
+          "булавка пластиковая 30мм с самокл.основной\" (value=5, code=PinPlastic)",
+          "магнитное крепление с клеевым слоем, 45*13мм (value=6, code=Magnet4513)",
+          "магнитное крепление с клеевым слоем, круг 17мм (value=7, code=Magnet17)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/bejdzhi-s-uf-pechatyu/",
+    "title": "Бейджи с УФ-печатью",
+    "function": "calcBadge",
+    "params": [
+      {
+        "ezfc_id": "2595",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2596",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2597",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2598",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал основы",
+        "options": [
+          "Двухслойный пластик для гравирования ROWMARK LASERMAX, акрил, 2 слоя, 1220 х 600 мм x 1.6 ммслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=0, code=ROWMARKLASERMAX)",
+          "Акрил молочный Plexiglas XT 3мм (value=1, code=AcrylWhite3)",
+          "Акрил прозрачный Plexiglas XT 2мм (value=2, code=AcrylTrans2)",
+          "Акрил прозрачный Plexiglas XT 3мм (value=3, code=AcrylTrans3)",
+          "Акрил цветной Plexiglas XT 3мм (value=4, code=AcrylColor3)",
+          "Фанера сорт 2/2 3мм (value=5, code=Plywood3)",
+          "Фанера сорт 2/2 4мм (value=6, code=Plywood4)",
+          "Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=7, code=ZENOMARKLASER)"
+        ]
+      },
+      {
+        "ezfc_id": "2599",
+        "element_name": "dpddifficulty",
+        "type": "select",
+        "label": "Сложность форма бейджа",
+        "options": [
+          "простая (value=0, code=1)",
+          "сложная (value=1, code=1.3)"
+        ]
+      },
+      {
+        "ezfc_id": "2600",
+        "element_name": "chkpocket",
+        "type": "checkbox",
+        "label": "chkpocket",
+        "options": [
+          "Окошко для имени (value=0, code=Pocket)"
+        ]
+      },
+      {
+        "ezfc_id": "2603",
+        "element_name": "chkgrave",
+        "type": "checkbox",
+        "label": "chkgrave",
+        "options": [
+          "Гравировка (value=0, code=isGrave)"
+        ]
+      },
+      {
+        "ezfc_id": "2604",
+        "element_name": "numgravew",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2605",
+        "element_name": "numgraveh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2607",
+        "element_name": "chkuvprint",
+        "type": "checkbox",
+        "label": "chkuvprint",
+        "options": [
+          "УФ-печать (value=0, code=isUVPrint)"
+        ]
+      },
+      {
+        "ezfc_id": "2608",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность",
+        "options": [
+          "полноцвет (value=0, code=4+0)",
+          "полноцвет + белый (value=1, code=4+1)",
+          "белый (value=2, code=1+0)"
+        ]
+      },
+      {
+        "ezfc_id": "2609",
+        "element_name": "chkepoxy",
+        "type": "checkbox",
+        "label": "chkepoxy",
+        "options": [
+          "Полимерная заливка смолой (value=0, code=isEpoxy)"
+        ]
+      },
+      {
+        "ezfc_id": "2610",
+        "element_name": "dpdattachment",
+        "type": "select",
+        "label": "Крепление",
+        "options": [
+          "без крепления (value=0, code=No)",
+          "игла-цанга (value=1, code=BC)",
+          "булавка металлическая 20мм (value=2, code=PinMetall20)",
+          "булавка металлическая 25мм (value=3, code=PinMetall25)",
+          "булавка металлическая 30мм (value=4, code=PinMetall30)",
+          "булавка пластиковая 30мм с самокл.основной\" (value=5, code=PinPlastic)",
+          "магнитное крепление с клеевым слоем, 45*13мм (value=6, code=Magnet4513)",
+          "магнитное крепление с клеевым слоем, круг 17мм (value=7, code=Magnet17)",
+          "клеевой слой 3М 0.05мм (value=8, code=AdhesiveLayer50)"
+        ]
+      },
+      {
+        "ezfc_id": "2611",
+        "element_name": "chkpacking",
+        "type": "checkbox",
+        "label": "chkpacking",
+        "options": [
+          "Упаковка (value=0, code=isPacking)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/znachki-derevyannye/",
+    "title": "Значки деревянные",
+    "function": "calcBadge",
+    "params": [
+      {
+        "ezfc_id": "2467",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2468",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал основы",
+        "options": [
+          "Акрил молочный Plexiglas XT 3мм (value=0, code=AcrylWhite3)",
+          "Акрил прозрачный Plexiglas XT 2мм (value=1, code=AcrylTrans2)",
+          "Акрил прозрачный Plexiglas XT 3мм (value=2, code=AcrylTrans3)",
+          "Акрил цветной Plexiglas XT 3мм (value=3, code=AcrylColor3)",
+          "Фанера сорт 2/2 3мм (value=4, code=Plywood3)",
+          "Фанера сорт 2/2 4мм (value=5, code=Plywood4)",
+          "ПЭТ 0.7мм (value=6, code=PET07)",
+          "ПЭТ 1.0мм (value=7, code=PET10)",
+          "Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=8, code=ZENOMARKLASER)"
+        ]
+      },
+      {
+        "ezfc_id": "2469",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2470",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2471",
+        "element_name": "dpddifficulty",
+        "type": "select",
+        "label": "Сложность форма значка",
+        "options": [
+          "простая (value=0, code=1)",
+          "сложная (value=1, code=1.3)"
+        ]
+      },
+      {
+        "ezfc_id": "2473",
+        "element_name": "chkpocket",
+        "type": "checkbox",
+        "label": "chkpocket",
+        "options": [
+          "Окошко для имени (value=0, code=Pocket)"
+        ]
+      },
+      {
+        "ezfc_id": "2474",
+        "element_name": "chkpacking",
+        "type": "checkbox",
+        "label": "chkpacking",
+        "options": [
+          "Упаковка (value=0, code=isPacking)"
+        ]
+      },
+      {
+        "ezfc_id": "2476",
+        "element_name": "dpdattachment",
+        "type": "select",
+        "label": "Крепление",
+        "options": [
+          "без крепления (value=0, code=No)",
+          "игла-цанга (value=1, code=BC)",
+          "булавка металлическая 20мм (value=2, code=PinMetall20)",
+          "булавка металлическая 25мм (value=3, code=PinMetall25)",
+          "булавка металлическая 30мм (value=4, code=PinMetall30)",
+          "булавка пластиковая 30мм с самокл.основной\" (value=5, code=PinPlastic)",
+          "магнитное крепление с клеевым слоем, 45*13мм (value=6, code=Magnet4513)",
+          "магнитное крепление с клеевым слоем, круг 17мм (value=7, code=Magnet17)"
+        ]
+      },
+      {
+        "ezfc_id": "2495",
+        "element_name": "chkepoxy",
+        "type": "checkbox",
+        "label": "chkepoxy",
+        "options": [
+          "Полимерная заливка смолой (value=0, code=isEpoxy)"
+        ]
+      },
+      {
+        "ezfc_id": "2496",
+        "element_name": "chkgrave",
+        "type": "checkbox",
+        "label": "chkgrave",
+        "options": [
+          "Гравировка (value=0, code=isGrave)"
+        ]
+      },
+      {
+        "ezfc_id": "2497",
+        "element_name": "chkuvprint",
+        "type": "checkbox",
+        "label": "chkuvprint",
+        "options": [
+          "УФ-печать (value=0, code=isUVPrint)"
+        ]
+      },
+      {
+        "ezfc_id": "2498",
+        "element_name": "numgravew",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2499",
+        "element_name": "numgraveh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2500",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность",
+        "options": [
+          "полноцвет (value=0, code=4+0)",
+          "полноцвет + белый (value=1, code=4+1)",
+          "белый (value=2, code=1+0)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/znachki-metallicheskie-s-emalyami/",
+    "title": "Значки металлические с эмалями",
+    "function": "calcMetalPins",
+    "params": [
+      {
+        "ezfc_id": "1222",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "1223",
+        "element_name": "numw1",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=20"
+        ]
+      },
+      {
+        "ezfc_id": "1225",
+        "element_name": "dpdform",
+        "type": "select",
+        "label": "Вид значка",
+        "options": [
+          "простой (value=0, code=1)",
+          "двухсторонний (value=1, code=2)",
+          "двухсоставной (value=2, code=3)"
+        ]
+      },
+      {
+        "ezfc_id": "1227",
+        "element_name": "dpdpacking",
+        "type": "select",
+        "label": "Упаковка",
+        "options": [
+          "Полиэтиленовый пакетик (value=0, code=PolyBag)",
+          "Акриловая коробочка 30х30х15мм (value=1, code=AcrylicBox30)",
+          "Акриловая коробочка 40х40х15мм (value=2, code=AcrylicBox40)",
+          "Акриловая коробочка 50х50х15мм (value=3, code=AcrylicBox50)"
+        ]
+      },
+      {
+        "ezfc_id": "1229",
+        "element_name": "dpdplating1",
+        "type": "select",
+        "label": "Покрытие",
+        "options": [
+          "серебро (value=0, code=silver)",
+          "античное серебро (value=1, code=anticsilver)",
+          "никель (value=2, code=nickel)",
+          "античный никель (value=3, code=anticnickel)",
+          "черный никель (value=4, code=blacknickel)",
+          "черненый никель (value=5, code=dyednickel)",
+          "золото (value=6, code=gold)",
+          "античное золото (value=7, code=anticgold)",
+          "медь (value=8, code=cooper)",
+          "античная медь (value=9, code=anticcooper)",
+          "серебро и золото (value=10, code=silvergold)",
+          "бронза (value=11, code=bronze)",
+          "античная бронза (value=12, code=anticbronze)"
+        ]
+      },
+      {
+        "ezfc_id": "1230",
+        "element_name": "dpdattachment",
+        "type": "select",
+        "label": "Крепление",
+        "options": [
+          "без крепления (value=0, code=No)",
+          "игла-цанга (value=1, code=BC)",
+          "двойная цанга (value=2, code=BC2)",
+          "булавка металлическая (value=3, code=PinMetal)",
+          "безопасная булавка (value=4, code=SafetyPinMetall)",
+          "винтовое крепление (value=5, code=Screw)",
+          "двухсторонний скотч (value=6, code=Scotch)",
+          "магнитное крепление с клеевым слоем, 45*13мм (value=7, code=Magnet4513)",
+          "магнитное крепление с клеевым слоем, круг 17мм (value=8, code=Magnet17)",
+          "зажим для галстука (value=9, code=TieClip)"
+        ]
+      },
+      {
+        "ezfc_id": "1252",
+        "element_name": "dpdprocess1",
+        "type": "select",
+        "label": "Технология",
+        "options": [
+          "штамповка 2D (value=0, code=1)",
+          "штамповка 3D (value=1, code=2)",
+          "литье 2D/3D (value=2, code=3)",
+          "штамповка и офсетная печать (value=3, code=4)",
+          "штамповка и шелкография (value=4, code=5)"
+        ]
+      },
+      {
+        "ezfc_id": "1254",
+        "element_name": "dpdmetall1",
+        "type": "select",
+        "label": "Металл",
+        "options": [
+          "латунь (value=0, code=brass)",
+          "алюминий (value=1, code=aluminium)",
+          "сталь (value=2, code=steel)",
+          "нержавейка (value=3, code=stainlesssteel)"
+        ]
+      },
+      {
+        "ezfc_id": "1255",
+        "element_name": "numenamels1",
+        "type": "tel",
+        "label": "Количество эмалей",
+        "options": [
+          "value=0, placeholder=0"
+        ]
+      },
+      {
+        "ezfc_id": "1256",
+        "element_name": "ckbthinkness1",
+        "type": "checkbox",
+        "label": "ckbthinkness1",
+        "options": [
+          "Задать толщину (value=0, code=1)"
+        ]
+      },
+      {
+        "ezfc_id": "1258",
+        "element_name": "numt1",
+        "type": "tel",
+        "label": "Толщина, мм",
+        "options": [
+          "value=1.2"
+        ]
+      },
+      {
+        "ezfc_id": "1261",
+        "element_name": "numh1",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=20"
+        ]
+      },
+      {
+        "ezfc_id": "1274",
+        "element_name": "numw2",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=20"
+        ]
+      },
+      {
+        "ezfc_id": "1275",
+        "element_name": "numh2",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=20"
+        ]
+      },
+      {
+        "ezfc_id": "1276",
+        "element_name": "ckbthinkness2",
+        "type": "checkbox",
+        "label": "ckbthinkness2",
+        "options": [
+          "Задать толщину (value=0, code=1)"
+        ]
+      },
+      {
+        "ezfc_id": "1277",
+        "element_name": "numt2",
+        "type": "tel",
+        "label": "Толщина, мм",
+        "options": [
+          "value=1.2"
+        ]
+      },
+      {
+        "ezfc_id": "1279",
+        "element_name": "dpdmetall2",
+        "type": "select",
+        "label": "Металл",
+        "options": [
+          "латунь (value=0, code=brass)",
+          "алюминий (value=1, code=aluminium)",
+          "сталь (value=2, code=steel)",
+          "нержавейка (value=3, code=stainlesssteel)"
+        ]
+      },
+      {
+        "ezfc_id": "1280",
+        "element_name": "dpdprocess2",
+        "type": "select",
+        "label": "Технология",
+        "options": [
+          "штамповка 2D (value=0, code=1)",
+          "штамповка 3D (value=1, code=2)",
+          "литье 2D/3D (value=2, code=3)",
+          "штамповка и офсетная печать (value=3, code=4)",
+          "штамповка и шелкография (value=4, code=5)"
+        ]
+      },
+      {
+        "ezfc_id": "1281",
+        "element_name": "dpdplating2",
+        "type": "select",
+        "label": "Покрытие",
+        "options": [
+          "серебро (value=0, code=silver)",
+          "античное серебро (value=1, code=anticsilver)",
+          "никель (value=2, code=nickel)",
+          "античный никель (value=3, code=anticnickel)",
+          "черный никель (value=4, code=blacknickel)",
+          "черненый никель (value=5, code=dyednickel)",
+          "золото (value=6, code=gold)",
+          "античное золото (value=7, code=anticgold)",
+          "медь (value=8, code=cooper)",
+          "античная медь (value=9, code=anticcooper)",
+          "серебро и золото (value=10, code=silvergold)",
+          "бронза (value=11, code=bronze)",
+          "античная бронза (value=12, code=anticbronze)"
+        ]
+      },
+      {
+        "ezfc_id": "1282",
+        "element_name": "numenamels2",
+        "type": "tel",
+        "label": "Количество эмалей",
+        "options": [
+          "value=0"
+        ]
+      },
+      {
+        "ezfc_id": "1289",
+        "element_name": "sbtstandartt1",
+        "type": "text",
+        "label": "Толщина, мм",
+        "options": [
+          "Свободный ввод"
+        ]
+      },
+      {
+        "ezfc_id": "1292",
+        "element_name": "sbtstandartt2",
+        "type": "text",
+        "label": "Толщина, мм",
+        "options": [
+          "Свободный ввод"
+        ]
+      },
+      {
+        "ezfc_id": "3125",
+        "element_name": "ckbepoxy1",
+        "type": "checkbox",
+        "label": "ckbepoxy1",
+        "options": [
+          "Эпоксидная смола (value=0, code=1)"
+        ]
+      },
+      {
+        "ezfc_id": "3126",
+        "element_name": "ckbepoxy2",
+        "type": "checkbox",
+        "label": "ckbepoxy2",
+        "options": [
+          "Эпоксидная смола (value=0, code=1)"
+        ]
+      },
+      {
+        "ezfc_id": "3312",
+        "element_name": "ckbmould",
+        "type": "checkbox",
+        "label": "ckbmould",
+        "options": [
+          "Штамп есть (value=0, code=1)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/znachki-plastikovye-s-gravirovkoj/",
+    "title": "Значки пластиковые с гравировкой",
+    "function": "calcBadge",
+    "params": [
+      {
+        "ezfc_id": "2467",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2468",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал основы",
+        "options": [
+          "Акрил молочный Plexiglas XT 3мм (value=0, code=AcrylWhite3)",
+          "Акрил прозрачный Plexiglas XT 2мм (value=1, code=AcrylTrans2)",
+          "Акрил прозрачный Plexiglas XT 3мм (value=2, code=AcrylTrans3)",
+          "Акрил цветной Plexiglas XT 3мм (value=3, code=AcrylColor3)",
+          "Фанера сорт 2/2 3мм (value=4, code=Plywood3)",
+          "Фанера сорт 2/2 4мм (value=5, code=Plywood4)",
+          "ПЭТ 0.7мм (value=6, code=PET07)",
+          "ПЭТ 1.0мм (value=7, code=PET10)",
+          "Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=8, code=ZENOMARKLASER)"
+        ]
+      },
+      {
+        "ezfc_id": "2469",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2470",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2471",
+        "element_name": "dpddifficulty",
+        "type": "select",
+        "label": "Сложность форма значка",
+        "options": [
+          "простая (value=0, code=1)",
+          "сложная (value=1, code=1.3)"
+        ]
+      },
+      {
+        "ezfc_id": "2473",
+        "element_name": "chkpocket",
+        "type": "checkbox",
+        "label": "chkpocket",
+        "options": [
+          "Окошко для имени (value=0, code=Pocket)"
+        ]
+      },
+      {
+        "ezfc_id": "2474",
+        "element_name": "chkpacking",
+        "type": "checkbox",
+        "label": "chkpacking",
+        "options": [
+          "Упаковка (value=0, code=isPacking)"
+        ]
+      },
+      {
+        "ezfc_id": "2476",
+        "element_name": "dpdattachment",
+        "type": "select",
+        "label": "Крепление",
+        "options": [
+          "без крепления (value=0, code=No)",
+          "игла-цанга (value=1, code=BC)",
+          "булавка металлическая 20мм (value=2, code=PinMetall20)",
+          "булавка металлическая 25мм (value=3, code=PinMetall25)",
+          "булавка металлическая 30мм (value=4, code=PinMetall30)",
+          "булавка пластиковая 30мм с самокл.основной\" (value=5, code=PinPlastic)",
+          "магнитное крепление с клеевым слоем, 45*13мм (value=6, code=Magnet4513)",
+          "магнитное крепление с клеевым слоем, круг 17мм (value=7, code=Magnet17)"
+        ]
+      },
+      {
+        "ezfc_id": "2495",
+        "element_name": "chkepoxy",
+        "type": "checkbox",
+        "label": "chkepoxy",
+        "options": [
+          "Полимерная заливка смолой (value=0, code=isEpoxy)"
+        ]
+      },
+      {
+        "ezfc_id": "2496",
+        "element_name": "chkgrave",
+        "type": "checkbox",
+        "label": "chkgrave",
+        "options": [
+          "Гравировка (value=0, code=isGrave)"
+        ]
+      },
+      {
+        "ezfc_id": "2497",
+        "element_name": "chkuvprint",
+        "type": "checkbox",
+        "label": "chkuvprint",
+        "options": [
+          "УФ-печать (value=0, code=isUVPrint)"
+        ]
+      },
+      {
+        "ezfc_id": "2498",
+        "element_name": "numgravew",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2499",
+        "element_name": "numgraveh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2500",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность",
+        "options": [
+          "полноцвет (value=0, code=4+0)",
+          "полноцвет + белый (value=1, code=4+1)",
+          "белый (value=2, code=1+0)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/znachki-plastikovye-s-uf-pechatyu/",
+    "title": "Значки пластиковые с УФ-печатью",
+    "function": "calcBadge",
+    "params": [
+      {
+        "ezfc_id": "2467",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2468",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал основы",
+        "options": [
+          "Акрил молочный Plexiglas XT 3мм (value=0, code=AcrylWhite3)",
+          "Акрил прозрачный Plexiglas XT 2мм (value=1, code=AcrylTrans2)",
+          "Акрил прозрачный Plexiglas XT 3мм (value=2, code=AcrylTrans3)",
+          "Акрил цветной Plexiglas XT 3мм (value=3, code=AcrylColor3)",
+          "Фанера сорт 2/2 3мм (value=4, code=Plywood3)",
+          "Фанера сорт 2/2 4мм (value=5, code=Plywood4)",
+          "ПЭТ 0.7мм (value=6, code=PET07)",
+          "ПЭТ 1.0мм (value=7, code=PET10)",
+          "Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=8, code=ZENOMARKLASER)"
+        ]
+      },
+      {
+        "ezfc_id": "2469",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2470",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2471",
+        "element_name": "dpddifficulty",
+        "type": "select",
+        "label": "Сложность форма значка",
+        "options": [
+          "простая (value=0, code=1)",
+          "сложная (value=1, code=1.3)"
+        ]
+      },
+      {
+        "ezfc_id": "2473",
+        "element_name": "chkpocket",
+        "type": "checkbox",
+        "label": "chkpocket",
+        "options": [
+          "Окошко для имени (value=0, code=Pocket)"
+        ]
+      },
+      {
+        "ezfc_id": "2474",
+        "element_name": "chkpacking",
+        "type": "checkbox",
+        "label": "chkpacking",
+        "options": [
+          "Упаковка (value=0, code=isPacking)"
+        ]
+      },
+      {
+        "ezfc_id": "2476",
+        "element_name": "dpdattachment",
+        "type": "select",
+        "label": "Крепление",
+        "options": [
+          "без крепления (value=0, code=No)",
+          "игла-цанга (value=1, code=BC)",
+          "булавка металлическая 20мм (value=2, code=PinMetall20)",
+          "булавка металлическая 25мм (value=3, code=PinMetall25)",
+          "булавка металлическая 30мм (value=4, code=PinMetall30)",
+          "булавка пластиковая 30мм с самокл.основной\" (value=5, code=PinPlastic)",
+          "магнитное крепление с клеевым слоем, 45*13мм (value=6, code=Magnet4513)",
+          "магнитное крепление с клеевым слоем, круг 17мм (value=7, code=Magnet17)"
+        ]
+      },
+      {
+        "ezfc_id": "2495",
+        "element_name": "chkepoxy",
+        "type": "checkbox",
+        "label": "chkepoxy",
+        "options": [
+          "Полимерная заливка смолой (value=0, code=isEpoxy)"
+        ]
+      },
+      {
+        "ezfc_id": "2496",
+        "element_name": "chkgrave",
+        "type": "checkbox",
+        "label": "chkgrave",
+        "options": [
+          "Гравировка (value=0, code=isGrave)"
+        ]
+      },
+      {
+        "ezfc_id": "2497",
+        "element_name": "chkuvprint",
+        "type": "checkbox",
+        "label": "chkuvprint",
+        "options": [
+          "УФ-печать (value=0, code=isUVPrint)"
+        ]
+      },
+      {
+        "ezfc_id": "2498",
+        "element_name": "numgravew",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2499",
+        "element_name": "numgraveh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2500",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность",
+        "options": [
+          "полноцвет (value=0, code=4+0)",
+          "полноцвет + белый (value=1, code=4+1)",
+          "белый (value=2, code=1+0)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/znachki-polimernye/",
+    "title": "Значки полимерные",
+    "function": "calcBadge",
+    "params": [
+      {
+        "ezfc_id": "2437",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2438",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2439",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2440",
+        "element_name": "dpddifficulty",
+        "type": "select",
+        "label": "Сложность форма значка",
+        "options": [
+          "простая (value=0, code=1)",
+          "сложная (value=1, code=1.3)"
+        ]
+      },
+      {
+        "ezfc_id": "2441",
+        "element_name": "chkpocket",
+        "type": "checkbox",
+        "label": "chkpocket",
+        "options": [
+          "Окошко для имени (value=0, code=Pocket)"
+        ]
+      },
+      {
+        "ezfc_id": "2442",
+        "element_name": "chkpacking",
+        "type": "checkbox",
+        "label": "chkpacking",
+        "options": [
+          "Упаковка (value=0, code=isPacking)"
+        ]
+      },
+      {
+        "ezfc_id": "2444",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал основы",
+        "options": [
+          "Акрил молочный Plexiglas XT 3мм (value=0, code=AcrylWhite3)",
+          "Акрил прозрачный Plexiglas XT 2мм (value=1, code=AcrylTrans2)",
+          "Акрил прозрачный Plexiglas XT 3мм (value=2, code=AcrylTrans3)",
+          "Акрил цветной Plexiglas XT 3мм (value=3, code=AcrylColor3)",
+          "Фанера сорт 2/2 3мм (value=4, code=Plywood3)",
+          "Фанера сорт 2/2 4мм (value=5, code=Plywood4)",
+          "ПЭТ 0.7мм (value=6, code=PET07)",
+          "ПЭТ 1.0мм (value=7, code=PET10)",
+          "Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=8, code=ZENOMARKLASER)",
+          "Металлическая заготовка (value=9, code=MetalBlank)"
+        ]
+      },
+      {
+        "ezfc_id": "2445",
+        "element_name": "dpdattachment",
+        "type": "select",
+        "label": "Крепление",
+        "options": [
+          "без крепления (value=0, code=No)",
+          "игла-цанга (value=1, code=BC)",
+          "булавка металлическая 20мм (value=2, code=PinMetall20)",
+          "булавка металлическая 25мм (value=3, code=PinMetall25)",
+          "булавка металлическая 30мм (value=4, code=PinMetall30)",
+          "булавка пластиковая 30мм с самокл.основной\" (value=5, code=PinPlastic)",
+          "магнитное крепление с клеевым слоем, 45*13мм (value=6, code=Magnet4513)",
+          "магнитное крепление с клеевым слоем, круг 17мм (value=7, code=Magnet17)"
+        ]
+      },
+      {
+        "ezfc_id": "2464",
+        "element_name": "dpdmetallblank",
+        "type": "select",
+        "label": "Форма и размеры",
+        "options": [
+          "круг 13мм (value=0, code=MetalPins13)",
+          "круг 15мм (value=1, code=MetalPins15)",
+          "круг 17.3мм (value=2, code=MetalPins17)",
+          "круг 21мм (value=3, code=MetalPins21)",
+          "круг 25мм (value=4, code=MetalPins25)",
+          "круг 30мм (value=5, code=MetalPins30)",
+          "круг 35мм (value=6, code=MetalPins35)",
+          "квадрат 13x13мм (value=7, code=MetalPins1313)",
+          "квадрат 17x17мм (value=8, code=MetalPins1717)",
+          "квадрат 21x21мм (value=9, code=MetalPins2121)",
+          "квадрат 25x25мм (value=10, code=MetalPins2525)",
+          "прямоугольник 17x12мм (value=11, code=MetalPins1712)",
+          "прямоугольник 20х17мм (value=12, code=MetalPins2017)",
+          "прямоугольник 24.5х20мм (value=13, code=MetalPins2520)",
+          "прямоугольник 33x13мм (value=14, code=MetalPins3313)",
+          "овал 21x12мм (value=15, code=MetalPins2112)",
+          "овал 28х15мм (value=16, code=MetalPins2815)",
+          "овал 27х20мм (value=17, code=MetalPins2720)",
+          "флаг 27x20мм (value=18, code=MetalPinsFlag2720)",
+          "флаг 30x25мм (value=19, code=MetalPinsFlag3025)",
+          "флаг двойной 20x15мм (value=20, code=MetalPinsFlagDouble)",
+          "герб 22x30мм (value=21, code=MetalPinsFlagEmblem)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-akrilovyh-brelokov/",
+    "title": "Калькулятор акриловых брелоков",
+    "function": "calcAcrylicKeychain",
+    "params": [
+      {
+        "ezfc_id": "2964",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2965",
+        "element_name": "dpdblank",
+        "type": "select",
+        "label": "Форма",
+        "options": [
+          "квадрат 39х39 мм (value=0, code=KeychainAcrylic3939)",
+          "бочонок 35х58 мм (value=1, code=KeychainAcrylic3558)",
+          "прямоугольник 40х56 мм (value=2, code=KeychainAcrylic4056)",
+          "круг 40мм (value=3, code=KeychainAcrylic4040)"
+        ]
+      },
+      {
+        "ezfc_id": "2985",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность",
+        "options": [
+          "односторонние (value=0, code=4+0)",
+          "двухсторонние (value=1, code=4+4)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-akrilovyh-prizov/",
+    "title": "Калькулятор акриловых призов",
+    "function": "calcAcrilycPrizes",
+    "params": [
+      {
+        "ezfc_id": "3071",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "3100",
+        "element_name": "frmbazislayers",
+        "type": "select",
+        "label": "материал",
+        "options": [
+          "Акрил прозрачный Plexiglas XT 3мм (value=0, code=AcrylTrans3)",
+          "Акрил прозрачный Plexiglas XT 5мм (value=1, code=AcrylTrans5)",
+          "Акрил прозрачный Plexiglas XT 8мм (value=2, code=AcrylTrans8)",
+          "Акрил прозрачный Plexiglas XT 10мм (value=3, code=AcrylTrans10)",
+          "Акрил молочный Plexiglas XT 3мм (value=4, code=AcrylWhite3)",
+          "Акрил молочный Plexiglas XT 5мм (value=5, code=AcrylWhite5)",
+          "Акрил молочный Plexiglas XT 8мм (value=6, code=AcrylWhite8)",
+          "Акрил молочный Plexiglas XT 10мм (value=7, code=AcrylWhite10)",
+          "Акрил цветной Plexiglas XT 3мм (value=8, code=AcrylColor3)",
+          "Акрил цветной Plexiglas XT 5мм (value=9, code=AcrylColor5)",
+          "Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=10, code=ZENOMARKLASER)",
+          "Двухслойный пластик для гравирования SHENGWEI (value=11, code=SHENGWEI)",
+          "Двухслойный пластик для гравирования ROWMARK LASERMAX (value=12, code=ROWMARKLASERMAX)",
+          "Двухслойный пластик для гравирования ROWMARK LASERMAX (value=13, code=ROWMARKLASERMAX3)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-bloknotov/",
+    "title": "Калькулятор блокнотов",
+    "function": "calcNotebook",
+    "params": [
+      {
+        "ezfc_id": "1796",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "1797",
+        "element_name": "dpdformat",
+        "type": "select",
+        "label": "Размер блокнота",
+        "options": [
+          "А4 (210х297мм) (value=0, code=210,297)",
+          "А5 (148x210мм) (value=1, code=148,210)",
+          "А6 (105x148мм) (value=2, code=105,148)",
+          "А7 (74x105мм) (value=3, code=74,105)"
+        ]
+      },
+      {
+        "ezfc_id": "1798",
+        "element_name": "dpdcovercolor",
+        "type": "select",
+        "label": "Цветность обложки",
+        "options": [
+          "4+0 (value=0, code=4+0)",
+          "4+4 (value=1, code=4+4)",
+          "1+0 (value=2, code=1+0)",
+          "1+1 (value=3, code=1+1)"
+        ]
+      },
+      {
+        "ezfc_id": "1799",
+        "element_name": "dpdcovermaterial",
+        "type": "select",
+        "label": "Материал обложки",
+        "options": [
+          "матовая 250гр (value=0, code=PaperCoated250M)",
+          "глянцевая 250гр (value=1, code=PaperCoated250G)",
+          "матовая 300гр (value=2, code=PaperCoated300M)",
+          "глянцевая 300гр (value=3, code=PaperCoated300G)",
+          "Маджестик 290г/м (value=4, code=MAJESTIC)",
+          "Лен Супервайс 280г/м (value=5, code=SUPERWAIS)",
+          "Крафтовая бумага 290гр (value=6, code=ECOLINER290)",
+          "Тач кавер 301г/м (value=7, code=TOUCHCAVER)"
+        ]
+      },
+      {
+        "ezfc_id": "1800",
+        "element_name": "dpdcoverlaminat",
+        "type": "select",
+        "label": "Ламинация",
+        "options": [
+          "нет (value=0)",
+          "глянцевая, 32 мкм (value=1, code=Laminat32G)",
+          "матовая, 32 мкм (value=2, code=Laminat32M)",
+          "глянцевая, 75 мкм (value=3, code=Laminat75G)",
+          "матовая, 75 мкм (value=4, code=Laminat75M)"
+        ]
+      },
+      {
+        "ezfc_id": "1825",
+        "element_name": "dpdbinding",
+        "type": "select",
+        "label": "Способ брошюровки",
+        "options": [
+          "металлическая пружина (value=0, code=metallwire)"
+        ]
+      },
+      {
+        "ezfc_id": "1826",
+        "element_name": "dpdedge",
+        "type": "select",
+        "label": "Сторона брошюровки",
+        "options": [
+          "короткая (value=0, code=short)",
+          "широкая (value=1, code=long)"
+        ]
+      },
+      {
+        "ezfc_id": "1832",
+        "element_name": "dpdbackingmaterial",
+        "type": "select",
+        "label": "Материал подложки",
+        "options": [
+          "матовая 250гр (value=0, code=PaperCoated250M)",
+          "глянцевая 250гр (value=1, code=PaperCoated250G)",
+          "матовая 300гр (value=2, code=PaperCoated300M)",
+          "глянцевая 300гр (value=3, code=PaperCoated300G)",
+          "Маджестик 290г/м (value=4, code=MAJESTIC)",
+          "Лен Супервайс 280г/м (value=5, code=SUPERWAIS)",
+          "Крафтовая бумага 290гр (value=6, code=ECOLINER290)",
+          "Тач кавер 301г/м (value=7, code=TOUCHCAVER)"
+        ]
+      },
+      {
+        "ezfc_id": "1833",
+        "element_name": "dpdbackingcolor",
+        "type": "select",
+        "label": "Цветность подложки",
+        "options": [
+          "0+0 (value=0, code=0+0)",
+          "4+0 (value=1, code=4+0)",
+          "4+4 (value=2, code=4+4)",
+          "1+0 (value=3, code=1+0)",
+          "1+1 (value=4, code=1+1)"
+        ]
+      },
+      {
+        "ezfc_id": "1834",
+        "element_name": "dpdbackinglaminat",
+        "type": "select",
+        "label": "Ламинация",
+        "options": [
+          "нет (value=0)",
+          "глянцевая, 32 мкм (value=1, code=Laminat32G)",
+          "матовая, 32 мкм (value=2, code=Laminat32M)",
+          "глянцевая, 75 мкм (value=3, code=Laminat75G)",
+          "матовая, 75 мкм (value=4, code=Laminat75M)"
+        ]
+      },
+      {
+        "ezfc_id": "1837",
+        "element_name": "dpdinnermaterial",
+        "type": "select",
+        "label": "Материал блока",
+        "options": [
+          "80гр, вхи (value=0, code=VHI80)",
+          "115 г/м, матовая (value=1, code=PaperCoated115M)",
+          "170 г/м, матовая (value=2, code=PaperCoated170M)"
+        ]
+      },
+      {
+        "ezfc_id": "1838",
+        "element_name": "dpdinnercolor",
+        "type": "select",
+        "label": "Цветность блока",
+        "options": [
+          "0+0 (value=0, code=0+0)",
+          "4+0 (value=1, code=4+0)",
+          "4+4 (value=2, code=4+4)",
+          "1+0 (value=3, code=1+0)",
+          "1+1 (value=4, code=1+1)"
+        ]
+      },
+      {
+        "ezfc_id": "1840",
+        "element_name": "numsheet",
+        "type": "tel",
+        "label": "Кол-во листов в блоке",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2007",
+        "element_name": "ckbprintlaser",
+        "type": "checkbox",
+        "label": "ckbprintlaser",
+        "options": [
+          "Цифровая печать (value=0, code=isPrintLaser)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-vympelov-bumazhnyh/",
+    "title": "Калькулятор вымпелов бумажных",
+    "function": "calcPennantPaper",
+    "params": [
+      {
+        "ezfc_id": "2937",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2938",
+        "element_name": "dpdsize",
+        "type": "select",
+        "label": "Размер",
+        "options": [
+          "А6 (105х148 мм) (value=0, code=105, 148)",
+          "А5 (148х210 мм) (value=1, code=148, 210)",
+          "А4 (210х297 мм) (value=2, code=210, 297)"
+        ]
+      },
+      {
+        "ezfc_id": "2939",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность",
+        "options": [
+          "4+0 (value=0, code=4+0)",
+          "4+4 (value=1, code=4+4)"
+        ]
+      },
+      {
+        "ezfc_id": "2940",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Бумага",
+        "options": [
+          "170гр (value=0, code=PaperCoated170M)",
+          "200гр (value=1, code=PaperCoated200M)",
+          "250гр (value=2, code=PaperCoated250M)",
+          "300гр (value=3, code=PaperCoated300M)"
+        ]
+      },
+      {
+        "ezfc_id": "2941",
+        "element_name": "dpdcoverlaminat",
+        "type": "select",
+        "label": "Ламинация",
+        "options": [
+          "нет (value=0)",
+          "глянцевая, 32 мкм (value=1, code=Laminat32G)",
+          "матовая, 32 мкм (value=2, code=Laminat32M)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-kvartalnyh-kalendarej/",
+    "title": "Калькулятор квартальных календарей",
+    "function": "calcCalendarQuarterly",
+    "params": [
+      {
+        "ezfc_id": "2049",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2050",
+        "element_name": "dpdsize",
+        "type": "select",
+        "label": "Размер",
+        "options": [
+          "Мини (210х297мм) (value=0, code=Mini)",
+          "Миди (335х250 мм) (value=1, code=Midi)",
+          "Макси (370х290мм) (value=2, code=Maxi)"
+        ]
+      },
+      {
+        "ezfc_id": "2055",
+        "element_name": "dpdfield",
+        "type": "select",
+        "label": "Рекламные поля",
+        "options": [
+          "без рекламных полей (value=0)",
+          "одно рекламное поле (value=1, code=1)",
+          "три рекламных поля (value=2, code=3)",
+          "три рекламных поля и боковые (value=3, code=3Plus)"
+        ]
+      },
+      {
+        "ezfc_id": "2056",
+        "element_name": "dpdblock",
+        "type": "select",
+        "label": "Дизайн блока",
+        "options": [
+          "офсетная сетка, 80гр (value=0, code=Offset)",
+          "мелованная сетка, 90гр (value=1, code=Mel)"
+        ]
+      },
+      {
+        "ezfc_id": "2057",
+        "element_name": "dpdcoverlaminat",
+        "type": "select",
+        "label": "Ламинация",
+        "options": [
+          "нет (value=0)",
+          "глянцевая, 32 мкм (value=1, code=Laminat32G)",
+          "матовая, 32 мкм (value=2, code=Laminat32M)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kulkulyator-magnitov-vinilovyh/",
+    "title": "Калькулятор магнитов виниловых",
+    "function": "calcMagnetLamination",
+    "params": [
+      {
+        "ezfc_id": "2222",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2223",
+        "element_name": "dpdshape",
+        "type": "select",
+        "label": "Форма магнита",
+        "options": [
+          "прямоугольная (value=0, code=rectangular)",
+          "стандартная из каталога (value=1, code=standart)",
+          "не стандартная (value=2, code=nonstandart)"
+        ]
+      },
+      {
+        "ezfc_id": "2225",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Толщина магнитного слоя",
+        "options": [
+          "0.4 мм (value=0, code=MagnetVinil04)",
+          "0.7 мм (value=1, code=MagnetVinil07)",
+          "0.9 мм (value=2, code=MagnetVinil09)"
+        ]
+      },
+      {
+        "ezfc_id": "2226",
+        "element_name": "dpdlaminat",
+        "type": "select",
+        "label": "Ламинация",
+        "options": [
+          "нет (value=0)",
+          "глянцевая, 32 мкм (value=1, code=Laminat32G)",
+          "матовая, 32 мкм (value=2, code=Laminat32M)",
+          "глянцевая, 75 мкм (value=3, code=Laminat75G)",
+          "матовая, 75 мкм (value=4, code=Laminat75M)"
+        ]
+      },
+      {
+        "ezfc_id": "2228",
+        "element_name": "ckbnumber",
+        "type": "checkbox",
+        "label": "ckbnumber",
+        "options": [
+          "Нумерация (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "2229",
+        "element_name": "ckbbarcode",
+        "type": "checkbox",
+        "label": "ckbbarcode",
+        "options": [
+          "Штрихкод (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "2230",
+        "element_name": "ckbvariables",
+        "type": "checkbox",
+        "label": "ckbvariables",
+        "options": [
+          "Переменные данные/ФИО (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "2231",
+        "element_name": "ckbrounding",
+        "type": "checkbox",
+        "label": "ckbrounding",
+        "options": [
+          "Скругление (4 угла) (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "2251",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2252",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2355",
+        "element_name": "dpddifficulty",
+        "type": "select",
+        "label": "Сложность формы",
+        "options": [
+          "простая (value=0, code=1)",
+          "с вогнутостями (value=1, code=1.5)",
+          "с пустотами (value=2, code=2)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-nagradnyh-plaketok/",
+    "title": "Калькулятор наградных плакеток",
+    "function": "calcPlaque",
+    "params": [
+      {
+        "ezfc_id": "2773",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "2776",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал пластины",
+        "options": [
+          "не задан материал (value=0)",
+          "Акрил молочный Plexiglas XT 3мм (value=1, code=AcrylWhite3)",
+          "Акрил цветной Plexiglas XT 3мм (value=2, code=AcrylColor3)",
+          "Фанера сорт 2/2 3мм (value=3, code=Plywood3)",
+          "Алюминий для сублимации 305х600х0 (value=4, code=AluminiumSU055)",
+          "Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=5, code=ZENOMARKLASER)",
+          "Двухслойный пластик для гравирования SHENGWEI 1200 x 600 x 1.5 мм. (value=6, code=SHENGWEI)",
+          "Двухслойный пластик для гравирования ROWMARK LASERMAX акрил 2 слоя (value=7, code=ROWMARKLASERMAX)",
+          "Двухслойный пластик для гравирования ROWMARK LASERMAX акрил 2 слоя (value=8, code=ROWMARKLASERMAX3)"
+        ]
+      },
+      {
+        "ezfc_id": "2778",
+        "element_name": "dpdformat",
+        "type": "select",
+        "label": "Формат плакетки",
+        "options": [
+          "Формат основы 230 х 300 мм (пластина 195 х 265 мм) (value=0, code=Plaque2330)",
+          "Формат основы 200 х 250 мм (пластина 165 х 190 мм) (value=1, code=Plaque2025)",
+          "Формат основы 150 х 200 мм (пластина 115 х 165 мм) (value=2, code=Plaque1520)",
+          "Формат основы 300 х 380 мм (пластина 260 х 340 мм) (value=3, code=Plaque3038)"
+        ]
+      },
+      {
+        "ezfc_id": "2779",
+        "element_name": "dpdapplication",
+        "type": "select",
+        "label": "Способ нанесения",
+        "options": [
+          "без нанесения (value=0, code=noApplication)",
+          "УФ-печать (value=1, code=isUVPrint)",
+          "Гравировка (value=2, code=isGrave)",
+          "Сублимационная печать (value=3, code=isSublimation)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-naneseniya-na-odezhdu/",
+    "title": "Калькулятор нанесения на одежду",
+    "function": "calcHeatPress",
+    "params": [
+      {
+        "ezfc_id": "1539",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "1540",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина нанесения, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1541",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота нанесения, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1542",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Тип изделия",
+        "options": [
+          "Футболка/поло/рубашка (value=0, code=tshirt)",
+          "Толстовка (value=1, code=clothes)",
+          "Бейсболка (value=2, code=hat)",
+          "Зонт (value=3, code=ambrella)",
+          "Сумка/рюкзак (value=4, code=bag)"
+        ]
+      },
+      {
+        "ezfc_id": "1546",
+        "element_name": "dpdheatpress",
+        "type": "select",
+        "label": "Способ нанесения",
+        "options": [
+          "нанесение пленками (value=0, code=film)",
+          "сублимационная печать по синтетике (value=1, code=sublimation)",
+          "пленка с полноцветной сублимационной печатью (value=2, code=filmSublimation)",
+          "пленка с полноцветной экосольвентной печатью (value=3, code=filmEcosolvent)",
+          "печать полноцветная термобумагой (value=4, code=paperLaser)",
+          "шелкотрансферная печать (value=5, code=silk)",
+          "DTF-печать (value=6, code=dtf)"
+        ]
+      },
+      {
+        "ezfc_id": "1555",
+        "element_name": "dpdapplicationmaterial",
+        "type": "select",
+        "label": "Пленка для аппликации",
+        "options": [
+          "Термопленка POLI-FLEX, серия PREMIUM, белая/черная (value=0, code=POLIFLEXPREMIUMBW)",
+          "Термопленка POLI-FLEX, серия PREMIUM, цветная (value=1, code=POLIFLEXPREMIUMCOLOR)",
+          "Термопленка декоративная (металлик, голографические, глиттерные) (value=2, code=POLIFLEXIMAGE)"
+        ]
+      },
+      {
+        "ezfc_id": "1558",
+        "element_name": "numfilm",
+        "type": "tel",
+        "label": "Кол-во цветов",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "1559",
+        "element_name": "setmaxsize",
+        "type": "text",
+        "label": "setmaxsize",
+        "options": [
+          "Свободный ввод"
+        ]
+      },
+      {
+        "ezfc_id": "1561",
+        "element_name": "numsizeitem",
+        "type": "tel",
+        "label": "Размер элементов, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1562",
+        "element_name": "numdensity",
+        "type": "tel",
+        "label": "Плотность элементов",
+        "options": [
+          "value=25"
+        ]
+      },
+      {
+        "ezfc_id": "1563",
+        "element_name": "dpdfilmdifficulty",
+        "type": "select",
+        "label": "Форма наклейки",
+        "options": [
+          "Простая форма (value=0, code=1)",
+          "Сложная форма (value=1, code=1.3)",
+          "Сложная форма с внутренними элементами (value=2, code=1.7)"
+        ]
+      },
+      {
+        "ezfc_id": "1590",
+        "element_name": "numsilkcolor",
+        "type": "tel",
+        "label": "Кол-во цветов",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "1591",
+        "element_name": "rdocolortshirt",
+        "type": "radio",
+        "label": "rdocolortshirt",
+        "options": [
+          "белая ткань (value=0, code=0)",
+          "цветная ткань (value=1, code=1)"
+        ]
+      },
+      {
+        "ezfc_id": "2283",
+        "element_name": "ckbmaterialcostomer",
+        "type": "checkbox",
+        "label": "ckbmaterialcostomer",
+        "options": [
+          "Изделие заказчика +25% (value=0, code=isMaterialCustomer)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-nastolnyh-perekidnyh-kalendarej/",
+    "title": "Калькулятор настольных перекидных календарей",
+    "function": "calcCalendarTableFlip",
+    "params": [
+      {
+        "ezfc_id": "2661",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2663",
+        "element_name": "dpdsize",
+        "type": "select",
+        "label": "Размер",
+        "options": [
+          "210х110мм горизонтальный (value=0, code=TableFlip210110)",
+          "140х170мм вертикальный (value=1, code=TableFlip140170)",
+          "210х148мм горизонтальный (value=2, code=TableFlip210148)"
+        ]
+      },
+      {
+        "ezfc_id": "2666",
+        "element_name": "dpdblock",
+        "type": "select",
+        "label": "Перекидной блок",
+        "options": [
+          "6 листов 4+4 (value=0, code=DoubleSide6)",
+          "7 листов 4+4 (value=1, code=DoubleSide7)",
+          "13 листов 4+0 (value=2, code=OneSide13)",
+          "14 листов 4+0 (value=3, code=OneSide14)",
+          "14 листов 4+0 (value=4, code=OneSide14)"
+        ]
+      },
+      {
+        "ezfc_id": "2667",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Бумага блока",
+        "options": [
+          "115гр (value=0, code=PaperCoated115M)",
+          "130гр (value=1, code=PaperCoated130M)",
+          "170гр (value=2, code=PaperCoated170M)"
+        ]
+      },
+      {
+        "ezfc_id": "2668",
+        "element_name": "dpdcoverlaminat",
+        "type": "select",
+        "label": "Ламинация",
+        "options": [
+          "нет (value=0)",
+          "глянцевая, 32 мкм (value=1, code=Laminat32G)",
+          "матовая, 32 мкм (value=2, code=Laminat32M)"
+        ]
+      },
+      {
+        "ezfc_id": "2687",
+        "element_name": "ckbcolor",
+        "type": "checkbox",
+        "label": "ckbcolor",
+        "options": [
+          "Печать на основе (value=0, code=4+0)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-pazlov/",
+    "title": "Калькулятор пазлов",
+    "function": "calcPuzzle",
+    "params": [
+      {
+        "ezfc_id": "3103",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "3104",
+        "element_name": "dpdformat",
+        "type": "select",
+        "label": "Формат пазла",
+        "options": [
+          "Прямоугольный картонный 300 х 420 мм (300 элементов) (value=0, code=Puzzle300420)",
+          "Прямоугольный картонный 208 х 298 мм (120 элементов) (value=1, code=Puzzle208298)",
+          "Прямоугольный картонный 159 х 215 мм (80 элементов) (value=2, code=Puzzle159215)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-perekidnyh-kalendarej/",
+    "title": "Калькулятор перекидных календарей",
+    "function": "calcCalendarFlip",
+    "params": [
+      {
+        "ezfc_id": "2154",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2156",
+        "element_name": "dpdsize",
+        "type": "select",
+        "label": "Вид",
+        "options": [
+          "А3 (297х420мм) (value=0, code=297,420)",
+          "А4 (210х297мм) (value=1, code=210,297)",
+          "А5 (148х210мм) (value=2, code=148,210)"
+        ]
+      },
+      {
+        "ezfc_id": "2160",
+        "element_name": "dpdblock",
+        "type": "select",
+        "label": "Блок",
+        "options": [
+          "6 листов 4+4 (value=0, code=DoubleSide6)",
+          "7 листов 4+4 (value=1, code=DoubleSide7)",
+          "12 листов 4+4 (value=2, code=DoubleSide12)",
+          "13 листов 4+4 (value=3, code=DoubleSide13)",
+          "12 листов 4+0 (value=4, code=OneSide12)",
+          "13 листов 4+0 (value=5, code=OneSide13)",
+          "14 листов 4+0 (value=6, code=OneSide14)"
+        ]
+      },
+      {
+        "ezfc_id": "2161",
+        "element_name": "dpdcoverlaminat",
+        "type": "select",
+        "label": "Ламинация",
+        "options": [
+          "нет (value=0)",
+          "глянцевая, 32 мкм (value=1, code=Laminat32G)",
+          "матовая, 32 мкм (value=2, code=Laminat32M)"
+        ]
+      },
+      {
+        "ezfc_id": "2179",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Бумага",
+        "options": [
+          "170гр (value=0, code=PaperCoated170M)",
+          "200гр (value=1, code=PaperCoated200M)",
+          "250гр (value=2, code=PaperCoated250M)",
+          "300гр (value=3, code=PaperCoated300M)"
+        ]
+      },
+      {
+        "ezfc_id": "2686",
+        "element_name": "dpdedge",
+        "type": "select",
+        "label": "Ориентация",
+        "options": [
+          "книжная (value=0, code=short)",
+          "альбомная (value=1, code=long)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-plastikovyh-kart/",
+    "title": "Калькулятор пластиковых карт",
+    "function": "calcPlasticCards",
+    "params": [
+      {
+        "ezfc_id": "2286",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2288",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность печати",
+        "options": [
+          "4+0 (value=0, code=4+0)",
+          "4+4 (value=1, code=4+4)"
+        ]
+      },
+      {
+        "ezfc_id": "2289",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Пластик",
+        "options": [
+          "Пластик белый (value=0, code=White)",
+          "Пластик золотой, серебряный,прозрачный, перламутровый (value=1, code=Design)",
+          "Пластик с чипом EM Marine (value=2, code=ChipEMMarine)",
+          "Пластик с чипом Mifare (value=3, code=ChipMifare)"
+        ]
+      },
+      {
+        "ezfc_id": "2290",
+        "element_name": "dpdlaminat",
+        "type": "select",
+        "label": "Ламинация",
+        "options": [
+          "глянец (value=0, code=gloss)",
+          "матовая (value=1, code=matte)",
+          "софт-тач (value=2, code=touch)"
+        ]
+      },
+      {
+        "ezfc_id": "2292",
+        "element_name": "ckbnumber",
+        "type": "checkbox",
+        "label": "ckbnumber",
+        "options": [
+          "Нумерация (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "2293",
+        "element_name": "ckbbarcode",
+        "type": "checkbox",
+        "label": "ckbbarcode",
+        "options": [
+          "Штрихкод (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "2294",
+        "element_name": "ckbvariables",
+        "type": "checkbox",
+        "label": "ckbvariables",
+        "options": [
+          "Переменные данные/ФИО (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "2295",
+        "element_name": "ckbembossingfoil",
+        "type": "checkbox",
+        "label": "ckbembossingfoil",
+        "options": [
+          "Эмбоссинг (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "2296",
+        "element_name": "ckbmagneticstripehico",
+        "type": "checkbox",
+        "label": "ckbmagneticstripehico",
+        "options": [
+          "Магнитная полоса HiCo (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "2315",
+        "element_name": "ckbsignaturestrip",
+        "type": "checkbox",
+        "label": "ckbsignaturestrip",
+        "options": [
+          "Полоса для подписи (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "2316",
+        "element_name": "ckbscratchpanel",
+        "type": "checkbox",
+        "label": "ckbscratchpanel",
+        "options": [
+          "Нанесение скретч-панели (value=0, code=true)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-pressvolov/",
+    "title": "Калькулятор прессволов",
+    "function": "calcPresswall",
+    "params": [
+      {
+        "ezfc_id": "1843",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Кол-во",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "1844",
+        "element_name": "dpdpresswall",
+        "type": "select",
+        "label": "Размер прессвола",
+        "options": [
+          "3,0х2,0м (value=0, code=Joker30_20_eyelet)",
+          "3,0х2,5м (value=1, code=Joker30_25_eyelet)",
+          "2,5х2,5м (value=2, code=Joker25_25_eyelet)",
+          "2,5х2,0м (value=3, code=Joker25_20_eyelet)",
+          "2,0х2,0м (value=4, code=Joker20_20_eyelet)",
+          "1,0х2,0м (value=5, code=Joker10_20_eyelet)",
+          "4,0х3,0м (двойная труба) (value=6, code=Tritix40_30_eyelet)"
+        ]
+      },
+      {
+        "ezfc_id": "1845",
+        "element_name": "dpdattachment",
+        "type": "select",
+        "label": "Способ крепления",
+        "options": [
+          "люверсы (value=0, code=isEyelet)",
+          "карман (value=1, code=isPocket)"
+        ]
+      },
+      {
+        "ezfc_id": "1879",
+        "element_name": "dpdbanner",
+        "type": "select",
+        "label": "Баннер",
+        "options": [
+          "без баннера (value=0)",
+          "ламинированный, 440гр (value=1, code=BannerFronlitLamin440)",
+          "литой, 400гр (value=2, code=BannerFronlitCoat400)"
+        ]
+      },
+      {
+        "ezfc_id": "1880",
+        "element_name": "dpdbag",
+        "type": "select",
+        "label": "Сумка для транспортировки",
+        "options": [
+          "не нужна (value=0)",
+          "Сумка переноска для чехла, 160х15х15см, оксфорд (value=1, code=bag160)",
+          "Сумка переноска для чехла, 210х15х15см, оксфорд (value=2, code=bag210)"
+        ]
+      },
+      {
+        "ezfc_id": "1882",
+        "element_name": "numdays",
+        "type": "tel",
+        "label": "Кол-во дней",
+        "options": [
+          "value=2"
+        ]
+      },
+      {
+        "ezfc_id": "1883",
+        "element_name": "rdopresswal",
+        "type": "radio",
+        "label": "rdopresswal",
+        "options": [
+          "изготовить прессвол (value=0, code=isPresswall)",
+          "взять на прокат (value=1, code=isRent)",
+          "свой прессвол (value=2, code=noPresswall)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-rollapov/",
+    "title": "Калькулятор роллапов",
+    "function": "calcRollup",
+    "params": [
+      {
+        "ezfc_id": "2019",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Кол-во",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "2020",
+        "element_name": "dpdsize",
+        "type": "select",
+        "label": "Размер роллапа",
+        "options": [
+          "0,85х2,0м (value=0, code=85)",
+          "1,0х2,0м (value=1, code=100)",
+          "1,2х2,0м (value=2, code=120)",
+          "1,5х2,0м (value=3, code=150)",
+          "2,0х2,0м (value=4, code=200)"
+        ]
+      },
+      {
+        "ezfc_id": "2024",
+        "element_name": "dpdrollup",
+        "type": "select",
+        "label": "Тип роллапа",
+        "options": [
+          "эконом (value=0, code=econom)",
+          "стандарт (value=1, code=standart)",
+          "премиум (value=2, code=premium)"
+        ]
+      },
+      {
+        "ezfc_id": "2043",
+        "element_name": "dpdposter",
+        "type": "select",
+        "label": "Постер",
+        "options": [
+          "нет (value=0)",
+          "Скроллерная бумага (1,27, 200 мкр, белая, матовая, полипропилен) (value=1, code=ScrollPaper200)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-stendov/",
+    "title": "Калькулятор стендов",
+    "function": "calcTablets",
+    "params": [
+      {
+        "ezfc_id": "1924",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "1925",
+        "element_name": "numw",
+        "type": "text",
+        "label": "Ширина, мм",
+        "options": [
+          "value=1000"
+        ]
+      },
+      {
+        "ezfc_id": "1926",
+        "element_name": "numh",
+        "type": "text",
+        "label": "Высота, мм",
+        "options": [
+          "value=1000"
+        ]
+      },
+      {
+        "ezfc_id": "1927",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал",
+        "options": [
+          "не задан материал (value=0)",
+          "ПВХ Unext Strong 3 мм (value=1, code=PVC3)",
+          "ПВХ Unext Strong 5 мм (value=2, code=PVC5)",
+          "ПВХ Unext Strong 8 мм (value=3, code=PVC8)",
+          "ПВХ Unext Strong 10 мм (value=4, code=PVC10)",
+          "АКП Altec белый 3мм (стенка 0.3мм) (value=5, code=ACPWhite3)",
+          "ПВХ Unext Strong 3 мм цветной (value=6, code=PVCColor3)",
+          "ПВХ Unext Strong 5 мм цветной (value=7, code=PVCColor5)"
+        ]
+      },
+      {
+        "ezfc_id": "1934",
+        "element_name": "dpdapplication",
+        "type": "select",
+        "label": "Способ нанесения фона",
+        "options": [
+          "без нанесения (value=0, code=noApplication)",
+          "УФ-печать (value=1, code=isUVPrint)",
+          "пленка с экосольвентной печатью (value=2, code=isECOPrint)",
+          "пленка с латексной печатью (value=3, code=isLatexPrint)",
+          "пленка цветная/металлизированная (value=4, code=isBackgroundFilm)"
+        ]
+      },
+      {
+        "ezfc_id": "1936",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность печати",
+        "options": [
+          "полноцвет (value=0, code=4+0)",
+          "полноцвет + белый (value=1, code=4+1)",
+          "белый (value=2, code=1+0)"
+        ]
+      },
+      {
+        "ezfc_id": "1937",
+        "element_name": "dpdrollwidelaminat",
+        "type": "select",
+        "label": "Параметры ламинации",
+        "options": [
+          "нет (value=0, code=No)",
+          "глянцевая (value=1, code=LaminatDLCLAM)",
+          "матовая (value=2, code=LaminatDLCLAM)"
+        ]
+      },
+      {
+        "ezfc_id": "1938",
+        "element_name": "dpdedge",
+        "type": "select",
+        "label": "Обработка края",
+        "options": [
+          "подрезка (value=0, code=isCutEdge)",
+          "подгибка (value=1, code=isBendEdge)"
+        ]
+      },
+      {
+        "ezfc_id": "1940",
+        "element_name": "dpdapplicationmaterial",
+        "type": "select",
+        "label": "Нанесение аппликации пленками",
+        "options": [
+          "нет (value=0, code=0)",
+          "Плёнка AVERY, серия 500, белая (value=1, code=Avery500w)",
+          "Плёнка AVERY, серия 500, цветная (value=2, code=Avery500c)",
+          "Пленка ORACAL 352 металлик (value=3, code=Oracal352)",
+          "Плёнка транслюцентная LG, серия LT4000 (value=4, code=LGLT4000)",
+          "Плёнка светонакапливающая ФЭС-24, ГОСТ 2009, жёлто-зелёная, для сольвентной печати (value=5, code=FES24)",
+          "Плёнка световозвращающая DMP 2000, белая, 1.24 м (value=6, code=DMP2000)",
+          "Плёнка световозвращающая ТМ3100, красная, 1.24 м (value=7, code=TM3100)"
+        ]
+      },
+      {
+        "ezfc_id": "1941",
+        "element_name": "numapplicationw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1942",
+        "element_name": "numapplicationh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1943",
+        "element_name": "numfilm",
+        "type": "tel",
+        "label": "Кол-во цветов",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "1944",
+        "element_name": "setmaxsize",
+        "type": "text",
+        "label": "setmaxsize",
+        "options": [
+          "Свободный ввод"
+        ]
+      },
+      {
+        "ezfc_id": "1946",
+        "element_name": "numsizeitem",
+        "type": "tel",
+        "label": "Размер элементов, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1947",
+        "element_name": "numdensity",
+        "type": "tel",
+        "label": "Плотность элементов",
+        "options": [
+          "value=25"
+        ]
+      },
+      {
+        "ezfc_id": "1948",
+        "element_name": "dpdfilmdifficulty",
+        "type": "select",
+        "label": "Форма наклейки",
+        "options": [
+          "Простая форма (value=0, code=1)",
+          "Сложная форма (value=1, code=1.3)",
+          "Сложная форма с внутренними элементами (value=2, code=1.7)"
+        ]
+      },
+      {
+        "ezfc_id": "1949",
+        "element_name": "dpdbackgroudmaterial",
+        "type": "select",
+        "label": "Материал для фона",
+        "options": [
+          "Плёнка AVERY, серия 500, белая (value=0, code=Avery500w)",
+          "Плёнка AVERY, серия 500, цветная (value=1, code=Avery500c)",
+          "Пленка ORACAL 352 металлик (value=2, code=Oracal352)",
+          "Плёнка транслюцентная LG, серия LT4000 (value=3, code=LGLT4000)",
+          "Плёнка светонакапливающая ФЭС-24, ГОСТ 2009, жёлто-зелёная, для сольвентной печати (value=4, code=FES24)",
+          "Плёнка световозвращающая DMP 2000, белая, 1.24 м (value=5, code=DMP2000)",
+          "Плёнка световозвращающая ТМ3100, красная, 1.24 м (value=6, code=TM3100)"
+        ]
+      },
+      {
+        "ezfc_id": "2008",
+        "element_name": "numprintw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2009",
+        "element_name": "numprinth",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2318",
+        "element_name": "ckbsize",
+        "type": "checkbox",
+        "label": "ckbsize",
+        "options": [
+          "Задать размеры фона (value=0, code=1)"
+        ]
+      },
+      {
+        "ezfc_id": "2871",
+        "element_name": "dpdprofile",
+        "type": "select",
+        "label": "Профиль",
+        "options": [
+          "нет (value=0, code=no)",
+          "алюминиевый профиль (value=1, code=AluFrame2Plus)"
+        ]
+      },
+      {
+        "ezfc_id": "2872",
+        "element_name": "dpdhanger",
+        "type": "select",
+        "label": "Подвес",
+        "options": [
+          "нет (value=0, code=no)",
+          "Подвес стальной Н35, универсальный (value=1, code=HangerH35)",
+          "Ухо-подвеска с петлей для настенного монтажа панелей (value=2, code=HangerEar)"
+        ]
+      },
+      {
+        "ezfc_id": "2873",
+        "element_name": "numhangers",
+        "type": "tel",
+        "label": "Количество подвесов",
+        "options": [
+          "value=2, placeholder=2"
+        ]
+      },
+      {
+        "ezfc_id": "2933",
+        "element_name": "frmsetpockets",
+        "type": "select",
+        "label": "frmsetpockets",
+        "options": [
+          "Карман А5 (value=0, code=PocketPETA5V)",
+          "Карман А4 (value=1, code=PocketPETA4V)",
+          "Карман А3 (value=2, code=PocketPETA3V)",
+          "Карман объемный акриловый А4 (value=3, code=PocketAcrylicA4V)",
+          "Карман объемный акриловый А5 (value=4, code=PocketAcrylicA5V)",
+          "Карман объемный акриловый Евро (value=5, code=PocketAcrylicEuroV)",
+          "Карман на дистанционных держателях А4 вертикальный, ПЭТ 2мм (value=6, code=PocketStandoffА4V)",
+          "Карман на металлических держателях А4 вертикальный, ПЭТ 2мм (value=7, code=PocketMetalCapА4V)"
+        ]
+      },
+      {
+        "ezfc_id": "2959",
+        "element_name": "dpd",
+        "type": "select",
+        "label": "Доп. поверхности",
+        "options": [
+          "нет (value=0, code=no)",
+          "резина ЕВА-пласт 5мм (value=1, code=EVAFoam5)"
+        ]
+      },
+      {
+        "ezfc_id": "2960",
+        "element_name": "numfoamw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=500"
+        ]
+      },
+      {
+        "ezfc_id": "2961",
+        "element_name": "numfoamh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=500"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-sublimaczionnoj-pechati-na-kruzhki/",
+    "title": "Калькулятор сублимационной печати на кружки",
+    "function": "calcMug",
+    "params": [
+      {
+        "ezfc_id": "1594",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "1597",
+        "element_name": "dpdtypemug",
+        "type": "select",
+        "label": "Тип кружки",
+        "options": [
+          "Стандартная белая (value=0, code=MugStandartWhite)",
+          "С цветной каемкой и ручкой (value=1, code=MugColorBorderHandle)",
+          "Цветная внутри с цветной ручкой (value=2, code=MugColorInnerHandle)",
+          "Цветная внутри (value=3, code=MugColorInner)",
+          "Цветная с белым полем (value=4, code=MugColorField)"
+        ]
+      },
+      {
+        "ezfc_id": "1599",
+        "element_name": "ckbdifferent",
+        "type": "checkbox",
+        "label": "ckbdifferent",
+        "options": [
+          "Разные макеты (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "1601",
+        "element_name": "ckbpacking",
+        "type": "checkbox",
+        "label": "ckbpacking",
+        "options": [
+          "Распаковка и упаковка изделий (value=0, code=true)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/tablichki-s-uf-pechatyu/",
+    "title": "Калькулятор табличек",
+    "function": "calcTablets",
+    "params": [
+      {
+        "ezfc_id": "1336",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "1337",
+        "element_name": "numw",
+        "type": "text",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1339",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал",
+        "options": [
+          "не задан материал (value=0)",
+          "АКП Altec белый 3мм (стенка 0.3мм) (value=1, code=ACPWhite3)",
+          "АКП Altec цветной 3мм (стенка 0.3мм) (value=2, code=ACPColor3)",
+          "ПВХ Unext Strong 3 мм (value=3, code=PVC3)",
+          "ПВХ Unext Strong 5 мм (value=4, code=PVC5)",
+          "ПВХ Unext Strong 8 мм (value=5, code=PVC8)",
+          "ПВХ Unext Strong 10 мм (value=6, code=PVC10)",
+          "ПВХ Unext Color 3 мм (value=7, code=PVCColor3)",
+          "ПВХ Unext Color 5 мм (value=8, code=PVCColor5)",
+          "Поликарбонат монолитный прозрачный NOVATTRO 1.5мм (value=9, code=Polycarbonate1)",
+          "Поликарбонат монолитный прозрачный NOVATTRO 2мм (value=10, code=Polycarbonate2)",
+          "Поликарбонат монолитный прозрачный NOVATTRO 3мм (value=11, code=Polycarbonate3)",
+          "Поликарбонат монолитный прозрачный NOVATTRO 5мм (value=12, code=Polycarbonate4)",
+          "Полистирол белый ударопрочный GEBAU HIPS 1мм (value=13, code=Polystirol1)",
+          "Полистирол белый ударопрочный GEBAU HIPS 2мм (value=14, code=Polystirol2)",
+          "Полистирол белый ударопрочный GEBAU HIPS 3мм (value=15, code=Polystirol3)",
+          "Полистирол белый ударопрочный GEBAU HIPS 4мм (value=16, code=Polystirol4)",
+          "Акрил молочный Plexiglas XT 3мм (value=17, code=AcrylWhite3)",
+          "Акрил молочный Plexiglas XT 5мм (value=18, code=AcrylWhite5)",
+          "Акрил молочный Plexiglas XT 8мм (value=19, code=AcrylWhite8)",
+          "Акрил молочный Plexiglas XT 10мм (value=20, code=AcrylWhite10)",
+          "Акрил прозрачный Plexiglas XT 2мм (value=21, code=AcrylTrans2)",
+          "Акрил прозрачный Plexiglas XT 3мм (value=22, code=AcrylTrans3)",
+          "Акрил прозрачный Plexiglas XT 5мм (value=23, code=AcrylTrans5)",
+          "Акрил прозрачный Plexiglas XT 8мм (value=24, code=AcrylTrans8)",
+          "Акрил прозрачный Plexiglas XT 10мм (value=25, code=AcrylTrans10)",
+          "Акрил цветной Plexiglas XT 3мм (value=26, code=AcrylColor3)",
+          "Акрил цветной Plexiglas XT 5мм (value=27, code=AcrylColor5)",
+          "Фанера сорт 2/2 3мм (value=28, code=Plywood3)",
+          "Фанера сорт 2/2 4мм (value=29, code=Plywood4)",
+          "ПЭТ 0.3мм (value=30, code=PET03)",
+          "ПЭТ 0.5мм (value=31, code=PET05)",
+          "ПЭТ 0.7мм (value=32, code=PET07)",
+          "ПЭТ 1.0мм (value=33, code=PET10)",
+          "ПЭТ 1.5мм (value=34, code=PET15)",
+          "ПЭТ 2.0мм (value=35, code=PET20)",
+          "Пенокартон 5мм (value=36, code=Foamboard5)",
+          "Пенополистирол 5мм (value=37, code=FoamPolystirol5)",
+          "Алюминий для сублимации 305х600х0,55мм (value=38, code=AluminiumSU055)",
+          "Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=39, code=ZENOMARKLASER)",
+          "Двухслойный пластик для гравирования SHENGWEI, 1200 x 600 x 1.5 мм. (value=40, code=SHENGWEI)",
+          "Двухслойный пластик для гравирования ROWMARK LASERMAX, акрил, 2 слоя, 1220 х 600 мм x 1.6 мм (value=41, code=ROWMARKLASERMAX)",
+          "Двухслойный пластик для гравирования ROWMARK LASERMAX, акрил, 2 слоя, 1220 х 600 мм x 3.2 мм (value=42, code=ROWMARKLASERMAX3)"
+        ]
+      },
+      {
+        "ezfc_id": "1340",
+        "element_name": "rdomaterial",
+        "type": "select",
+        "label": "Материал в цене",
+        "options": [
+          "учитывать (value=0, code=isMaterial)",
+          "не учитывать (value=1, code=noMaterial)",
+          "материал заказчика +25% к услуге (value=2, code=isMaterialCustomer)"
+        ]
+      },
+      {
+        "ezfc_id": "1342",
+        "element_name": "dpddifficulty",
+        "type": "select",
+        "label": "Параметры раскроя",
+        "options": [
+          "простая форма (value=0, code=1)",
+          "сложная форма (value=1, code=1.3)",
+          "задать длину резки (value=2, code=isLenCut)"
+        ]
+      },
+      {
+        "ezfc_id": "1368",
+        "element_name": "dpdapplication",
+        "type": "select",
+        "label": "Способ нанесения",
+        "options": [
+          "без нанесения (value=0, code=noApplication)",
+          "УФ-печать (value=1, code=isUVPrint)",
+          "пленка с экосольвентной печатью (value=2, code=isECOPrint)",
+          "пленка с латексной печатью (value=3, code=isLatexPrint)",
+          "аппликация пленками (value=4, code=isFilm)",
+          "сублимационная печать (value=5, code=isSublimation)"
+        ]
+      },
+      {
+        "ezfc_id": "1371",
+        "element_name": "dpdcut",
+        "type": "select",
+        "label": "Способ раскроя",
+        "options": [
+          "ручной раскрой на Keencut (value=0, code=isCutManual)",
+          "раскрой на лазере (value=1, code=isCutLaser)",
+          "раскрой на фрезере (value=2, code=isCutMilling)",
+          "раскрой на гильотине по металлу (value=3, code=isCutManualMetal)"
+        ]
+      },
+      {
+        "ezfc_id": "1373",
+        "element_name": "numh",
+        "type": "text",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1375",
+        "element_name": "dpdtypecut",
+        "type": "select",
+        "label": "Группы типов раскроя",
+        "options": [
+          "все виды (value=0, code=0)",
+          "ручная (value=1, code=0)",
+          "ручная и фрезеровка (value=2, code=0)",
+          "лазер и фрезеровка (value=3, code=0)",
+          "фрезеровка (value=4, code=0)",
+          "ручная резка по металлу (value=5, code=0)"
+        ]
+      },
+      {
+        "ezfc_id": "1378",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность печати",
+        "options": [
+          "полноцвет (value=0, code=4+0)",
+          "полноцвет + белый (value=1, code=4+1)",
+          "белый (value=2, code=1+0)"
+        ]
+      },
+      {
+        "ezfc_id": "1419",
+        "element_name": "numapplicationw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1420",
+        "element_name": "numapplicationh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1421",
+        "element_name": "setmaxsize",
+        "type": "text",
+        "label": "setmaxsize",
+        "options": [
+          "Свободный ввод"
+        ]
+      },
+      {
+        "ezfc_id": "1423",
+        "element_name": "dpdfilmdifficulty",
+        "type": "select",
+        "label": "Форма наклейки",
+        "options": [
+          "Простая форма (value=0, code=1)",
+          "Сложная форма (value=1, code=1.3)",
+          "Сложная форма с внутренними элементами (value=2, code=1.7)"
+        ]
+      },
+      {
+        "ezfc_id": "1424",
+        "element_name": "numsizeitem",
+        "type": "tel",
+        "label": "Размер элементов, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1425",
+        "element_name": "numdensity",
+        "type": "tel",
+        "label": "Плотность элементов",
+        "options": [
+          "value=25"
+        ]
+      },
+      {
+        "ezfc_id": "1427",
+        "element_name": "dpdbackgroudmaterial",
+        "type": "select",
+        "label": "Оклейка фона таблички",
+        "options": [
+          "без оклейки (value=0, code=0)",
+          "Плёнка AVERY, серия 500, белая (value=1, code=Avery500w)",
+          "Плёнка AVERY, серия 500, цветная (value=2, code=Avery500c)",
+          "Пленка ORACAL 352 металлик (value=3, code=Oracal352)",
+          "Плёнка транслюцентная LG, серия LT4000 (value=4, code=LGLT4000)",
+          "Плёнка светонакапливающая ФЭС-24, ГОСТ 2009, жёлто-зелёная, для сольвентной печати (value=5, code=FES24)",
+          "Плёнка световозвращающая DMP 2000, белая, 1.24 м (value=6, code=DMP2000)",
+          "Плёнка световозвращающая ТМ3100, красная, 1.24 м (value=7, code=TM3100)"
+        ]
+      },
+      {
+        "ezfc_id": "1429",
+        "element_name": "dpdrollwidelaminat",
+        "type": "select",
+        "label": "Параметры ламинации",
+        "options": [
+          "нет (value=0, code=No)",
+          "глянцевая (value=1, code=LaminatDLCLAM)",
+          "матовая (value=2, code=LaminatDLCLAM)"
+        ]
+      },
+      {
+        "ezfc_id": "1430",
+        "element_name": "numfilm",
+        "type": "tel",
+        "label": "Кол-во цветов",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "1468",
+        "element_name": "numlencut",
+        "type": "tel",
+        "label": "Длинна реза, мм",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "1477",
+        "element_name": "dpdedge",
+        "type": "select",
+        "label": "Обработка края",
+        "options": [
+          "подрезка (value=0, code=isCutEdge)",
+          "подгибка (value=1, code=isBendEdge)"
+        ]
+      },
+      {
+        "ezfc_id": "1483",
+        "element_name": "dpdbackroundedge",
+        "type": "select",
+        "label": "Обработка края",
+        "options": [
+          "подрезка (value=0, code=isCutEdge)",
+          "подгибка (value=1, code=isBendEdge)"
+        ]
+      },
+      {
+        "ezfc_id": "1484",
+        "element_name": "dpdapplicationmaterial",
+        "type": "select",
+        "label": "Пленка для аппликации",
+        "options": [
+          "нет (value=0, code=0)",
+          "Плёнка AVERY, серия 500, белая (value=1, code=Avery500w)",
+          "Плёнка AVERY, серия 500, цветная (value=2, code=Avery500c)",
+          "Пленка ORACAL 352 металлик (value=3, code=Oracal352)",
+          "Плёнка транслюцентная LG, серия LT4000 (value=4, code=LGLT4000)",
+          "Плёнка светонакапливающая ФЭС-24, ГОСТ 2009, жёлто-зелёная, для сольвентной печати (value=5, code=FES24)",
+          "Плёнка световозвращающая DMP 2000, белая, 1.24 м (value=6, code=DMP2000)",
+          "Плёнка световозвращающая ТМ3100, красная, 1.24 м (value=7, code=TM3100)"
+        ]
+      },
+      {
+        "ezfc_id": "1533",
+        "element_name": "ckbshaft",
+        "type": "checkbox",
+        "label": "ckbshaft",
+        "options": [
+          "Пластиковое древко (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "1534",
+        "element_name": "numlengthshaft",
+        "type": "tel",
+        "label": "Длинна,м",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "2718",
+        "element_name": "chkadhesivelayer",
+        "type": "checkbox",
+        "label": "chkadhesivelayer",
+        "options": [
+          "Клеевой слой (value=0, code=1)"
+        ]
+      },
+      {
+        "ezfc_id": "2770",
+        "element_name": "dpdresolution",
+        "type": "select",
+        "label": "Детализация печати",
+        "options": [
+          "стандартное качество (value=0, code=1)",
+          "высокое качество (value=1, code=2)"
+        ]
+      },
+      {
+        "ezfc_id": "3313",
+        "element_name": "ckbdoubleapplication",
+        "type": "checkbox",
+        "label": "ckbdoubleapplication",
+        "options": [
+          "Нанесение с двух сторон (value=0, code=1)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-tisneniya/",
+    "title": "Калькулятор тиснения",
+    "function": "calcEmbossing",
+    "params": [
+      {
+        "ezfc_id": "3278",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "3279",
+        "element_name": "dpdpreset",
+        "type": "select",
+        "label": "Изделие",
+        "options": [
+          "Другое (value=0, code=0)",
+          "Ежедневник А5 (value=1, code=diary)",
+          "Планнинг (value=2, code=planning)",
+          "Картхолдер (value=3, code=cardholder)"
+        ]
+      },
+      {
+        "ezfc_id": "3280",
+        "element_name": "dpdembossing",
+        "type": "select",
+        "label": "Тип тиснения",
+        "options": [
+          "блинт (value=0, code=blind)",
+          "серебро/золото (value=1, code=foil)"
+        ]
+      },
+      {
+        "ezfc_id": "3281",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина клише, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "3282",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота клише, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "3285",
+        "element_name": "numitemw",
+        "type": "tel",
+        "label": "Ширина изделия, мм",
+        "options": [
+          "value=150"
+        ]
+      },
+      {
+        "ezfc_id": "3286",
+        "element_name": "numitemh",
+        "type": "tel",
+        "label": "Высота изделия, мм",
+        "options": [
+          "value=200"
+        ]
+      },
+      {
+        "ezfc_id": "3287",
+        "element_name": "dpdsurfacematerial",
+        "type": "select",
+        "label": "Материал поверхности",
+        "options": [
+          "не указан (value=0, code=no)",
+          "Бумага/картон (value=1, code=isPaper)",
+          "Кожа (value=2, code=isLeather)",
+          "Кожзам (value=3, code=isLeatherECO)"
+        ]
+      },
+      {
+        "ezfc_id": "3291",
+        "element_name": "ckbcliche",
+        "type": "checkbox",
+        "label": "ckbcliche",
+        "options": [
+          "Изготовить клише (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "3292",
+        "element_name": "ckbpacking",
+        "type": "checkbox",
+        "label": "ckbpacking",
+        "options": [
+          "Упаковка изделия (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "3311",
+        "element_name": "ckbmaterialcustomer",
+        "type": "checkbox",
+        "label": "ckbmaterialcustomer",
+        "options": [
+          "Изделие заказчика +25% (value=0, code=true)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-flazhkov-bumazhnyh/",
+    "title": "Калькулятор флажков бумажных",
+    "function": "calcFlagPaper",
+    "params": [
+      {
+        "ezfc_id": "2256",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2258",
+        "element_name": "dpdsize",
+        "type": "select",
+        "label": "Размер",
+        "options": [
+          "148х105мм (value=0, code=148,105)",
+          "200х90мм (value=1, code=200,99)",
+          "210х148мм (value=2, code=210,148)"
+        ]
+      },
+      {
+        "ezfc_id": "2263",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Бумага",
+        "options": [
+          "115гр (value=0, code=PaperCoated115M)",
+          "170гр (value=1, code=PaperCoated170M)",
+          "200гр (value=2, code=PaperCoated200M)",
+          "250гр (value=3, code=PaperCoated250M)"
+        ]
+      },
+      {
+        "ezfc_id": "2264",
+        "element_name": "dpdcoverlaminat",
+        "type": "select",
+        "label": "Ламинация",
+        "options": [
+          "нет (value=0)",
+          "глянцевая, 32 мкм (value=1, code=Laminat32G)",
+          "матовая, 32 мкм (value=2, code=Laminat32M)"
+        ]
+      },
+      {
+        "ezfc_id": "2282",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность",
+        "options": [
+          "4+0 (value=0, code=4+0)",
+          "4+4 (value=1, code=4+4)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-heshtegov/",
+    "title": "Калькулятор хештегов",
+    "function": "calcTablets",
+    "params": [
+      {
+        "ezfc_id": "2099",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "2100",
+        "element_name": "numw",
+        "type": "text",
+        "label": "Длинна хештега, мм",
+        "options": [
+          "value=1000"
+        ]
+      },
+      {
+        "ezfc_id": "2101",
+        "element_name": "numh",
+        "type": "text",
+        "label": "Высота букв, мм",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2102",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал",
+        "options": [
+          "ПВХ Unext Strong 5 мм (value=0, code=PVC5)",
+          "ПВХ Unext Strong 8 мм (value=1, code=PVC8)",
+          "ПВХ Unext Strong 10 мм (value=2, code=PVC10)",
+          "Акрил молочный Plexiglas XT 5мм (value=3, code=AcrylWhite5)",
+          "Акрил молочный Plexiglas XT 8мм (value=4, code=AcrylWhite8)",
+          "Акрил молочный Plexiglas XT 10мм (value=5, code=AcrylWhite10)",
+          "Акрил прозрачный Plexiglas XT 5мм (value=6, code=AcrylTrans5)",
+          "Акрил прозрачный Plexiglas XT 8мм (value=7, code=AcrylTrans8)",
+          "Акрил прозрачный Plexiglas XT 10мм (value=8, code=AcrylTrans10)",
+          "Фанера сорт 2/2 4мм (value=9, code=Plywood4)"
+        ]
+      },
+      {
+        "ezfc_id": "2106",
+        "element_name": "dpdcut",
+        "type": "select",
+        "label": "Способ раскроя",
+        "options": [
+          "раскрой на лазере (value=0, code=isCutLaser)",
+          "раскрой на фрезере (value=1, code=isCutMilling)"
+        ]
+      },
+      {
+        "ezfc_id": "2109",
+        "element_name": "dpdapplication",
+        "type": "select",
+        "label": "Способ нанесения",
+        "options": [
+          "без нанесения (value=0, code=noApplication)",
+          "УФ-печать (value=1, code=isUVPrint)"
+        ]
+      },
+      {
+        "ezfc_id": "2111",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность печати",
+        "options": [
+          "полноцвет (value=0, code=4+0)",
+          "полноцвет + белый (value=1, code=4+1)",
+          "белый (value=2, code=1+0)"
+        ]
+      },
+      {
+        "ezfc_id": "2148",
+        "element_name": "inptext",
+        "type": "text",
+        "label": "Текст",
+        "options": [
+          "value=#хештег, placeholder=#хештег"
+        ]
+      },
+      {
+        "ezfc_id": "2151",
+        "element_name": "set",
+        "type": "text",
+        "label": "Set",
+        "options": [
+          "Свободный ввод"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/kalkulyator-shildov/",
+    "title": "Калькулятор шильдов",
+    "function": "calcTablets",
+    "params": [
+      {
+        "ezfc_id": "2721",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2722",
+        "element_name": "numw",
+        "type": "text",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2723",
+        "element_name": "numh",
+        "type": "text",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2724",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал",
+        "options": [
+          "не задан материал (value=0)",
+          "Акрил молочный Plexiglas XT 3мм (value=1, code=AcrylWhite3)",
+          "Акрил цветной Plexiglas XT 3мм (value=2, code=AcrylColor3)",
+          "Фанера сорт 2/2 3мм (value=3, code=Plywood3)",
+          "Алюминий для сублимации 305х600х0 (value=4, code=AluminiumSU055)",
+          "Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=5, code=ZENOMARKLASER)",
+          "Двухслойный пластик для гравирования SHENGWEI 1200 x 600 x 1.5 мм. (value=6, code=SHENGWEI)",
+          "Двухслойный пластик для гравирования ROWMARK LASERMAX акрил 2 слоя (value=7, code=ROWMARKLASERMAX)",
+          "Двухслойный пластик для гравирования ROWMARK LASERMAX акрил 2 слоя (value=8, code=ROWMARKLASERMAX3)"
+        ]
+      },
+      {
+        "ezfc_id": "2728",
+        "element_name": "dpdcut",
+        "type": "select",
+        "label": "Способ раскроя",
+        "options": [
+          "раскрой на лазере (value=0, code=isCutLaser)",
+          "раскрой на гильотине по металлу (value=1, code=isCutManualMetal)"
+        ]
+      },
+      {
+        "ezfc_id": "2731",
+        "element_name": "dpdapplication",
+        "type": "select",
+        "label": "Способ нанесения",
+        "options": [
+          "без нанесения (value=0, code=noApplication)",
+          "УФ-печать (value=1, code=isUVPrint)",
+          "Гравировка (value=2, code=isGrave)",
+          "Сублимационная печать (value=3, code=isSublimation)"
+        ]
+      },
+      {
+        "ezfc_id": "2751",
+        "element_name": "chkadhesivelayer",
+        "type": "checkbox",
+        "label": "chkadhesivelayer",
+        "options": [
+          "Клеевой слой (value=0, code=1)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/lazernaya-gravirovka-i-rezka/",
+    "title": "Лазерная гравировка и резка",
+    "function": "calcLaser",
+    "params": [
+      {
+        "ezfc_id": "980",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "981",
+        "element_name": "numgravew",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "982",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "983",
+        "element_name": "setmaxsize",
+        "type": "text",
+        "label": "setmaxsize",
+        "options": [
+          "Свободный ввод"
+        ]
+      },
+      {
+        "ezfc_id": "985",
+        "element_name": "dpddifficulty",
+        "type": "select",
+        "label": "Параметры лазерной резки",
+        "options": [
+          "без резки (value=0, code=noCut)",
+          "Простая форма резки (value=1, code=1)",
+          "Сложная форма резки (value=2, code=1.3)",
+          "Сложная форма с внутренними элементами (value=3, code=1.7)",
+          "Задана длина резки (value=4, code=isLenCut)"
+        ]
+      },
+      {
+        "ezfc_id": "986",
+        "element_name": "numsizeitem",
+        "type": "tel",
+        "label": "Размер элементов, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "987",
+        "element_name": "numdensity",
+        "type": "tel",
+        "label": "Плотность элементов",
+        "options": [
+          "value=25"
+        ]
+      },
+      {
+        "ezfc_id": "988",
+        "element_name": "chkmark",
+        "type": "checkbox",
+        "label": "chkmark",
+        "options": [
+          "Резка по меткам (value=0, code=1)"
+        ]
+      },
+      {
+        "ezfc_id": "989",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал",
+        "options": [
+          "не задан материал (value=0)",
+          "Акрил молочный Plexiglas XT 3мм (value=1, code=AcrylWhite3)",
+          "Акрил молочный Plexiglas XT 5мм (value=2, code=AcrylWhite5)",
+          "Акрил молочный Plexiglas XT 8мм (value=3, code=AcrylWhite8)",
+          "Акрил молочный Plexiglas XT 10мм (value=4, code=AcrylWhite10)",
+          "Акрил прозрачный Plexiglas XT 2мм (value=5, code=AcrylTrans2)",
+          "Акрил прозрачный Plexiglas XT 3мм (value=6, code=AcrylTrans3)",
+          "Акрил прозрачный Plexiglas XT 5мм (value=7, code=AcrylTrans5)",
+          "Акрил прозрачный Plexiglas XT 8мм (value=8, code=AcrylTrans8)",
+          "Акрил прозрачный Plexiglas XT 10мм (value=9, code=AcrylTrans10)",
+          "Акрил цветной Plexiglas XT 3мм (value=10, code=AcrylColor3)",
+          "Акрил цветной Plexiglas XT 5мм (value=11, code=AcrylColor5)",
+          "Фанера сорт 2/2 3мм (value=12, code=Plywood3)",
+          "Фанера сорт 2/2 4мм (value=13, code=Plywood4)",
+          "Шпон бук 0.6мм (value=14, code=VeneerBeech06)",
+          "Шпон бук 1.5мм (value=15, code=VeneerBeech15)",
+          "Шпон дуб 0.6мм (value=16, code=VeneerOak06)",
+          "Шпон дуб 1.5мм (value=17, code=VeneerOak15)",
+          "Шпон ясень 0.6мм (value=18, code=VeneerAsh06)",
+          "Шпон ясень 1.5мм (value=19, code=VeneerAsh15)",
+          "ПЭТ 0.3мм (value=20, code=PET03)",
+          "ПЭТ 0.5мм (value=21, code=PET05)",
+          "ПЭТ 0.7мм (value=22, code=PET07)",
+          "ПЭТ 1.0мм (value=23, code=PET10)",
+          "ПЭТ 1.5мм (value=24, code=PET15)",
+          "ПЭТ 2.0мм (value=25, code=PET20)",
+          "Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=26, code=ZENOMARKLASER)",
+          "Двухслойный пластик для гравирования SHENGWEI, 1200 x 600 x 1.5 мм. (value=27, code=SHENGWEI)",
+          "Двухслойный пластик для гравирования ROWMARK LASERMAX, акрил, 2 слоя, 1220 х 600 мм x 1.6 мм (value=28, code=ROWMARKLASERMAX)",
+          "Двухслойный пластик для гравирования ROWMARK LASERMAX, акрил, 2 слоя, 1220 х 600 мм x 3.2 мм (value=29, code=ROWMARKLASERMAX3)"
+        ]
+      },
+      {
+        "ezfc_id": "1013",
+        "element_name": "numlencut",
+        "type": "tel",
+        "label": "Длинна реза, мм",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "1015",
+        "element_name": "dpdgrave",
+        "type": "select",
+        "label": "Параметры гравировки",
+        "options": [
+          "без гравировки (value=0, code=noGrave)",
+          "гравировка заполнением (value=1, code=isGraveFill)",
+          "гравировка контуром (value=2, code=isGraveContur)"
+        ]
+      },
+      {
+        "ezfc_id": "1016",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1017",
+        "element_name": "numgraveh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1020",
+        "element_name": "numlencontur",
+        "type": "tel",
+        "label": "Длинна контура, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1024",
+        "element_name": "numthinknesscontur",
+        "type": "tel",
+        "label": "Толщина контура, мм",
+        "options": [
+          "value=2"
+        ]
+      },
+      {
+        "ezfc_id": "1025",
+        "element_name": "dpdgraveresolution",
+        "type": "select",
+        "label": "Детализация гравировки",
+        "options": [
+          "Стандартная (до 0.1мм) (value=0, code=1)",
+          "Высокая (до 0.01мм) (value=1, code=2)"
+        ]
+      },
+      {
+        "ezfc_id": "1027",
+        "element_name": "rdomaterial",
+        "type": "radio",
+        "label": "rdomaterial",
+        "options": [
+          "Учитывать материал в цене (value=0, code=isMaterial)",
+          "Не учитывать материал в цене (value=1, code=noMaterial)",
+          "Материал заказчика +25% (value=2, code=isMaterialCustomer)"
+        ]
+      },
+      {
+        "ezfc_id": "2630",
+        "element_name": "chkadhesivelayer",
+        "type": "checkbox",
+        "label": "chkadhesivelayer",
+        "options": [
+          "Клеевой слой (value=0, code=1)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/listovki-pod-zakaz/",
+    "title": "Листовки под заказ",
+    "function": "calcPrintSheet",
+    "params": [
+      {
+        "ezfc_id": "98",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "99",
+        "element_name": "dpdformat",
+        "type": "select",
+        "label": "Формат бумаги",
+        "options": [
+          "А3 (420х297 мм) (value=0, code=420,297)",
+          "А4 (297х210 мм) (value=1, code=297,210)",
+          "А5 (210х148 мм) (value=2, code=210,148)",
+          "А6 (148х105 мм) (value=3, code=148,105)",
+          "А7 (105х74 мм) (value=4, code=105,74)",
+          "Евро (200х99 мм) (value=5, code=200,99)",
+          "задать свой размер (value=6, code=0)"
+        ]
+      },
+      {
+        "ezfc_id": "100",
+        "element_name": "numw",
+        "type": "text",
+        "label": "Ширина, мм",
+        "options": [
+          "value=210"
+        ]
+      },
+      {
+        "ezfc_id": "101",
+        "element_name": "numh",
+        "type": "text",
+        "label": "Высота, мм",
+        "options": [
+          "value=297"
+        ]
+      },
+      {
+        "ezfc_id": "102",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность печати",
+        "options": [
+          "4+0 (value=0, code=4+0)",
+          "4+4 (value=1, code=4+4)",
+          "4+1 (value=2, code=4+1)",
+          "1+0 (value=3, code=1+0)",
+          "1+1 (value=4, code=1+1)"
+        ]
+      },
+      {
+        "ezfc_id": "103",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал",
+        "options": [
+          "Снегурочка (value=0, code=VHI80)",
+          "Мелованная матовая 115 г/м (value=1, code=PaperCoated115M)",
+          "Мелованная глянец 115 г/м (value=2, code=PaperCoated115G)",
+          "Мелованная матовая 130 г/м (value=3, code=PaperCoated130M)",
+          "Мелованная глянец 130 г/м (value=4, code=PaperCoated130G)",
+          "Мелованная матовая 170 г/м (value=5, code=PaperCoated170M)",
+          "Мелованная глянец 170 г/м (value=6, code=PaperCoated170G)",
+          "Мелованная матовая 200 г/м (value=7, code=PaperCoated200M)",
+          "Мелованная глянец 200 г/м (value=8, code=PaperCoated200G)",
+          "Мелованная матовая 250 г/м (value=9, code=PaperCoated250M)",
+          "Мелованная глянец 250 г/м (value=10, code=PaperCoated250G)",
+          "Мелованная матовая 300 г/м (value=11, code=PaperCoated300M)",
+          "Мелованная глянец 300 г/м (value=12, code=PaperCoated300G)",
+          "Xerox Colotech Plus матовая 90 г/м SRA3 (value=13, code=ColotechPlus90M)",
+          "Xerox Colotech Plus матовая 120 г/м SRA3 (value=14, code=ColotechPlus120M)",
+          "Xerox Colotech Plus матовая 160 г/м SRA3 (value=15, code=ColotechPlus160M)",
+          "Xerox Colotech Plus матовая 200 г/м SRA3 (value=16, code=ColotechPlus200M)",
+          "Xerox Colotech Plus матовая 250 г/м SRA3 (value=17, code=ColotechPlus250M)",
+          "Xerox Colotech Plus матовая 300 г/м SRA3 (value=18, code=ColotechPlus300M)",
+          "Xerox Colotech Plus матовая 350 г/м SRA3 (value=19, code=ColotechPlus350M)",
+          "Самоклеящаяся бумага RAFLACOAT 640х450 постоянный клей (value=20, code=RAFLACOAT)",
+          "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 матовая белая 215 г/м (value=21, code=RaflatacMW)",
+          "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 матовая прозрачная 196 г/м (value=22, code=RaflatacMT)",
+          "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 глянцевая белая 212 г/м (value=23, code=RaflatacGW)",
+          "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 глянцевая прозрачная 211 г/м (value=24, code=RaflatacGT)",
+          "Конверт DL белый без запечатки 80 г/м (value=25, code=EnvelopeDL)",
+          "Конверт С5 белый без запечатки 80 г/м (value=26, code=EnvelopeС5)",
+          "Конверт С4 белый без запечатки 90 г/м (value=27, code=EnvelopeС4)",
+          "Маджестик (value=28, code=MAJESTIC)",
+          "Лен Супервайс (value=29, code=SUPERWAIS)",
+          "Крафт Эколайнер 100гр (value=30, code=ECOLINER100)",
+          "Крафт Эколайнер 250гр (value=31, code=ECOLINER250)",
+          "Крафт Эколайнер 290гр (value=32, code=ECOLINER290)",
+          "Тач кавер (value=33, code=TOUCHCAVER)",
+          "Калька 90гр (value=34, code=CALQUE90)",
+          "Калька 130гр (value=35, code=CALQUE130)",
+          "Калька 180гр (value=36, code=CALQUE180)"
+        ]
+      },
+      {
+        "ezfc_id": "400",
+        "element_name": "dpdrolllaminat",
+        "type": "select",
+        "label": "Параметры ламинации",
+        "options": [
+          "глянцевая, 32 мкм (value=0, code=Laminat32G)",
+          "матовая, 32 мкм (value=1, code=Laminat32M)",
+          "глянцевая, 75 мкм (value=2, code=Laminat75G)",
+          "матовая, 75 мкм (value=3, code=Laminat75M)",
+          "софт-тач, 32 мкм (value=4, code=Laminat32ST)"
+        ]
+      },
+      {
+        "ezfc_id": "401",
+        "element_name": "rdolaminat",
+        "type": "radio",
+        "label": "Ламинация",
+        "options": [
+          "Нет (value=0, code=0)",
+          "Рулонная (value=1, code=1)",
+          "Пакетная (value=2, code=2)"
+        ]
+      },
+      {
+        "ezfc_id": "402",
+        "element_name": "dpdpacklaminat",
+        "type": "select",
+        "label": "Параметры ламинации",
+        "options": [
+          "А4 (216х303мм, 2х60мкм), глянцевая (value=0, code=LaminatA460G)",
+          "А4 (216х303мм, 2х60мкм), матовая (value=1, code=LaminatA460M)",
+          "А4 (216х303мм, 2х150мкм), глянцевая (value=2, code=LaminatA4150G)",
+          "А4 (216х303мм, 2х150мкм), матовая (value=3, code=LaminatA4150M)",
+          "А4 (216х303мм, 2х200мкм), глянцевая (value=4, code=LaminatA4200G)",
+          "А4 (216х303мм, 2х250мкм), глянцевая (value=5, code=LaminatA4250G)",
+          "А4 (216х303мм, 2х250мкм), матовая (value=6, code=LaminatA4250M)",
+          "А5 (154х216мм, 2х60мкм), глянцевая (value=7, code=LaminatA560G)",
+          "А6 (111х154мм, 2х60мкм), глянцевая (value=8, code=LaminatA660G)",
+          "А7 (80х111мм, 2х60мкм), глянцевая (value=9, code=LaminatA760G)",
+          "А3 (303х426мм, 2х60мкм), глянцевая (value=10, code=LaminatA360G)",
+          "А3 (303х426мм, 2х60мкм), матовая (value=11, code=LaminatA360M)",
+          "А3 (303х426мм, 2х175мкм), глянцевая (value=12, code=LaminatA3175G)",
+          "А3 (303х426мм, 2х150мкм), матовая (value=13, code=LaminatA3150M)",
+          "А3 (303х426мм, 2х200мкм), глянцевая (value=14, code=LaminatA3200G)",
+          "А3 (303х426мм, 2х250мкм), глянцевая (value=15, code=LaminatA3250G)",
+          "А3 (303х426мм, 2х250мкм), матовая (value=16, code=LaminatA3250M)"
+        ]
+      },
+      {
+        "ezfc_id": "419",
+        "element_name": "ckbmargin",
+        "type": "checkbox",
+        "label": "ckbmargin",
+        "options": [
+          "Белые поля (value=0, code=1)"
+        ]
+      },
+      {
+        "ezfc_id": "661",
+        "element_name": "ckbnumber",
+        "type": "checkbox",
+        "label": "ckbnumber",
+        "options": [
+          "Нумерация (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "663",
+        "element_name": "ckbbarcode",
+        "type": "checkbox",
+        "label": "ckbbarcode",
+        "options": [
+          "Штрихкод (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "664",
+        "element_name": "ckbcrease",
+        "type": "checkbox",
+        "label": "ckbcrease",
+        "options": [
+          "Биговка (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "665",
+        "element_name": "numcrease",
+        "type": "tel",
+        "label": "Бигов",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "666",
+        "element_name": "ckbvariables",
+        "type": "checkbox",
+        "label": "ckbvariables",
+        "options": [
+          "Переменные данные/ФИО (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "667",
+        "element_name": "ckbrounding",
+        "type": "checkbox",
+        "label": "ckbrounding",
+        "options": [
+          "Скругление (4 угла) (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "668",
+        "element_name": "ckbhole",
+        "type": "checkbox",
+        "label": "ckbhole",
+        "options": [
+          "Пробивка отверстий (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "669",
+        "element_name": "numhole",
+        "type": "tel",
+        "label": "Отверстий",
+        "options": [
+          "value=1"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/naklejki-s-polimernoj-zalivkoj/",
+    "title": "Наклейки с полимерной заливкой",
+    "function": "calcPolySticker",
+    "params": [
+      {
+        "ezfc_id": "1067",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "1068",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1069",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "1072",
+        "element_name": "dpddifficulty",
+        "type": "select",
+        "label": "Форма наклейки",
+        "options": [
+          "простая (value=0, code=1)",
+          "сложная (value=1, code=1.3)"
+        ]
+      },
+      {
+        "ezfc_id": "1076",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал",
+        "options": [
+          "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 матовая белая 215 г/м (value=0, code=RaflatacMW)",
+          "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 матовая прозрачная 196г/м (value=1, code=RaflatacMT)",
+          "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 глянцевая белая 212г/м (value=2, code=RaflatacGW)",
+          "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 глянцевая прозрачная 211г/м (value=3, code=RaflatacGT)",
+          "Плёнка ORAJET 3640, белая/прозрачная/глянцевая/матовая (value=4, code=ORAJET3640)",
+          "Плёнка AVERY, серия 500, белая (value=5, code=Avery500w)",
+          "Плёнка AVERY, серия 500, цветная (value=6, code=Avery500c)",
+          "Пленка ORACAL 352 металлик (value=7, code=Oracal352)",
+          "Плёнка транслюцентная LG, серия LT4000 (value=8, code=LGLT4000)"
+        ]
+      },
+      {
+        "ezfc_id": "1077",
+        "element_name": "dpdprint",
+        "type": "select",
+        "label": "Способ печати",
+        "options": [
+          "Без печати (value=0, code=No)",
+          "Цифровая лазерная печать (value=1, code=KMBizhubC220)",
+          "Интерьерная экосольвентная (value=2, code=Technojet160ECO)",
+          "Интерьерная латексная (value=3, code=HPLatex335)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/stikerpaki-s-polimernoj-zalivkoj/",
+    "title": "Стикерпаки с полимерной заливкой",
+    "function": "calcPolyStickerPack",
+    "params": [
+      {
+        "ezfc_id": "2818",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "2819",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина стикерпака, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2820",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота стикерпака, мм",
+        "options": [
+          "value=50"
+        ]
+      },
+      {
+        "ezfc_id": "2823",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал",
+        "options": [
+          "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 матовая белая 215 г/м (value=0, code=RaflatacMW)",
+          "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 матовая прозрачная 196г/м (value=1, code=RaflatacMT)",
+          "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 глянцевая белая 212г/м (value=2, code=RaflatacGW)",
+          "Пленка самоклеящаяся PolyLaser UPM Raflatac SRA3 глянцевая прозрачная 211г/м (value=3, code=RaflatacGT)",
+          "Плёнка ORAJET 3640, белая/прозрачная/глянцевая/матовая (value=4, code=ORAJET3640)",
+          "Плёнка AVERY, серия 500, белая (value=5, code=Avery500w)",
+          "Плёнка AVERY, серия 500, цветная (value=6, code=Avery500c)",
+          "Пленка ORACAL 352 металлик (value=7, code=Oracal352)",
+          "Плёнка транслюцентная LG, серия LT4000 (value=8, code=LGLT4000)"
+        ]
+      },
+      {
+        "ezfc_id": "2824",
+        "element_name": "dpdprint",
+        "type": "select",
+        "label": "Способ печати",
+        "options": [
+          "Без печати (value=0, code=No)",
+          "Цифровая лазерная печать (value=1, code=KMBizhubC220)",
+          "Интерьерная экосольвентная (value=2, code=Technojet160ECO)",
+          "Интерьерная латексная (value=3, code=HPLatex335)"
+        ]
+      },
+      {
+        "ezfc_id": "2847",
+        "element_name": "frmsetstickers",
+        "type": "select",
+        "label": "ширина, мм",
+        "options": [
+          "простая (value=0, code=1)",
+          "сложная (value=1, code=1.3)"
+        ]
+      },
+      {
+        "ezfc_id": "2870",
+        "element_name": "chkbackground",
+        "type": "checkbox",
+        "label": "chkbackground",
+        "options": [
+          "Фон с печатью (value=0, code=1)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/tampopechat/",
+    "title": "Тампопечать",
+    "function": "calcPadPrint",
+    "params": [
+      {
+        "ezfc_id": "1433",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "1434",
+        "element_name": "dpdpreset",
+        "type": "select",
+        "label": "Тип изделия",
+        "options": [
+          "Ручка, брелок, зажигалка (value=0, code=isSmallItems)",
+          "Кружка, бокал (value=1, code=isLargeItems)",
+          "Нестандартное изделие (value=2, code=isLargeItems)"
+        ]
+      },
+      {
+        "ezfc_id": "1435",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность печати",
+        "options": [
+          "1 цвет (value=0, code=1)",
+          "2 цвета (value=1, code=2)"
+        ]
+      },
+      {
+        "ezfc_id": "1442",
+        "element_name": "dpdsurfacematerial",
+        "type": "select",
+        "label": "Материал поверхности",
+        "options": [
+          "не указан (value=0, code=no)",
+          "Пластик (value=1, code=isPlastic)",
+          "Металл (value=2, code=isMetall)",
+          "Стекло (value=3, code=isGlass)",
+          "Камень (value=4, code=isStone)",
+          "Кожа (value=5, code=isLeather)",
+          "Керамика (value=6, code=isCeramic)"
+        ]
+      },
+      {
+        "ezfc_id": "1444",
+        "element_name": "ckbpantone",
+        "type": "checkbox",
+        "label": "ckbpantone",
+        "options": [
+          "Печать по Pantone (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "1445",
+        "element_name": "ckbmaterialcustomer",
+        "type": "checkbox",
+        "label": "ckbmaterialcustomer",
+        "options": [
+          "Изделие заказчика + 25% (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "1446",
+        "element_name": "ckbpacking",
+        "type": "checkbox",
+        "label": "ckbpacking",
+        "options": [
+          "Распаковка и упаковка изделий (value=0, code=true)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/uf-pechat-na-suveniry/",
+    "title": "УФ-печать на сувениры",
+    "function": "calcUVPrint",
+    "params": [
+      {
+        "ezfc_id": "890",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "891",
+        "element_name": "dpdsurfaceprint",
+        "type": "select",
+        "label": "Вид поверхности",
+        "options": [
+          "Печать по плоской поверхности (value=0, code=isPlain)",
+          "Круговая печать (value=1, code=isAround)"
+        ]
+      },
+      {
+        "ezfc_id": "893",
+        "element_name": "numitemw",
+        "type": "tel",
+        "label": "Ширина изделия, мм",
+        "options": [
+          "value=150"
+        ]
+      },
+      {
+        "ezfc_id": "894",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота печати, мм",
+        "options": [
+          "value=7"
+        ]
+      },
+      {
+        "ezfc_id": "895",
+        "element_name": "dpdcolor",
+        "type": "select",
+        "label": "Цветность печати",
+        "options": [
+          "Полноцвет (value=0, code=4+0)",
+          "Полноцвет + белый (value=1, code=4+1)",
+          "Белый (value=2, code=1+0)"
+        ]
+      },
+      {
+        "ezfc_id": "896",
+        "element_name": "dpdsurfacematerial",
+        "type": "select",
+        "label": "Материал поверхности",
+        "options": [
+          "не указан (value=0, code=no)",
+          "Пластик (value=1, code=isPlastic)",
+          "Металл (value=2, code=isMetall)",
+          "Стекло (value=3, code=isGlass)",
+          "Камень (value=4, code=isStone)",
+          "Кожа (value=5, code=isLeather)",
+          "Керамика (value=6, code=isCeramic)"
+        ]
+      },
+      {
+        "ezfc_id": "901",
+        "element_name": "ckbnumber",
+        "type": "checkbox",
+        "label": "ckbnumber",
+        "options": [
+          "Нумерация (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "902",
+        "element_name": "ckbbarcode",
+        "type": "checkbox",
+        "label": "ckbbarcode",
+        "options": [
+          "Штрихкод (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "903",
+        "element_name": "ckbvariables",
+        "type": "checkbox",
+        "label": "ckbvariables",
+        "options": [
+          "Переменные данные/ФИО (value=0, code=true)"
+        ]
+      },
+      {
+        "ezfc_id": "931",
+        "element_name": "numitemh",
+        "type": "tel",
+        "label": "Высота изделия, мм",
+        "options": [
+          "value=15"
+        ]
+      },
+      {
+        "ezfc_id": "932",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина печати, мм",
+        "options": [
+          "value=60"
+        ]
+      },
+      {
+        "ezfc_id": "933",
+        "element_name": "dpdpreset",
+        "type": "select",
+        "label": "Прессет",
+        "options": [
+          "Ручной ввод (value=0, code=0)",
+          "Ручка (value=1, code=60,7,150,20,2)",
+          "Брелок (value=2, code=30,30,75,50,2)",
+          "Зажигалка (value=3, code=55,13,85,25,2)"
+        ]
+      },
+      {
+        "ezfc_id": "934",
+        "element_name": "dpdresolution",
+        "type": "select",
+        "label": "Разрешение печати",
+        "options": [
+          "Разрешение 720dpi (value=0, code=1)",
+          "Разрешение 1440dpi (value=1, code=2)"
+        ]
+      },
+      {
+        "ezfc_id": "3009",
+        "element_name": "ckbmaterialcustomer",
+        "type": "checkbox",
+        "label": "ckbmaterialcustomer",
+        "options": [
+          "Изделие заказчика +25% (value=0, code=true)"
+        ]
+      }
+    ]
+  },
+  {
+    "url": "https://insain.ru/catalog/shirokoformatnaya-pechat-na-zakaz/",
+    "title": "Широкоформатная печать на заказ",
+    "function": "calcPrintRoll",
+    "params": [
+      {
+        "ezfc_id": "756",
+        "element_name": "numn",
+        "type": "tel",
+        "label": "Тираж",
+        "options": [
+          "value=1"
+        ]
+      },
+      {
+        "ezfc_id": "757",
+        "element_name": "dpdformat",
+        "type": "select",
+        "label": "Формат и размер изделия",
+        "options": [
+          "А0 (118.9x84.1 cм) (value=0, code=1189,841)",
+          "А1 (84.1x59.4 cм) (value=1, code=841,594)",
+          "А2 (59.4,42.0 cм) (value=2, code=594,420)",
+          "задать свой размер (value=3, code=0)"
+        ]
+      },
+      {
+        "ezfc_id": "759",
+        "element_name": "numw",
+        "type": "tel",
+        "label": "Ширина, см",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "760",
+        "element_name": "numh",
+        "type": "tel",
+        "label": "Высота, см",
+        "options": [
+          "value=100"
+        ]
+      },
+      {
+        "ezfc_id": "761",
+        "element_name": "dpdprinter",
+        "type": "select",
+        "label": "Способ печати",
+        "options": [
+          "Интерьерная экосольвентная (value=0, code=Technojet160ECO)",
+          "Интерьерная латексная (value=1, code=HPLatex335)",
+          "Широкоформатная сольвентная (value=2, code=TechnojetXR720)",
+          "Широкоформатная УФ-печать (value=3, code=PrintWideUV)"
+        ]
+      },
+      {
+        "ezfc_id": "762",
+        "element_name": "dpdmaterial",
+        "type": "select",
+        "label": "Материал",
+        "options": [
+          "Плёнка ORAJET 3640, белая/прозрачная/глянцевая/матовая (value=0, code=ORAJET3640)",
+          "Скроллерная бумага (1,27, 200 мкр, белая, матовая, полипропилен) (value=1, code=ScrollPaper200)",
+          "Плёнка светонакапливающая ФЭС-24, ГОСТ 2009, жёлто-зелёная, для сольвентной печати (value=2, code=FES24)",
+          "Баннер Fronlit литой, 400гр (value=3, code=BannerFronlitCoat400)",
+          "Баннер Fronlit литой, 510гр (value=4, code=BannerFronlitCoat510)",
+          "Баннер Fronlit ламинированный, 440гр (value=5, code=BannerFronlitLamin440)",
+          "Баннер Fronlit литой, 510гр НЕГОРЮЧИЙ, класс Г1 (value=6, code=BannerFronlitLamin510B1FR)",
+          "Сетка 330 г (с подложкой), 3,2м (value=7, code=BannerGrid)",
+          "Баннер BLACKOUT светоблокирующий,540 гр/м2 (value=8, code=BannerBlackout)",
+          "Постерная бумага SKYLIGHT 150г 1,27м (value=9, code=Skylight150)",
+          "Фотобумага 220г 1,27м глянец (value=10, code=Photo)",
+          "Холст DLC NM-320 натуральный матовый 1,27м (value=11, code=CanvasDLCNM320)",
+          "Фотообои бум. DigiFort (песок) 1,3м (value=12, code=WallpaperDigiFort)",
+          "Обои под покраску флизелиновые (песок) 1.06м (value=13, code=WallpaperSand)",
+          "Обои под покраску флизелиновые (текстура в асс.) 1.06м (value=14, code=Wallpaper)",
+          "Плёнка световозвращающая DMP 2000, белая, 1.24 м (value=15, code=DMP2000)",
+          "Плёнка бэклит (value=16, code=Backlit)",
+          "Перфорированная пленка, постоянный черный клей, белая, 120 мкм (value=17, code=Perforated)"
+        ]
+      },
+      {
+        "ezfc_id": "764",
+        "element_name": "dpdrolllaminat",
+        "type": "select",
+        "label": "Ламинация",
+        "options": [
+          "нет (value=0, code=0)",
+          "глянцевая (value=1, code=1)",
+          "матовая (value=2, code=2)"
+        ]
+      },
+      {
+        "ezfc_id": "772",
+        "element_name": "numstepeyelets",
+        "type": "tel",
+        "label": "Шаг люверсовки, см",
+        "options": [
+          "value=30"
+        ]
+      },
+      {
+        "ezfc_id": "799",
+        "element_name": "dpdprocessedge",
+        "type": "select",
+        "label": "dpdprocessedge",
+        "options": [
+          "поля 5 см (value=0, code=isField50)",
+          "поля 10 см (value=1, code=idField100)",
+          "резка в край (value=2, code=isCutting)",
+          "проклейка (value=3, code=isGluing)",
+          "карман (value=4, code=isPocket)",
+          "люверсовка (value=5, code=isEyelet)"
+        ]
+      },
+      {
+        "ezfc_id": "800",
+        "element_name": "rdoprocessedge",
+        "type": "radio",
+        "label": "Обработка краев",
+        "options": [
+          "Одинаковая по всем краям (value=0, code=1)",
+          "Разная для каждого края (value=1, code=2)"
+        ]
+      },
+      {
+        "ezfc_id": "801",
+        "element_name": "dpdprocessedgeright",
+        "type": "select",
+        "label": "Правый край",
+        "options": [
+          "поля 5 см (value=0, code=isField50)",
+          "поля 10 см (value=1, code=isField100)",
+          "резка в край (value=2, code=isCutting)",
+          "проклейка (value=3, code=isGluing)",
+          "карман (value=4, code=isPocket)",
+          "люверсовка (value=5, code=isEyelet)"
+        ]
+      },
+      {
+        "ezfc_id": "802",
+        "element_name": "numstepeyeletsright",
+        "type": "tel",
+        "label": "Шаг люверсовки, см",
+        "options": [
+          "value=30"
+        ]
+      },
+      {
+        "ezfc_id": "803",
+        "element_name": "dpdprocessedgeleft",
+        "type": "select",
+        "label": "Левый край",
+        "options": [
+          "поля 5 см (value=0, code=isField50)",
+          "поля 10 см (value=1, code=isField100)",
+          "резка в край (value=2, code=isCutting)",
+          "проклейка (value=3, code=isGluing)",
+          "карман (value=4, code=isPocket)",
+          "люверсовка (value=5, code=isEyelet)"
+        ]
+      },
+      {
+        "ezfc_id": "804",
+        "element_name": "dpdprocessedgebottom",
+        "type": "select",
+        "label": "Нижний край",
+        "options": [
+          "поля 5 см (value=0, code=isField50)",
+          "поля 10 см (value=1, code=isField100)",
+          "резка в край (value=2, code=isCutting)",
+          "проклейка (value=3, code=isGluing)",
+          "карман (value=4, code=isPocket)",
+          "люверсовка (value=5, code=isEyelet)"
+        ]
+      },
+      {
+        "ezfc_id": "805",
+        "element_name": "numstepeyeletsbottom",
+        "type": "tel",
+        "label": "Шаг люверсовки, см",
+        "options": [
+          "value=30"
+        ]
+      },
+      {
+        "ezfc_id": "806",
+        "element_name": "numstepeyeletsleft",
+        "type": "tel",
+        "label": "Шаг люверсовки, см",
+        "options": [
+          "value=30"
+        ]
+      },
+      {
+        "ezfc_id": "807",
+        "element_name": "dpdprocessedgetop",
+        "type": "select",
+        "label": "Верх",
+        "options": [
+          "поля 5 см (value=0, code=isField50)",
+          "поля 10 см (value=1, code=isField100)",
+          "резка в край (value=2, code=isCutting)",
+          "проклейка (value=3, code=isGluing)",
+          "карман (value=4, code=isPocket)",
+          "люверсовка (value=5, code=isEyelet)"
+        ]
+      },
+      {
+        "ezfc_id": "808",
+        "element_name": "numstepeyeletstop",
+        "type": "tel",
+        "label": "Шаг люверсовки, см",
+        "options": [
+          "value=30"
+        ]
+      },
+      {
+        "ezfc_id": "810",
+        "element_name": "ckbjoing",
+        "type": "checkbox",
+        "label": "ckbjoing",
+        "options": [
+          "Печать со стыковкой (value=0, code=true)"
+        ]
+      }
+    ]
+  }
+]

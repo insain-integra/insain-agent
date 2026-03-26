@@ -1,0 +1,190 @@
+Калькулятор: Широкоформатная печать на заказ
+URL: https://insain.ru/catalog/shirokoformatnaya-pechat-na-zakaz/
+Функция расчёта: calcPrintRoll
+Параметров: 19
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 756
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=1
+
+Параметр 2: Формат и размер изделия
+  ezfc_id: 757
+  element_name: dpdformat
+  Тип: select
+  Варианты:
+    • А0 (118.9x84.1 cм) (value=0, code=1189,841)
+    • А1 (84.1x59.4 cм) (value=1, code=841,594)
+    • А2 (59.4,42.0 cм) (value=2, code=594,420)
+    • задать свой размер (value=3, code=0)
+
+Параметр 3: Ширина, см
+  ezfc_id: 759
+  element_name: numw
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 4: Высота, см
+  ezfc_id: 760
+  element_name: numh
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 5: Способ печати
+  ezfc_id: 761
+  element_name: dpdprinter
+  Тип: select
+  Варианты:
+    • Интерьерная экосольвентная (value=0, code=Technojet160ECO)
+    • Интерьерная латексная (value=1, code=HPLatex335)
+    • Широкоформатная сольвентная (value=2, code=TechnojetXR720)
+    • Широкоформатная УФ-печать (value=3, code=PrintWideUV)
+
+Параметр 6: Материал
+  ezfc_id: 762
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • Плёнка ORAJET 3640, белая/прозрачная/глянцевая/матовая (value=0, code=ORAJET3640)
+    • Скроллерная бумага (1,27, 200 мкр, белая, матовая, полипропилен) (value=1, code=ScrollPaper200)
+    • Плёнка светонакапливающая ФЭС-24, ГОСТ 2009, жёлто-зелёная, для сольвентной печати (value=2, code=FES24)
+    • Баннер Fronlit литой, 400гр (value=3, code=BannerFronlitCoat400)
+    • Баннер Fronlit литой, 510гр (value=4, code=BannerFronlitCoat510)
+    • Баннер Fronlit ламинированный, 440гр (value=5, code=BannerFronlitLamin440)
+    • Баннер Fronlit литой, 510гр НЕГОРЮЧИЙ, класс Г1 (value=6, code=BannerFronlitLamin510B1FR)
+    • Сетка 330 г (с подложкой), 3,2м (value=7, code=BannerGrid)
+    • Баннер BLACKOUT светоблокирующий,540 гр/м2 (value=8, code=BannerBlackout)
+    • Постерная бумага SKYLIGHT 150г 1,27м (value=9, code=Skylight150)
+    • Фотобумага 220г 1,27м глянец (value=10, code=Photo)
+    • Холст DLC NM-320 натуральный матовый 1,27м (value=11, code=CanvasDLCNM320)
+    • Фотообои бум. DigiFort (песок) 1,3м (value=12, code=WallpaperDigiFort)
+    • Обои под покраску флизелиновые (песок) 1.06м (value=13, code=WallpaperSand)
+    • Обои под покраску флизелиновые (текстура в асс.) 1.06м (value=14, code=Wallpaper)
+    • Плёнка световозвращающая DMP 2000, белая, 1.24 м (value=15, code=DMP2000)
+    • Плёнка бэклит (value=16, code=Backlit)
+    • Перфорированная пленка, постоянный черный клей, белая, 120 мкм (value=17, code=Perforated)
+
+Параметр 7: Ламинация
+  ezfc_id: 764
+  element_name: dpdrolllaminat
+  Тип: select
+  Варианты:
+    • нет (value=0, code=0)
+    • глянцевая (value=1, code=1)
+    • матовая (value=2, code=2)
+
+Параметр 8: Шаг люверсовки, см
+  ezfc_id: 772
+  element_name: numstepeyelets
+  Тип: tel
+  Варианты:
+    • value=30
+
+Параметр 9: dpdprocessedge
+  ezfc_id: 799
+  element_name: dpdprocessedge
+  Тип: select
+  Варианты:
+    • поля 5 см (value=0, code=isField50)
+    • поля 10 см (value=1, code=idField100)
+    • резка в край (value=2, code=isCutting)
+    • проклейка (value=3, code=isGluing)
+    • карман (value=4, code=isPocket)
+    • люверсовка (value=5, code=isEyelet)
+
+Параметр 10: Обработка краев
+  ezfc_id: 800
+  element_name: rdoprocessedge
+  Тип: radio
+  Варианты:
+    • Одинаковая по всем краям (value=0, code=1)
+    • Разная для каждого края (value=1, code=2)
+
+Параметр 11: Правый край
+  ezfc_id: 801
+  element_name: dpdprocessedgeright
+  Тип: select
+  Варианты:
+    • поля 5 см (value=0, code=isField50)
+    • поля 10 см (value=1, code=isField100)
+    • резка в край (value=2, code=isCutting)
+    • проклейка (value=3, code=isGluing)
+    • карман (value=4, code=isPocket)
+    • люверсовка (value=5, code=isEyelet)
+
+Параметр 12: Шаг люверсовки, см
+  ezfc_id: 802
+  element_name: numstepeyeletsright
+  Тип: tel
+  Варианты:
+    • value=30
+
+Параметр 13: Левый край
+  ezfc_id: 803
+  element_name: dpdprocessedgeleft
+  Тип: select
+  Варианты:
+    • поля 5 см (value=0, code=isField50)
+    • поля 10 см (value=1, code=isField100)
+    • резка в край (value=2, code=isCutting)
+    • проклейка (value=3, code=isGluing)
+    • карман (value=4, code=isPocket)
+    • люверсовка (value=5, code=isEyelet)
+
+Параметр 14: Нижний край
+  ezfc_id: 804
+  element_name: dpdprocessedgebottom
+  Тип: select
+  Варианты:
+    • поля 5 см (value=0, code=isField50)
+    • поля 10 см (value=1, code=isField100)
+    • резка в край (value=2, code=isCutting)
+    • проклейка (value=3, code=isGluing)
+    • карман (value=4, code=isPocket)
+    • люверсовка (value=5, code=isEyelet)
+
+Параметр 15: Шаг люверсовки, см
+  ezfc_id: 805
+  element_name: numstepeyeletsbottom
+  Тип: tel
+  Варианты:
+    • value=30
+
+Параметр 16: Шаг люверсовки, см
+  ezfc_id: 806
+  element_name: numstepeyeletsleft
+  Тип: tel
+  Варианты:
+    • value=30
+
+Параметр 17: Верх
+  ezfc_id: 807
+  element_name: dpdprocessedgetop
+  Тип: select
+  Варианты:
+    • поля 5 см (value=0, code=isField50)
+    • поля 10 см (value=1, code=isField100)
+    • резка в край (value=2, code=isCutting)
+    • проклейка (value=3, code=isGluing)
+    • карман (value=4, code=isPocket)
+    • люверсовка (value=5, code=isEyelet)
+
+Параметр 18: Шаг люверсовки, см
+  ezfc_id: 808
+  element_name: numstepeyeletstop
+  Тип: tel
+  Варианты:
+    • value=30
+
+Параметр 19: ckbjoing
+  ezfc_id: 810
+  element_name: ckbjoing
+  Тип: checkbox
+  Варианты:
+    • Печать со стыковкой (value=0, code=true)
+

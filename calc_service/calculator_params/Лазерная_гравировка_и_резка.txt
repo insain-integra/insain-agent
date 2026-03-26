@@ -1,0 +1,170 @@
+Калькулятор: Лазерная гравировка и резка
+URL: https://insain.ru/catalog/lazernaya-gravirovka-i-rezka/
+Функция расчёта: calcLaser
+Параметров: 18
+============================================================
+
+Параметр 1: Тираж
+  ezfc_id: 980
+  element_name: numn
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 2: Ширина, мм
+  ezfc_id: 981
+  element_name: numgravew
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 3: Высота, мм
+  ezfc_id: 982
+  element_name: numh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 4: setmaxsize
+  ezfc_id: 983
+  element_name: setmaxsize
+  Тип: text
+  Варианты:
+    • Свободный ввод
+
+Параметр 5: Параметры лазерной резки
+  ezfc_id: 985
+  element_name: dpddifficulty
+  Тип: select
+  Варианты:
+    • без резки (value=0, code=noCut)
+    • Простая форма резки (value=1, code=1)
+    • Сложная форма резки (value=2, code=1.3)
+    • Сложная форма с внутренними элементами (value=3, code=1.7)
+    • Задана длина резки (value=4, code=isLenCut)
+
+Параметр 6: Размер элементов, мм
+  ezfc_id: 986
+  element_name: numsizeitem
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 7: Плотность элементов
+  ezfc_id: 987
+  element_name: numdensity
+  Тип: tel
+  Варианты:
+    • value=25
+
+Параметр 8: chkmark
+  ezfc_id: 988
+  element_name: chkmark
+  Тип: checkbox
+  Варианты:
+    • Резка по меткам (value=0, code=1)
+
+Параметр 9: Материал
+  ezfc_id: 989
+  element_name: dpdmaterial
+  Тип: select
+  Варианты:
+    • не задан материал (value=0)
+    • Акрил молочный Plexiglas XT 3мм (value=1, code=AcrylWhite3)
+    • Акрил молочный Plexiglas XT 5мм (value=2, code=AcrylWhite5)
+    • Акрил молочный Plexiglas XT 8мм (value=3, code=AcrylWhite8)
+    • Акрил молочный Plexiglas XT 10мм (value=4, code=AcrylWhite10)
+    • Акрил прозрачный Plexiglas XT 2мм (value=5, code=AcrylTrans2)
+    • Акрил прозрачный Plexiglas XT 3мм (value=6, code=AcrylTrans3)
+    • Акрил прозрачный Plexiglas XT 5мм (value=7, code=AcrylTrans5)
+    • Акрил прозрачный Plexiglas XT 8мм (value=8, code=AcrylTrans8)
+    • Акрил прозрачный Plexiglas XT 10мм (value=9, code=AcrylTrans10)
+    • Акрил цветной Plexiglas XT 3мм (value=10, code=AcrylColor3)
+    • Акрил цветной Plexiglas XT 5мм (value=11, code=AcrylColor5)
+    • Фанера сорт 2/2 3мм (value=12, code=Plywood3)
+    • Фанера сорт 2/2 4мм (value=13, code=Plywood4)
+    • Шпон бук 0.6мм (value=14, code=VeneerBeech06)
+    • Шпон бук 1.5мм (value=15, code=VeneerBeech15)
+    • Шпон дуб 0.6мм (value=16, code=VeneerOak06)
+    • Шпон дуб 1.5мм (value=17, code=VeneerOak15)
+    • Шпон ясень 0.6мм (value=18, code=VeneerAsh06)
+    • Шпон ясень 1.5мм (value=19, code=VeneerAsh15)
+    • ПЭТ 0.3мм (value=20, code=PET03)
+    • ПЭТ 0.5мм (value=21, code=PET05)
+    • ПЭТ 0.7мм (value=22, code=PET07)
+    • ПЭТ 1.0мм (value=23, code=PET10)
+    • ПЭТ 1.5мм (value=24, code=PET15)
+    • ПЭТ 2.0мм (value=25, code=PET20)
+    • Двухслойный пластик для гравирования ZENOMARK LASER 1200 x 600 x 1.5 мм. (value=26, code=ZENOMARKLASER)
+    • Двухслойный пластик для гравирования SHENGWEI, 1200 x 600 x 1.5 мм. (value=27, code=SHENGWEI)
+    • Двухслойный пластик для гравирования ROWMARK LASERMAX, акрил, 2 слоя, 1220 х 600 мм x 1.6 мм (value=28, code=ROWMARKLASERMAX)
+    • Двухслойный пластик для гравирования ROWMARK LASERMAX, акрил, 2 слоя, 1220 х 600 мм x 3.2 мм (value=29, code=ROWMARKLASERMAX3)
+
+Параметр 10: Длинна реза, мм
+  ezfc_id: 1013
+  element_name: numlencut
+  Тип: tel
+  Варианты:
+    • value=100
+
+Параметр 11: Параметры гравировки
+  ezfc_id: 1015
+  element_name: dpdgrave
+  Тип: select
+  Варианты:
+    • без гравировки (value=0, code=noGrave)
+    • гравировка заполнением (value=1, code=isGraveFill)
+    • гравировка контуром (value=2, code=isGraveContur)
+
+Параметр 12: Ширина, мм
+  ezfc_id: 1016
+  element_name: numw
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 13: Высота, мм
+  ezfc_id: 1017
+  element_name: numgraveh
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 14: Длинна контура, мм
+  ezfc_id: 1020
+  element_name: numlencontur
+  Тип: tel
+  Варианты:
+    • value=50
+
+Параметр 15: Толщина контура, мм
+  ezfc_id: 1024
+  element_name: numthinknesscontur
+  Тип: tel
+  Варианты:
+    • value=2
+
+Параметр 16: Детализация гравировки
+  ezfc_id: 1025
+  element_name: dpdgraveresolution
+  Тип: select
+  Варианты:
+    • Стандартная (до 0.1мм) (value=0, code=1)
+    • Высокая (до 0.01мм) (value=1, code=2)
+
+Параметр 17: rdomaterial
+  ezfc_id: 1027
+  element_name: rdomaterial
+  Тип: radio
+  Варианты:
+    • Учитывать материал в цене (value=0, code=isMaterial)
+    • Не учитывать материал в цене (value=1, code=noMaterial)
+    • Материал заказчика +25% (value=2, code=isMaterialCustomer)
+
+Параметр 18: chkadhesivelayer
+  ezfc_id: 2630
+  element_name: chkadhesivelayer
+  Тип: checkbox
+  Варианты:
+    • Клеевой слой (value=0, code=1)
+
