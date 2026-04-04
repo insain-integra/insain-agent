@@ -129,6 +129,17 @@ material/magnet.json     → data/materials/magnet.json
 material/keychain.json   → data/materials/keychain.json
 material/mug.json        → data/materials/mug.json
 material/misc.json       → data/materials/misc.json
+                         + data/materials/offset_promo.json
+                         + data/materials/epoxy.json
+                         + data/materials/attachment.json
+                         + data/materials/pack.json
+                         + data/materials/pocket.json
+                         + data/materials/flag.json
+                         + data/materials/pins.json
+                         + data/materials/tape.json
+                         + data/materials/plaque.json
+                         + data/materials/puzzle.json
+                         + data/materials/pennant.json
 ```
 
 ### Оборудование (копируются без изменений)
@@ -161,7 +172,7 @@ calc/calcLayout.js  → common/layout.py       (переписано на Python
 calcLaser.js         → calculators/laser.py
 calcPrintWide.js     → calculators/print_wide.py
 calcPrintRoll.js     → calculators/print_roll.py
-calcUVPrint.js       → calculators/print_uv.py
+calcUVPrint.js       → calculators/uv_print.py
 calcPrintOffset.js   → calculators/print_offset.py
 calcPrintSheet.js    → calculators/print_sheet.py (в т.ч. costOptions: нумерация, штрихкод, переменные данные, скругление, пробивка, биговка — см. `option_*`, `holes_per_item`, `crease_lines_per_item` и алиасы `is_*` из JS)
 calcPrintInkJet.js   → calculators/print_inkjet.py
@@ -195,7 +206,7 @@ calcCalendar.js      → calculators/calendar.py
 calcNotebook.js      → calculators/notebook.py
 calcPadPrint.js      → calculators/pad_print.py
 calcDesign.js        → calculators/design.py
-calcProcessTools.js  → calculators/process_tools.py
+calcProcessTools.js  → common/process_tools.py
 ```
 
 Если JS-файл содержит несколько функций расчёта —  

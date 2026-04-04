@@ -240,24 +240,4 @@ class EquipmentCatalog:
         except KeyError:
             raise KeyError(f"Неизвестный код оборудования: {code!r}") from None
 
-    def find_for_width(self, width_mm: float) -> Optional[EquipmentSpec]:
-        """
-        Найти оборудование с минимальной подходящей шириной max_size[0] ≥ width_mm.
-        Если подходящего нет — вернуть None.
-        """
-        target = float(width_mm)
-        best: Optional[EquipmentSpec] = None
-        best_width: Optional[float] = None
-
-        for spec in self._items.values():
-            if not spec.max_size or len(spec.max_size) == 0:
-                continue
-            w = float(spec.max_size[0])
-            if w < target:
-                continue
-            if best is None or w < best_width:
-                best = spec
-                best_width = w
-
-        return best
 

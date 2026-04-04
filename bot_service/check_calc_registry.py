@@ -17,28 +17,11 @@ import sys
 from pathlib import Path
 
 
-def _load_env() -> None:
-    root = Path(__file__).resolve().parent.parent
-    env_path = root / ".env"
-    if not env_path.is_file():
-        return
-    try:
-        from dotenv import load_dotenv
-
-        load_dotenv(env_path)
-    except ImportError:
-        with open(env_path, encoding="utf-8", errors="ignore") as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#") and "=" in line:
-                    k, _, v = line.partition("=")
-                    k, v = k.strip(), v.strip().strip("'\"")
-                    if k and k not in os.environ:
-                        os.environ[k] = v
+from env_loader import load_env
 
 
 def main() -> int:
-    _load_env()
+    load_env()
 
     root = Path(__file__).resolve().parent.parent
     calc_dir = root / "calc_service"

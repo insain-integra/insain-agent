@@ -82,7 +82,7 @@
     - свойство `name` для обратной совместимости возвращает `description`.
   - `MaterialCatalog`:
     - хранит все `MaterialSpec` одной категории,
-    - методы: `add`, `get`, `get_group`, `list_all`, `list_for_frontend()`, `filter_by_thickness()`.
+    - методы: `add`, `get`, `get_group`, `list_all`, `list_for_frontend()`.
     - `list_for_frontend()` отдаёт:
       - `code`, `group`, `name` (краткое), `title`, `description`, `thickness` — используется в UI и агенте.
 - `loader.py` — загрузка файлов `data/materials/*.json`:
@@ -93,8 +93,7 @@
 - `__init__.py`:
   - загружает все каталоги в `ALL_MATERIALS: dict[str, MaterialCatalog]`,
   - функции:
-    - `get_material(category: str, code: str) -> MaterialSpec`,
-    - `get_all_options() -> dict[str, list[dict]]` (списки материалов для фронта).
+    - `get_material(category: str, code: str) -> MaterialSpec`.
 
 ### 3.5. Оборудование (`calc_service/equipment/`)
 
@@ -102,6 +101,14 @@
   - справочными таблицами скоростей, брака, стоимости,
   - методами `get_sheets_per_hour`, `get_defect_rate`, `get_meter_per_hour`, `get_time_ready` и др.
 - `loader.py`, `__init__.py` — загрузка всех JSON‑файлов и реестр `ALL_EQUIPMENT`.
+
+### 3.5a. Продукты (`calc_service/products/`)
+
+- `data/products.json` — каталог продуктов (slug, название, базовый калькулятор, ключевые слова).
+- `base.py` — `ProductSpec` (Pydantic-модель продукта).
+- `loader.py` — загрузка `products.json`.
+- `__init__.py` — реестр `ALL_PRODUCTS`, функции `get_product()`, `list_available()`, `list_by_calc_slug()`.
+- API: `GET /api/v1/products`, `GET /api/v1/product/{product_slug}`.
 
 ### 3.6. Калькуляторы (`calc_service/calculators/`)
 

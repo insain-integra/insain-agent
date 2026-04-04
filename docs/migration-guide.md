@@ -189,7 +189,7 @@ CALCULATORS = { ..., "новый": НовыйCalculator() }
 ☐ Несколько материалов
 ☐ Тесты написаны и проходят
 ☐ Добавлен в CALCULATORS
-☐ make test проходит
+☐ pytest calc_service/tests/ -v проходит
 ```
 
 ## Миграция метаданных материалов (title, description, cost_date, cost_source)
@@ -219,7 +219,7 @@ python -m calc_service.scripts.migrate_materials_metadata
 После запуска скрипта обязательно:
 
 ```bash
-make test-calc
+pytest calc_service/tests/ -v
 ```
 
 чтобы убедиться, что все калькуляторы и загрузчики продолжают корректно работать с новой структурой.

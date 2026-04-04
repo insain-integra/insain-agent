@@ -43,7 +43,7 @@ VPS (Ubuntu 22.04, 2GB RAM)
 
 ### ЭТАП 1 (сейчас)
 База знаний:
-Yandex Wiki → парсер (каждые 6ч) → PostgreSQL (кэш статей)
+Yandex Wiki → парсер → файловый кэш (`kb_cache.json`), в будущем — PostgreSQL
 Менеджер → Bot → [вся база целиком + вопрос] → Gemini → ответ
 
 Расчёты:
@@ -54,7 +54,7 @@ Yandex Wiki → парсер (каждые 6ч) → PostgreSQL (кэш стат�
 Запрос → FastAPI → loader.py → JSON из data/ → калькулятор → ответ
 
 Логирование:
-Все запросы → PostgreSQL (логи, история диалогов, аналитика)
+Все запросы → JSON-логи в `logs/` (планируется переход на PostgreSQL)
 
 
 ### ЭТАП 2 (когда статей 200+)
@@ -80,7 +80,6 @@ YandexGPT платный (~400 ₽ за 1М токенов вход+выход �
 используется как fallback в режиме `mixed` или как основной в режиме `yandex`.
 
 Кодинг: Cursor ($20/мес) — редактор с ИИ
-Aider (бесплатно + Gemini) — автогенерация калькуляторов
 
 ## PostgreSQL (insain_agent_db)
 Таблицы:
@@ -94,10 +93,13 @@ wiki_embeddings — pgvector для поиска по базе знаний
 
 - `POST /api/v1/calc/{slug}` — расчёт калькулятора
 - `GET /api/v1/options/{slug}` — опции для форм на сайте (материалы, режимы)
-- `GET /api/v1/calculators` — список всех калькуляторов (slug, name, description)
+- `GET /api/v1/calculators` — список всех калькуляторов (slug, name, description, keywords)
 - `GET /api/v1/param_schema/{slug}` — детальная схема параметров калькулятора
   (для агента и фронтенда: required, defaults, источники данных)
 - `GET /api/v1/tool_schema/{slug}` — компактная схема инструмента для function calling (LLM)
+- `GET /api/v1/llm_prompt/{slug}` — опциональный алгоритм калькулятора для LLM
+- `GET /api/v1/products` — список всех продуктов
+- `GET /api/v1/product/{product_slug}` — информация о продукте по slug
 - `POST /api/v1/choices` — поиск вариантов для параметров с choices
   (например, материалы по запросу "акрил 3мм" для параметра `material`)
 

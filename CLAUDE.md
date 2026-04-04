@@ -51,12 +51,12 @@ insain-agent/
 │ │ └── tools.json — инструменты обработки
 │ │
 │ ├── common/ ← ОБЩИЕ ФУНКЦИИ (Python)
-│ │ ├── init.py
 │ │ ├── markups.py — наценки, сроки, get_margin()
 │ │ ├── currencies.py — курсы валют, parse_currency()
 │ │ ├── holidays.py — праздники, is_working_day()
 │ │ ├── helpers.py — find_in_table(), calc_weight()
-│ │ └── layout.py — layout_on_sheet(), layout_on_roll()
+│ │ ├── layout.py — layout_on_sheet(), layout_on_roll()
+│ │ └── process_tools.py — вспомогательные операции (ламинация, резка, обработка)
 │ │
 │ ├── materials/ ← СПРАВОЧНИКИ МАТЕРИАЛОВ (Python)
 │ │ ├── init.py — реестр: ALL_MATERIALS, get_material()
@@ -68,8 +68,13 @@ insain-agent/
 │ │ ├── base.py — EquipmentSpec, LaserSpec, LookupTable
 │ │ └── loader.py — JSON → Python объекты
 │ │
-│ ├── calculators/ ← КАЛЬКУЛЯТОРЫ (мигрированы из JS)
-│ │ ├── __init__.py
+│ ├── products/ ← КАТАЛОГ ПРОДУКТОВ
+│ │ ├── __init__.py — реестр ALL_PRODUCTS, get_product()
+│ │ ├── base.py — ProductSpec (Pydantic)
+│ │ └── loader.py — data/products.json → Python
+│ │
+│ ├── calculators/ ← КАЛЬКУЛЯТОРЫ (40 slug, мигрированы из JS)
+│ │ ├── __init__.py         — реестр CALCULATORS (40 slug, 38 публичных)
 │ │ ├── base.py
 │ │ ├── _template.py
 │ │ ├── laser.py
@@ -80,7 +85,7 @@ insain-agent/
 │ │ ├── lamination.py
 │ │ ├── print_sheet.py
 │ │ ├── print_laser.py     (is_public=False)
-│ │ └── ...                ← ~32 JS-калькулятора ещё не мигрированы
+│ │ └── ...                (ещё ~30 файлов, см. data-formats.md)
 │ │
 │ └── tests/
 │ ├── test_common.py
@@ -97,28 +102,24 @@ insain-agent/
 │ ├── token_analyzer.py   — анализ расхода токенов
 │ ├── analyze_tokens.py   — CLI-утилита для анализа логов
 │ ├── check.py            — проверка LLM-подключения
+│ ├── check_calc_registry.py — сверка реестра калькуляторов с API
+│ ├── knowledge_base.py   — база знаний (файловый кэш, поиск, refresh)
+│ ├── wiki_parser.py      — парсер Yandex Wiki API
 │ ├── requirements.txt
-│ ├── knowledge_base.py   ← TODO: Wiki → контекст
-│ ├── wiki_parser.py      ← TODO: парсер Yandex Wiki API
 │ ├── privacy.py          ← TODO: анонимизация ПДн
 │ ├── models.py           ← TODO: SQLAlchemy модели
 │ ├── database.py         ← TODO: подключение к PostgreSQL
 │ ├── Dockerfile          ← TODO
-│ └── tests/              ← TODO
+│ └── tests/              — test_agent.py, test_prompts.py и др.
 │
-├── wp-plugin/              ← TODO: JS-ОБЁРТКА ДЛЯ САЙТА
-│ ├── insain-calc-bridge.php
-│ ├── js/insain-calc-bridge.js
-│ └── css/insain-calc-bridge.css
+├── wp-plugin/              ← ПЛАНИРУЕТСЯ: JS-ОБЁРТКА ДЛЯ САЙТА
 │
 ├── js_legacy/ ← ИСХОДНЫЙ JS (только для справки!)
 │ ├── calc/ — JS-калькуляторы (не запускаются)
 │ ├── equipment/ — JSON оборудования (оригиналы)
 │ └── material/ — JSON материалов (оригиналы)
 │
-├── ai_agent/               ← TODO: АВТОМАТИЗАЦИЯ
-│ ├── task_runner.py
-│ └── prompts/
+├── ai_agent/               ← ПЛАНИРУЕТСЯ: АВТОМАТИЗАЦИЯ
 │
 ├── docs/ ← ПОДРОБНАЯ ДОКУМЕНТАЦИЯ
 │ ├── architecture.md — архитектура, контейнеры, потоки
@@ -129,11 +130,7 @@ insain-agent/
 │ ├── gemini-prompt-caching.md — кэширование контекста Gemini
 │ └── project_summary.md — общий обзор проекта
 │
-├── infra/                  ← TODO: ИНФРАСТРУКТУРА
-│ ├── docker-compose.yml
-│ ├── nginx.conf
-│ ├── deploy.sh
-│ └── monitoring/healthcheck.py
+├── infra/                  ← ПЛАНИРУЕТСЯ: ИНФРАСТРУКТУРА
 │
 ├── scripts/
 │ ├── dev.py                — запуск/остановка calc + бота (make вызывает это)
@@ -141,7 +138,7 @@ insain-agent/
 │ └── wiki_sync.py
 │
 ├── wiki_export/ — fallback: ручной экспорт Wiki
-├── alembic/                ← TODO: миграции PostgreSQL
+├── alembic/                ← ПЛАНИРУЕТСЯ: миграции PostgreSQL
 ├── .github/workflows/      ← TODO: CI/CD
 ├── Makefile                — make up, down, status (обёртка над scripts/dev.py)
 ├── .env — секреты (НЕ в git)
@@ -280,9 +277,12 @@ JSON содержат комментарии (`// ...`) — читаются ч�
 11. **API контракт:**  
     - `POST /api/v1/calc/{slug}` — расчёт калькулятора,  
     - `GET /api/v1/options/{slug}` — опции для форм (материалы, режимы и т.п.),  
-    - `GET /api/v1/calculators` — список калькуляторов (slug, name, description),  
+    - `GET /api/v1/calculators` — список калькуляторов (slug, name, description, keywords),  
     - `GET /api/v1/param_schema/{slug}` — детальная схема параметров калькулятора для агента/фронтенда,  
     - `GET /api/v1/tool_schema/{slug}` — компактная JSON‑схема для function calling (LLM),  
+    - `GET /api/v1/llm_prompt/{slug}` — опциональный алгоритм калькулятора для LLM,  
+    - `GET /api/v1/products` — список всех продуктов,  
+    - `GET /api/v1/product/{product_slug}` — информация о продукте по slug,  
     - `POST /api/v1/choices` — поиск вариантов для параметров с choices (материалы, режимы и т.п.).
 
 12. **Тесты обязательны** для каждого калькулятора, загрузчика, функции.
@@ -406,14 +406,14 @@ docker compose up  # и т.д. — TODO
 
 ```
 data/materials/категория.json → изменить "cost"
-make test → make restart
+pytest calc_service/tests/ -v → make restart
 ```
 
 **Обновить курс валюты / наценки / сроки:**
 
 ```
 data/common.json → изменить нужное поле
-make test → make restart
+pytest calc_service/tests/ -v → make restart
 ```
 
 **Добавить материал:**
@@ -421,7 +421,7 @@ make test → make restart
 ```
 data/materials/категория.json → новый блок в группу
 Если новый файл — добавить в materials/__init__.py
-make test
+pytest calc_service/tests/ -v
 ```
 
 **Мигрировать JS-калькулятор:**

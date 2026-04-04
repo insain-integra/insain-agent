@@ -70,17 +70,4 @@ def get_material(category: str, code: str) -> MaterialSpec:
     return catalog.get(code)
 
 
-def get_all_options() -> Dict[str, list[dict]]:
-    """
-    Все материалы для выпадающих списков на сайте / в API.
-
-    Формат:
-        {
-            "hardsheet": [...],
-            "roll": [...],
-            ...
-        }
-    где значение — результат catalog.list_for_frontend().
-    """
-    return {name: catalog.list_for_frontend() for name, catalog in ALL_MATERIALS.items()}
 

@@ -1,4 +1,4 @@
-from typing import Iterable, List, Sequence, Tuple
+from typing import Sequence, Tuple
 
 
 def find_in_table(table: Sequence[Tuple[float, float]], value: float) -> float:

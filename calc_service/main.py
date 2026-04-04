@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 
 from calculators import CALCULATORS, get_calculator
 from materials import ALL_MATERIALS, MaterialCatalog, MaterialSpec
-from products import ALL_PRODUCTS, get_product, list_available as list_available_products
+from products import get_product, list_available as list_available_products
 
 logging.basicConfig(
     level=logging.INFO,

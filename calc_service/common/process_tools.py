@@ -115,17 +115,6 @@ def _get_material(category: str, code: str):
     return get_material(category, code)
 
 
-def _find_material_across(categories: Sequence[str], code: str):
-    """Найти MaterialSpec по коду в нескольких категориях."""
-    from materials import get_material
-    for cat in categories:
-        try:
-            return get_material(cat, code)
-        except KeyError:
-            continue
-    raise ValueError(f"Параметры материала не найдены: {code!r}")
-
-
 # ── Результат операции ────────────────────────────────────────────────
 
 @dataclass
@@ -292,6 +281,7 @@ def calc_manual_press(n: int, material_id: str = "", mode: int = 1) -> ProcessRe
     return ProcessResult(cost=cost, price=price, time_hours=time_hours)
 
 
+# TODO: вынести в отдельный калькулятор или интегрировать в существующие
 def calc_press(n: int, material_id: str = "", mode: int = 1) -> ProcessResult:
     """
     Вырубка на прессе.
@@ -601,6 +591,7 @@ def calc_gluing_banner(
     return ProcessResult(cost=cost, price=price, time_hours=time_hours)
 
 
+# TODO: вынести в отдельный калькулятор или интегрировать в существующие
 def calc_set_sticker(n: int, size: Sequence[float] = (0, 0), mode: int = 1) -> ProcessResult:
     """
     Наклейка стикера на изделие.
@@ -1790,6 +1781,7 @@ def calc_silk_print(
 #  ЗАКАТНЫЕ ЗНАЧКИ
 # ══════════════════════════════════════════════════════════════════════
 
+# TODO: вынести в отдельный калькулятор или интегрировать в существующие
 def calc_button_pins(
     n: int,
     pin_id: str,

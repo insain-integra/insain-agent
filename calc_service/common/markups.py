@@ -57,13 +57,6 @@ def get_time_ready(key: str) -> List[float]:
     return list(BASE_TIME_READY)
 
 
-def get_all_margins() -> Dict[str, Any]:
-    """
-    Вернуть словарь всех полей, начинающихся с \"margin\" (для отладки).
-    """
-    return {k: v for k, v in _data.items() if k.startswith("margin")}
-
-
 def reload() -> None:
     """
     Перечитать common.json и обновить все константы.

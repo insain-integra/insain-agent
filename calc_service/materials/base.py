@@ -130,15 +130,4 @@ class MaterialCatalog:
             )
         return result
 
-    def filter_by_thickness(self, max_mm: float) -> List[MaterialSpec]:
-        """
-        Вернуть материалы с толщиной <= max_mm.
-        Материалы без thickness игнорируются.
-        """
-        limit = float(max_mm)
-        return [
-            m
-            for m in self._items.values()
-            if m.thickness is not None and m.thickness <= limit
-        ]
 

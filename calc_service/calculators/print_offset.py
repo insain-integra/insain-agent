@@ -18,7 +18,6 @@ from common.markups import (
     MARGIN_MATERIAL,
     MARGIN_OPERATION,
     get_margin,
-    get_time_ready,
 )
 from equipment import printer as printer_catalog
 from materials import sheet as sheet_catalog

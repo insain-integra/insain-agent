@@ -19,27 +19,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 
-def _load_env() -> None:
-    """Загрузить .env из корня проекта."""
-    _env_path = Path(__file__).resolve().parent.parent / ".env"
-    if not _env_path.is_file():
-        return
-    try:
-        from dotenv import load_dotenv
-        load_dotenv(_env_path)
-    except ImportError:
-        # Без python-dotenv: читаем .env вручную
-        with open(_env_path, encoding="utf-8", errors="ignore") as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#") and "=" in line:
-                    k, _, v = line.partition("=")
-                    k, v = k.strip(), v.strip().strip("'\"").strip()
-                    if k and k not in os.environ:
-                        os.environ[k] = v
+from env_loader import load_env
 
-
-_load_env()
+load_env()
 
 from openai import OpenAI
 
@@ -354,25 +336,3 @@ class LLMProvider:
             self.analyzer.save_to_file(request_log)
             raise
 
-    def chat_with_tools(
-        self,
-        messages: List[Dict[str, Any]],
-        tools: List[Dict[str, Any]],
-    ) -> Tuple[Optional[str], Optional[List[Dict[str, Any]]]]:
-        """
-        Один раунд с поддержкой function calling.
-
-        Отправляет messages и tools. Если модель вернула tool_calls —
-        возвращает (None, tool_calls). Если вернула текстовый content —
-        возвращает (content, None).
-
-        :param messages: история сообщений
-        :param tools: список инструментов (OpenAI tool format)
-        :return: (content, None) или (None, tool_calls)
-        """
-        result = self.chat(messages, tools=tools)
-        content = result.get("content")
-        tool_calls = result.get("tool_calls")
-        if tool_calls:
-            return (None, tool_calls)
-        return (content, None)
