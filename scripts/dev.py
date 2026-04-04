@@ -155,7 +155,7 @@ def cmd_start_calc() -> None:
     ]
     proc = subprocess.Popen(cmd, cwd=cwd)
     _write_pid("calc", proc.pid)
-    print(f"calc: запущен uvicorn PID {proc.pid} → http://{CALC_HOST}:{CALC_PORT}")
+    print(f"calc: запущен uvicorn PID {proc.pid} -> http://{CALC_HOST}:{CALC_PORT}")
 
 
 def cmd_start_bot() -> None:
