@@ -34,7 +34,12 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://insain.ru", "http://insain.ru"],
+    allow_origins=[
+        "https://insain.ru",
+        "http://insain.ru",
+        "https://www.insain.ru",
+        "http://www.insain.ru",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

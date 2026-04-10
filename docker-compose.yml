@@ -1,0 +1,50 @@
+# D2: локальный и VPS-запуск calc_service + Telegram-бота.
+# Требуется .env в корне репозитория (см. .env.example).
+#
+# CALC_API_URL для бота переопределён на имя сервиса сети compose,
+# даже если в .env указан http://localhost:8001.
+
+services:
+  calc-api:
+    build:
+      context: ./calc_service
+      dockerfile: Dockerfile
+    container_name: insain-calc-api
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./calc_service/data:/app/calc_service/data
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/api/v1/calculators', timeout=5).read()",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  tg-bot:
+    build:
+      context: ./bot_service
+      dockerfile: Dockerfile
+    container_name: insain-tg-bot
+    depends_on:
+      calc-api:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      CALC_API_URL: http://calc-api:8001
+    volumes:
+      # token_analyzer пишет в PROJECT_ROOT/logs → /opt/insain/logs
+      - ./logs:/opt/insain/logs
+    restart: always
+
+networks:
+  default:
+    name: insain-agent

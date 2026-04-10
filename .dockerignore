@@ -1,0 +1,40 @@
+# Общий контекст (docker-compose с context: .) и локальные сборки
+.git
+.gitignore
+.run
+.env
+.env.*
+!.env.example
+
+__pycache__
+*.py[cod]
+*$py.class
+.pytest_cache
+.mypy_cache
+.ruff_cache
+*.egg-info
+.eggs
+dist
+build
+
+# Документация и прочее, не нужное в образах
+*.md
+!README.md
+docs/
+wiki_export/
+exports/
+js_legacy/
+wp-plugin/
+ai_agent/
+alembic/
+.github/
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Логи и кэши с хоста (примонтируются отдельно)
+logs/
+**/logs/
