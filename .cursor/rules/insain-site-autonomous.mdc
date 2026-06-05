@@ -1,0 +1,44 @@
+---
+description: Автономная работа с prod insain.ru (WP, bridge, API, VDS)
+alwaysApply: false
+---
+
+# Сайт insain.ru — режим автономной работы
+
+## Контекст
+- Прод: https://insain.ru
+- WordPress: /var/www/insain.ru
+- API: относительный /api/v1 (nginx → 127.0.0.1:8002)
+- Репозиторий на сервере: /opt/insain-agent
+- SSH: Host insain-prod (см. docs/agent-autonomous-environment.md)
+
+## Окружение VDS (важно)
+- wp-команды: sudo -u www-data wp ... --path=/var/www/insain.ru
+  (www-data переключён на php8.2; mysqli есть только в 8.2)
+- Деплой плагина: Compress-Archive → scp /tmp → sudo -u www-data wp plugin install zip --force --activate
+  (rsync/cp от root недоступны: sudoers только wp+nginx)
+- sudo доступен только для: nginx -t, systemctl reload nginx, wp (как www-data)
+- docker compose — без sudo (agent в группе docker)
+- Browser MCP работает через реальный Chrome с залогиненной админ-сессией WordPress
+
+## Делай самостоятельно
+- Правки wp-plugin/, calc_service/, infra/; pytest перед деплоем
+- Деплой плагина через wp plugin install (см. выше)
+- git pull и docker compose на VDS для API (cd /opt/insain-agent)
+- Проверка страниц через Browser MCP; Network: /api/v1/
+- wp cache flush, wp plugin list/activate (через sudo -u www-data)
+
+## Спроси подтверждение у пользователя
+- git push, смена DNS, wp search-replace по всей БД
+- удаление файлов/БД, docker compose down -v
+- отключение плагинов оплаты/SEO без явной задачи
+
+## Не делай
+- не коммить .env и секреты
+- не использовать test.insain.ru как целевой URL (только prod)
+- не выводить внутренние code материалов в ответы пользователям сайта
+
+## После изменений
+1. curl -sS https://insain.ru/api/v1/calculators | head -c 200
+2. Открыть страницу калькулятора, проверить POST /api/v1/calc/{slug}
+3. Краткий отчёт: что изменено, что проверено, ошибки консоли

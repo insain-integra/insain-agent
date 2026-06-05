@@ -6,8 +6,8 @@
 
 ```text
 Интернет → nginx (наши конфиги)
-               ├─ insain.ru      → PHP-FPM → WordPress
-               └─ calc.insain.ru → proxy_pass → Docker calc-api :8001
+               ├─ test.insain.ru / insain.ru → PHP-FPM → WordPress
+               └─ /api/                      → proxy_pass → Docker calc-api 127.0.0.1:8002
            Docker tg-bot → outbound → Telegram
 ```
 
@@ -21,7 +21,7 @@
 
 - Хостинг — VDS на **[NetAngels](https://panel.netangels.ru)** (Debian 12 с предустановленным nginx/Apache/PHP; Apache отключаем в п. 3.0).
 - Домен сайта, например `insain.ru`, DNS можно менять.
-- Для API калькуляторов планируется субдомен `calc.insain.ru` (как в [ROADMAP.md](../ROADMAP.md)).
+- Для тестового API калькуляторов используется путь `test.insain.ru/api/`; отдельный субдомен `calc.insain.ru` можно добавить позже (как в [ROADMAP.md](../ROADMAP.md)).
 - Старый сервер доступен по SSH для снятия бэкапов.
 - В перспективе ИИ-агент получит SSH-доступ к серверу для управления сайтом, nginx, Docker и wp-cli (п. 8.7).
 
@@ -149,7 +149,7 @@ cat /etc/nginx/listen.conf
 listen 185.41.161.31:80;
 ```
 
-**Запомни этот IP** — его нужно подставить во **все** наши `server`-блоки nginx (для WordPress и для `calc.insain.ru`). Если `listen.conf` нет или он пустой — используй `curl -4 ifconfig.me` для определения публичного IP.
+**Запомни этот IP** — его нужно подставить во **все** наши `server`-блоки nginx. Если `listen.conf` нет или он пустой — используй `curl -4 ifconfig.me` для определения публичного IP.
 
 #### 3.0.4. Перезагрузить nginx
 
@@ -895,16 +895,14 @@ sudo usermod -aG docker $USER
 ```bash
 sudo mkdir -p /opt
 cd /opt
-sudo git clone https://github.com/ВАШ_ОРГ/insain-agent.git insain-agent
-sudo chown -R $USER:$USER insain-agent
+sudo git clone https://github.com/insain-integra/insain-agent.git insain-agent
 cd insain-agent
+sudo git fetch origin
+sudo git checkout feature/agent-logic
+sudo git pull --ff-only origin feature/agent-logic
 ```
 
-Подставь реальный URL репозитория. В `deploy.sh` используй:
-
-```bash
-export INSAIN_REPO_DIR=/opt/insain-agent
-```
+Важно: на момент тестового развёртывания `docker-compose.yml` и `infra/compose.vds.yml` лежали в ветке `feature/agent-logic`, поэтому после clone нужно явно переключиться на неё.
 
 ### 8.3. Файл `.env`
 
@@ -915,45 +913,112 @@ nano .env
 
 Заполни как на локальной машине: `TELEGRAM_TOKEN`, ключи LLM и остальное (см. [.env.example](../.env.example)). Файл `.env` в git не коммитится.
 
-### 8.4. Первый запуск контейнеров (продакшен-привязка порта)
+Для запуска только `calc_service` файл `.env` не обязателен, если задаёшь `SITE_URL` прямо в compose override.
 
-На VDS API должен слушать только **localhost:8001**, наружу — nginx. Используется override [infra/compose.vds.yml](../infra/compose.vds.yml) и скрипт [infra/deploy.sh](../infra/deploy.sh):
+### 8.4. Развёртывание `calc_service` для prod `insain.ru`
+
+На VDS API не должен открывать публичный порт. Для prod используется отдельный compose только для `calc_service`: контейнер слушает `8001` внутри Docker, а на хосте доступен только как `127.0.0.1:8002`. Наружу API отдаёт nginx по `https://insain.ru/api/`.
+
+Создай файл `/opt/insain-agent/docker-compose.calc-only.yml`:
 
 ```bash
-chmod +x infra/deploy.sh
-export INSAIN_REPO_DIR=/opt/insain-agent
-bash infra/deploy.sh
+cd /opt/insain-agent
+
+cat > docker-compose.calc-only.yml <<'EOF'
+services:
+  calc-api:
+    build:
+      context: ./calc_service
+      dockerfile: Dockerfile
+    container_name: insain-calc-api
+    ports:
+      - "127.0.0.1:8002:8001"
+    volumes:
+      - ./calc_service/data:/app/calc_service/data
+    environment:
+      SITE_URL: https://insain.ru
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/api/v1/calculators', timeout=5).read()",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+EOF
+```
+
+Запусти сервис:
+
+```bash
+cd /opt/insain-agent
+docker rm -f insain-calc-api || true
+docker compose -f docker-compose.calc-only.yml up -d --build
 ```
 
 Проверка **на сервере**:
 
 ```bash
-curl -sS http://127.0.0.1:8001/api/v1/calculators | head -c 300
+docker ps -a | grep insain-calc-api
+ss -tlnp | grep -E ':8001|:8002' || true
+docker logs --tail=80 insain-calc-api
+curl -sS http://127.0.0.1:8002/api/v1/calculators | head -c 300
 ```
 
-### 8.5. Субдомен calc.insain.ru
+Ожидаемо:
 
-1. В DNS ([панель NetAngels](https://panel.netangels.ru) или зона у регистратора): **A**-запись `calc` → тот же IP сервера.
-2. Скопируй шаблон nginx и **замени `listen`** на привязку к IP (как в п. 3.0.3):
-  ```bash
-   sudo cp /opt/insain-agent/infra/nginx.conf /etc/nginx/sites-available/calc.insain.ru
-   sudo nano /etc/nginx/sites-available/calc.insain.ru
-  ```
-   Замени:
-   на:
-   Эталон хранится в [infra/nginx.conf](../infra/nginx.conf).
-3. Включи сайт:
-  ```bash
-   sudo ln -sf /etc/nginx/sites-available/calc.insain.ru /etc/nginx/sites-enabled/
-   sudo nginx -t && sudo systemctl reload nginx
-  ```
-4. Выпусти сертификат (после того как DNS `calc.insain.ru` указывает на этот сервер):
-  ```bash
-   sudo certbot --nginx -d calc.insain.ru
-  ```
-5. Проверка: `https://calc.insain.ru/api/v1/calculators`.
+- `ss` показывает `127.0.0.1:8002`, но не публичный `0.0.0.0:8001`;
+- `curl` возвращает JSON со списком калькуляторов.
 
-CORS для сайта настроен в [calc_service/main.py](../calc_service/main.py) (домены insain.ru и www).
+### 8.5. Проксирование API через `insain.ru/api/`
+
+После переноса сайта API подключён к основному WordPress-домену:
+
+```text
+https://insain.ru/api/v1/calculators → nginx → http://127.0.0.1:8002/api/v1/calculators
+```
+
+В nginx-конфиг сайта `/etc/nginx/sites-available/insain.ru` добавь блок **перед** `location /`:
+
+```nginx
+location ^~ /api/ {
+    proxy_pass http://127.0.0.1:8002;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 120s;
+}
+```
+
+Команды на сервере:
+
+```bash
+CONF="/etc/nginx/sites-available/insain.ru"
+TS=$(date +%F-%H%M)
+cp "$CONF" "/root/insain.ru-nginx-before-calc-api-$TS.conf"
+nano "$CONF"
+nginx -t
+systemctl reload nginx
+```
+
+Проверка:
+
+```bash
+curl -sS https://insain.ru/api/v1/calculators | head -c 300
+```
+
+Не используй `curl -I` для проверки FastAPI endpoint: `-I` отправляет `HEAD`, а `/api/v1/calculators` разрешает `GET`, поэтому нормальный ответ на `HEAD` может быть `405 Method Not Allowed`.
+
+Позже, когда будет нужен отдельный API-домен `calc.insain.ru`, можно перенести proxy-блок в отдельный server block из [infra/nginx.conf](../infra/nginx.conf) и выпустить сертификат для `calc.insain.ru`.
+
+CORS для сайта настроен в [calc_service/main.py](../calc_service/main.py) (домены `insain.ru` и `www.insain.ru`). При относительном `/api/v1` запросы идут на тот же origin, поэтому CORS не нужен.
 
 ### 8.6. Логи бота на диске хоста
 
@@ -961,19 +1026,23 @@ CORS для сайта настроен в [calc_service/main.py](../calc_servic
 
 ### 8.7. Подготовка к ИИ-доступу
 
-В перспективе ИИ-агент (Cursor, Codex, аналоги) получит SSH-доступ к серверу для управления сайтом и сервисами. Чтобы это работало:
+**Пошаговый план (Cursor, SSH, Browser, деплой bridge, безопасность):** [agent-autonomous-environment.md](agent-autonomous-environment.md).
 
-1. **SSH-ключ для ИИ-агента.** Создай отдельного пользователя или добавь ключ в `~/.ssh/authorized_keys` существующего:
+Кратко — что нужно на сервере для агента:
+
+1. **SSH-ключ для ИИ-агента.** Создай отдельного пользователя `agent` и добавь отдельный SSH-ключ:
   ```bash
-   sudo adduser --disabled-password agent
-   sudo usermod -aG sudo,docker agent
-   sudo -u agent mkdir -p /home/agent/.ssh
+   sudo adduser --disabled-password --gecos "" agent
+   sudo usermod -aG www-data,docker agent
+   sudo install -d -m 700 -o agent -g agent /home/agent/.ssh
    # скопируй публичный ключ ИИ-агента в /home/agent/.ssh/authorized_keys
   ```
-2. **wp-cli** установлен глобально (п. 5.4, шаг C) — ИИ управляет WordPress из CLI: обновления, search-replace, настройки.
-3. **Docker CLI** — пользователь в группе `docker`: перезапуск контейнеров, просмотр логов, деплой через `infra/deploy.sh`.
-4. **Конфиги nginx в `infra/`** — эталоны [nginx-wp.conf](../infra/nginx-wp.conf) и [nginx.conf](../infra/nginx.conf) хранятся в репозитории; ИИ-агент может обновить конфиг на сервере через `scp` или `git pull` + копирование.
-5. **Все действия через CLI** — нет зависимости от GUI-панелей; всё автоматизируемо.
+2. **Ограниченный sudo, не группа `sudo`.** В `/etc/sudoers.d/agent` разрешить только `nginx -t`, `systemctl reload nginx` и `wp` от `www-data`. Полный пример — в [agent-autonomous-environment.md](agent-autonomous-environment.md).
+3. **wp-cli + PHP 8.2 CLI.** `wp` должен запускаться от `www-data` на PHP 8.2 (`sudo -u www-data wp --info --path=/var/www/insain.ru`). Панель хостинга задаёт PHP-FPM сайта, а CLI-версия проверяется отдельно.
+4. **Docker CLI** — пользователь в группе `docker`: перезапуск контейнеров, просмотр логов, деплой `calc_service` через `/opt/insain-agent/docker-compose.calc-only.yml`.
+5. **Browser MCP в Chrome.** Для админки WordPress агент использует Browser MCP в вашем залогиненном Chrome, а не встроенный Browser.
+6. **Конфиги nginx в `infra/`** — эталоны [nginx-wp.conf](../infra/nginx-wp.conf) и [nginx.conf](../infra/nginx.conf) хранятся в репозитории; ИИ-агент может обновить конфиг на сервере через `git pull` + ограниченный reload nginx.
+7. **Все действия через CLI и Browser MCP** — нет зависимости от GUI-панелей хостера; всё автоматизируемо.
 
 ---
 
@@ -983,9 +1052,9 @@ CORS для сайта настроен в [calc_service/main.py](../calc_servic
 | Проверка       | Действие                                                            |
 | -------------- | ------------------------------------------------------------------- |
 | Сайт           | `https://insain.ru` открывается, админка работает                   |
-| API            | `https://calc.insain.ru/api/v1/calculators` возвращает JSON         |
+| API            | `https://insain.ru/api/v1/calculators` возвращает JSON              |
 | Бот            | В Telegram ответ на `/start`                                        |
-| Firewall       | `sudo ufw status` — открыты 22, 80, 443; 8001 не в списке публичных |
+| Firewall       | `sudo ufw status` — открыты 22, 80, 443; 8001/8002 не в списке публичных |
 | Apache         | `sudo systemctl status apache2` — должен быть `inactive (dead)`     |
 | nginx          | `sudo nginx -T` — только наши конфиги, нет `vm-*.na4u.ru.conf`      |
 | Место на диске | `df -h` — запас под обновления и Docker                             |
@@ -999,7 +1068,7 @@ CORS для сайта настроен в [calc_service/main.py](../calc_servic
 
 - **502 Bad Gateway** у nginx: проверь `sudo systemctl status php*-fpm`, сокет в конфиге nginx, права на файлы WP. Если в `/var/log/nginx/insain.ru.error.log` есть `upstream sent too big header while reading response header from upstream`, увеличь `fastcgi_buffer_size`, `fastcgi_buffers`, `fastcgi_busy_buffers_size` в конфиге WordPress (см. п. 3.4). Частая причина — слишком большой `Set-Cookie`, например `wt_geo_data` от геотаргетинга.
 - **Ошибка подключения к БД (MySQL)**: проверь `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST` в `wp-config.php`; что служба `**mariadb`** или `**mysql`** запущена; вход: `mysql -u wpuser -p wordpress` с того же сервера.
-- **Docker не стартует**: `docker compose -f docker-compose.yml -f infra/compose.vds.yml logs`.
+- **Docker не стартует**: `cd /opt/insain-agent && docker compose -f docker-compose.calc-only.yml logs`.
 - **Белый экран WP**: включи отладку временно в `wp-config.php` (`WP_DEBUG`), смотри логи php-fpm и nginx (`/var/log/nginx/insain.ru.error.log`).
 - `**bind() to 0.0.0.0:80 failed (98: Address already in use)`**: порт 80 уже занят. Проверь:
   ```bash
@@ -1015,10 +1084,10 @@ CORS для сайта настроен в [calc_service/main.py](../calc_servic
 
 ## Связанные файлы в репозитории
 
-- [docker-compose.yml](../docker-compose.yml) — сервисы calc-api и tg-bot  
-- [infra/compose.vds.yml](../infra/compose.vds.yml) — привязка `127.0.0.1:8001`  
-- [infra/deploy.sh](../infra/deploy.sh) — деплой на сервере (`INSAIN_REPO_DIR=/opt/insain-agent`)  
-- [infra/nginx.conf](../infra/nginx.conf) — reverse proxy для `calc.insain.ru`  
+- [docker-compose.yml](../docker-compose.yml) — общий compose для calc-api и tg-bot  
+- `/opt/insain-agent/docker-compose.calc-only.yml` — фактический compose тестового VDS для `calc_service` (`127.0.0.1:8002`)  
+- [infra/compose.vds.yml](../infra/compose.vds.yml) — старый/общий override с привязкой `127.0.0.1:8001`; для текущего тестового VDS не используется  
+- [infra/nginx.conf](../infra/nginx.conf) — заготовка reverse proxy для будущего `calc.insain.ru`  
 - [infra/nginx-wp.conf](../infra/nginx-wp.conf) — эталонный конфиг nginx для WordPress (п. 3.4)  
 - [ROADMAP.md](../ROADMAP.md) — фазы D2, D3 и дальше
 

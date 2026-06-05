@@ -449,6 +449,7 @@ docs/architecture.md           — архитектура, контейнеры,
 docs/data-formats.md           — форматы JSON, маппинг JS → Python
 docs/migration-guide.md        — миграция калькуляторов, чек-листы
 docs/wordpress-integration.md  — сайт, ez Form Calculator, share URL
+docs/agent-autonomous-environment.md — Cursor, SSH, Browser: автономная работа с insain.ru
 docs/common-json-reference.md  — все поля common.json с описанием
 docs/gemini-prompt-caching.md  — кэширование контекста Gemini
 docs/project_summary.md        — общий обзор проекта (выжимка)
