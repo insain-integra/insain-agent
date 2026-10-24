@@ -4,7 +4,7 @@
 
 ## Текущее состояние
 
-На сайте используется **ez Form Calculator for WordPress**. Формы уже собраны в админке плагина, а для каждого калькулятора внутри формы есть custom JS-обработчик: он собирает значения через плейсхолдеры ez Form Calculator (`{{numN}}`, `{{dpdformat}}` и т.п.), вызывает старую JS-функцию `insaincalc.calc...`, затем записывает результат обратно в переменные формы и DOM.
+На сайте используется **ez Form Calculator for WordPress**. Формы уже собраны в админке плагина, а для каждого калькулятора внутри формы есть custom JS-обработчик: он собирает значения через API плагина (`ezfc_functions.get_value_from`, плейсхолдеры `{{numN}}` и т.п.), вызывает старую JS-функцию `insaincalc.calc...`, затем записывает результат обратно в переменные формы.
 
 Типовой фрагмент старого обработчика:
 
@@ -26,12 +26,16 @@ document.getElementsByClassName('data-material-table')[0].innerHTML =
 
 Пользователь заполняет ту же форму ez Form Calculator, но расчёт выполняется в Python:
 
-1. custom JS-обработчик формы собирает параметры;
-2. вместо старого `insaincalc.calc...` вызывает bridge-функцию из `wp-plugin`;
-3. bridge делает `GET /api/v1/product/{product_slug}` для defaults и `base_calc_slug`;
-4. bridge делает `POST /api/v1/calc/{slug}`;
-5. bridge адаптирует новый ответ API к старому объекту `calcCost`;
-6. существующий код формы выводит цену, срок, вес и материалы почти без изменений.
+1. custom JS-обработчик формы собирает параметры и маппит значения в коды API;
+2. вместо старого `insaincalc.calc...` вызывает тонкую bridge-функцию из `wp-plugin`;
+3. bridge делает `POST /api/v1/calc/{slug}`;
+4. bridge адаптирует новый ответ API к старому объекту `calcCost`;
+5. тот же обработчик вызывает `insaincalc.syncUrl(...)` для обновления шаринговой ссылки;
+6. `insaincalc.showResult(...)` выводит цену, срок, вес и материалы.
+
+> Bridge (v0.2.3) не знает коды материалов конкретной формы и не ходит в `/product/{slug}`.
+> Сбор параметров — в custom JS формы. Расчёт (`calcApi`) и вывод (`showResult`) — отдельные методы `insaincalc`.
+> Пошаговый перевод: [ezfc-api-migration.md](ezfc-api-migration.md).
 
 На боевом сайте использовать относительный API URL:
 
@@ -48,23 +52,12 @@ document.getElementsByClassName('data-material-table')[0].innerHTML =
 Рекомендуемый вариант для форм ez Form Calculator:
 
 ```js
-let calcCost = await insainCalcLegacy('puzzle', {
+insaincalc.calcApi('puzzle', {
     quantity: {{numN}},
     puzzle_id: puzzleId,
-    mode: {{rdoModeProduction}} || 1
-});
-```
-
-Если конкретное поле/обработчик ez Form не допускает `await`, использовать Promise-цепочку:
-
-```js
-insainCalcLegacy('puzzle', {
-    quantity: {{numN}},
-    puzzle_id: puzzleId,
-    mode: {{rdoModeProduction}} || 1
-}).then(function(calcCost) {
-    PriceTotalManager = insaincalc.round(calcCost.price, {{numN}});
-    WeightTotal = calcCost.weight;
+    mode: mode
+}).then(function (calcCost) {
+    insaincalc.showResult(calcCost, {{numN}}, __form_id__);
 });
 ```
 
@@ -78,11 +71,14 @@ wp-plugin/
 └── js/insain-calc-bridge.js
 ```
 
-Публичные функции bridge:
+Методы на объекте `insaincalc` (v0.2.3):
 
-- `insainCalc(slug, params)` — прямой `POST /api/v1/calc/{slug}`, возвращает новый Python-контракт.
-- `insainCalcLegacy(productSlug, params)` — загружает `/product/{productSlug}`, применяет `defaults`, вызывает калькулятор и возвращает объект в старом формате `calcCost`.
-- `InsainCalcBridge.recalculate(productSlug)` — вариант для автономной привязки к DOM-полям, если у формы нет удобного custom JS-сборщика.
+- `calcApi(slug, params)` — `POST /api/v1/calc/{slug}` и адаптер в старый `calcCost`. Устаревший ответ (если форму пересчитали раньше) возвращает `null`.
+- `showResult(calcCost, qty, formId)` — цена, вес, срок с подсказкой, материалы.
+- `showError(err, formId)` — текст ошибки в блоке срока.
+- `syncUrl(params)` — query-строка (`history.replaceState`), имена = GET полей формы.
+
+Поля формы читает сам ezFC: `{{numN}}` и `ezfc_functions.get_value_from`. Маппинг в параметры API — только в custom JS формы.
 
 Адаптация ответа:
 
@@ -110,6 +106,51 @@ wp-plugin/
 - `insaincalc.calcDateReady(calcCost.timeReady)`;
 - `insaincalc.showMaterials(calcCost.material)`.
 
+## GET-поля и шаринговые ссылки
+
+Задача: делиться ссылкой на готовый расчёт (`?numN=111&dpdformat=0`), чтобы при открытии
+форма заполнилась и пересчиталась автоматически.
+
+Разделение ответственности:
+
+| Направление | Кто делает |
+|---|---|
+| URL → поля (при загрузке) | **ez Form Calculator**, встроенное свойство `GET` у поля (`ADVANCED → GET`) |
+| поля → API | custom JS формы (маппинг в коды API) |
+| API → расчёт | `insaincalc.calcApi()` |
+| поля → URL (для шеринга) | `insaincalc.syncUrl()`, вызывается из того же custom JS |
+
+Важно:
+
+- В URL храним «язык формы» (GET-имена ez Form Calculator: `numN`, `dpdformat`), а не
+  API-имена (`quantity`, `puzzle_id`). Тогда встроенное чтение ez Form Calculator работает
+  без нашего кода, а маппинг в API-имена живёт в custom JS.
+- У каждого шарингового поля в ez Form Calculator должно быть задано `ADVANCED → GET`
+  (у `numN` уже есть; для остальных полей — проставить в админке).
+- Файл-поля (например «Файлы для печати») в URL не кладём.
+
+Автообновление ссылки: custom JS секции CALCULATE выполняется при каждом пересчёте,
+поэтому отдельная кнопка не нужна — достаточно вызвать `insaincalc.syncUrl(...)` в обработчике:
+
+```js
+var qty = {{numN}};
+var puzzleId = ezfc_functions.get_value_from(3104, true)[0];
+var fmtIndex = ezfc_functions.get_value_from(3104, true, false, { return_value: 'index' })[0];
+var mode = Number(ezfc_functions.get_value_from(3121, true)[0]) || 1;
+
+insaincalc.syncUrl({ numN: qty, dpdformat: fmtIndex, rdoModeProduction: mode });
+
+insaincalc.calcApi('puzzle', {
+    quantity: qty,
+    puzzle_id: puzzleId,
+    mode: mode
+}).then(function (calcCost) {
+    insaincalc.showResult(calcCost, qty, __form_id__);
+}).catch(function (err) {
+    insaincalc.showError(err, __form_id__);
+});
+```
+
 ## Пилот: Puzzle
 
 Страница: `https://insain.ru/catalog/kalkulyator-pazlov/`.
@@ -117,8 +158,8 @@ wp-plugin/
 API:
 
 ```http
-GET /api/v1/product/puzzle
 POST /api/v1/calc/puzzle
+GET  /api/v1/product/puzzle   # опционально: defaults/base_calc_slug, тонкий bridge не вызывает
 ```
 
 `/api/v1/product/puzzle` возвращает:
@@ -141,30 +182,28 @@ POST /api/v1/calc/puzzle
 | `puzzle_id` | `dpdformat` | `3104` | Select формата |
 | `mode` | режим производства | зависит от формы | Если нет поля, использовать `1` |
 
-Коды `dpdformat`:
+Читать поля формы **через API ez Form Calculator**, не через DOM:
 
-| value формы | `puzzle_id` |
-| --- | --- |
-| `0` | `Puzzle300420` |
-| `1` | `Puzzle208298` |
-| `2` | `Puzzle159215` |
+- числа и индексы — плейсхолдеры по **имени** элемента: `{{numN}}`, `{{dpdFormat}}`, `{{rdoModeProduction}}`;
+- текстовые коды dropdown (`Puzzle300420`) — `ezfc_functions.get_value_from(id, true)[0]` (`true`, иначе `parseFloat` даст `0`);
+- id элемента по имени: `ezfc_functions.get_element_id_by_name(__form_id__, 'dpdFormat')`.
 
-Пример замены в обработчике формы:
+Документация: [ez Form Calculator](https://ez-form-calculator.ezplugins.de/documentation/).
+
+Пример обработчика (как CalcMug):
 
 ```js
-const puzzleMap = {
-    0: 'Puzzle300420',
-    1: 'Puzzle208298',
-    2: 'Puzzle159215'
-};
-
-let puzzleId = puzzleMap[{{dpdformat}}] || {{dpdformat}};
-let calcCost = await insainCalcLegacy('puzzle', {
+let puzzleId = ezfc_functions.get_value_from(3104, true)[0];
+insaincalc.calcApi('puzzle', {
     quantity: {{numN}},
     puzzle_id: puzzleId,
-    mode: 1
+    mode: Number(ezfc_functions.get_value_from(3121, true)[0]) || 1
+}).then(function (calcCost) {
+    insaincalc.showResult(calcCost, {{numN}}, __form_id__);
 });
 ```
+
+`{{dpdFormat}}` для текстового dropdown нельзя использовать: плагин делает `parseFloat` от `data-value` (`Puzzle300420` → `0`). Индекс для share-URL: `get_value_from(3104, true, false, { return_value: 'index' })[0]`. В API уходит `get_value_from(3104, true)[0]`.
 
 Дальше текущий код вывода цены, веса, срока и материалов можно оставить прежним.
 
@@ -172,24 +211,22 @@ let calcCost = await insainCalcLegacy('puzzle', {
 
 - Асинхронность: любой обработчик, в котором вызывается `calc_service`, должен уметь дождаться `Promise`. Это главный риск для ez Form Calculator.
 - Область видимости переменных: если ez Form ожидает, что `PriceTotalManager`, `WeightTotal` и другие значения будут установлены синхронно в одном проходе расчёта, нужно проверить, срабатывает ли обновление после `await`/`.then(...)`.
-- Формат select-полей: в DOM может быть `value=0`, а API ждёт `Puzzle300420`. Для каждого калькулятора нужен явный маппинг `value -> code`.
+- Формат select-полей: HTML `value` — индекс, код API лежит в `data-value`. Читать через `get_value_from(id, true)[0]`, не через DOM и не через `{{dpdFormat}}` (это индекс, `parseFloat` кода даст `0`).
 - Материалы: старый `material` был `Map`, новый API возвращает `materials[]`. Bridge конвертирует массив обратно в `Map`, но надо проверить, что `insaincalc.showMaterials()` корректно отображает новый набор полей.
 - Сроки: старый код ждёт `timeReady`, API отдаёт `time_ready`. Bridge маппит поле, но `timeToWords()` и `calcDateReady()` остаются на стороне сайта.
 - Ошибки API: при недоступности сервиса нельзя затирать форму нулями без сообщения пользователю. В `catch` нужно показывать понятную ошибку или оставлять предыдущий успешный результат.
 - CORS/прокси: на `insain.ru` используется относительный `/api/v1`, поэтому браузер идёт на тот же origin и CORS не нужен. При выносе API на отдельный домен нужно явно разрешить origin WordPress.
-- Кэширование defaults: `/product/{slug}` можно кэшировать в JS на время страницы, но при изменении product defaults в API нужно учитывать браузерный/CDN-кэш.
+- Defaults: тонкий bridge `/product/{slug}` не загружает. Если форме нужны server-side defaults/`base_calc_slug`, custom JS формы запрашивает их сам (`GET /api/v1/product/{slug}`) и при необходимости кэширует на время страницы. Обычно проще передать все параметры явно из полей формы.
 
 ## Что Нужно Для Каждого Следующего Калькулятора
 
-Для перехода очередной формы на `calc_service` нужно собрать:
+Пошаговый рецепт и шаблон `cjsCalc`: [ezfc-api-migration.md](ezfc-api-migration.md).
 
-1. URL страницы калькулятора на сайте.
-2. Название старой JS-функции и полный custom JS-сборщик из ez Form Calculator.
-3. Список плейсхолдеров ez Form (`{{numN}}`, `{{dpdmaterial}}`, `{{rdoModeProduction}}` и т.п.).
-4. Маппинг значений select/radio/checkbox в коды нового API.
-5. `product_slug` и `base_calc_slug` из `GET /api/v1/product/{slug}`.
-6. Пример эталонного расчёта: входные параметры, старая цена/срок/вес, новая цена/срок/вес.
-7. Особые DOM-выводы: `.htmTime`, `.data-material-table`, поля цены, поля веса, подсказки tooltip.
+Кратко собрать перед правкой формы:
+
+1. URL страницы и slug API (`GET /api/v1/tool_schema/{slug}`).
+2. Id/имена полей ввода и GET-имена для share-URL.
+3. Эталон: те же входы, старая и новая цена / срок / вес.
 
 ## Проверка Перехода
 

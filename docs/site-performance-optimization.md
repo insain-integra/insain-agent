@@ -316,7 +316,7 @@ _Не требуется (метрики = базовая линия)._
 
 **Зачем:** на страницах ez Form в HTML подключаются десятки `calc*.js` и JSON материалов; для одного продукта это лишнее и бьёт по **TBT** и Script Evaluation.
 
-**Цель:** расчёт через `POST /api/v1/calc/{slug}`, на странице — [wp-plugin](../wp-plugin/) (`insainCalcLegacy`), без блока `/icalc/...` в custom HTML формы.
+**Цель:** расчёт через `POST /api/v1/calc/{slug}`, на странице — [wp-plugin](../wp-plugin/) (`insaincalc.calcApi`), без блока `/icalc/...` в custom HTML формы.
 
 **Пилот:** [калькулятор пазлов](http://test.insain.ru/catalog/kalkulyator-pazlov/) — см. [wordpress-integration.md](wordpress-integration.md).
 
