@@ -917,47 +917,22 @@ nano .env
 
 ### 8.4. Развёртывание `calc_service` для prod `insain.ru`
 
-На VDS API не должен открывать публичный порт. Для prod используется отдельный compose только для `calc_service`: контейнер слушает `8001` внутри Docker, а на хосте доступен только как `127.0.0.1:8002`. Наружу API отдаёт nginx по `https://insain.ru/api/`.
+На VDS API не открывает публичный порт. Рабочий контейнер `insain-calc-api` создан файлом [`docker-compose.calc-only.yml`](../docker-compose.calc-only.yml) (label `com.docker.compose.project.config_files`). Второй compose на сервере не создавать.
 
-Создай файл `/opt/insain-agent/docker-compose.calc-only.yml`:
+Параметры с `docker inspect insain-calc-api`:
 
-```bash
-cd /opt/insain-agent
+- порт `127.0.0.1:8002` → `8001` в контейнере;
+- volume `/opt/insain-agent/calc_service/data` → `/app/calc_service/data`;
+- `SITE_URL=http://test.insain.ru`;
+- команда `uvicorn main:app --host 0.0.0.0 --port 8001` (CMD образа);
+- сеть `insain-agent_default`.
 
-cat > docker-compose.calc-only.yml <<'EOF'
-services:
-  calc-api:
-    build:
-      context: ./calc_service
-      dockerfile: Dockerfile
-    container_name: insain-calc-api
-    ports:
-      - "127.0.0.1:8002:8001"
-    volumes:
-      - ./calc_service/data:/app/calc_service/data
-    environment:
-      SITE_URL: https://insain.ru
-    restart: always
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/api/v1/calculators', timeout=5).read()",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-EOF
-```
+Наружу API отдаёт nginx по `https://insain.ru/api/`.
 
-Запусти сервис:
+Команда запуска:
 
 ```bash
 cd /opt/insain-agent
-docker rm -f insain-calc-api || true
 docker compose -f docker-compose.calc-only.yml up -d --build
 ```
 
@@ -1084,9 +1059,9 @@ CORS для сайта настроен в [calc_service/main.py](../calc_servic
 
 ## Связанные файлы в репозитории
 
-- [docker-compose.yml](../docker-compose.yml) — общий compose для calc-api и tg-bot  
-- `/opt/insain-agent/docker-compose.calc-only.yml` — фактический compose тестового VDS для `calc_service` (`127.0.0.1:8002`)  
-- [infra/compose.vds.yml](../infra/compose.vds.yml) — старый/общий override с привязкой `127.0.0.1:8001`; для текущего тестового VDS не используется  
+- [docker-compose.yml](../docker-compose.yml) — локальный compose для calc-api и tg-bot  
+- [docker-compose.calc-only.yml](../docker-compose.calc-only.yml) — compose работающего `insain-calc-api` (`127.0.0.1:8002` → `8001`). Запуск: `docker compose -f docker-compose.calc-only.yml up -d --build`  
+- [infra/compose.vds.yml](../infra/compose.vds.yml) — порт и `SITE_URL` бывшего `docker-compose.calc-vds.yml`; контейнер этим файлом не поднимался  
 - [infra/nginx.conf](../infra/nginx.conf) — заготовка reverse proxy для будущего `calc.insain.ru`  
 - [infra/nginx-wp.conf](../infra/nginx-wp.conf) — эталонный конфиг nginx для WordPress (п. 3.4)  
 - [ROADMAP.md](../ROADMAP.md) — фазы D2, D3 и дальше

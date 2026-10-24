@@ -1,4 +1,6 @@
-# D2: локальный и VPS-запуск calc_service + Telegram-бота.
+# Локальный запуск calc_service + Telegram-бота.
+# VDS: docker compose -f docker-compose.calc-only.yml up -d --build
+# (insain-calc-api слушает 127.0.0.1:8002 → 8001).
 # Требуется .env в корне репозитория (см. .env.example).
 #
 # CALC_API_URL для бота переопределён на имя сервиса сети compose,
