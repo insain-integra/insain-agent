@@ -1,233 +1,69 @@
+/**
+ * Мост ez Form Calculator → Python calc_service.
+ *
+ * Методы вешаются на уже существующий объект insaincalc
+ * (его создаёт /icalc/calc/icdc_ls.js; если скрипт ещё не загружен — создаём пустой).
+ *
+ *   insaincalc.calcApi(slug, params)     — POST /api/v1/calc/{slug}, ответ в формате calcCost
+ *   insaincalc.showResult(calcCost, qty, formId) — цена, вес, срок, материалы
+ *   insaincalc.showError(err, formId)    — текст ошибки в блоке срока
+ *   insaincalc.syncUrl(params)           — query-строка, имена = GET полей формы
+ *
+ * Сбор параметров формы остаётся в custom JS. Расчёт и вывод вызываются отдельно.
+ */
 (function () {
     'use strict';
 
-    const DEFAULT_CONFIG = {
-        apiBase: '/api/v1',
-        autoInit: true,
-        debounceMs: 350,
-        products: {
-            puzzle: {
-                productSlug: 'puzzle',
-                calcSlug: 'puzzle',
-                pagePathIncludes: 'kalkulyator-pazlov',
-                inputSelectors: {
-                    quantity: [
-                        '#ezfc_element-3103',
-                        '#ezfc_element_3103',
-                        '[name="numn"]',
-                        '[name$="[numn]"]',
-                        '[data-element-name="numn"]',
-                        '[data-ezfc-id="3103"]',
-                    ],
-                    puzzle_id: [
-                        '#ezfc_element-3104',
-                        '#ezfc_element_3104',
-                        '[name="dpdformat"]',
-                        '[name$="[dpdformat]"]',
-                        '[data-element-name="dpdformat"]',
-                        '[data-ezfc-id="3104"]',
-                    ],
-                },
-                selectCodeMap: {
-                    puzzle_id: {
-                        0: 'Puzzle300420',
-                        1: 'Puzzle208298',
-                        2: 'Puzzle159215',
-                    },
-                },
-                resultSelectors: {},
-            },
-        },
-    };
+    var calc = window.insaincalc || (window.insaincalc = {});
+    var cfg = window.InsainCalcBridgeConfig || {};
+    var API = String(cfg.apiBase || '/api/v1').replace(/\/+$/, '');
+    var requestSeq = {};
 
-    const globalConfig = window.InsainCalcBridgeConfig || {};
-    const config = mergeConfig(DEFAULT_CONFIG, globalConfig);
-    const productCache = new Map();
-    const lastRequestByProduct = new Map();
-
-    function mergeConfig(base, override) {
-        const out = Array.isArray(base) ? base.slice() : Object.assign({}, base);
-        Object.keys(override || {}).forEach((key) => {
-            const baseValue = out[key];
-            const overrideValue = override[key];
-            if (isPlainObject(baseValue) && isPlainObject(overrideValue)) {
-                out[key] = mergeConfig(baseValue, overrideValue);
-            } else {
-                out[key] = overrideValue;
-            }
-        });
-        return out;
-    }
-
-    function isPlainObject(value) {
-        return Object.prototype.toString.call(value) === '[object Object]';
-    }
-
-    function joinUrl(base, path) {
-        return String(base || '').replace(/\/+$/, '') + '/' + String(path || '').replace(/^\/+/, '');
-    }
-
-    function selectFirst(selectors, root) {
-        const scope = root || document;
-        const list = Array.isArray(selectors) ? selectors : [selectors];
-
-        for (const selector of list) {
-            if (!selector) {
-                continue;
-            }
-            try {
-                const element = scope.querySelector(selector);
-                if (element) {
-                    return element;
-                }
-            } catch (err) {
-                console.warn('InsainCalcBridge: некорректный selector', selector, err);
+    function formRoot(formId) {
+        if (formId) {
+            var root = document.getElementById('ezfc-form-' + formId);
+            if (root) {
+                return root;
             }
         }
-
-        return null;
+        return document;
     }
 
-    function getFieldValue(element) {
-        if (!element) {
-            return '';
-        }
-
-        if (element.type === 'checkbox') {
-            return element.checked ? (element.value || '1') : '';
-        }
-
-        if (element.tagName === 'SELECT') {
-            const option = element.options[element.selectedIndex];
-            return option ? option.value : element.value;
-        }
-
-        return element.value || element.textContent || '';
-    }
-
-    function setFieldValue(element, value) {
-        if (!element) {
+    function setNamedAmount(formId, name, number) {
+        if (typeof ezfc_functions === 'undefined' || !ezfc_functions.get_element_id_by_name) {
             return;
         }
-
-        if ('value' in element) {
-            element.value = value == null ? '' : String(value);
-            element.dispatchEvent(new Event('input', { bubbles: true }));
-            element.dispatchEvent(new Event('change', { bubbles: true }));
+        var id = ezfc_functions.get_element_id_by_name(formId || null, name);
+        if (!id) {
             return;
         }
-
-        element.textContent = value == null ? '' : String(value);
-    }
-
-    function normalizeInteger(value, fallback) {
-        const parsed = parseInt(String(value || '').replace(',', '.'), 10);
-        return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-    }
-
-    function normalizeSelectValue(paramName, value, productConfig) {
-        const raw = String(value || '').trim();
-        const codeMap = (productConfig.selectCodeMap || {})[paramName] || {};
-        return codeMap[raw] || raw;
-    }
-
-    function readParams(productKey, root) {
-        const productConfig = getProductConfig(productKey);
-        const fields = productConfig.inputSelectors || {};
-        const quantityValue = getFieldValue(selectFirst(fields.quantity, root));
-        const puzzleValue = getFieldValue(selectFirst(fields.puzzle_id, root));
-
-        return {
-            quantity: normalizeInteger(quantityValue, undefined),
-            puzzle_id: normalizeSelectValue('puzzle_id', puzzleValue, productConfig),
-            mode: 1,
-        };
-    }
-
-    function applyDefaults(params, productInfo) {
-        const defaults = Object.assign({}, productInfo && productInfo.defaults ? productInfo.defaults : {});
-        const out = Object.assign({}, defaults, params || {});
-
-        Object.keys(out).forEach((key) => {
-            if (out[key] === undefined || out[key] === null || out[key] === '') {
-                out[key] = defaults[key];
-            }
-        });
-
-        if (!out.mode && out.mode !== 0) {
-            out.mode = 1;
+        var field = document.querySelector('#ezfc_element-' + id);
+        if (!field) {
+            return;
         }
-
-        return out;
-    }
-
-    async function fetchJson(url, options) {
-        const response = await fetch(url, Object.assign({ credentials: 'same-origin' }, options || {}));
-        let payload = null;
-
-        try {
-            payload = await response.json();
-        } catch (err) {
-            payload = null;
+        var caption = field.querySelector('.ezfc-text');
+        if (caption) {
+            caption.textContent = String(number);
         }
-
-        if (!response.ok) {
-            const message = payload && (payload.detail || payload.error || payload.message);
-            throw new Error(message || `Ошибка API ${response.status}`);
+        var hiddenInput = field.querySelector('input.ezfc-element-subtotal');
+        if (hiddenInput) {
+            hiddenInput.value = number;
         }
-
-        return payload;
-    }
-
-    async function loadProduct(productKey) {
-        const productConfig = getProductConfig(productKey);
-        const productSlug = productConfig.productSlug || productKey;
-
-        if (!productCache.has(productSlug)) {
-            const promise = fetchJson(joinUrl(config.apiBase, `product/${productSlug}`));
-            productCache.set(productSlug, promise);
-        }
-
-        return productCache.get(productSlug);
-    }
-
-    async function insainCalc(slug, params) {
-        const body = Object.assign({}, params || {});
-        return fetchJson(joinUrl(config.apiBase, `calc/${slug}`), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body),
-        });
-    }
-
-    async function insainCalcLegacy(productKey, params, options) {
-        const productConfig = getProductConfig(productKey);
-        const product = await loadProduct(productKey);
-        const calcSlug = (options && options.calcSlug) || productConfig.calcSlug || product.base_calc_slug || productKey;
-        const requestParams = applyDefaults(params || {}, product);
-        const result = await insainCalc(calcSlug, requestParams);
-        const legacyResult = adaptLegacyResult(result);
-
-        if (!options || options.updateUrl !== false) {
-            updateUrlParams(requestParams);
-        }
-
-        return legacyResult;
     }
 
     function adaptLegacyResult(result) {
-        const materialsMap = new Map();
-        (result.materials || []).forEach((material) => {
-            const code = material.code || material.id || '';
+        result = result || {};
+
+        var material = new Map();
+        (result.materials || []).forEach(function (item) {
+            var code = item.code || item.id;
             if (!code) {
                 return;
             }
-            materialsMap.set(code, [
-                material.name || material.title || code,
-                material.size_mm || material.size || null,
-                material.quantity || material.quantity_approx || 0,
+            material.set(code, [
+                item.title || item.name || code,
+                item.size_mm || item.size || null,
+                item.quantity || item.quantity_approx || 0
             ]);
         });
 
@@ -238,85 +74,55 @@
             time: result.time_hours || 0,
             timeReady: result.time_ready || 0,
             weight: result.weight_kg || 0,
-            material: materialsMap,
+            material: material,
             materials: result.materials || [],
             share_url: result.share_url || '',
-            raw: result,
+            raw: result
         };
     }
 
-    function formatMoney(value) {
-        const number = Number(value || 0);
-        return Number.isFinite(number) ? Math.ceil(number).toString() : '';
-    }
-
-    function formatNumber(value, digits) {
-        const number = Number(value || 0);
-        return Number.isFinite(number) ? number.toFixed(digits).replace(/\.?0+$/, '') : '';
-    }
-
-    function formatResultValue(key, value) {
-        if (key === 'cost' || key === 'price' || key === 'unit_price') {
-            return formatMoney(value);
-        }
-        if (key === 'time' || key === 'time_hours' || key === 'timeReady' || key === 'time_ready') {
-            return formatNumber(value, 2);
-        }
-        if (key === 'weight' || key === 'weight_kg') {
-            return formatNumber(value, 2);
-        }
-        return value == null ? '' : value;
-    }
-
-    function displayResult(productKey, legacyResult, root) {
-        const productConfig = getProductConfig(productKey);
-        const resultSelectors = productConfig.resultSelectors || {};
-        const values = {
-            cost: legacyResult.cost,
-            price: legacyResult.price,
-            unit_price: legacyResult.unit_price,
-            time: legacyResult.time,
-            time_hours: legacyResult.time,
-            timeReady: legacyResult.timeReady,
-            time_ready: legacyResult.timeReady,
-            weight: legacyResult.weight,
-            weight_kg: legacyResult.weight,
-            share_url: legacyResult.share_url,
-        };
-
-        Object.keys(resultSelectors).forEach((key) => {
-            const element = selectFirst(resultSelectors[key], root);
-            if (element) {
-                setFieldValue(element, formatResultValue(key, values[key]));
-            }
+    function postCalc(slug, params) {
+        return fetch(API + '/calc/' + slug, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify(params || {})
+        }).then(function (res) {
+            return res.json().catch(function () {
+                return null;
+            }).then(function (data) {
+                if (!res.ok) {
+                    var message = data && (data.detail || data.error || data.message);
+                    throw new Error(message || ('Ошибка API ' + res.status));
+                }
+                return data;
+            });
         });
-
-        document.dispatchEvent(new CustomEvent('insaincalc:result', {
-            detail: {
-                product: productKey,
-                result: legacyResult,
-            },
-        }));
     }
 
-    function displayError(productKey, error) {
-        console.error('InsainCalcBridge:', error);
-        document.dispatchEvent(new CustomEvent('insaincalc:error', {
-            detail: {
-                product: productKey,
-                error,
-            },
-        }));
+    function calcApi(slug, params) {
+        requestSeq[slug] = (requestSeq[slug] || 0) + 1;
+        var reqId = requestSeq[slug];
+        return postCalc(slug, params).then(function (data) {
+            if (reqId !== requestSeq[slug]) {
+                return null;
+            }
+            return adaptLegacyResult(data);
+        }, function (err) {
+            if (reqId !== requestSeq[slug]) {
+                return null;
+            }
+            throw err;
+        });
     }
 
-    function updateUrlParams(params) {
-        if (!window.history || !window.URLSearchParams) {
+    function syncUrl(params) {
+        if (!window.history || !window.URL) {
             return;
         }
-
-        const url = new URL(window.location.href);
-        Object.keys(params || {}).forEach((key) => {
-            const value = params[key];
+        var url = new URL(window.location.href);
+        Object.keys(params || {}).forEach(function (key) {
+            var value = params[key];
             if (value === undefined || value === null || value === '') {
                 url.searchParams.delete(key);
             } else {
@@ -326,140 +132,66 @@
         window.history.replaceState({}, '', url.toString());
     }
 
-    function readUrlParams() {
-        const params = {};
-        const search = new URLSearchParams(window.location.search);
-        search.forEach((value, key) => {
-            params[key] = value;
-        });
-        return params;
-    }
-
-    function prefillForm(productKey, root) {
-        const productConfig = getProductConfig(productKey);
-        const fields = productConfig.inputSelectors || {};
-        const params = readUrlParams();
-
-        if (params.quantity) {
-            setFieldValue(selectFirst(fields.quantity, root), params.quantity);
+    function showError(err, formId) {
+        var timeBlock = formRoot(formId).getElementsByClassName('htmTime')[0];
+        if (timeBlock && timeBlock.getElementsByTagName('div')[0]) {
+            timeBlock.getElementsByTagName('div')[0].innerHTML = 'Ошибка: ' + (err && err.message ? err.message : err);
         }
+        console.error('InsainCalcBridge:', err);
+    }
 
-        if (params.puzzle_id) {
-            const puzzleField = selectFirst(fields.puzzle_id, root);
-            const reverseMap = reverseCodeMap((productConfig.selectCodeMap || {}).puzzle_id || {});
-            setFieldValue(puzzleField, reverseMap[params.puzzle_id] || params.puzzle_id);
+    function showResult(calcCost, qty, formId) {
+        if (!calcCost) {
+            return;
         }
-    }
-
-    function reverseCodeMap(map) {
-        return Object.keys(map || {}).reduce((acc, key) => {
-            acc[map[key]] = key;
-            return acc;
-        }, {});
-    }
-
-    async function recalculate(productKey, explicitParams, root) {
-        const productConfig = getProductConfig(productKey);
-        const product = await loadProduct(productKey);
-        const calcSlug = productConfig.calcSlug || product.base_calc_slug || productKey;
-        const formParams = explicitParams || readParams(productKey, root);
-        const params = applyDefaults(formParams, product);
-
-        const requestId = Date.now();
-        lastRequestByProduct.set(productKey, requestId);
-
-        const result = await insainCalc(calcSlug, params);
-        if (lastRequestByProduct.get(productKey) !== requestId) {
-            return null;
-        }
-
-        const legacyResult = adaptLegacyResult(result);
-        displayResult(productKey, legacyResult, root);
-        updateUrlParams({
-            quantity: params.quantity,
-            puzzle_id: params.puzzle_id,
-            mode: params.mode,
-        });
-        return legacyResult;
-    }
-
-    function bindProduct(productKey, root) {
-        const productConfig = getProductConfig(productKey);
-        const fields = productConfig.inputSelectors || {};
-        const inputs = [
-            selectFirst(fields.quantity, root),
-            selectFirst(fields.puzzle_id, root),
-        ].filter(Boolean);
-
-        if (!inputs.length) {
-            return false;
-        }
-
-        const debounced = debounce(() => {
-            recalculate(productKey, undefined, root).catch((error) => displayError(productKey, error));
-        }, Number(config.debounceMs || 350));
-
-        inputs.forEach((input) => {
-            input.addEventListener('input', debounced);
-            input.addEventListener('change', debounced);
-        });
-
-        prefillForm(productKey, root);
-        debounced();
-        return true;
-    }
-
-    function debounce(fn, wait) {
-        let timeoutId = null;
-        return function debounced() {
-            window.clearTimeout(timeoutId);
-            timeoutId = window.setTimeout(fn, wait);
+        var n = Number(qty) || 1;
+        var marginMin = (calc.common && calc.common.marginMin) || 0;
+        var price = calc.round ? calc.round(calcCost.price, n) : Math.ceil(calcCost.price || 0);
+        var discount = Math.ceil((calcCost.cost || 0) * (1 + marginMin));
+        var cost = Math.ceil(calcCost.cost || 0);
+        var weight = Math.round((calcCost.weight || 0) * 100) / 100;
+        var unit = function (total) {
+            return n ? Math.round(total / n * 100) / 100 : total;
         };
-    }
 
-    function getProductConfig(productKey) {
-        return (config.products || {})[productKey] || {};
-    }
+        window.PriceTotalManager = price;
+        window.PriceTotalDiscount = discount;
+        window.CostTotal = cost;
+        window.WeightTotal = weight;
 
-    function shouldAutoBind(productKey) {
-        const productConfig = getProductConfig(productKey);
-        if (!productConfig.pagePathIncludes) {
-            return true;
-        }
-        return window.location.pathname.indexOf(productConfig.pagePathIncludes) !== -1;
-    }
+        setNamedAmount(formId, 'sbtPriceTotalManager', price);
+        setNamedAmount(formId, 'sbtPriceManager', unit(price));
+        setNamedAmount(formId, 'sbtPriceTotalDiscount', discount);
+        setNamedAmount(formId, 'sbtPriceDiscount', unit(discount));
+        setNamedAmount(formId, 'sbtCostTotal', cost);
+        setNamedAmount(formId, 'sbtCost', unit(cost));
+        setNamedAmount(formId, 'sbtWeightTotal', weight);
 
-    function init(root) {
-        Object.keys(config.products || {}).forEach((productKey) => {
-            if (shouldAutoBind(productKey)) {
-                bindProduct(productKey, root || document);
+        var root = formRoot(formId);
+        if (calc.timeToWords && calc.calcDateReady) {
+            var timeReady = calc.timeToWords(calcCost.timeReady);
+            var dateReady = calc.calcDateReady(calcCost.timeReady);
+            var timeBlock = root.getElementsByClassName('htmTime')[0];
+            if (timeBlock) {
+                timeBlock.getElementsByTagName('div')[0].innerHTML = 'Срок ' + timeReady;
+                var hint = timeBlock.getElementsByTagName('a')[0];
+                if (hint) {
+                    hint.setAttribute(
+                        'data-bs-original-title',
+                        'Готовность заказа: ' + dateReady[1] + ' При запуске заказа в работу до: ' + dateReady[0]
+                    );
+                }
             }
-        });
+        }
+
+        var materialsTable = root.getElementsByClassName('data-material-table')[0];
+        if (materialsTable && calc.showMaterials && calcCost.material) {
+            materialsTable.innerHTML = calc.showMaterials(calcCost.material);
+        }
     }
 
-    window.insainCalc = insainCalc;
-    window.insainCalcLegacy = insainCalcLegacy;
-    window.InsainCalcBridge = {
-        init,
-        bindProduct,
-        recalculate,
-        calcLegacy: insainCalcLegacy,
-        readParams,
-        adaptLegacyResult,
-        updateUrlParams,
-        readUrlParams,
-    };
-
-    window.insaincalc = window.insaincalc || {};
-    window.insaincalc.calcPuzzleAsync = function calcPuzzleAsync(n, puzzleID, options, modeProduction) {
-        return insainCalcLegacy('puzzle', {
-            quantity: normalizeInteger(n, 1),
-            puzzle_id: puzzleID,
-            mode: modeProduction == null ? 1 : Number(modeProduction),
-        }).then((result) => result || adaptLegacyResult({}));
-    };
-
-    if (config.autoInit !== false) {
-        document.addEventListener('DOMContentLoaded', () => init(document));
-    }
+    calc.calcApi = calcApi;
+    calc.showResult = showResult;
+    calc.showError = showError;
+    calc.syncUrl = syncUrl;
 }());
