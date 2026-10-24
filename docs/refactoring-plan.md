@@ -141,12 +141,13 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
       *Готово:* `git status` чистый, `pytest calc_service/tests -q` зелёный.
       сделано 24.10.2026, проверено: `pytest calc_service/tests -q` (414 passed). В `git status` остался только `calc_service/data/materials/puzzle.json` — вне scope 0.1.
 
-- [ ] **0.2. Свести `puzzle.json`.** Снять прод-версию, сравнить построчно, применить правило
+- [x] **0.2. Свести `puzzle.json`.** Снять прод-версию, сравнить построчно, применить правило
       по умолчанию из протокола.
       *Контекст:* локальный `calc_service/data/materials/puzzle.json`; тот же файл с VDS
       (`ssh insain-prod "cat /opt/insain-agent/calc_service/data/materials/puzzle.json"`);
       `git log -p --follow -- calc_service/data/materials/puzzle.json`. Больше ничего.
       *Готово:* на VDS `git status` по `data/` чист; расчёт пазлов на сайте совпадает с локальным API.
+      сделано 24.10.2026, проверено: POST /api/v1/calc/puzzle (3 id) site==local; pytest calc_service/tests/test_calculators/test_puzzle.py -q (6 passed). Сведённый файл закоммичен локально; на VDS `data/` ещё dirty до pull.
 
 - [ ] **0.3. Легализовать конфигурацию VDS.** Истина — работающий контейнер, не файлы compose.
       *Контекст:* `docker-compose.yml`, `infra/compose.vds.yml`; на сервере `ls /opt/insain-agent/*.yml`
