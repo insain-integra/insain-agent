@@ -302,9 +302,10 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
 - [x] **4.3.** GitHub Actions: `make check` на push и PR в `main`.
       сделано 26.10.2026, проверено: `python -c "import yaml; yaml.safe_load(open(r'.github/workflows/check.yml', encoding='utf-8'))"` (exit 0). Первый прогон Actions зелёный, run #1, 25.10.2026.
 
-- [ ] **4.4. Ворота деплоя:** в `infra/deploy.sh` — отказ при грязном дереве, проверка после выкатки
+- [x] **4.4. Ворота деплоя:** в `infra/deploy.sh` — отказ при грязном дереве, проверка после выкатки
       (`/api/v1/calculators`, smoke-расчёт), описанный откат на предыдущий образ.
       *Готово:* деплой с красными проверками невозможен; откат описан и проверен.
+      сделано 26.10.2026, проверено: на VDS `bash /tmp/deploy.sh` (копия нового скрипта, `INSAIN_REPO_DIR=/opt/insain-agent`) → `3b2ae44 → 5037cd2`, smoke 200/200, exit 0; `SMOKE_EXTRA_PATH=/api/v1/nonexistent` → 404 → откат на `rollback`, повторный smoke 200/200, exit 1, дерево чистое; ветка `feature` и грязное дерево на клоне в `/tmp` → exit 1; `python scripts/dev.py check` (`414 passed`; `81 passed`, exit 0).
 
 - [ ] **4.5.** Обновить `.cursor/rules/insain-site-autonomous.mdc`: порт, ветка `main`, ворота,
       бэкап БД перед массовыми правками контента, что подтверждать у человека.

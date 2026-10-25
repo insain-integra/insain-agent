@@ -40,15 +40,15 @@ Nginx, активный файл `/etc/nginx/sites-enabled/insain.ru` (`ls -l`: 
 
 ## Git
 
-Репозиторий `/opt/insain-agent`. Префикс команд: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent`. Время **2026-10-25T07:17:22Z** (тот же HEAD уже был в **2026-10-25T07:10:26Z**).
+Репозиторий `/opt/insain-agent`. Префикс команд: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent`. Время **2026-10-25T18:32:37Z**, после деплоя задачи 4.4.
 
 | Факт | Значение | Команда |
 | --- | --- | --- |
 | Ветка | `main` | `rev-parse --abbrev-ref HEAD` |
-| HEAD | `3b2ae44b65ca4bc52102ee568557902b842170c5` | `rev-parse HEAD` |
+| HEAD | `5037cd23adaefecaf4a589fc5d6ae8dcd8c3a2ce` | `rev-parse HEAD` |
 | `origin/main` | тот же хеш | `rev-parse origin/main` |
-| Дата коммита | 2026-10-25 14:18:07 +0800 | `log -1 --format=%ci` |
-| Тема | Mark task 0.4 done: production deploys from main. | `log -1 --format=%s` |
+| Дата коммита | 2026-10-26 01:56:52 +0800 | `log -1 --format=%ci` |
+| Тема | Add a GitHub Actions workflow that runs make check on main. | `log -1 --format=%s` |
 | Рабочее дерево | чистое, нет ahead/behind | `status -sb` → `## main...origin/main` |
 | origin | `https://github.com/insain-integra/insain-agent.git` | `remote get-url origin` (в URL нет учётных данных) |
 
@@ -65,9 +65,9 @@ Nginx, активный файл `/etc/nginx/sites-enabled/insain.ru` (`ls -l`: 
 | `com.docker.compose.project.working_dir` | `/opt/insain-agent` |
 | `com.docker.compose.project.config_files` | `/opt/insain-agent/docker-compose.calc-only.yml` |
 | Образ | `insain-agent-calc-api` |
-| Image ID | `sha256:e8efca23463a3746b68179279e3550c44e3d9b63b5e3123de94efd303dc5035e` |
+| Image ID | `sha256:fe480dff338d4104221779bf2649be308e43302aa54c06c7f8890c6adb5b6ec9` (на 2026-10-25T18:32:37Z) |
 | Состояние | `running`, health `healthy` |
-| Создан | 2026-10-25T06:50:31Z |
+| Создан | 2026-10-25T18:28:58Z |
 | Restart | `always` |
 | Команда | `uvicorn main:app --host 0.0.0.0 --port 8001` |
 | WorkingDir | `/app/calc_service` |
@@ -98,17 +98,16 @@ Nginx, активный файл `/etc/nginx/sites-enabled/insain.ru` (`ls -l`: 
 
 ## Образы
 
-`docker images` **2026-10-25T07:12:02Z** и `docker image inspect` **2026-10-25T07:17:22Z**. Других образов на хосте нет.
+`docker images insain-agent-calc-api` и `docker inspect insain-calc-api`, **2026-10-25T18:32:37Z**.
 
 | Тег | ID | Создан | Кто использует |
 | --- | --- | --- | --- |
-| `insain-agent-calc-api:latest` | `e8efca23463a` | 2026-10-25 09:49:02 +0300 | работающий `insain-calc-api` |
-| `insain-agent-calc-api:deploy-2026-10-25` | `e8efca23463a` | 2026-10-25 09:49:02 +0300 | тот же образ, что `latest` |
-| `insain-agent-calc-api:rollback` | `c71450a10e57` | 2026-05-01 22:21:25 +0300 | контейнер с этим ID не запущен |
+| `insain-agent-calc-api:latest` | `fe480dff338d` | 2026-10-25 21:28:21 +0300 | работающий `insain-calc-api` |
+| `insain-agent-calc-api:rollback` | `fe480dff338d` | 2026-10-25 21:28:21 +0300 | тот же образ: `infra/deploy.sh` тегирует `latest` перед каждой сборкой |
+| `insain-agent-calc-api:deploy-2026-10-25` | `e8efca23463a` | 2026-10-25 09:49:02 +0300 | образ задачи 0.5, не запущен |
 
-Полный ID rollback: `sha256:c71450a10e57c484ababf7609fca10bc287ffc6cdcf813d85ce5b58149d0b712`.
-
-Образ `latest` создан 2026-10-25 09:49:02 +0300, коммит HEAD — 2026-10-25 14:18:07 +0800 (06:18Z). Образ новее этого коммита (06:49Z), контейнер создан в 06:50Z.
+Полный ID `latest`: `sha256:fe480dff338d4104221779bf2649be308e43302aa54c06c7f8890c6adb5b6ec9`. Контейнер пересоздан
+2026-10-25T18:28:58Z при проверке автоотката (`SMOKE_EXTRA_PATH=/api/v1/nonexistent`), health `healthy`.
 
 ## WordPress
 

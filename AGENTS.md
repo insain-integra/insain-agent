@@ -43,16 +43,19 @@ Windows/PowerShell: `&&` не работает, разделитель `;`. Ес
 
 ### Деплой API (только с `main`)
 
+Деплоить только коммит с зелёным CI (GitHub Actions, `make check`).
+
 ```bash
 ssh insain-prod            # с первого раза может отвалиться по таймауту — повторить
 cd /opt/insain-agent
-docker tag insain-agent-calc-api:latest insain-agent-calc-api:rollback
-bash infra/deploy.sh       # git pull --ff-only + docker compose -f docker-compose.calc-only.yml up -d --build
+bash infra/deploy.sh       # main + чистое дерево → tag rollback → pull → build → smoke → автооткат
 curl -fsS https://insain.ru/api/v1/calculators | head -c 200
 ```
 
-Затем smoke `POST /api/v1/calc/{slug}` на странице калькулятора. Откат — поднять контейнер из
-образа `insain-agent-calc-api:rollback`. Git на VDS: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent …`.
+Smoke в скрипте: `GET /api/v1/calculators` и `POST /api/v1/calc/puzzle`. Упал — скрипт сам откатывает код
+и образ на `insain-agent-calc-api:rollback` и выходит с ненулевым кодом. Проверка отката без поломки прода:
+`SMOKE_EXTRA_PATH=/api/v1/nonexistent bash infra/deploy.sh`. Затем smoke на странице калькулятора.
+Git на VDS: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent …`.
 
 ### Деплой плагина и WordPress
 
