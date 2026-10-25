@@ -5,7 +5,7 @@
 Если нужно только **переключение режимов** (автономный ↔ с подтверждением) — сразу к [разделу 2](#2-два-режима-работы-и-как-переключаться).
 
 **Целевая среда:** основной сайт `https://insain.ru` (после переноса с `test.insain.ru`).  
-**Связанные документы:** [production-cutover-plan.md](production-cutover-plan.md), [vds-wordpress-docker-setup.md](vds-wordpress-docker-setup.md) (п. 8.7), [wordpress-integration.md](wordpress-integration.md).
+**Связанные документы:** [archive/production-cutover-plan.md](archive/production-cutover-plan.md), [archive/vds-wordpress-docker-setup.md](archive/vds-wordpress-docker-setup.md) (п. 8.7), [wordpress-integration.md](wordpress-integration.md).
 
 ---
 
@@ -68,7 +68,7 @@
                             │ SSH (22)
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  VDS (insain.ru) — 5.181.252.133 (см. production-cutover-plan) │
+│  VDS (insain.ru) — 5.181.252.133 (см. archive/production-cutover-plan.md) │
 │                                                                  │
 │  /var/www/insain.ru          WordPress + wp-plugin               │
 │  /etc/nginx/sites-enabled/   insain.ru + location /api/          │
@@ -114,7 +114,7 @@ curl -sS https://insain.ru/api/v1/calculators | head -c 200
 
 Ожидается: `200` на главной и JSON со списком калькуляторов.
 
-Подробный cutover: [production-cutover-plan.md](production-cutover-plan.md).
+Подробный cutover: [archive/production-cutover-plan.md](archive/production-cutover-plan.md).
 
 ---
 
@@ -436,7 +436,7 @@ ssh insain-prod "cd /opt/insain-agent && git fetch origin && git pull --ff-only"
 
 ### D.2. Пересборка и перезапуск
 
-Имя compose-файла на VDS смотрите в [vds-wordpress-docker-setup.md](vds-wordpress-docker-setup.md) (часто `docker-compose.calc-only.yml`):
+Имя compose-файла на VDS смотрите в [archive/vds-wordpress-docker-setup.md](archive/vds-wordpress-docker-setup.md) (часто `docker-compose.calc-only.yml`):
 
 ```bash
 ssh insain-prod "cd /opt/insain-agent && docker compose -f docker-compose.calc-only.yml build calc-api && docker compose -f docker-compose.calc-only.yml up -d calc-api"
@@ -503,7 +503,7 @@ curl -sS https://insain.ru/api/v1/calculators | head -c 200
   ```
 - не хранить пароли в репозитории; `.env` только на сервере и локально в `.gitignore`;
 - в правиле агента: **не** `git push` и **не** менять DNS без явной просьбы;
-- для отката DNS — [production-cutover-plan.md](production-cutover-plan.md).
+- для отката DNS — [archive/production-cutover-plan.md](archive/production-cutover-plan.md).
 
 ### G.2. Быстрый откат nginx
 
@@ -588,10 +588,10 @@ alwaysApply: false
 
 | Файл | Назначение |
 |------|------------|
-| [production-cutover-plan.md](production-cutover-plan.md) | DNS, SSL, search-replace на prod |
+| [archive/production-cutover-plan.md](archive/production-cutover-plan.md) | DNS, SSL, search-replace на prod |
 | [wordpress-integration.md](wordpress-integration.md) | ez Form, bridge, миграция калькуляторов |
-| [vds-wordpress-docker-setup.md](vds-wordpress-docker-setup.md) | Полная установка VDS, Docker, nginx |
-| [site-performance-optimization.md](site-performance-optimization.md) | Производительность и bridge на страницах |
+| [archive/vds-wordpress-docker-setup.md](archive/vds-wordpress-docker-setup.md) | Полная установка VDS, Docker, nginx |
+| [archive/site-performance-optimization.md](archive/site-performance-optimization.md) | Производительность и bridge на страницах |
 | [wp-plugin/](../wp-plugin/) | Insain Calc Bridge |
 | [infra/nginx-wp.conf](../infra/nginx-wp.conf) | Эталон nginx для WordPress |
 

@@ -14,14 +14,14 @@
 - **nginx → PHP-FPM** напрямую (без Apache). Apache отключён.
 - Автоконфиг панели NetAngels (`vm-*.na4u.ru.conf`) **отключён** — nginx-конфигами управляем вручную.
 - Панель [NetAngels](https://panel.netangels.ru) используется **только для DNS** и управления VDS (старт/стоп/бэкапы).
-- Эталонные конфиги nginx хранятся в `**infra/`** репозитория ([nginx-wp.conf](../infra/nginx-wp.conf), [nginx.conf](../infra/nginx.conf)) для воспроизводимости и управления ИИ-агентом.
+- Эталонные конфиги nginx хранятся в `**infra/`** репозитория ([nginx-wp.conf](../../infra/nginx-wp.conf), [nginx.conf](../../infra/nginx.conf)) для воспроизводимости и управления ИИ-агентом.
 - `.htaccess` **не работает** с nginx — все правила (ЧПУ, редиректы) задаются в конфиге nginx.
 
 **Предположения:**
 
 - Хостинг — VDS на **[NetAngels](https://panel.netangels.ru)** (Debian 12 с предустановленным nginx/Apache/PHP; Apache отключаем в п. 3.0).
 - Домен сайта, например `insain.ru`, DNS можно менять.
-- Для тестового API калькуляторов используется путь `test.insain.ru/api/`; отдельный субдомен `calc.insain.ru` можно добавить позже (как в [ROADMAP.md](../ROADMAP.md)).
+- Для тестового API калькуляторов используется путь `test.insain.ru/api/`; отдельный субдомен `calc.insain.ru` можно добавить позже (как в [ROADMAP.md](../../ROADMAP.md)).
 - Старый сервер доступен по SSH для снятия бэкапов.
 - В перспективе ИИ-агент получит SSH-доступ к серверу для управления сайтом, nginx, Docker и wp-cli (п. 8.7).
 
@@ -100,7 +100,7 @@ sudo ufw enable
 sudo ufw status
 ```
 
-**Важно:** порт **8001** для API калькуляторов **не открывай** наружу: доступ к API будет через **nginx** на 443 (см. [infra/nginx.conf](../infra/nginx.conf)).
+**Важно:** порт **8001** для API калькуляторов **не открывай** наружу: доступ к API будет через **nginx** на 443 (см. [infra/nginx.conf](../../infra/nginx.conf)).
 
 ---
 
@@ -262,7 +262,7 @@ Nginx передаёт PHP-запросы в **php-fpm** через **Unix-со�
 - в `**listen`** — публичный IP из п. 3.0.3 (например `185.41.161.31`);
 - в `**fastcgi_pass`** — свой `.sock` из `ls /run/php/`.
 
-Эталонный конфиг хранится в репозитории: [infra/nginx-wp.conf](../infra/nginx-wp.conf).
+Эталонный конфиг хранится в репозитории: [infra/nginx-wp.conf](../../infra/nginx-wp.conf).
 
 ```nginx
 server {
@@ -911,13 +911,13 @@ cp .env.example .env
 nano .env
 ```
 
-Заполни как на локальной машине: `TELEGRAM_TOKEN`, ключи LLM и остальное (см. [.env.example](../.env.example)). Файл `.env` в git не коммитится.
+Заполни как на локальной машине: `TELEGRAM_TOKEN`, ключи LLM и остальное (см. [.env.example](../../.env.example)). Файл `.env` в git не коммитится.
 
 Для запуска только `calc_service` файл `.env` не обязателен, если задаёшь `SITE_URL` прямо в compose override.
 
 ### 8.4. Развёртывание `calc_service` для prod `insain.ru`
 
-На VDS API не открывает публичный порт. Рабочий контейнер `insain-calc-api` создан файлом [`docker-compose.calc-only.yml`](../docker-compose.calc-only.yml) (label `com.docker.compose.project.config_files`). Второй compose на сервере не создавать.
+На VDS API не открывает публичный порт. Рабочий контейнер `insain-calc-api` создан файлом [`docker-compose.calc-only.yml`](../../docker-compose.calc-only.yml) (label `com.docker.compose.project.config_files`). Второй compose на сервере не создавать.
 
 Параметры с `docker inspect insain-calc-api`:
 
@@ -992,9 +992,9 @@ curl -sS https://insain.ru/api/v1/calculators | head -c 300
 
 Не используй `curl -I` для проверки FastAPI endpoint: `-I` отправляет `HEAD`, а `/api/v1/calculators` разрешает `GET`, поэтому нормальный ответ на `HEAD` может быть `405 Method Not Allowed`.
 
-Позже, когда будет нужен отдельный API-домен `calc.insain.ru`, можно перенести proxy-блок в отдельный server block из [infra/nginx.conf](../infra/nginx.conf) и выпустить сертификат для `calc.insain.ru`.
+Позже, когда будет нужен отдельный API-домен `calc.insain.ru`, можно перенести proxy-блок в отдельный server block из [infra/nginx.conf](../../infra/nginx.conf) и выпустить сертификат для `calc.insain.ru`.
 
-CORS для сайта настроен в [calc_service/main.py](../calc_service/main.py) (домены `insain.ru` и `www.insain.ru`). При относительном `/api/v1` запросы идут на тот же origin, поэтому CORS не нужен.
+CORS для сайта настроен в [calc_service/main.py](../../calc_service/main.py) (домены `insain.ru` и `www.insain.ru`). При относительном `/api/v1` запросы идут на тот же origin, поэтому CORS не нужен.
 
 ### 8.6. Логи бота на диске хоста
 
@@ -1002,7 +1002,7 @@ CORS для сайта настроен в [calc_service/main.py](../calc_servic
 
 ### 8.7. Подготовка к ИИ-доступу
 
-**Пошаговый план (Cursor, SSH, Browser, деплой bridge, безопасность):** [agent-autonomous-environment.md](agent-autonomous-environment.md).
+**Пошаговый план (Cursor, SSH, Browser, деплой bridge, безопасность):** [agent-autonomous-environment.md](../agent-autonomous-environment.md).
 
 Кратко — что нужно на сервере для агента:
 
@@ -1013,11 +1013,11 @@ CORS для сайта настроен в [calc_service/main.py](../calc_servic
    sudo install -d -m 700 -o agent -g agent /home/agent/.ssh
    # скопируй публичный ключ ИИ-агента в /home/agent/.ssh/authorized_keys
   ```
-2. **Ограниченный sudo, не группа `sudo`.** В `/etc/sudoers.d/agent` разрешить только `nginx -t`, `systemctl reload nginx` и `wp` от `www-data`. Полный пример — в [agent-autonomous-environment.md](agent-autonomous-environment.md).
+2. **Ограниченный sudo, не группа `sudo`.** В `/etc/sudoers.d/agent` разрешить только `nginx -t`, `systemctl reload nginx` и `wp` от `www-data`. Полный пример — в [agent-autonomous-environment.md](../agent-autonomous-environment.md).
 3. **wp-cli + PHP 8.2 CLI.** `wp` должен запускаться от `www-data` на PHP 8.2 (`sudo -u www-data wp --info --path=/var/www/insain.ru`). Панель хостинга задаёт PHP-FPM сайта, а CLI-версия проверяется отдельно.
 4. **Docker CLI** — пользователь в группе `docker`: перезапуск контейнеров, просмотр логов, деплой `calc_service` через `/opt/insain-agent/docker-compose.calc-only.yml`.
 5. **Browser MCP в Chrome.** Для админки WordPress агент использует Browser MCP в вашем залогиненном Chrome, а не встроенный Browser.
-6. **Конфиги nginx в `infra/`** — эталоны [nginx-wp.conf](../infra/nginx-wp.conf) и [nginx.conf](../infra/nginx.conf) хранятся в репозитории; ИИ-агент может обновить конфиг на сервере через `git pull` + ограниченный reload nginx.
+6. **Конфиги nginx в `infra/`** — эталоны [nginx-wp.conf](../../infra/nginx-wp.conf) и [nginx.conf](../../infra/nginx.conf) хранятся в репозитории; ИИ-агент может обновить конфиг на сервере через `git pull` + ограниченный reload nginx.
 7. **Все действия через CLI и Browser MCP** — нет зависимости от GUI-панелей хостера; всё автоматизируемо.
 
 ---
@@ -1060,13 +1060,13 @@ CORS для сайта настроен в [calc_service/main.py](../calc_servic
 
 ## Связанные файлы в репозитории
 
-- [docker-compose.yml](../docker-compose.yml) — локальный compose для calc-api и tg-bot  
-- [docker-compose.calc-only.yml](../docker-compose.calc-only.yml) — compose работающего `insain-calc-api` (`127.0.0.1:8002` → `8001`). Запуск: `docker compose -f docker-compose.calc-only.yml up -d --build`  
-- [infra/compose.vds.yml](../infra/compose.vds.yml) — не задаёт прод; запуск только через `docker-compose.calc-only.yml`  
-- [infra/deploy.sh](../infra/deploy.sh) — `git pull` и `docker compose -f docker-compose.calc-only.yml up -d --build`  
-- [infra/nginx.conf](../infra/nginx.conf) — заготовка reverse proxy для будущего `calc.insain.ru`  
-- [infra/nginx-wp.conf](../infra/nginx-wp.conf) — эталонный конфиг nginx для WordPress (п. 3.4)  
-- [ROADMAP.md](../ROADMAP.md) — фазы D2, D3 и дальше
+- [docker-compose.yml](../../docker-compose.yml) — локальный compose для calc-api и tg-bot  
+- [docker-compose.calc-only.yml](../../docker-compose.calc-only.yml) — compose работающего `insain-calc-api` (`127.0.0.1:8002` → `8001`). Запуск: `docker compose -f docker-compose.calc-only.yml up -d --build`  
+- [infra/compose.vds.yml](../../infra/compose.vds.yml) — не задаёт прод; запуск только через `docker-compose.calc-only.yml`  
+- [infra/deploy.sh](../../infra/deploy.sh) — `git pull` и `docker compose -f docker-compose.calc-only.yml up -d --build`  
+- [infra/nginx.conf](../../infra/nginx.conf) — заготовка reverse proxy для будущего `calc.insain.ru`  
+- [infra/nginx-wp.conf](../../infra/nginx-wp.conf) — эталонный конфиг nginx для WordPress (п. 3.4)  
+- [ROADMAP.md](../../ROADMAP.md) — фазы D2, D3 и дальше
 
 Дата черновика инструкции: 2026-04-04.  
 Обновление (вариант B — ручной nginx, без Apache): 2026-04-12.

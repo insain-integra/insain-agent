@@ -6,9 +6,9 @@
 
 Связанные документы:
 
-- [wordpress-integration.md](wordpress-integration.md) — миграция калькуляторов с `/icalc/` на API
+- [wordpress-integration.md](../wordpress-integration.md) — миграция калькуляторов с `/icalc/` на API
 - [vds-wordpress-docker-setup.md](vds-wordpress-docker-setup.md) — VDS, nginx, плагины
-- [infra/nginx-wp.conf](../infra/nginx-wp.conf) — эталон виртуального хоста nginx
+- [infra/nginx-wp.conf](../../infra/nginx-wp.conf) — эталон виртуального хоста nginx
 
 ---
 
@@ -185,7 +185,7 @@ _Не требуется (метрики = базовая линия)._
 
 **Зачем (для новичка):** браузер скачивает меньше байт (gzip) и при повторном визите не качает заново картинки/CSS/JS (долгий `Cache-Control`). Это бьёт по предупреждениям PSI про кеш (~2 MiB) и ускоряет загрузку CSS из отчёта «блокирующие запросы».
 
-**Где:** VDS, файл вида `/etc/nginx/sites-available/insain.ru` (ориентир — [infra/nginx-wp.conf](../infra/nginx-wp.conf), нужно **дополнить**, не заменить слепо).
+**Где:** VDS, файл вида `/etc/nginx/sites-available/insain.ru` (ориентир — [infra/nginx-wp.conf](../../infra/nginx-wp.conf), нужно **дополнить**, не заменить слепо).
 
 ### Что сделать безопасно
 
@@ -316,9 +316,9 @@ _Не требуется (метрики = базовая линия)._
 
 **Зачем:** на страницах ez Form в HTML подключаются десятки `calc*.js` и JSON материалов; для одного продукта это лишнее и бьёт по **TBT** и Script Evaluation.
 
-**Цель:** расчёт через `POST /api/v1/calc/{slug}`, на странице — [wp-plugin](../wp-plugin/) (`insaincalc.calcApi`), без блока `/icalc/...` в custom HTML формы.
+**Цель:** расчёт через `POST /api/v1/calc/{slug}`, на странице — [wp-plugin](../../wp-plugin/) (`insaincalc.calcApi`), без блока `/icalc/...` в custom HTML формы.
 
-**Пилот:** [калькулятор пазлов](http://test.insain.ru/catalog/kalkulyator-pazlov/) — см. [wordpress-integration.md](wordpress-integration.md).
+**Пилот:** [калькулятор пазлов](http://test.insain.ru/catalog/kalkulyator-pazlov/) — см. [wordpress-integration.md](../wordpress-integration.md).
 
 ### Чек-лист
 

@@ -198,4 +198,4 @@ sudo systemctl reload nginx
 
 ## Дальше: автономная работа агентов
 
-После cutover настройте Cursor, SSH-пользователя `agent`, Browser и деплой `wp-plugin`: [agent-autonomous-environment.md](agent-autonomous-environment.md).
+После cutover настройте Cursor, SSH-пользователя `agent`, Browser и деплой `wp-plugin`: [agent-autonomous-environment.md](../agent-autonomous-environment.md).
