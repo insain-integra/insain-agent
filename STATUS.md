@@ -165,6 +165,18 @@ Nginx, активный файл `/etc/nginx/sites-enabled/insain.ru` (`ls -l`: 
 
 Бот на VDS не запущен. Это и есть текущая консервация: на проде поднят только calc-api.
 
+Статус на **25.10.2026**: бот не развивается и не деплоится. Тесты `bot_service/tests` остаются обязательными. `bot_service/AGENTS.md` пока нет. Цели `make check` в `Makefile` нет.
+
+Повторная проверка VDS, **2026-10-25T09:17:59Z**, только чтение, файлы на сервере не менялись:
+
+| Команда | Результат |
+| --- | --- |
+| `docker inspect -f '{{json .Config.Labels}}' insain-calc-api` | `com.docker.compose.project.config_files` = `/opt/insain-agent/docker-compose.calc-only.yml`, сервис `calc-api`, `working_dir` = `/opt/insain-agent` |
+| `docker ps -a` | один контейнер, `insain-calc-api`, статус `Up 2 hours (healthy)` |
+| `docker ps -a --filter name=insain-tg-bot` | пусто |
+
+В локальном `docker-compose.yml` сервис `tg-bot` стоит за `profiles: [bot]`. Без `--profile bot` compose его не поднимает. Этот файл на VDS не выкладывался. `docker-compose.calc-only.yml` и `infra/deploy.sh` бота не содержат и в этой задаче не менялись.
+
 Проверено **2026-10-25T07:17:22Z**:
 
 | Команда | Результат |
@@ -177,7 +189,7 @@ Nginx, активный файл `/etc/nginx/sites-enabled/insain.ru` (`ls -l`: 
 
 `docker-compose.calc-only.yml` содержит один сервис, `calc-api` (разбор файла, **2026-10-25T07:18:48Z**). Комментарий строки 1: «VDS: только calc-api».
 
-`docker-compose.yml` описывает сервис `tg-bot`: `container_name insain-tg-bot`, сборка `./bot_service`, `env_file: .env`, переменная `CALC_API_URL` задана в файле литералом (значение не копировалось), volume `./logs`, `restart always`. Этот compose работающий контейнер не создавал.
+`docker-compose.yml` описывает сервис `tg-bot`: `container_name insain-tg-bot`, сборка `./bot_service`, `env_file: .env`, переменная `CALC_API_URL` задана в файле литералом (значение не копировалось), volume `./logs`, `restart always`. Этот compose работающий контейнер не создавал. С **25.10.2026** в локальном файле у `tg-bot` есть `profiles: [bot]`; снимок VDS выше снят до выкладки этой правки.
 
 Слова «консервация» в комментариях обоих compose-файлов нет (`grep -n '^#'`, **2026-10-25**, сразу после 07:18:48Z).
 

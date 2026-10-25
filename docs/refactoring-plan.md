@@ -234,10 +234,11 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
       *Готово:* предел размера или периодическая очистка.
       сделано 25.10.2026, проверено: python -m pytest bot_service/tests/test_token_analyzer.py -q --tb=short
 
-- [ ] **2.4. Консервация бота.** Зафиксировать статус в `bot_service/AGENTS.md` (позже) и `STATUS.md`:
+- [x] **2.4. Консервация бота.** Зафиксировать статус в `bot_service/AGENTS.md` (позже) и `STATUS.md`:
       не развивается, не деплоится, тесты обязательны. Убрать `tg-bot` из прод-варианта compose
       или оставить выключенным явно (profile).
       *Готово:* деплой на VDS не пытается поднять бота; тесты бота остаются в `make check`.
+      сделано 25.10.2026, проверено: docker inspect labels config_files=/opt/insain-agent/docker-compose.calc-only.yml; docker ps -a (только insain-calc-api); docker compose config --services (без profile — calc-api, с --profile bot — calc-api tg-bot)
 
 ## Фаза 3. Конституция проекта
 
