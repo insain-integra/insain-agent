@@ -10,6 +10,7 @@ alwaysApply: false
 - WordPress: /var/www/insain.ru
 - API: относительный /api/v1 (nginx → 127.0.0.1:8002)
 - Репозиторий на сервере: /opt/insain-agent
+- Прод деплоится с ветки main.
 - SSH: Host insain-prod (см. docs/agent-autonomous-environment.md)
 
 ## Окружение VDS (важно)

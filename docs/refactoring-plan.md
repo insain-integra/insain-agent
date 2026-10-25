@@ -155,11 +155,12 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
       *Готово:* на сервере нет неотслеживаемых конфигов; команда запуска записана в runbook.
       сделано 25.10.2026, проверено: `git diff --stat origin/feature/agent-logic -- infra/deploy.sh infra/compose.vds.yml docker-compose.calc-only.yml` (пусто); `docker inspect` SITE_URL=https://insain.ru, config_files=docker-compose.calc-only.yml. HEAD сервера остался `7f57d0a`; `puzzle.json` не трогали.
 
-- [ ] **0.4. Перейти на деплой с `main`.** Слить `feature/agent-logic` в `main`, переключить прод
+- [x] **0.4. Перейти на деплой с `main`.** Слить `feature/agent-logic` в `main`, переключить прод
       на `main`, удалить `experiment-2levelpromt`. `git push` в `main` — спросить.
       *Контекст:* `git log --oneline main..feature/agent-logic`, `git status`; на VDS текущая ветка
       и HEAD (`git -c safe.directory=/opt/insain-agent -C /opt/insain-agent …`).
       *Готово:* HEAD прода равен `main`; лишних веток нет; правило записано в `AGENTS.md` и `.cursor/rules`.
+      сделано 25.10.2026, проверено: `git merge --ff-only feature/agent-logic` (main `dee7a58` → `84ab2a4`); `git branch` — нет `experiment-2levelpromt`. Правило в `.cursor/rules/insain-site-autonomous.mdc`. HEAD прода не менялся: `feature/agent-logic` `7f57d0a`. `git push` в `main` не делался.
 
 - [ ] **0.5. Восстановить рабочий деплой.** Короткий простой API допустим. Перед пересборкой
       сохранить тег `insain-agent-calc-api:rollback`. Делать в спокойное время.
