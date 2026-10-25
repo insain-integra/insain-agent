@@ -80,7 +80,7 @@
                             └──► https://insain.ru/api/v1/...
 ```
 
-**Важно:** bridge использует относительный URL `/api/v1` — запросы идут на тот же origin, что и сайт. Отдельный домен `calc.insain.ru` для агента не обязателен (см. [ROADMAP.md](../ROADMAP.md)).
+**Важно:** bridge использует относительный URL `/api/v1` — запросы идут на тот же origin, что и сайт (`https://insain.ru/api/v1`). Отдельный домен `calc.insain.ru` не используется (см. [BACKLOG.md](../BACKLOG.md)).
 
 ---
 

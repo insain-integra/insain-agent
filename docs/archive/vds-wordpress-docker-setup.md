@@ -21,7 +21,7 @@
 
 - Хостинг — VDS на **[NetAngels](https://panel.netangels.ru)** (Debian 12 с предустановленным nginx/Apache/PHP; Apache отключаем в п. 3.0).
 - Домен сайта, например `insain.ru`, DNS можно менять.
-- Для тестового API калькуляторов используется путь `test.insain.ru/api/`; отдельный субдомен `calc.insain.ru` можно добавить позже (как в [ROADMAP.md](../../ROADMAP.md)).
+- API калькуляторов — `https://insain.ru/api/v1` на том же хосте, что и сайт. Отдельный субдомен `calc.insain.ru` не используется (см. [BACKLOG.md](../../BACKLOG.md)).
 - Старый сервер доступен по SSH для снятия бэкапов.
 - В перспективе ИИ-агент получит SSH-доступ к серверу для управления сайтом, nginx, Docker и wp-cli (п. 8.7).
 
@@ -42,7 +42,7 @@
 
 ### 1.1. Выбор тарифа и образа (NetAngels и аналоги)
 
-1. Возьми тариф с **запасом по диску и RAM** (WordPress + MySQL + Docker + образы и логи). Ориентир: **от 8 ГБ RAM**, **от 30 ГБ NVMe** — см. обсуждение в ROADMAP.
+1. Возьми тариф с **запасом по диску и RAM** (WordPress + MySQL + Docker + образы и логи). Ориентир: **от 8 ГБ RAM**, **от 30 ГБ NVMe**.
 2. ОС: **Debian 12** с выбором PHP (готовая сборка хостера нормальна).
 3. Запомни **публичный IP** нового сервера (панель хостинга или `curl -4 ifconfig.me` после входа).
 
@@ -902,7 +902,7 @@ sudo git checkout feature/agent-logic
 sudo git pull --ff-only origin feature/agent-logic
 ```
 
-Важно: на момент тестового развёртывания `docker-compose.yml` и `infra/compose.vds.yml` лежали в ветке `feature/agent-logic`, поэтому после clone нужно явно переключиться на неё.
+Важно: на момент тестового развёртывания `docker-compose.yml` лежал в ветке `feature/agent-logic`, поэтому после clone нужно явно переключиться на неё.
 
 ### 8.3. Файл `.env`
 
@@ -992,7 +992,7 @@ curl -sS https://insain.ru/api/v1/calculators | head -c 300
 
 Не используй `curl -I` для проверки FastAPI endpoint: `-I` отправляет `HEAD`, а `/api/v1/calculators` разрешает `GET`, поэтому нормальный ответ на `HEAD` может быть `405 Method Not Allowed`.
 
-Позже, когда будет нужен отдельный API-домен `calc.insain.ru`, можно перенести proxy-блок в отдельный server block из [infra/nginx.conf](../../infra/nginx.conf) и выпустить сертификат для `calc.insain.ru`.
+API калькуляторов открыт на `https://insain.ru/api/v1` (тот же хост, что и сайт). Отдельный субдомен `calc.insain.ru` не используется.
 
 CORS для сайта настроен в [calc_service/main.py](../../calc_service/main.py) (домены `insain.ru` и `www.insain.ru`). При относительном `/api/v1` запросы идут на тот же origin, поэтому CORS не нужен.
 
@@ -1062,11 +1062,10 @@ CORS для сайта настроен в [calc_service/main.py](../../calc_ser
 
 - [docker-compose.yml](../../docker-compose.yml) — локальный compose для calc-api и tg-bot  
 - [docker-compose.calc-only.yml](../../docker-compose.calc-only.yml) — compose работающего `insain-calc-api` (`127.0.0.1:8002` → `8001`). Запуск: `docker compose -f docker-compose.calc-only.yml up -d --build`  
-- [infra/compose.vds.yml](../../infra/compose.vds.yml) — не задаёт прод; запуск только через `docker-compose.calc-only.yml`  
 - [infra/deploy.sh](../../infra/deploy.sh) — `git pull` и `docker compose -f docker-compose.calc-only.yml up -d --build`  
-- [infra/nginx.conf](../../infra/nginx.conf) — заготовка reverse proxy для будущего `calc.insain.ru`  
+- [infra/nginx.conf](../../infra/nginx.conf) — старая заготовка reverse proxy: в файле указан `calc.insain.ru`, прод-адрес API — `https://insain.ru/api/v1`  
 - [infra/nginx-wp.conf](../../infra/nginx-wp.conf) — эталонный конфиг nginx для WordPress (п. 3.4)  
-- [ROADMAP.md](../../ROADMAP.md) — фазы D2, D3 и дальше
+- [BACKLOG.md](../../BACKLOG.md) — неоформленные идеи. Прежний `ROADMAP.md` удалён, текст в истории git
 
 Дата черновика инструкции: 2026-04-04.  
 Обновление (вариант B — ручной nginx, без Apache): 2026-04-12.

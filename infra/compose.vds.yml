@@ -1,6 +1,0 @@
-# Этот файл не задаёт прод.
-# Единственное определение calc-api — docker-compose.calc-only.yml:
-#   docker compose -f docker-compose.calc-only.yml up -d --build
-#
-# Порт и SITE_URL сюда не переносятся: контейнер их брал из
-# docker-compose.calc-only.yml (label config_files), не из отдельного override.

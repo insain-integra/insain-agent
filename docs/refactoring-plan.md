@@ -74,8 +74,9 @@
 Для агента, который берёт задачу из этого плана. Не читать план целиком.
 
 1. Одна задача = одна сессия с чистым контекстом. Читать только этот протокол, блок своей задачи
-   и файлы из строки «Контекст». Весь план, `ROADMAP.md`, `CLAUDE.md`, `docs/archive/vds-wordpress-docker-setup.md`,
+   и файлы из строки «Контекст». Весь план, `CLAUDE.md`, `docs/archive/vds-wordpress-docker-setup.md`,
    `docs/project_summary.md`, `bot_service/agent.py` целиком — не открывать; только grep по месту.
+   `ROADMAP.md` удалён, идеи — в `BACKLOG.md` (текст файла — в истории git).
 2. Критерий «Готово» — это команда. Выполнить её и привести вывод, не писать «проверено».
 3. Не выходить за scope. Соседняя проблема — одна строка в отчёте, не правка.
 4. После закрытия: отметить чекбокс и дописать «сделано ДД.ММ.ГГГГ, проверено: \<команда\>».
@@ -116,7 +117,7 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
 |---|---|---|
 | Ветка | `feature/agent-logic`, HEAD `bb80f7a` (05.06) | та же ветка, `7f57d0a` (01.05) |
 | `puzzle.json` | изменён, не закоммичен (14 строк) | изменён, не закоммичен (52 строки) |
-| compose | `docker-compose.yml` + `infra/compose.vds.yml` | плюс `docker-compose.calc-only.yml`, `docker-compose.calc-vds.yml` (нет в git) |
+| compose | `docker-compose.yml` | плюс `docker-compose.calc-only.yml`, `docker-compose.calc-vds.yml` (нет в git) |
 | Telegram-бот | Dockerfile и сервис в compose есть | не запущен (теперь — осознанно, см. консервация) |
 
 Прочее: `main` отстаёт на 9 коммитов (последний 22.03), последний коммит 05.06 при незакоммиченной
@@ -150,10 +151,10 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
       сделано 24.10.2026, проверено: POST /api/v1/calc/puzzle (3 id) site==local; pytest calc_service/tests/test_calculators/test_puzzle.py -q (6 passed). Сведённый файл закоммичен локально; на VDS `data/` ещё dirty до pull.
 
 - [x] **0.3. Легализовать конфигурацию VDS.** Истина — работающий контейнер, не файлы compose.
-      *Контекст:* `docker-compose.yml`, `infra/compose.vds.yml`; на сервере `ls /opt/insain-agent/*.yml`
+      *Контекст:* `docker-compose.yml`; на сервере `ls /opt/insain-agent/*.yml`
       и `docker inspect insain-calc-api` (порты, volumes, Env, Labels).
       *Готово:* на сервере нет неотслеживаемых конфигов; команда запуска записана в runbook.
-      сделано 25.10.2026, проверено: `git diff --stat origin/feature/agent-logic -- infra/deploy.sh infra/compose.vds.yml docker-compose.calc-only.yml` (пусто); `docker inspect` SITE_URL=https://insain.ru, config_files=docker-compose.calc-only.yml. HEAD сервера остался `7f57d0a`; `puzzle.json` не трогали.
+      сделано 25.10.2026, проверено: `git diff --stat origin/feature/agent-logic -- infra/deploy.sh docker-compose.calc-only.yml` (пусто); `docker inspect` SITE_URL=https://insain.ru, config_files=docker-compose.calc-only.yml. HEAD сервера остался `7f57d0a`; `puzzle.json` не трогали.
 
 - [x] **0.4. Перейти на деплой с `main`.** Слить `feature/agent-logic` в `main`, переключить прод
       на `main`, удалить `experiment-2levelpromt`. `git push` в `main` — спросить.
@@ -164,7 +165,7 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
 
 - [x] **0.5. Восстановить рабочий деплой.** Короткий простой API допустим. Перед пересборкой
       сохранить тег `insain-agent-calc-api:rollback`. Делать в спокойное время.
-      *Контекст:* `infra/deploy.sh`, `docker-compose.yml`, `infra/compose.vds.yml`; на сервере
+      *Контекст:* `infra/deploy.sh`, `docker-compose.yml`; на сервере
       `docker images`, `docker inspect insain-calc-api`, текущий `git status`.
       *Готово:* `bash infra/deploy.sh` проходит целиком; API 200; контейнер свежий; откат проверен
       на практике (поднять `rollback`, вернуть актуальный).
@@ -263,19 +264,23 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
       факта, противоречащего репозиторию.
       сделано 26.10.2026, проверено: `(Get-Content AGENTS.md).Count` → `129`; пути из файла — `Test-Path` (все `True`); вычитано человеком 26.10.2026.
 
-- [ ] **3.2. Вложенные `AGENTS.md`** в `calc_service/` (данные, контракт ответа, как добавить
+- [x] **3.2. Вложенные `AGENTS.md`** в `calc_service/` (данные, контракт ответа, как добавить
       калькулятор), `bot_service/` (консервация, что нельзя ломать), `wp-plugin/` (bridge, ezFC,
       деплой плагина) — по 20–40 строк.
+      сделано 26.10.2026, проверено: `(Get-Content).Count` → calc_service 25, bot_service 21, wp-plugin 20 (все в 20–40); `Test-Path` ссылок migration-guide.md, site/access-tools.md, ezfc-api-migration.md → True.
 
-- [ ] **3.3. `CLAUDE.md` → тонкая ссылка** на `AGENTS.md`.
+- [x] **3.3. `CLAUDE.md` → тонкая ссылка** на `AGENTS.md`.
+      сделано 26.10.2026, проверено: `(Get-Content CLAUDE.md).Count` → 5; обход локальных ссылок в `*.md` (70 ссылок, broken: 0).
 
-- [ ] **3.4. Реорганизация `docs/`**: справочники, runbook'и (деплой, WP-операции, перевод формы),
+- [x] **3.4. Реорганизация `docs/`**: справочники, runbook'и (деплой, WP-операции, перевод формы),
       архив; `docs/README.md` с таблицей «файл — назначение — живой/архив».
+      сделано 26.10.2026, проверено: обход локальных ссылок в `*.md` (69 ссылок, broken: 0); таблица `docs/README.md` покрывает 18/18 файлов `docs/`. Заглушка compose в `infra/` удалена, поиск её прежнего имени по репозиторию пуст.
 
-- [ ] **3.5. `ROADMAP.md` → `BACKLOG.md`.** Короткий плоский список ещё не оформленных идей
+- [x] **3.5. `ROADMAP.md` → `BACKLOG.md`.** Короткий плоский список ещё не оформленных идей
       (калькуляторы C1–C11, Max, PostgreSQL, бот). Отметить сделанное, исправить адреса.
       Оформленные задачи живут в `todo/`, третьего трекера нет.
       *Готово:* ≤150 строк; у каждой строки понятно, что это и зачем.
+      сделано 26.10.2026, проверено: `(Get-Content BACKLOG.md).Count` → `50`; `Test-Path ROADMAP.md` → `False`; обход локальных ссылок в `*.md` (69 ссылок, broken: 0).
 
 - [x] **3.6. Правило ретроспективы** записано в самом `AGENTS.md`: ошибка агента → одна строка
       правила или одна проверка; изменения малыми порциями, не пакетом.
@@ -288,7 +293,7 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
 - [x] **4.1. `make check` — одна команда.** `pytest calc_service/tests` + `pytest bot_service/tests`;
       позже — `check_calc_registry.py` при доступном API. Это и есть петля обратной связи агента.
       *Готово:* команда есть в `Makefile` и `scripts/dev.py` (для Windows без make); упоминается в `AGENTS.md`.
-      сделано 26.10.2026, проверено: `python scripts/dev.py check` (`414 passed in 18.44s`; `81 passed in 123.41s (0:02:03)`, exit 0). Упоминание в `AGENTS.md` отложено: файла нет, это фаза 3.
+      сделано 26.10.2026, проверено: `python scripts/dev.py check` (`414 passed in 18.44s`; `81 passed in 123.41s (0:02:03)`, exit 0). Упоминание в `AGENTS.md` — добавлено в задаче 3.1 (раздел «Команды», «Перед сдачей»).
 
 - [x] **4.2.** Починить 5 падающих тестов `bot_service` (`_calc_tool_by_slug`).
       *Готово:* `make check` зелёный.

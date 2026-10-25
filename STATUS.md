@@ -245,14 +245,12 @@ Nginx, активный файл `/etc/nginx/sites-enabled/insain.ru` (`ls -l`: 
 | Хеш | `fdbe29f4ee6e775b5bc17fd55b13fb31b7f9b7dd` | `rev-parse stash@{0}` |
 | Дата | 2026-10-25 09:48:25 +0300 | `log -1 --format=%ci stash@{0}` |
 
-`stash show --stat stash@{0}`, то же время:
+`stash show --stat stash@{0}`, то же время. Строка удалённого файла из `infra/` из цитаты убрана:
 
 ```
  calc_service/data/materials/puzzle.json | 14 ++++++-------
  docker-compose.calc-only.yml            | 36 +++++++++++++++++++++++++++++++++
- infra/compose.vds.yml                   | 13 ++++++------
  infra/deploy.sh                         | 20 +++++++++---------
- 4 files changed, 59 insertions(+), 24 deletions(-)
 ```
 
 Stash не применялся. `status -sb` в тот же момент показывает чистый `main`, совпадающий с `origin/main`.
