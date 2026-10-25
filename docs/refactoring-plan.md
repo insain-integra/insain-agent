@@ -218,9 +218,10 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
 
 Оценка: 0.5 дня.
 
-- [ ] **2.1. Удалить мёртвое:** `calc_service/calculator_params/`, `calc_service/data.backup/`,
+- [x] **2.1. Удалить мёртвое:** `calc_service/calculator_params/`, `calc_service/data.backup/`,
       `calc_service/check.py`, пустые `ai_agent/`, `alembic/`, `infra/monitoring/`.
       *Готово:* тесты зелёные; поиск по удалённым именам ничего не находит.
+      сделано 25.10.2026, проверено: python -m pytest calc_service/tests/ -q --tb=line
 
 - [ ] **2.2. Архивировать историчные доки** в `docs/archive/` с индексом:
       `vds-wordpress-docker-setup.md`, `production-cutover-plan.md`,
