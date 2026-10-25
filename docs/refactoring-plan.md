@@ -149,11 +149,10 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
       *Готово:* на VDS `git status` по `data/` чист; расчёт пазлов на сайте совпадает с локальным API.
       сделано 24.10.2026, проверено: POST /api/v1/calc/puzzle (3 id) site==local; pytest calc_service/tests/test_calculators/test_puzzle.py -q (6 passed). Сведённый файл закоммичен локально; на VDS `data/` ещё dirty до pull.
 
-- [x] **0.3. Легализовать конфигурацию VDS.** Истина — работающий контейнер, не файлы compose.
+- [ ] **0.3. Легализовать конфигурацию VDS.** Истина — работающий контейнер, не файлы compose.
       *Контекст:* `docker-compose.yml`, `infra/compose.vds.yml`; на сервере `ls /opt/insain-agent/*.yml`
       и `docker inspect insain-calc-api` (порты, volumes, Env, Labels).
       *Готово:* на сервере нет неотслеживаемых конфигов; команда запуска записана в runbook.
-      сделано 24.10.2026, проверено: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent status --short -- '*.yml' 'infra/*.yml'` (пусто); `docker inspect insain-calc-api` (running/healthy, 127.0.0.1:8002→8001).
 
 - [ ] **0.4. Перейти на деплой с `main`.** Слить `feature/agent-logic` в `main`, переключить прод
       на `main`, удалить `experiment-2levelpromt`. `git push` в `main` — спросить.
