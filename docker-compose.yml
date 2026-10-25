@@ -1,7 +1,8 @@
 # Локальный запуск calc_service.
-# Telegram-бот не развивается и не деплоится. Сервис tg-bot выключен,
-# пока явно не передан profile bot:
+# Telegram-бот на VDS не деплоится. Перед будущей работой его сначала
+# проверяют локально:
 #   docker compose --profile bot up -d
+#   либо make bot-up
 # VDS: docker compose -f docker-compose.calc-only.yml up -d --build
 # (insain-calc-api слушает 127.0.0.1:8002 → 8001).
 # Требуется .env в корне репозитория (см. .env.example), только для profile bot.

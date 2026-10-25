@@ -119,8 +119,6 @@ insain-agent/
 │ ├── equipment/ — JSON оборудования (оригиналы)
 │ └── material/ — JSON материалов (оригиналы)
 │
-├── ai_agent/               ← ПЛАНИРУЕТСЯ: АВТОМАТИЗАЦИЯ
-│
 ├── docs/ ← ПОДРОБНАЯ ДОКУМЕНТАЦИЯ
 │ ├── architecture.md — архитектура, контейнеры, потоки
 │ ├── data-formats.md — форматы JSON, маппинг JS → Python
@@ -138,7 +136,6 @@ insain-agent/
 │ └── wiki_sync.py
 │
 ├── wiki_export/ — fallback: ручной экспорт Wiki
-├── alembic/                ← ПЛАНИРУЕТСЯ: миграции PostgreSQL
 ├── .github/workflows/      ← TODO: CI/CD
 ├── Makefile                — make up, down, status (обёртка над scripts/dev.py)
 ├── .env — секреты (НЕ в git)

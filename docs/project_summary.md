@@ -17,9 +17,7 @@
 - `wp-plugin/` — интеграция с WordPress (JS‑обёртка).
 - `js_legacy/` — исходные JS‑калькуляторы и JSON (только как референс).
 - `infra/` — docker‑compose, nginx, healthcheck.
-- `ai_agent/` — автоматизация/таск‑раннер.
 - `wiki_export/` — ручной экспорт Wiki.
-- `alembic/` — миграции БД.
 - `.env` — конфиг (секреты, URLы, режим LLM и т.д.).
 
 ## 3. calc_service/ — сервис калькуляторов

@@ -41,10 +41,6 @@ class SourceBlock(NamedTuple):
 # --- 1. Описание проекта и документация ---
 CONTEXT_BLOCKS: list[SourceBlock] = [
     SourceBlock(
-        "docs/handoff_print_sheet_numbering_llm.md",
-        "Кейс: нумерация в листовой печати — бриф для внешней LLM (handoff)",
-    ),
-    SourceBlock(
         "docs/project_summary.md",
         "Документация: обзор проекта (docs/project_summary.md)",
         220,

@@ -121,8 +121,8 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
 
 Прочее: `main` отстаёт на 9 коммитов (последний 22.03), последний коммит 05.06 при незакоммиченной
 работе от 28.09; 5 падающих тестов `bot_service`; CI нет; документация ~2800 строк в `docs/` плюс
-`CLAUDE.md` (456) и `ROADMAP.md` (826) с дублированием и устаревшими фактами; мёртвые каталоги
-`calculator_params/`, `data.backup/`, пустые `ai_agent/`, `alembic/`, `infra/monitoring/`.
+`CLAUDE.md` и `ROADMAP.md` с дублированием и устаревшими фактами. Мёртвые каталоги
+из этого аудита удалены в задаче 2.1.
 
 `js_legacy/` не мусор: старый лоадер `/icalc/` обслуживает ещё не переведённые формы сайта.
 
@@ -225,20 +225,23 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
 
 - [x] **2.2. Архивировать историчные доки** в `docs/archive/` с индексом:
       `vds-wordpress-docker-setup.md`, `production-cutover-plan.md`,
-      `site-performance-optimization.md`, `handoff_print_sheet_numbering_llm.md`.
+      `site-performance-optimization.md`.
       `migration-guide.md` остаётся живым.
+      `handoff_print_sheet_numbering_llm.md` удалён 26.10.2026: задача неактуальна.
       *Готово:* ссылки между `.md` не сломаны.
       сделано 25.10.2026, проверено: обход локальных ссылок в `*.md` (51 ссылка, broken: 0)
 
 - [x] **2.3. Логи.** `logs/token_usage.jsonl` — 26 МБ без ротации.
       *Готово:* предел размера или периодическая очистка.
       сделано 25.10.2026, проверено: python -m pytest bot_service/tests/test_token_analyzer.py -q --tb=short
+      старый `logs/token_usage.jsonl` и `logs/llm_request_*.json` удалены 26.10.2026.
 
 - [x] **2.4. Консервация бота.** Зафиксировать статус в `bot_service/AGENTS.md` (позже) и `STATUS.md`:
       не развивается, не деплоится, тесты обязательны. Убрать `tg-bot` из прод-варианта compose
       или оставить выключенным явно (profile).
       *Готово:* деплой на VDS не пытается поднять бота; тесты бота остаются в `make check`.
       сделано 25.10.2026, проверено: docker inspect labels config_files=/opt/insain-agent/docker-compose.calc-only.yml; docker ps -a (только insain-calc-api); docker compose config --services (без profile — calc-api, с --profile bot — calc-api tg-bot)
+      26.10.2026: к боту возвращаться сначала локально (`make bot-up` или `docker compose --profile bot`).
 
 ## Фаза 3. Конституция проекта
 
