@@ -24,6 +24,7 @@
 # Firewall (пример ufw): SSH, Nginx Full; порт 8002 снаружи не открывать.
 #   sudo ufw allow OpenSSH && sudo ufw allow 'Nginx Full' && sudo ufw enable
 
+main() {
 set -euo pipefail
 
 INSAIN_REPO_DIR="${INSAIN_REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
@@ -119,3 +120,6 @@ if smoke; then
 fi
 dc ps || true
 fail "деплой ${new_commit:0:7} откачен, но smoke после отката тоже не пройден. Прод требует ручного разбора."
+}
+
+main "$@"
