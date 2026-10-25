@@ -300,7 +300,7 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
       сделано 26.10.2026, проверено: `python scripts/dev.py check` (`414 passed in 18.44s`; `81 passed in 123.41s (0:02:03)`, exit 0).
 
 - [x] **4.3.** GitHub Actions: `make check` на push и PR в `main`.
-      сделано 26.10.2026, проверено: `python -c "import yaml; yaml.safe_load(open(r'.github/workflows/check.yml', encoding='utf-8'))"` (exit 0). ждёт первого зелёного прогона.
+      сделано 26.10.2026, проверено: `python -c "import yaml; yaml.safe_load(open(r'.github/workflows/check.yml', encoding='utf-8'))"` (exit 0). Первый прогон Actions зелёный, run #1, 25.10.2026.
 
 - [ ] **4.4. Ворота деплоя:** в `infra/deploy.sh` — отказ при грязном дереве, проверка после выкатки
       (`/api/v1/calculators`, smoke-расчёт), описанный откат на предыдущий образ.
