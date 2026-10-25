@@ -923,9 +923,10 @@ nano .env
 
 - порт `127.0.0.1:8002` → `8001` в контейнере;
 - volume `/opt/insain-agent/calc_service/data` → `/app/calc_service/data`;
-- `SITE_URL=http://test.insain.ru`;
 - команда `uvicorn main:app --host 0.0.0.0 --port 8001` (CMD образа);
 - сеть `insain-agent_default`.
+
+В compose-файле `SITE_URL=https://insain.ru` (префикс `share_url`). Уже запущенный контейнер хранит прежнее значение, пока его не пересоздадут командой ниже.
 
 Наружу API отдаёт nginx по `https://insain.ru/api/`.
 
@@ -1061,7 +1062,8 @@ CORS для сайта настроен в [calc_service/main.py](../calc_servic
 
 - [docker-compose.yml](../docker-compose.yml) — локальный compose для calc-api и tg-bot  
 - [docker-compose.calc-only.yml](../docker-compose.calc-only.yml) — compose работающего `insain-calc-api` (`127.0.0.1:8002` → `8001`). Запуск: `docker compose -f docker-compose.calc-only.yml up -d --build`  
-- [infra/compose.vds.yml](../infra/compose.vds.yml) — порт и `SITE_URL` бывшего `docker-compose.calc-vds.yml`; контейнер этим файлом не поднимался  
+- [infra/compose.vds.yml](../infra/compose.vds.yml) — не задаёт прод; запуск только через `docker-compose.calc-only.yml`  
+- [infra/deploy.sh](../infra/deploy.sh) — `git pull` и `docker compose -f docker-compose.calc-only.yml up -d --build`  
 - [infra/nginx.conf](../infra/nginx.conf) — заготовка reverse proxy для будущего `calc.insain.ru`  
 - [infra/nginx-wp.conf](../infra/nginx-wp.conf) — эталонный конфиг nginx для WordPress (п. 3.4)  
 - [ROADMAP.md](../ROADMAP.md) — фазы D2, D3 и дальше

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Деплой insain-agent на VDS: git pull и перезапуск контейнеров.
-# calc-api слушает только 127.0.0.1:8001 (см. infra/compose.vds.yml), наружу — nginx.
+# Деплой insain-agent на VDS: git pull и перезапуск calc-api.
+# Единственное определение прода — docker-compose.calc-only.yml:
+# 127.0.0.1:8002 → 8001, SITE_URL=https://insain.ru, наружу — nginx.
 #
-# Требования: git, docker compose v2, в корне репозитория есть .env для tg-bot.
+# Требования: git, docker compose v2.
 #
 # Использование на сервере:
-#   export INSAIN_REPO_DIR=/var/www/insain-agent
 #   bash infra/deploy.sh
 #
-# Firewall (пример ufw): SSH, Nginx Full; порт 8001 снаружи не открывать.
+# Firewall (пример ufw): SSH, Nginx Full; порт 8002 снаружи не открывать.
 #   sudo ufw allow OpenSSH && sudo ufw allow 'Nginx Full' && sudo ufw enable
 
 set -euo pipefail
@@ -26,11 +26,11 @@ else
   echo ">>> Предупреждение: каталог не похож на git-клон (.git нет), пропускаю pull"
 fi
 
-echo ">>> docker compose up -d --build (VDS: calc-api на 127.0.0.1:8001)"
-docker compose -f docker-compose.yml -f infra/compose.vds.yml up -d --build
+echo ">>> docker compose up -d --build (VDS: calc-api на 127.0.0.1:8002)"
+docker compose -f docker-compose.calc-only.yml up -d --build
 
 echo ">>> Состояние контейнеров"
-docker compose -f docker-compose.yml -f infra/compose.vds.yml ps
+docker compose -f docker-compose.calc-only.yml ps
 
-echo ">>> Готово. Проверка (после DNS и certbot):"
-echo "    curl -fsS https://calc.insain.ru/api/v1/calculators | head -c 200; echo"
+echo ">>> Готово. Проверка:"
+echo "    curl -fsS https://insain.ru/api/v1/calculators | head -c 200; echo"

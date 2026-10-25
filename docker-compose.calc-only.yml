@@ -1,11 +1,9 @@
 # VDS: только calc-api. Рабочий контейнер insain-calc-api создан этим файлом
 # (label com.docker.compose.project.config_files).
-# Порт, volume, SITE_URL и healthcheck совпадают с docker inspect.
+# Порт, volume и healthcheck совпадают с docker inspect.
 # Команда процесса — CMD образа: uvicorn main:app --host 0.0.0.0 --port 8001.
-#
-# Бывший docker-compose.calc-vds.yml повторял только
-# 127.0.0.1:8002:8001 и SITE_URL=http://test.insain.ru
-# и в config_files контейнера не входил.
+# SITE_URL=https://insain.ru — префикс share_url. В уже запущенном контейнере
+# может оставаться прежнее значение, пока контейнер не пересоздадут.
 #
 # Запуск:
 #   cd /opt/insain-agent
@@ -22,7 +20,7 @@ services:
     volumes:
       - ./calc_service/data:/app/calc_service/data
     environment:
-      SITE_URL: http://test.insain.ru
+      SITE_URL: https://insain.ru
     restart: always
     healthcheck:
       test:
