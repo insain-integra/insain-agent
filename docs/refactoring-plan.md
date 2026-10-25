@@ -176,26 +176,29 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
 
 Оценка: 1–1.5 дня. Здесь появляется состояние сайта как данные — основа контура 1.
 
-- [ ] **1.1. `STATUS.md` — снимок прода.** Адреса, порты, контейнеры, версии плагинов, где секреты,
+- [x] **1.1. `STATUS.md` — снимок прода.** Адреса, порты, контейнеры, версии плагинов, где секреты,
       какая ветка деплоится, что приостановлено (бот).
       *Контекст:* `.cursor/rules/insain-site-autonomous.mdc`; на VDS `docker compose ps`,
       `wp plugin list`, `git log -1`. Не читать длинные runbook'и.
       *Готово:* каждый факт подтверждён командой; указаны дата и способ проверки.
+      Сделано 25.10.2026, проверено: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent log -1` и `status -sb`; `docker compose -f /opt/insain-agent/docker-compose.calc-only.yml ps -a`; `docker inspect insain-calc-api`; `sudo -u www-data wp plugin list --status=active --path=/var/www/insain.ru` (окно снимка 2026-10-25T07:12:02Z–07:18:48Z, файл `STATUS.md`).
 
-- [ ] **1.2. Реестр форм калькуляторов.** Страница → форма ezFC (id) → slug API → статус
+- [x] **1.2. Реестр форм калькуляторов.** Страница → форма ezFC (id) → slug API → статус
       (на API / старый JS `/icalc/`).
       *Контекст:* wp-cli список форм ezFC; `GET /api/v1/calculators`; страницы сайта через wp-cli
       или Browser MCP. Не открывать `js_legacy/` целиком.
       *Готово:* все страницы с калькуляторами перечислены; видно число непереведённых форм.
+      сделано 25.10.2026, проверено: `sudo -u www-data wp db query` по `wp_insain_ezfc_forms`, `wp_insain_ezfc_forms_elements` и meta `ezfc_form_id` (`--path=/var/www/insain.ru`); `GET https://insain.ru/api/v1/calculators` (38 slug); `curl` `https://insain.ru/catalog/kalkulyator-pazlov/` (`calcApi('puzzle'`) и `https://insain.ru/catalog/lazernaya-gravirovka-i-rezka/` (`calcLaser`, `calcApi` нет). Реестр: `docs/site/forms.md`. Непереведённых форм: 45.
 
-- [ ] **1.3. Инвентарь редакционного контента.** Структура сайта: страницы и разделы, меню,
+- [x] **1.3. Инвентарь редакционного контента.** Структура сайта: страницы и разделы, меню,
       товары WooCommerce (количество, категории), SEO-плагин и где живут мета, медиатека (объём).
       Не содержимое — карта: что есть, где лежит, чем правится.
       *Контекст:* `wp post list`, `wp menu list`, `wp wc product list --format=count` (если есть),
       `wp plugin list`, оценка медиатеки. Не выгружать тексты страниц.
       *Готово:* одна таблица в `docs/`; по ней понятно, к какому объекту какой инструмент применять.
+      сделано 25.10.2026, проверено: `sudo -u www-data wp db query` — `GROUP BY LOWER(LEFT(_sku,3)), post_type, post_status` по `wp_insain_posts`/`wp_insain_postmeta` (prg 694/12670, ins 62+1 draft, dbp 1); `wp post list --post_type=page`, `wp menu list`, `wp menu location list`, `wp plugin list`, `wp theme list`, `du -sh wp-content/uploads`. Карта: `docs/site/content-inventory.md`.
 
-- [ ] **1.4. Разведка инструментов доступа к WP из Cursor.** Что реально доступно для каждого
+- [x] **1.4. Разведка инструментов доступа к WP из Cursor.** Что реально доступно для каждого
       типа объекта: wp-cli (есть, через `sudo -u www-data`), REST API WordPress и WooCommerce
       (проверить аутентификацию), Browser MCP (есть). Отдельно — как ezFC хранит формы и возможен
       ли экспорт/импорт custom JS.
@@ -203,11 +206,13 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
       экспорт формы ezFC, не все.
       *Готово:* таблица «объект → инструмент чтения → инструмент записи → ограничения»; по формам
       ezFC — ответ «да / нет / частично» и выбранный порядок работы.
+      сделано 25.10.2026, проверено: `wp help`, `wp wc product list --user=1 --format=count` (758; без `--user` — 401), `wp user application-password list 1 --format=count` (0), `wp db query` по `wp_insain_woocommerce_api_keys` (0) и `SHOW COLUMNS` таблиц `wp_insain_ezfc_*`; анонимные `curl` к `/wp-json/` (`wp/v2/pages`, `media`, `product`, `wc/store/v1/products`, `yoast/v1/get_head` — 200; `wp/v2/menus`, `menu-items`, `wc/v3/products`, `pages?context=edit` — 401); экспорт формы 79 `SELECT JSON_OBJECT(…) --raw` → `/tmp/ezfc-form-79.json`, `json.load` OK (22 элемента, 192 опции); код `form_add`/`form_import`/`form_get_export_data` в `class.ezfc_backend.php`. Итог: `docs/site/access-tools.md`; экспорт одной формы — да, импорт — частично, режим — снимки после правки в админке.
 
-- [ ] **1.5. Ревизия расхождений данных.** Сравнить весь `calc_service/data` на VDS с git.
+- [x] **1.5. Ревизия расхождений данных.** Сравнить весь `calc_service/data` на VDS с git.
       *Контекст:* `git -C /opt/insain-agent status -- calc_service/data` и `git diff --stat`
       по тому же пути. Не читать JSON целиком, пока `diff --stat` не покажет файл.
       *Готово:* `git status` на сервере чист по `data/`; правило «цены только в git» записано.
+      Сделано 25.10.2026, проверено: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent status -- calc_service/data` и `git diff --stat -- calc_service/data` (ветка main, working tree clean, diff пуст).
 
 ## Фаза 2. Чистка
 
@@ -339,9 +344,11 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
 - [ ] **6.4. Skills контура сайта:** правка страницы/текста; товар WooCommerce (создать, обновить
       цену/описание); SEO-мета страницы; загрузка медиа. Каждый — с шагом проверки на сайте.
 
-- [ ] **6.5. Кодоподобный контент в репозитории** — по результату 1.4: `site/forms/<slug>.js`
-      с custom JS переведённых форм и порядок «правка в git → вставка в ezFC → проверка», либо
-      документированный режим снимков, если экспорт невозможен.
+- [ ] **6.5. Кодоподобный контент в репозитории** — по решению 1.4 (`docs/site/access-tools.md`):
+      custom JS переведённых форм — файлы `forms/<slug>.js` в плагине `insain-calc-bridge`, у
+      JS-элемента формы один раз включается `read_file`; порядок «правка в git → деплой плагина →
+      проверка на странице». Структура форм — снимки `site/forms/<id>.json` после правки в админке
+      (`SELECT … --raw`), обратно не импортируются.
 
 Дальше контур 1 ведётся задачами в `todo/`: перевод оставшихся форм на API, правки контента по запросу.
 
@@ -353,7 +360,8 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
 
 ## Открытые решения
 
-- Режим работы с формами ezFC (источник правды или снимки) — по итогам 1.4.
-- Доступность REST API WordPress/WooCommerce для записи — по итогам 1.4; если нет, контур 6 идёт
+- ~~Режим работы с формами ezFC~~ — решено 25.10.2026: JS переведённых форм в репозитории
+  (`read_file` из `insain-calc-bridge`), структура — снимки. См. `docs/site/access-tools.md`.
+- ~~Доступность REST API для записи~~ — решено 25.10.2026: без учёток не пишет, контур 6 идёт
   через wp-cli и Browser MCP.
 - Когда снимать паузу с бота — отдельным решением владельца.
