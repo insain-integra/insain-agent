@@ -162,12 +162,15 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
       *Готово:* HEAD прода равен `main`; лишних веток нет; правило записано в `AGENTS.md` и `.cursor/rules`.
       сделано 25.10.2026, проверено: `git merge --ff-only feature/agent-logic` (main `dee7a58` → `84ab2a4`); `git branch` — нет `experiment-2levelpromt`. Правило в `.cursor/rules/insain-site-autonomous.mdc`. HEAD прода не менялся: `feature/agent-logic` `7f57d0a`. `git push` в `main` не делался.
 
-- [ ] **0.5. Восстановить рабочий деплой.** Короткий простой API допустим. Перед пересборкой
+- [x] **0.5. Восстановить рабочий деплой.** Короткий простой API допустим. Перед пересборкой
       сохранить тег `insain-agent-calc-api:rollback`. Делать в спокойное время.
       *Контекст:* `infra/deploy.sh`, `docker-compose.yml`, `infra/compose.vds.yml`; на сервере
       `docker images`, `docker inspect insain-calc-api`, текущий `git status`.
       *Готово:* `bash infra/deploy.sh` проходит целиком; API 200; контейнер свежий; откат проверен
       на практике (поднять `rollback`, вернуть актуальный).
+      сделано 25.10.2026, проверено: `bash infra/deploy.sh` → EXIT=0, прод на `main` `3b2ae44`, `git status` чистый;
+      `curl -sS -o NUL -w "%{http_code}" https://insain.ru/api/v1/calculators` → 200 на `rollback` (`c71450a10e57`)
+      и на актуальном (`e8efca23463a`, собран 25.10.2026). Прежнее дерево прода — в `stash@{0}` на VDS.
 
 ## Фаза 1. Инвентаризация «как есть»
 
