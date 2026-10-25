@@ -5,42 +5,43 @@ alwaysApply: false
 
 # Сайт insain.ru — режим автономной работы
 
+Прод-операции. Запреты, git, цены и процедура деплоя API — в [AGENTS.md](../../AGENTS.md), здесь не дублируются.
+
 ## Контекст
 - Прод: https://insain.ru
 - WordPress: /var/www/insain.ru
-- API: относительный /api/v1 (nginx → 127.0.0.1:8002)
+- API: /api/v1, nginx → 127.0.0.1:8002 (не 8001; 8001 — локальный make calc-up)
 - Репозиторий на сервере: /opt/insain-agent
-- Прод деплоится с ветки main.
 - SSH: Host insain-prod (см. docs/agent-autonomous-environment.md)
 
-## Окружение VDS (важно)
+## Окружение VDS
 - wp-команды: sudo -u www-data wp ... --path=/var/www/insain.ru
-  (www-data переключён на php8.2; mysqli есть только в 8.2)
+  (www-data на php8.2; mysqli есть только в 8.2)
 - Деплой плагина: Compress-Archive → scp /tmp → sudo -u www-data wp plugin install zip --force --activate
   (rsync/cp от root недоступны: sudoers только wp+nginx)
 - sudo доступен только для: nginx -t, systemctl reload nginx, wp (как www-data)
 - docker compose — без sudo (agent в группе docker)
-- Browser MCP работает через реальный Chrome с залогиненной админ-сессией WordPress
+- Browser MCP — Chrome с залогиненной админ-сессией WordPress
 
 ## Делай самостоятельно
 - Правки wp-plugin/, calc_service/, infra/; pytest перед деплоем
+- Деплой API — только раздел «Деплой API» в AGENTS.md: ветка main, bash infra/deploy.sh
+  (ворота и автооткат внутри). Ручной git pull и docker compose для выкатки API не использовать
 - Деплой плагина через wp plugin install (см. выше)
-- git pull и docker compose на VDS для API (cd /opt/insain-agent)
 - Проверка страниц через Browser MCP; Network: /api/v1/
 - wp cache flush, wp plugin list/activate (через sudo -u www-data)
 
+## Перед массовыми правками контента WordPress
+- Бэкап БД: sudo -u www-data wp db export /tmp/insain-db.sql --path=/var/www/insain.ru
+
 ## Спроси подтверждение у пользователя
-- git push, смена DNS, wp search-replace по всей БД
-- удаление файлов/БД, docker compose down -v
-- отключение плагинов оплаты/SEO без явной задачи
+- Опасные действия и git push — списки в AGENTS.md, разделы «Запреты» и «Git»
+- Любое изменение прода вне раздела «Делай самостоятельно»
 
 ## Не делай
-- цены меняются только в git
-- не коммить .env и секреты
-- не использовать test.insain.ru как целевой URL (только prod)
-- не выводить внутренние code материалов в ответы пользователям сайта
+- См. AGENTS.md: цены только в git; секреты и .env; test.insain.ru; внутренние code материалов
 
 ## После изменений
-1. curl -sS https://insain.ru/api/v1/calculators | head -c 200
+1. curl -fsS https://insain.ru/api/v1/calculators | head -c 200
 2. Открыть страницу калькулятора, проверить POST /api/v1/calc/{slug}
-3. Краткий отчёт: что изменено, что проверено, ошибки консоли
+3. Краткий отчёт: что изменено, что проверено, ошибки консоли, как откатить

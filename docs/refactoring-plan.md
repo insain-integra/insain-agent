@@ -307,8 +307,9 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
       *Готово:* деплой с красными проверками невозможен; откат описан и проверен.
       сделано 26.10.2026, проверено: на VDS `bash /tmp/deploy.sh` (копия нового скрипта, `INSAIN_REPO_DIR=/opt/insain-agent`) → `3b2ae44 → 5037cd2`, smoke 200/200, exit 0; `SMOKE_EXTRA_PATH=/api/v1/nonexistent` → 404 → откат на `rollback`, повторный smoke 200/200, exit 1, дерево чистое; ветка `feature` и грязное дерево на клоне в `/tmp` → exit 1; `python scripts/dev.py check` (`414 passed`; `81 passed`, exit 0).
 
-- [ ] **4.5.** Обновить `.cursor/rules/insain-site-autonomous.mdc`: порт, ветка `main`, ворота,
+- [x] **4.5.** Обновить `.cursor/rules/insain-site-autonomous.mdc`: порт, ветка `main`, ворота,
       бэкап БД перед массовыми правками контента, что подтверждать у человека.
+      сделано 26.10.2026, проверено: `python -c "t=open(r'.cursor/rules/insain-site-autonomous.mdc',encoding='utf-8').read(); print(len(t.splitlines()), '8002' in t, 'infra/deploy.sh' in t, 'wp db export' in t, 'AGENTS.md' in t)"` → `47 True True True True` (было 46 строк).
 
 ## Фаза 5. Конвейер агентов
 
