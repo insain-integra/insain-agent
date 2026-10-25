@@ -73,16 +73,24 @@ class TokenAnalyzer:
         "gemini": 0.0,
     }
 
+    # Активный JSONL. При достижении предела перед следующей записью
+    # файл переименовывается в один архив `<имя>.1` (предыдущий архив заменяется).
+    DEFAULT_MAX_LOG_BYTES = 8 * 1024 * 1024
+
     def __init__(
         self,
         log_path: Optional[Path] = None,
         pricing_rub_per_1m: Optional[Dict[str, float]] = None,
+        max_log_bytes: int = DEFAULT_MAX_LOG_BYTES,
     ) -> None:
         root = Path(__file__).resolve().parent.parent  # проект
         self.log_path: Path = log_path or (root / "logs" / "token_usage.jsonl")
         self.pricing_rub_per_1m: Dict[str, float] = (
             pricing_rub_per_1m or self.DEFAULT_PRICING_RUB_PER_1M
         )
+        if max_log_bytes <= 0:
+            raise ValueError("max_log_bytes должен быть положительным")
+        self.max_log_bytes = max_log_bytes
 
     # --- оценки токенов -------------------------------------------------
 
@@ -286,6 +294,7 @@ class TokenAnalyzer:
         """
         path = Path(filepath) if filepath is not None else self.log_path
         path.parent.mkdir(parents=True, exist_ok=True)
+        self._rotate_log_if_needed(path)
         with path.open("a", encoding="utf-8") as f:
             json.dump(log_entry, f, ensure_ascii=False)
             f.write("\n")
@@ -301,6 +310,18 @@ class TokenAnalyzer:
         except Exception:
             # Логирование не должно ломать основной поток, поэтому ошибки здесь глотаем.
             pass
+
+    def _rotate_log_if_needed(self, path: Path) -> None:
+        """Свернуть JSONL в один архив, если активный файл достиг предела."""
+        try:
+            if not path.is_file() or path.stat().st_size < self.max_log_bytes:
+                return
+            archive = path.with_name(path.name + ".1")
+            if archive.exists():
+                archive.unlink()
+            path.replace(archive)
+        except OSError:
+            return
 
 
 @dataclass
