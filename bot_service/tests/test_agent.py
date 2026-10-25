@@ -258,6 +258,7 @@ class TestSystemPromptForIntent:
         }
         agent._calculators = [{"slug": "laser", "name": "Лазерная резка", "description": "Лазер"}]
         agent._calc_llm_prompts = {"laser": "Алгоритм лазера."}
+        agent._param_schemas = {}
         agent._calculator_index = ""
         agent._products = []
         agent._product_by_slug = {}
@@ -304,6 +305,7 @@ class TestRecalcHeuristics:
 
         agent = InsainAgent.__new__(InsainAgent)
         agent._calc_tool_by_slug = {"print_sheet": {}}
+        agent._user_active_calc_target = {}
         agent._user_calc_context = {
             1: {"slug": "print_sheet", "product_slug": "print_sheet", "tool_name": "calc_print_sheet", "params": {"quantity": 100}},
         }
@@ -316,6 +318,7 @@ class TestRecalcHeuristics:
 
         agent = InsainAgent.__new__(InsainAgent)
         agent._calc_tool_by_slug = {"print_sheet": {}}
+        agent._user_active_calc_target = {}
         agent._user_calc_context = {
             1: {"slug": "print_sheet", "product_slug": "print_sheet", "tool_name": "calc_print_sheet", "params": {"quantity": 100}},
         }
@@ -336,6 +339,7 @@ class TestRecalcHeuristics:
 
         agent = InsainAgent.__new__(InsainAgent)
         agent._calc_tool_by_slug = {"magnet_acrylic": {}}
+        agent._user_active_calc_target = {}
         agent._user_calc_context = {}
         history = [
             {"role": "user", "content": "посчитай акриловые магниты"},
@@ -354,6 +358,7 @@ class TestRecalcHeuristics:
         from agent import InsainAgent
 
         agent = InsainAgent.__new__(InsainAgent)
+        agent._calc_tool_by_slug = {}
         ctx = {
             "quantity": 100,
             "width": 100.0,

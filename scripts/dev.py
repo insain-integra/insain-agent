@@ -7,6 +7,7 @@
   python scripts/dev.py stop calc
   python scripts/dev.py status
   python scripts/dev.py restart bot
+  python scripts/dev.py check
 
 Переменные окружения (опционально):
   CALC_HOST   — по умолчанию 127.0.0.1
@@ -209,6 +210,15 @@ def cmd_stop_bot() -> None:
     _remove_pid("bot")
 
 
+def cmd_check() -> None:
+    """pytest calc_service и bot_service. Ненулевой код, если упала любая сюита."""
+    suites = ("calc_service/tests", "bot_service/tests")
+    for suite in suites:
+        rc = subprocess.call([sys.executable, "-m", "pytest", suite], cwd=ROOT)
+        if rc != 0:
+            sys.exit(rc)
+
+
 def cmd_status() -> None:
     print(f"CALC_API: http://{CALC_HOST}:{CALC_PORT}")
     cp = _read_pid("calc")
@@ -232,7 +242,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Запуск/остановка calc_service и бота")
     parser.add_argument(
         "action",
-        choices=("start", "stop", "restart", "status"),
+        choices=("start", "stop", "restart", "status", "check"),
         help="действие",
     )
     parser.add_argument(
@@ -243,6 +253,10 @@ def main() -> None:
         help="какой сервис (по умолчанию all)",
     )
     args = parser.parse_args()
+
+    if args.action == "check":
+        cmd_check()
+        return
 
     if args.action == "status":
         cmd_status()

@@ -10,15 +10,16 @@
 #   make up          — API + бот
 #   make down        — остановить оба
 #   make status
+#   make check       — pytest calc_service/tests и bot_service/tests
 #   make calc-up | calc-down | bot-up | bot-down
 
 PYTHON ?= python
 DEV = $(PYTHON) scripts/dev.py
 
-.PHONY: help up down restart status calc-up calc-down bot-up bot-down
+.PHONY: help up down restart status check calc-up calc-down bot-up bot-down
 
 help:
-	@echo "make up | down | restart | status"
+	@echo "make up | down | restart | status | check"
 	@echo "make calc-up | calc-down | bot-up | bot-down"
 
 up:
@@ -32,6 +33,10 @@ restart:
 
 status:
 	$(DEV) status
+
+check:
+	$(PYTHON) -m pytest calc_service/tests
+	$(PYTHON) -m pytest bot_service/tests
 
 calc-up:
 	$(DEV) start calc

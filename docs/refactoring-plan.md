@@ -283,12 +283,14 @@ healthy, проброс `127.0.0.1:8002 → 8001`, плагин `insain-calc-bri
 
 Оценка: 0.5–1 день. До закрытия фазы автономию агента на проде не расширять.
 
-- [ ] **4.1. `make check` — одна команда.** `pytest calc_service/tests` + `pytest bot_service/tests`;
+- [x] **4.1. `make check` — одна команда.** `pytest calc_service/tests` + `pytest bot_service/tests`;
       позже — `check_calc_registry.py` при доступном API. Это и есть петля обратной связи агента.
       *Готово:* команда есть в `Makefile` и `scripts/dev.py` (для Windows без make); упоминается в `AGENTS.md`.
+      сделано 26.10.2026, проверено: `python scripts/dev.py check` (`414 passed in 18.44s`; `81 passed in 123.41s (0:02:03)`, exit 0). Упоминание в `AGENTS.md` отложено: файла нет, это фаза 3.
 
-- [ ] **4.2.** Починить 5 падающих тестов `bot_service` (`_calc_tool_by_slug`).
+- [x] **4.2.** Починить 5 падающих тестов `bot_service` (`_calc_tool_by_slug`).
       *Готово:* `make check` зелёный.
+      сделано 26.10.2026, проверено: `python scripts/dev.py check` (`414 passed in 18.44s`; `81 passed in 123.41s (0:02:03)`, exit 0).
 
 - [ ] **4.3.** GitHub Actions: `make check` на push и PR в `main`.
 
