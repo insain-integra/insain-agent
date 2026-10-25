@@ -1,0 +1,34 @@
+# make check на push и pull_request в main. Секреты не используются.
+
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            calc_service/requirements.txt
+            bot_service/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r calc_service/requirements.txt -r bot_service/requirements.txt
+
+      - name: Run make check
+        run: make check
