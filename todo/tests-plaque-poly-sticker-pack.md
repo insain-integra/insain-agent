@@ -1,6 +1,6 @@
 # tests-plaque-poly-sticker-pack
 
-Статус: черновик
+Статус: ревью
 Сложность: обычная
 Implementer: Grok 4.7
 Reviewer: Opus 5.5
@@ -83,8 +83,8 @@ Reviewer: Opus 5.5
 
 Заполняет Implementer при сдаче.
 
-- Ветка, PR или коммит: `task/tests-plaque-poly-sticker-pack` от `main`
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+- Ветка, PR или коммит: `task/tests-plaque-poly-sticker-pack` от `main` (коммит в ветке, push не делался)
+- Сделано: тесты `calc_service/tests/test_calculators/test_plaque.py` и `test_poly_sticker_pack.py`. Позитивные прогоны через `execute()`: plaque — `Plaque2330` + `PVC3` (первый код из `get_options()["materials"]`), `isUVPrint`, `mode=1`; poly_sticker_pack — `quantity=20`, `80×80`, `PaperCoated115M` и дефолты схемы. Эталоны — текущий расчёт (допуск 3%). У plaque первый материал — заготовка `Plaque2330`; у стикерпака в `materials` есть `PaperCoated115M`. Дополнительно: `noApplication` (только заготовка, `time_hours == 0`, `time_ready > 0`), три `ValueError` plaque и `ValueError` при `width * height <= 0`. `pytest.skip` нет. Self-review: diff только эти два файла и файл задачи; цен и калькуляторов не трогал; обязательные поля и `code`/`name`/`title` проверяются; комментарии по-русски; прод не затрагивался.
+- Чем проверено: `python -m pytest calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_calculators/test_poly_sticker_pack.py -q` — `19 passed`, skipped нет. `--collect-only -q` — у обоих файлов slug, базовый ответ, `price >= cost`, `share_url`, `get_options`, `get_tool_schema`, эталон; у plaque ещё `noApplication` и три `ValueError`; у poly_sticker_pack ещё `ValueError` при нулевой площади. `make check` — `433 passed` (calc_service) и `81 passed` (bot_service), код выхода 0.
+- Не сделано и почему: нет
+- Требуется решение: нет
