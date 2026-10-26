@@ -60,14 +60,14 @@ Reviewer: Opus 5.5
 
 ## Критерии приёмки
 
-- [ ] `python -m pytest calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_calculators/test_poly_sticker_pack.py -q` — код выхода 0, в итоге `passed` и `skipped` нет
-- [ ] `python -m pytest calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_calculators/test_poly_sticker_pack.py --collect-only -q` — у каждого файла есть тесты slug, базового ответа, `price >= cost`, `share_url`, `get_options`, `get_tool_schema` и эталона; у plaque ещё `noApplication` и три `ValueError`; у poly_sticker_pack ещё `ValueError` при нулевой площади
-- [ ] `git diff main --name-only` — изменены только `todo/tests-plaque-poly-sticker-pack.md`, `calc_service/tests/test_calculators/test_plaque.py`, `calc_service/tests/test_calculators/test_poly_sticker_pack.py`
+- [x] `python -m pytest calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_calculators/test_poly_sticker_pack.py -q` — код выхода 0, в итоге `passed` и `skipped` нет
+- [x] `python -m pytest calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_calculators/test_poly_sticker_pack.py --collect-only -q` — у каждого файла есть тесты slug, базового ответа, `price >= cost`, `share_url`, `get_options`, `get_tool_schema` и эталона; у plaque ещё `noApplication` и три `ValueError`; у poly_sticker_pack ещё `ValueError` при нулевой площади
+- [x] `git diff main --name-only` — изменены только `todo/tests-plaque-poly-sticker-pack.md`, `calc_service/tests/test_calculators/test_plaque.py`, `calc_service/tests/test_calculators/test_poly_sticker_pack.py`
 
 ## Проверки
 
-- [ ] `make check` (или `python scripts/dev.py check`) — зелёный вывод
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `make check` (или `python scripts/dev.py check`) — зелёный вывод
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
 ## Риски
 
@@ -83,8 +83,8 @@ Reviewer: Opus 5.5
 
 Заполняет Implementer при сдаче.
 
-- Ветка, PR или коммит: `task/tests-plaque-poly-sticker-pack` от `main` (коммит в ветке, push не делался)
-- Сделано: тесты `calc_service/tests/test_calculators/test_plaque.py` и `test_poly_sticker_pack.py`. Позитивные прогоны через `execute()`: plaque — `Plaque2330` + `PVC3` (первый код из `get_options()["materials"]`), `isUVPrint`, `mode=1`; poly_sticker_pack — `quantity=20`, `80×80`, `PaperCoated115M` и дефолты схемы. Эталоны — текущий расчёт (допуск 3%). У plaque первый материал — заготовка `Plaque2330`; у стикерпака в `materials` есть `PaperCoated115M`. Дополнительно: `noApplication` (только заготовка, `time_hours == 0`, `time_ready > 0`), три `ValueError` plaque и `ValueError` при `width * height <= 0`. `pytest.skip` нет. Self-review: diff только эти два файла и файл задачи; цен и калькуляторов не трогал; обязательные поля и `code`/`name`/`title` проверяются; комментарии по-русски; прод не затрагивался.
-- Чем проверено: `python -m pytest calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_calculators/test_poly_sticker_pack.py -q` — `19 passed`, skipped нет. `--collect-only -q` — у обоих файлов slug, базовый ответ, `price >= cost`, `share_url`, `get_options`, `get_tool_schema`, эталон; у plaque ещё `noApplication` и три `ValueError`; у poly_sticker_pack ещё `ValueError` при нулевой площади. `make check` — `433 passed` (calc_service) и `81 passed` (bot_service), код выхода 0.
+- Ветка, PR или коммит: `task/tests-plaque-poly-sticker-pack` от `main` (коммит в ветке, push не делался). Замечания Reviewer закрыты отдельным коммитом.
+- Сделано: тесты `calc_service/tests/test_calculators/test_plaque.py` и `test_poly_sticker_pack.py`. Позитивные прогоны через `execute()`: plaque — `Plaque2330` + `PVC3`, `isUVPrint`, `mode=1`; poly_sticker_pack — `quantity=20`, `80×80`, `PaperCoated115M` и дефолты схемы. Эталон plaque — тираж 2, числа с текущего `execute()`: cost 2062, price 4906, unit_price 2453, time_hours 0.37, time_ready 32.74, weight_kg 1.17, заготовка `Plaque2330` quantity 2. Эталон стикерпака дополнен `unit_price` 283.36 (остальные числа те же). Сверка `unit_price` с допуском 3% в обоих `EXPECTED_REF`. Дополнительно: `noApplication`, три `ValueError` plaque и `ValueError` при `width * height <= 0`. Калькуляторы и JSON не менялись. `pytest.skip` нет.
+- Чем проверено: `python -m pytest calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_calculators/test_poly_sticker_pack.py -q` — `19 passed`, skipped нет. `--collect-only -q` — 19 тестов, набор как в критерии. `python scripts/dev.py check` — `433 passed` (calc_service) и `81 passed` (bot_service), код выхода 0.
 - Не сделано и почему: нет
 - Требуется решение: нет

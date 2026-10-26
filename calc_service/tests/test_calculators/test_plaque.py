@@ -120,23 +120,24 @@ def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
 
 
 REF_PARAMS = {
-    "quantity": 1,
+    "quantity": 2,
     "plaque_id": "Plaque2330",
     "material_id": "PVC3",
     "application": "isUVPrint",
     "mode": 1,
 }
 EXPECTED_REF = {
-    "cost": 1622.0,
-    "price": 3857,
-    "time_hours": 0.31,
-    "time_ready": 32.62,
-    "weight_kg": 0.59,
+    "cost": 2062.0,
+    "price": 4906,
+    "unit_price": 2453.0,
+    "time_hours": 0.37,
+    "time_ready": 32.74,
+    "weight_kg": 1.17,
 }
 EXPECTED_MATERIAL = {
     "code": "Plaque2330",
     "name_substring": "Дощечка-плакетка",
-    "quantity_approx": 1,
+    "quantity_approx": 2,
 }
 
 
@@ -153,6 +154,7 @@ def test_expected_values_plaque(ref_result):
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
     ok_price = _cmp(r["price"], e["price"], rel)
+    ok_unit = _cmp(r["unit_price"], e["unit_price"], rel)
     ok_time = _cmp(r["time_hours"], e["time_hours"], rel)
     ok_ready = _cmp(r["time_ready"], e["time_ready"], rel)
     ok_weight = _cmp(r["weight_kg"], e["weight_kg"], rel)
@@ -170,6 +172,7 @@ def test_expected_values_plaque(ref_result):
     print("  ---")
     print("  cost        %s  (ожид. %s)  %s" % (r["cost"], e["cost"], "ok" if ok_cost else "FAIL"))
     print("  price       %s  (ожид. %s)  %s" % (r["price"], e["price"], "ok" if ok_price else "FAIL"))
+    print("  unit_price  %s  (ожид. %s)  %s" % (r["unit_price"], e["unit_price"], "ok" if ok_unit else "FAIL"))
     print("  time_hours  %s  (ожид. %s)  %s" % (r["time_hours"], e["time_hours"], "ok" if ok_time else "FAIL"))
     print("  time_ready  %s  (ожид. %s)  %s" % (r["time_ready"], e["time_ready"], "ok" if ok_ready else "FAIL"))
     print("  weight_kg   %s  (ожид. %s)  %s" % (r["weight_kg"], e["weight_kg"], "ok" if ok_weight else "FAIL"))
@@ -192,6 +195,7 @@ def test_expected_values_plaque(ref_result):
 
     assert ok_cost, f"cost: got {r['cost']}, expected ~{e['cost']}"
     assert ok_price, f"price: got {r['price']}, expected ~{e['price']}"
+    assert ok_unit, f"unit_price: got {r['unit_price']}, expected ~{e['unit_price']}"
     assert ok_time, f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
     assert ok_ready, f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
     assert ok_weight, f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"

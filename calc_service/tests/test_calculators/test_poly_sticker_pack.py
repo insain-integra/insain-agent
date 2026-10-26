@@ -113,6 +113,7 @@ REF_PARAMS = {
 EXPECTED_REF = {
     "cost": 3060.0,
     "price": 5667.2,
+    "unit_price": 283.36,
     "time_hours": 1.68,
     "time_ready": 41.68,
     "weight_kg": 0.19,
@@ -137,6 +138,7 @@ def test_expected_values_poly_sticker_pack(ref_result):
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
     ok_price = _cmp(r["price"], e["price"], rel)
+    ok_unit = _cmp(r["unit_price"], e["unit_price"], rel)
     ok_time = _cmp(r["time_hours"], e["time_hours"], rel)
     ok_ready = _cmp(r["time_ready"], e["time_ready"], rel)
     ok_weight = _cmp(r["weight_kg"], e["weight_kg"], rel)
@@ -154,6 +156,7 @@ def test_expected_values_poly_sticker_pack(ref_result):
     print("  ---")
     print("  cost        %s  (ожид. %s)  %s" % (r["cost"], e["cost"], "ok" if ok_cost else "FAIL"))
     print("  price       %s  (ожид. %s)  %s" % (r["price"], e["price"], "ok" if ok_price else "FAIL"))
+    print("  unit_price  %s  (ожид. %s)  %s" % (r["unit_price"], e["unit_price"], "ok" if ok_unit else "FAIL"))
     print("  time_hours  %s  (ожид. %s)  %s" % (r["time_hours"], e["time_hours"], "ok" if ok_time else "FAIL"))
     print("  time_ready  %s  (ожид. %s)  %s" % (r["time_ready"], e["time_ready"], "ok" if ok_ready else "FAIL"))
     print("  weight_kg   %s  (ожид. %s)  %s" % (r["weight_kg"], e["weight_kg"], "ok" if ok_weight else "FAIL"))
@@ -176,6 +179,7 @@ def test_expected_values_poly_sticker_pack(ref_result):
 
     assert ok_cost, f"cost: got {r['cost']}, expected ~{e['cost']}"
     assert ok_price, f"price: got {r['price']}, expected ~{e['price']}"
+    assert ok_unit, f"unit_price: got {r['unit_price']}, expected ~{e['unit_price']}"
     assert ok_time, f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
     assert ok_ready, f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
     assert ok_weight, f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
