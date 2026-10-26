@@ -23,12 +23,14 @@
 
 ## Режимы работы
 
+Задачи — [todo/AGENTS.md](todo/AGENTS.md). Роли — [docs/agents/roles/](docs/agents/roles/).
+
 - **Быстрый** — один файл, цена, опечатка. Правка → `make check` → просмотр diff.
-- **Обычный** — калькулятор, bridge, форма, модуль. Задача с критериями приёмки → реализация →
-  `make check` → self-review по чеклисту ниже → ревью человека. При распухшем контексте — новая сессия
-  на этап. Задачи в `todo/` и роли Analyst / Implementer / Reviewer / Site ops появятся в фазе 5.
-- **Прод** — VDS, WordPress, данные на сервере. Только по `.cursor/rules/insain-site-autonomous.mdc`,
-  опасные шаги — с подтверждения человека.
+- **Обычный** — калькулятор, bridge, форма, модуль. `todo/<задача>.md` → Implementer (модель из шапки
+  задачи) → `make check` → self-review → Reviewer (другая модель) → ревью человека → merge.
+  При распухшем контексте — новая сессия на этап.
+- **Прод** — VDS, WordPress, данные на сервере. [Site ops](docs/agents/roles/site-ops.md) по
+  `.cursor/rules/insain-site-autonomous.mdc`, опасные шаги — с подтверждения человека.
 
 ## Команды
 
@@ -70,7 +72,9 @@ Git на VDS: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent …`
 
 ## Git
 
-- Прод деплоится только с `main`.
+- Обычный и прод — ветка `task/<имя>` от `main`; после ревью merge в `main`
+  (fast-forward, PR на GitHub не обязателен). Быстрый — сразу в `main`.
+  Прод деплоится только с `main`.
 - `git push` (в любую ветку) — только с подтверждения человека. Коммит — когда человек попросил.
 - Изменения малыми порциями, не пакетом: один коммит — одна осмысленная правка.
 
@@ -101,6 +105,7 @@ Git на VDS: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent …`
 ## Перед сдачей
 
 **`make check` зелёный. Упало — чини, не отчитывайся.** «Проверено» без вывода команды не пишется.
+Если Grok дважды не получает зелёный `make check` или повторяет одинаковые правки — остановиться и написать в отчёте «нужна эскалация на Opus».
 
 Self-review по своему diff:
 
