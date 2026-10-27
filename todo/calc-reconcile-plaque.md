@@ -1,6 +1,6 @@
 # calc-reconcile-plaque
 
-Статус: черновик
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -63,19 +63,19 @@ Reviewer: Grok 4.7
 
 Каждый пункт — команда и ожидаемый результат. Параметры эталона ниже: `{"quantity":2,"plaque_id":"Plaque2330","material_id":"PVC3","application":"isUVPrint","mode":1}`.
 
-- [ ] `node scripts/run_js_calc.mjs calcPlaque --params '{"quantity":2,"plaque_id":"Plaque2330","material_id":"PVC3","application":"isUVPrint","mode":1}'` — код 0; stdout парсится как JSON с полями `cost`, `price`, `unit_price`, `time_hours`, `time_ready`, `weight_kg`, других полей нет
-- [ ] `node scripts/run_js_calc.mjs calcPlaque --data current --params '{"quantity":2,"plaque_id":"Plaque2330","material_id":"PVC3","application":"isUVPrint","mode":1}'` — тот же вид JSON; `price` отличается от прогона без `--data current`; файлы в `js_legacy/` и `calc_service/data/` не изменились
-- [ ] `node scripts/run_js_calc.mjs notACalc --params "{}"` — код не 0; в stdout нет `cost` и `price`
-- [ ] `python -m pytest calc_service/tests/test_calculators/test_plaque.py -q` — код 0, `skipped` нет
-- [ ] `python -c "import pathlib,re; t=pathlib.Path(r'calc_service/tests/test_calculators/test_plaque.py').read_text(encoding='utf-8'); m=re.findall(r'JS, \d{2}\.\d{2}\.\d{4}', t); print(len(m)); assert 5<=len(m)<=10"` — печатает число от 5 до 10, код 0
-- [ ] `python scripts/dev.py check` — код 0 (`make` в PATH может не быть)
-- [ ] `git diff main --name-only` — только `scripts/run_js_calc.mjs`, `calc_service/tests/test_calculators/test_plaque.py`, `todo/calc-reconcile-plaque.md`, `docs/refactoring-plan.md`
-- [ ] `git diff main -- calc_service/data js_legacy` — пусто
+- [x] `node scripts/run_js_calc.mjs calcPlaque --params '{"quantity":2,"plaque_id":"Plaque2330","material_id":"PVC3","application":"isUVPrint","mode":1}'` — код 0; stdout парсится как JSON с полями `cost`, `price`, `unit_price`, `time_hours`, `time_ready`, `weight_kg`, других полей нет
+- [ ] `node scripts/run_js_calc.mjs calcPlaque --data current --params '{"quantity":2,"plaque_id":"Plaque2330","material_id":"PVC3","application":"isUVPrint","mode":1}'` — тот же вид JSON; `price` отличается от прогона без `--data current`; файлы в `js_legacy/` и `calc_service/data/` не изменились. Форма JSON и неизменность файлов есть, `price` совпадает (см. «Результат»).
+- [x] `node scripts/run_js_calc.mjs notACalc --params "{}"` — код не 0; в stdout нет `cost` и `price`
+- [x] `python -m pytest calc_service/tests/test_calculators/test_plaque.py -q` — код 0, `skipped` нет
+- [ ] `python -c "import pathlib,re; t=pathlib.Path(r'calc_service/tests/test_calculators/test_plaque.py').read_text(encoding='utf-8'); m=re.findall(r'JS, \d{2}\.\d{2}\.\d{4}', t); print(len(m)); assert 5<=len(m)<=10"` — печатает число от 5 до 10, код 0. Печатает `0`, код 1: совпавших кейсов нет.
+- [x] `python scripts/dev.py check` — код 0 (`make` в PATH может не быть)
+- [ ] `git diff main --name-only` — только `scripts/run_js_calc.mjs`, `calc_service/tests/test_calculators/test_plaque.py`, `todo/calc-reconcile-plaque.md`, `docs/refactoring-plan.md`. В diff нет теста и плана: эталоны не добавлены, чекбокс 5.6 не отмечен.
+- [x] `git diff main -- calc_service/data js_legacy` — пусто
 
 ## Проверки
 
-- [ ] `make check` (или `python scripts/dev.py check`) — зелёный вывод
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `make check` (или `python scripts/dev.py check`) — зелёный вывод
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
 ## Риски
 
@@ -92,7 +92,48 @@ Reviewer: Grok 4.7
 Заполняет Implementer при сдаче.
 
 - Ветка, PR или коммит: `task/calc-reconcile-plaque` от `main`
-- Сделано:
+- Сделано: `scripts/run_js_calc.mjs` считает `calcPlaque` (legacy и `--data current` в памяти). Сетка кейсов (тиражи 1/2/10, три плакетки, PVC3/PVC5, четыре нанесения, mode 1; отдельно mode 0 и 2 на эталоне; сублимация ещё на AluminiumSU055) — ни один кейс не попал в допуск 0.03 по всем шести полям. `legacy == current` на каждом посчитанном поле: ставки, которые читает прогон, уже совпадают (в том числе наценки `common` после `8a64d09`). Калькулятор, JSON цен и чекбокс 5.6 не менялись. `REF_PARAMS` не переписывался и пометку `JS` не получил.
 - Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+  - `python scripts/dev.py check` — код 0: calc_service 433 passed, bot_service 81 passed.
+  - `python -m pytest calc_service/tests/test_calculators/test_plaque.py -q` — `11 passed`, skipped нет.
+  - Прогон эталона без `--data` и с `--data current`: оба `{"cost":2698.3,"price":6205.71,"unit_price":3102.86,"time_hours":1.32,"time_ready":35.67,"weight_kg":1.18}`, других полей нет. `price` не отличается.
+  - `notACalc` — код 1, stdout пустой, stderr `Калькулятор не подключён: notACalc`.
+  - Подсчёт пометок `JS, ДД.ММ.ГГГГ` — печатает `0`, код 1.
+  - `git diff main -- calc_service/data js_legacy` — пусто.
+- Не сделано и почему: в тест не добавлены эталоны (меньше пяти совпадений, допуск не ослаблялся). Пункт 5.6 в `docs/refactoring-plan.md` не отмечен. Критерий «`price` с `--data current` отличается от legacy» не выполнен: подмена ставок есть, но числа те же.
+- Требуется решение: как закрывать 5.6, если формулы не сходятся при одинаковых ставках, и нужен ли критерий «price отличается», когда прайсы уже выровнены. Таблица расхождений — ниже. Причина везде `логика`: legacy и current совпадают. `цена` не встретилась.
+
+| Кейс | Поле | legacy | current | API | Причина |
+| --- | --- | --- | --- | --- | --- |
+| qty 2, Plaque2330, PVC3, isUVPrint, mode 1 (REF) | cost | 2698.3 | 2698.3 | 2093 | логика |
+| тот же | price | 6205.71 | 6205.71 | 4977 | логика |
+| тот же | unit_price | 3102.86 | 3102.86 | 2488.5 | логика |
+| тот же | time_hours | 1.32 | 1.32 | 0.37 | логика |
+| тот же | time_ready | 35.67 | 35.67 | 32.74 | логика |
+| тот же, mode 0 | cost | 2698.3 | 2698.3 | 2093 | логика |
+| тот же, mode 0 | price | 6205.71 | 6205.71 | 4977 | логика |
+| тот же, mode 0 | unit_price | 3102.86 | 3102.86 | 2488.5 | логика |
+| тот же, mode 0 | time_hours | 1.32 | 1.32 | 0.37 | логика |
+| тот же, mode 0 | time_ready | 35.67 | 35.67 | 56.74 | логика |
+| тот же, mode 2 | cost | 2698.3 | 2698.3 | 2469 | логика |
+| тот же, mode 2 | price | 6205.71 | 6205.71 | 5850 | логика |
+| тот же, mode 2 | unit_price | 3102.86 | 3102.86 | 2925 | логика |
+| тот же, mode 2 | time_hours | 1.32 | 1.32 | 0.58 | логика |
+| тот же, mode 2 | time_ready | 35.67 | 35.67 | 17.16 | логика |
+| qty 2, Plaque2330, PVC3, isGrave, mode 1 | cost | 9497.1 | 9497.1 | 1184 | логика |
+| тот же | price | 20224.31 | 20224.31 | 2691 | логика |
+| тот же | unit_price | 10112.16 | 10112.16 | 1345.5 | логика |
+| тот же | time_hours | 8.9 | 8.9 | 0.29 | логика |
+| тот же | time_ready | 42.7 | 42.7 | 16.58 | логика |
+| qty 2, Plaque2330, PVC3, noApplication, mode 1 | time_ready | 0 | 0 | 8 | логика |
+| qty 2, Plaque2330, PVC3, isSublimation, mode 1 | cost | NaN | NaN | 1380 | логика |
+| qty 2, Plaque2330, AluminiumSU055, isSublimation, mode 1 | cost | 1696.08 | 1696.08 | 993 | логика |
+| тот же | price | 4018.24 | 4018.24 | 2391 | логика |
+| тот же | unit_price | 2009.12 | 2009.12 | 1195.5 | логика |
+| тот же | time_hours | 0.58 | 0.58 | 0 | логика |
+| тот же | time_ready | 18.55 | 18.55 | 8 | логика |
+| тот же | weight_kg | 1.19 | 1.19 | 1.15 | логика |
+| qty 2, Plaque1520, PVC3, isUVPrint, mode 1 (ближайший по цене) | time_hours | 0.83 | 0.83 | 0.3 | логика |
+| тот же | time_ready | 34.21 | 34.21 | 32.6 | логика |
+
+У REF и mode 0/2 вес в допуске (1.18 против 1.17). У noApplication в допуске все поля, кроме `time_ready`. У Plaque1520×2 УФ в допуске cost/price/unit_price/weight. Сублимация на PVC не отдаёт число: `material.size` — список листов, `size[0] * size[1]` даёт NaN.
