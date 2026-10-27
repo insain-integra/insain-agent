@@ -39,7 +39,7 @@ def test_rotates_to_single_archive_when_size_reached(tmp_path: Path) -> None:
     assert [row["marker"] for row in archived] == ["second"]
     active = [json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines()]
     assert [row["marker"] for row in active] == ["third"]
-    assert list(tmp_path.glob("token_usage.jsonl*")) == [log_path, archive]
+    assert sorted(tmp_path.glob("token_usage.jsonl*")) == sorted([log_path, archive])
 
 
 def test_default_log_limit_is_eight_mebibytes() -> None:
