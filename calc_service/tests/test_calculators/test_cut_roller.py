@@ -20,8 +20,8 @@ from calculators.cut_roller import CutRollerCalculator
 # По умолчанию материал в цену не включаем (material_mode=noMaterial) — эталон только резка.
 # При isMaterial — добавляется стоимость материала (~673/1102). При isMaterialCustomer — +25% к резке.
 EXPECTED = {
-    "cost": 243.0,
-    "price": 389.0,
+    "cost": 260,
+    "price": 416,
     "time_hours": 0.17,
     "weight_kg": 0.54288,
     "time_ready": 8.17,

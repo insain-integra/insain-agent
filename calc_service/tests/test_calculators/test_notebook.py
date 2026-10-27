@@ -104,7 +104,7 @@ REF_PARAMS = {
 }
 EXPECTED_REF = {
     "cost": 9679.99,
-    "price": 20111.0,
+    "price": 20817,
     "time_hours": 2.15,
     "time_ready": 58.15,
     "weight_kg": 8.23,

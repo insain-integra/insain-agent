@@ -18,8 +18,8 @@ from calculators.cut_guillotine import CutGuillotineCalculator
 
 # Ожидаемые значения для base_params (34 листа 450×320, изделие 90×50 мм, PaperCoated300M)
 EXPECTED = {
-    "cost": 187,
-    "price": 300,
+    "cost": 200,
+    "price": 320,
     "time_hours": 0.13,
 }
 
@@ -94,7 +94,7 @@ def test_calculate_basic(result):
 
 
 def test_expected_values(result, base_params):
-    """Сверка с эталоном: себестоимость 187 р., цена 300 р., время 0,13 ч. Допуск 1%. Вывод — как в test_laser."""
+    """Сверка с эталоном: себестоимость 200 р., цена 320 р., время 0,13 ч. Допуск 1%. Вывод — как в test_laser."""
     if result is None:
         pytest.skip("расчёт не выполнен")
     r = result

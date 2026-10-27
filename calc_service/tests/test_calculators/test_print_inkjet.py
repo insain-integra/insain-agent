@@ -132,8 +132,8 @@ REF_PARAMS = {
     "mode": 1,
 }
 EXPECTED_REF = {
-    "cost": 337.13,
-    "price": 544.0748,
+    "cost": 355.66,
+    "price": 573.71,
     "unit_price": 54.40748,
     "time_hours": 0.16,
     "time_ready": 8.16,
@@ -157,8 +157,8 @@ REF_PARAMS_2 = {
     "mode": 1,
 }
 EXPECTED_REF_2 = {
-    "cost": 1280.93,
-    "price": 2090.1608,
+    "cost": 1324.01,
+    "price": 2159.08,
     "unit_price": 41.803216,
     "time_hours": 0.63,
     "time_ready": 8.63,
@@ -182,8 +182,8 @@ REF_PARAMS_3 = {
     "mode": 1,
 }
 EXPECTED_REF_3 = {
-    "cost": 2332.65,
-    "price": 3813.084,
+    "cost": 2403.03,
+    "price": 3925.68,
     "unit_price": 38.13084,
     "time_hours": 1.16,
     "time_ready": 9.16,

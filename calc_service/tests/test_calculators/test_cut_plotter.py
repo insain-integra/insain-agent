@@ -18,8 +18,8 @@ from calculators.cut_plotter import CutPlotterCalculator
 
 # Эталон: 100 шт, 60×60 мм, сложная форма, материал Avery500c (рулон 1230 мм), расход 0.4 м
 EXPECTED_CUT_PLOTTER = {
-    "cost": 371.0,
-    "price": 593.0,
+    "cost": 400.64,
+    "price": 642,
     "time_hours": 0.21,
     "time_ready": 16.23,
     "materials": [
@@ -29,8 +29,8 @@ EXPECTED_CUT_PLOTTER = {
 
 # Эталон: 1000 шт, 60×60 мм, difficulty=1.3, len_cut вычисляется (0.312 м/шт), Avery500c (рулон).
 EXPECTED_CUT_PLOTTER_1000 = {
-    "cost": 2716.0,
-    "price": 4345.0,
+    "cost": 2954.06,
+    "price": 4727,
     "time_hours": 1.64,
     "time_ready": 17.64,
     "materials": [

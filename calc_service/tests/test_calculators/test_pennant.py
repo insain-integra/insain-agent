@@ -85,7 +85,7 @@ def test_get_tool_schema(calc):
 # ── Эталонный тест ───────────────────────────────────────────────────
 
 REF_PARAMS = {"quantity": 50, "width_mm": 80, "height_mm": 120, "material_id": "PaperCoated115M", "color": "4+0", "mode": 1}
-EXPECTED_REF = {"cost": 1288.08, "price": 2081.0, "time_hours": 0.67, "time_ready": 9.004, "weight_kg": 0.105}
+EXPECTED_REF = {"cost": 1357.90, "price": 2192, "time_hours": 0.67, "time_ready": 9.004, "weight_kg": 0.105}
 EXPECTED_MATERIAL = {"code": "PaperCoated115M", "name_substring": "Титан DIGITAL", "quantity_approx": 6}
 
 

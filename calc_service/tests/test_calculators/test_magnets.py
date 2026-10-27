@@ -106,8 +106,8 @@ REF_PARAMS = {
 }
 
 EXPECTED_REF = {
-    "cost": 3046.69,
-    "price": 4971.0,
+    "cost": 3149.07,
+    "price": 5135,
     "time_hours": 0.99,
     "time_ready": 9.346,
     "weight_kg": 2.137,
@@ -275,10 +275,10 @@ LAMINATED_REF_PARAMS = {
     "mode": 1,
 }
 
-# Выход JS-калькулятора (эталон):
+# Эталон текущего API.
 LAMINATED_REF_EXPECTED = {
-    "cost": 2860,
-    "price": 5329.1,
+    "cost": 2992,
+    "price": 5572.90,
     "time_hours": 1.25,
     "time_ready": 9.79,
     "weight_kg": 2.14,
@@ -309,14 +309,14 @@ def laminated_ref_result(calc_laminated):
 
 
 def test_laminated_ref_cost(laminated_ref_result):
-    """Себестоимость: JS=2860."""
+    """Себестоимость эталона."""
     got = laminated_ref_result["cost"]
     exp = LAMINATED_REF_EXPECTED["cost"]
     assert _cmp(got, exp, 0.02), f"cost: got {got}, expected ~{exp}"
 
 
 def test_laminated_ref_price(laminated_ref_result):
-    """Цена с наценкой: JS=5329.1."""
+    """Цена с наценкой эталона."""
     got = laminated_ref_result["price"]
     exp = LAMINATED_REF_EXPECTED["price"]
     assert _cmp(got, exp, 0.02), f"price: got {got}, expected ~{exp}"

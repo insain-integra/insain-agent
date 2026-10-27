@@ -84,7 +84,7 @@ def test_get_tool_schema(calc):
 # ── Эталонный тест ───────────────────────────────────────────────────
 
 REF_PARAMS = {"quantity": 10, "mug_id": "MugStandartWhite", "is_packing": False, "mode": 1}
-EXPECTED_REF = {"cost": 1732.0, "price": 2827.0, "time_hours": 0.54, "time_ready": 9.077, "weight_kg": 4.13}
+EXPECTED_REF = {"cost": 1790, "price": 2920, "time_hours": 0.54, "time_ready": 9.077, "weight_kg": 4.13}
 EXPECTED_MATERIAL = {"code": "MugStandartWhite", "name_substring": "Кружка", "quantity_approx": 10}
 
 

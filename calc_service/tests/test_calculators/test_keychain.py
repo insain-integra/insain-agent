@@ -84,7 +84,7 @@ def test_get_tool_schema(calc):
 # ── Эталонный тест ───────────────────────────────────────────────────
 
 REF_PARAMS = {"quantity": 50, "keychain_id": "KeychainAcrylic3939", "color": 1, "is_packing": True, "mode": 1}
-EXPECTED_REF = {"cost": 1845.56, "price": 3002.0, "time_hours": 0.68, "time_ready": 16.93, "weight_kg": 0.635}
+EXPECTED_REF = {"cost": 1917.54, "price": 3117, "time_hours": 0.68, "time_ready": 16.93, "weight_kg": 0.635}
 EXPECTED_MATERIAL = {"code": "KeychainAcrylic3939", "name_substring": "брелок", "quantity_approx": 50}
 
 

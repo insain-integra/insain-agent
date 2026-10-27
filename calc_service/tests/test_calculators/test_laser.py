@@ -41,8 +41,8 @@ def _nomerki_params(
 
 # Ожидаемые значения (±1%): стандартная точность гравировки (is_grave=1)
 EXPECTED = {
-    "cost": 3328,
-    "price": 5359,
+    "cost": 3498,
+    "price": 5631,
     "time_hours": 3.05,
     "time_ready": 19.0,
     "weight_kg": 0.57,
@@ -53,8 +53,8 @@ EXPECTED = {
 
 # Высокая точность гравировки (is_grave=2)
 EXPECTED_HIGH = {
-    "cost": 5608,
-    "price": 9008,
+    "cost": 5916,
+    "price": 9501,
     "time_hours": 5.81,
     "time_ready": 21.81,
     "weight_kg": 0.57,

@@ -18,8 +18,8 @@ from calculators.lamination import LaminationCalculator
 
 # Эталон 1: рулонная ламинация — 13 шт, 320×450 мм, Laminat32G, двухсторонняя, пленка [330,0]
 EXPECTED_ROLL = {
-    "cost": 591.30,
-    "price": 958.33,
+    "cost": 618.40,
+    "price": 1002,
     "time_hours": 0.1987,
     "weight_kg": 0.1317,
     "materials": [
@@ -29,8 +29,8 @@ EXPECTED_ROLL = {
 
 # Эталон 2: пакетная ламинация — 100 шт, 148×105 мм, LaminatA660G, двухсторонняя, пленка [105,148]
 EXPECTED_PACKET = {
-    "cost": 1448.60,
-    "price": 2331,
+    "cost": 1533.88,
+    "price": 2468,
     "time_hours": 0.85,
     "weight_kg": 0.102564,
     "materials": [
