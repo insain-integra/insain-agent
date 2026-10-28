@@ -1,6 +1,6 @@
 # skills-recipes
 
-Статус: черновик
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -223,7 +223,7 @@ print("ok" if not bad else "\n".join(bad))
 ## Результат
 
 - Ветка, PR или коммит: `task/skills-recipes` от `main`, merge fast-forward. PR не обязателен. `git push` — спросить.
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+- Сделано: четыре `SKILL.md` в `.cursor/skills/` (`deploy-wp-plugin` 136 строк, `new-calculator` 130, `json-price-rollout` 134, `ezfc-form-to-api` 218). Команды под Windows PowerShell 5.1: JSON для `node` с `\"`, POST через `Invoke-RestMethod`, SQL к ezFC файлом через `scp`, снимок формы через `/tmp` и `scp`.
+- Чем проверено: шесть критериев приёмки — `ok`, код 0 (прогон с `$OutputEncoding = [System.Text.UTF8Encoding]::new($false)`); `python scripts/dev.py check` — 441 passed, 81 passed. Локально: `node scripts/run_js_calc.mjs calcPlaque … --params '{\"quantity\":2,…}'` → `price` 3871.268 (эталон `test_plaque.py` 3871.27); нормализатор снимка из шага 22 — на искусственном снимке; состав zip от `Compress-Archive` и `git archive`. Прод: только `ls -laR` каталога плагина.
+- Не сделано и почему: команды к серверу (SQL-снимок, `wp post meta`, `wp litespeed-purge`) не прогонялись — прод вне scope, прогон в `todo/pilot-plaque-form.md`.
+- Требуется решение: `Compress-Archive` на этой машине (модуль 1.0.1.0) пишет в zip `js\insain-calc-bridge.js` с обратным слэшем. В skill добавлена проверка и запасной `git archive … HEAD:wp-plugin`. Сделать ли `git archive` основным путём в C.2 и `AGENTS.md` — решение человека.
