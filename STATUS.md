@@ -40,15 +40,15 @@ Nginx, активный файл `/etc/nginx/sites-enabled/insain.ru` (`ls -l`: 
 
 ## Git
 
-Репозиторий `/opt/insain-agent`. Префикс команд: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent`. Время **2026-10-25T18:32:37Z**, после деплоя задачи 4.4.
+Репозиторий `/opt/insain-agent`. Префикс команд: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent`. Время **2026-10-28T17:39:32Z**, после деплоя переноса плакеток.
 
 | Факт | Значение | Команда |
 | --- | --- | --- |
 | Ветка | `main` | `rev-parse --abbrev-ref HEAD` |
-| HEAD | `5037cd23adaefecaf4a589fc5d6ae8dcd8c3a2ce` | `rev-parse HEAD` |
+| HEAD | `e52e94724c92881c1de8bbfb833b8890932d0875` | `rev-parse HEAD` |
 | `origin/main` | тот же хеш | `rev-parse origin/main` |
-| Дата коммита | 2026-10-26 01:56:52 +0800 | `log -1 --format=%ci` |
-| Тема | Add a GitHub Actions workflow that runs make check on main. | `log -1 --format=%s` |
+| Дата коммита | 2026-10-29 01:26:49 +0800 | `log -1 --format=%ci` |
+| Тема | Close the plaque port fix task. | `log -1 --format=%s` |
 | Рабочее дерево | чистое, нет ahead/behind | `status -sb` → `## main...origin/main` |
 | origin | `https://github.com/insain-integra/insain-agent.git` | `remote get-url origin` (в URL нет учётных данных) |
 
