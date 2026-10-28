@@ -86,6 +86,18 @@ def _parse_pairs(value: Any) -> Optional[List[Tuple[float, float]]]:
     return pairs or None
 
 
+def _parse_flat_list(value: Any) -> Optional[List[float]]:
+    """
+    Плоский массив чисел [1.2, 0.6, 0.3] → список float.
+    Число, таблица пар и пустое значение → None.
+    """
+    if not isinstance(value, (list, tuple)) or not value:
+        return None
+    if not all(isinstance(x, (int, float)) for x in value):
+        return None
+    return [float(x) for x in value]
+
+
 def load_laser_catalog() -> EquipmentCatalog:
     """
     Загрузить каталог лазеров из data/equipment/laser.json.
@@ -219,12 +231,14 @@ def load_generic_catalog(filename: str) -> EquipmentCatalog:
             defect_table=defects,
             available=bool(raw.get("available", True)),
             cost_process=_to_float(raw.get("costProcess")),
+            cost_process_by_layer=_parse_flat_list(raw.get("costProcess")),
             cuts_per_hour=_to_float(raw.get("cutsPerHour")),
             process_per_hour=_first_process_per_hour(raw_pph),
             process_per_hour_table=pph_table,
             max_sheet=int(raw.get("maxSheet", 0) or 0),
             meter_per_hour=mph_single,
             meter_per_hour_table=mph_table,
+            meter_per_hour_by_resolution=_parse_flat_list(raw_mph),
             sheets_per_hour_table=sph_table,
             cost_print_sheet=cost_print_sheet,
             cost_print_m2=_to_float(raw.get("costPrint")),

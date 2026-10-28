@@ -12,7 +12,6 @@ import math
 from typing import Any, Dict, List, Mapping
 
 from calculators.base import BaseCalculator, ProductionMode
-from common.layout import layout_on_sheet
 from common.markups import (
     BASE_TIME_READY,
     MARGIN_OPERATION,
@@ -21,6 +20,85 @@ from common.markups import (
 from equipment import printer as printer_catalog
 
 DEFAULT_PRINTER = "RimalSuvUV"
+
+
+def _layout_on_printer(
+    size_item: List[float],
+    max_size: List[float],
+    margins: List[float],
+    interval: float,
+    along_long: int = 0,
+) -> Dict[str, Any]:
+    """
+    Раскладка изделий на столе принтера по calcLayoutOnSheet из calcLayout.js.
+
+    along_long: 0 — выгоднее, 1 — длинной стороной вдоль длинной стороны стола,
+    -1 — длинной стороной вдоль короткой. Ответ: num, num_long, num_short, along_long.
+    """
+    result: Dict[str, Any] = {"num": 0, "num_long": 0, "num_short": 0, "along_long": True}
+    width_print = max_size[0] - margins[0] - margins[2]
+    height_print = max_size[1] - margins[1] - margins[3]
+    min_size = min(size_item) + interval
+    max_size_item = max(size_item) + interval
+    min_sheet = min(width_print, height_print) + interval
+    max_sheet = max(width_print, height_print) + interval
+    amount_long = math.floor(max_sheet / max_size_item) * math.floor(min_sheet / min_size)
+    amount_short = math.floor(max_sheet / min_size) * math.floor(min_sheet / max_size_item)
+    if amount_long == 0 and amount_short == 0:
+        return result
+    if amount_long > amount_short and along_long in (0, 1):
+        result["num_long"] = math.floor(max_sheet / max_size_item)
+        result["num_short"] = math.floor(min_sheet / min_size)
+        result["num"] = amount_long
+    else:
+        result["num_long"] = math.floor(max_sheet / min_size)
+        result["num_short"] = math.floor(min_sheet / max_size_item)
+        result["num"] = amount_short
+        result["along_long"] = False
+    return result
+
+
+def _vol_print_plain(
+    n: int,
+    size: List[float],
+    size_item: List[float],
+    max_size: List[float],
+    margins: List[float],
+    interval: float,
+) -> Dict[str, Any]:
+    """
+    Площадь печати (мм²) по раскладке изделий на столе, как в calcUVPrint.js:
+    печатается прямоугольник, охватывающий области печати всех изделий загрузки.
+    """
+    if (size[0] > size[1] and size_item[0] > size_item[1]) or (
+        size[0] < size[1] and size_item[0] < size_item[1]
+    ):
+        along_long = 1
+    else:
+        along_long = -1
+    layout = _layout_on_printer(size_item, max_size, margins, interval, along_long)
+    if layout["num"] == 0:
+        layout = _layout_on_printer(size_item, max_size, margins, interval)
+
+    num_long = layout["num_long"]
+    num_short = layout["num_short"]
+    if layout["along_long"]:
+        w = (num_long - 1) * max(size_item) + (num_long - 1) * interval
+        if along_long == 1:
+            h = num_short * min(size) + (num_short - 1) * interval
+            w += max(size)
+        else:
+            h = num_short * max(size) + (num_short - 1) * interval
+            w += min(size)
+    else:
+        w = (num_long - 1) * min(size_item) + (num_long - 1) * interval
+        if along_long == 1:
+            h = num_short * max(size) + (num_short - 1) * interval
+            w += min(size)
+        else:
+            h = num_short * min(size) + (num_short - 1) * interval
+            w += max(size)
+    return {"num": layout["num"], "vol_print": w * h * n / layout["num"]}
 
 
 class UVPrintCalculator(BaseCalculator):
@@ -137,15 +215,15 @@ class UVPrintCalculator(BaseCalculator):
 
         max_size = printer.max_size or [600, 800]
         interval = 5
-        layout = layout_on_sheet(size_item, max_size, margins_printer, float(interval))
+        layout = _layout_on_printer(size_item, max_size, margins_printer, float(interval))
         if layout["num"] == 0:
             raise ValueError("Размер изделия больше допустимого для принтера")
 
         # Объёмы печати
         if surface == "plain":
-            items_per_load = max(1, layout["num"])
-            num_loads = math.ceil(n / items_per_load)
-            vol_print = size[0] * size[1] * n / 1_000_000  # м²
+            plain = _vol_print_plain(n, size, size_item, max_size, margins_printer, float(interval))
+            num_loads = math.ceil(n / plain["num"])
+            vol_print = plain["vol_print"] / 1_000_000  # м²
             vol_material = size[0] * size[1] * n * (1 + defects) / 1_000_000
             time_prepare = (printer.time_prepare or 0.2) * max(1, mode.value)
         else:
@@ -158,9 +236,12 @@ class UVPrintCalculator(BaseCalculator):
         vol_print *= double_app
         num_loads *= double_app
 
-        # Скорость
+        # Скорость: meterPerHour[resolution], м²/час
         raw_mph = printer.meter_per_hour
-        if printer.meter_per_hour_table and resolution < len(printer.meter_per_hour_table):
+        mph_by_resolution = printer.meter_per_hour_by_resolution
+        if mph_by_resolution and 0 <= resolution < len(mph_by_resolution):
+            meter_per_hour = mph_by_resolution[resolution]
+        elif printer.meter_per_hour_table and resolution < len(printer.meter_per_hour_table):
             meter_per_hour = printer.meter_per_hour_table[resolution][1]
         elif raw_mph > 0:
             meter_per_hour = raw_mph
@@ -185,7 +266,9 @@ class UVPrintCalculator(BaseCalculator):
 
         # Стоимость печати по цветности
         cost_process_list = []
-        if printer.cost_process > 0:
+        if printer.cost_process_by_layer:
+            cost_process_list = list(printer.cost_process_by_layer)
+        elif printer.cost_process > 0:
             cost_process_list = [printer.cost_process, printer.cost_process, printer.cost_process]
         else:
             cost_process_list = [950, 950, 950]

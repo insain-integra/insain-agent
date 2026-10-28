@@ -126,13 +126,14 @@ REF_PARAMS = {
     "application": "isUVPrint",
     "mode": 1,
 }
+# JS, 29.10.2026
 EXPECTED_REF = {
-    "cost": 2062.0,
-    "price": 4906,
-    "unit_price": 2453.0,
-    "time_hours": 0.37,
-    "time_ready": 32.74,
-    "weight_kg": 1.17,
+    "cost": 2698.3,
+    "price": 6205.71,
+    "unit_price": 3102.86,
+    "time_hours": 1.32,
+    "time_ready": 35.67,
+    "weight_kg": 1.18,
 }
 EXPECTED_MATERIAL = {
     "code": "Plaque2330",
@@ -203,3 +204,38 @@ def test_expected_values_plaque(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+# Эталоны calcPlaque: node scripts/run_js_calc.mjs calcPlaque --data current --params '<json>'
+# Поля: (quantity, plaque_id, material_id, application), cost, price, unit_price, time_hours, time_ready, weight_kg
+JS_CASES = [
+    # JS, 29.10.2026
+    ((2, "Plaque2330", "PVC3", "isGrave"), 9497.1, 20224.31, 10112.16, 8.9, 42.7, 1.18),
+    # JS, 29.10.2026
+    ((2, "Plaque2330", "AcrylWhite3", "isUVPrint"), 2886.4, 6618.96, 3309.48, 1.32, 35.67, 1.37),
+    # JS, 29.10.2026
+    ((2, "Plaque2330", "AcrylWhite3", "isGrave"), 9685.2, 20637.56, 10318.78, 8.9, 42.7, 1.37),
+    # JS, 29.10.2026
+    ((2, "Plaque1520", "PVC3", "isUVPrint"), 1695.2, 3871.27, 1935.63, 0.83, 34.21, 0.49),
+    # JS, 29.10.2026
+    ((2, "Plaque1520", "PVC3", "isGrave"), 3891.8, 8321.32, 4160.66, 3.44, 26.32, 0.49),
+    # JS, 29.10.2026
+    ((5, "Plaque2330", "PVC3", "isUVPrint"), 5461.0, 12830.32, 2566.06, 2.57, 39.34, 2.93),
+    # JS, 29.10.2026
+    ((5, "Plaque1520", "AcrylWhite3", "isGrave"), 9973.0, 23240.75, 4648.15, 9.81, 45.43, 1.39),
+]
+
+
+@pytest.mark.parametrize("case", JS_CASES, ids=lambda c: "-".join(str(x) for x in c[0]))
+def test_matches_js_calc_plaque(calc, case):
+    (quantity, plaque_id, material_id, application), *expected = case
+    r = calc.execute({
+        "quantity": quantity,
+        "plaque_id": plaque_id,
+        "material_id": material_id,
+        "application": application,
+        "mode": 1,
+    })
+    fields = ("cost", "price", "unit_price", "time_hours", "time_ready", "weight_kg")
+    for field, value in zip(fields, expected):
+        assert _cmp(r[field], value), f"{field}: got {r[field]}, JS {value}"

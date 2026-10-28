@@ -15,7 +15,9 @@ from typing import Any, Dict, List, Mapping, Optional
 import json5
 
 from calculators.base import BaseCalculator, ProductionMode
+from calculators.laser import LaserCalculator
 from calculators.tablets import TabletsCalculator
+from calculators.uv_print import UVPrintCalculator
 from common.markups import BASE_TIME_READY, MARGIN_MATERIAL, get_margin
 from materials import plaque as plaque_catalog, hardsheet as hardsheet_catalog
 
@@ -67,6 +69,72 @@ _APPLICATION_TO_PRINT_METHOD: Dict[str, str] = {
     "isGrave": "laser",
     "isSublimation": "none",
 }
+
+# Параметры нанесения на пластину из calcPlaque
+PLATE_UV_PRINTER = "RimalSuvUV"
+PLATE_UV_RESOLUTION = 2
+PLATE_UV_COLOR = "4+1"
+PLATE_GRAVE_RESOLUTION = 2
+
+
+def _calc_plate(
+    n: int,
+    size_plate: List[float],
+    material_id: str,
+    application: str,
+    mode: ProductionMode,
+) -> Dict[str, Any]:
+    """
+    Пластина с УФ-печатью или гравировкой — как calcTablets с опциями из calcPlaque:
+    лазерная резка с материалом плюс нанесение, итог с наценкой marginTablets.
+    """
+    laser_params: Dict[str, Any] = {
+        "quantity": n,
+        "width": size_plate[0],
+        "height": size_plate[1],
+        "material_id": material_id,
+        "mode": mode.value,
+        "is_cut_laser": {
+            "len_cut": 0,
+            "size_item": min(size_plate),
+            "density": 0,
+            "difficulty": 1,
+        },
+    }
+    if application == "isGrave":
+        laser_params["is_grave"] = PLATE_GRAVE_RESOLUTION
+        laser_params["is_grave_fill"] = list(size_plate)
+    parts = [LaserCalculator().calculate(laser_params)]
+
+    if application == "isUVPrint":
+        parts.append(UVPrintCalculator().calculate({
+            "quantity": n,
+            "width": size_plate[0],
+            "height": size_plate[1],
+            "item_width": size_plate[0],
+            "item_height": size_plate[1],
+            "resolution": PLATE_UV_RESOLUTION,
+            "color": PLATE_UV_COLOR,
+            "surface": "plain",
+            "printer_code": PLATE_UV_PRINTER,
+            "mode": mode.value,
+        }))
+
+    materials: List[Dict[str, Any]] = []
+    for part in parts:
+        materials.extend(part.get("materials", []))
+
+    # JS calcTablets: время готовности = время работ + максимум сроков частей
+    time_hours = math.ceil(sum(float(p["time_hours"]) for p in parts) * 100) / 100.0
+    return {
+        "cost": sum(float(p["cost"]) for p in parts),
+        "price": sum(float(p["price"]) for p in parts) * (1 + get_margin("marginTablets")),
+        "time_hours": time_hours,
+        "time_ready": time_hours + max(float(p["time_ready"]) for p in parts),
+        "weight_kg": math.ceil(sum(float(p["weight_kg"]) for p in parts) * 100) / 100.0,
+        "materials": materials,
+    }
+
 
 APPLICATION_CHOICES = [
     {"id": "noApplication", "title": "Без нанесения"},
@@ -228,14 +296,22 @@ class PlaqueCalculator(BaseCalculator):
             }
         ]
 
-        # --- 2. Расчёт пластины через TabletsCalculator ---
+        # --- 2. Расчёт пластины ---
         cost_plate = 0.0
         price_plate = 0.0
         time_plate = 0.0
         time_ready_plate = 0.0
         weight_plate = 0.0
 
-        if application != "noApplication":
+        if application in ("isUVPrint", "isGrave"):
+            plate_result = _calc_plate(n, size_plate, material_id, application, mode)
+            cost_plate = plate_result["cost"]
+            price_plate = plate_result["price"]
+            time_plate = plate_result["time_hours"]
+            time_ready_plate = plate_result["time_ready"]
+            weight_plate = plate_result["weight_kg"]
+            materials_out.extend(plate_result["materials"])
+        elif application != "noApplication":
             print_method = _APPLICATION_TO_PRINT_METHOD[application]
             tablets_calc = TabletsCalculator()
             tablets_params: Dict[str, Any] = {

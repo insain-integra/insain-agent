@@ -98,10 +98,10 @@ REF_PARAMS = {
     "mode": 1,
 }
 EXPECTED_REF = {
-    "cost": 2868.0,
-    "price": 4634.0,
-    "time_hours": 1.04,
-    "time_ready": 33.04,
+    "cost": 2843.0,
+    "price": 4594.0,
+    "time_hours": 0.94,
+    "time_ready": 32.94,
     "weight_kg": 1.03,
 }
 EXPECTED_MATERIAL = {

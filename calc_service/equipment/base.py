@@ -67,6 +67,8 @@ class EquipmentSpec(BaseModel):
 
     # Опционально: себестоимость за рез/м и скорость (для резаков, плоттеров)
     cost_process: float = 0.0
+    # УФ-принтер: costProcess целиком, руб./м² по слоям [полноцвет, белый, лак]
+    cost_process_by_layer: Optional[List[float]] = None
     cuts_per_hour: float = 0.0
     process_per_hour: float = 0.0
     process_per_hour_table: Optional[List[Tuple[float, float]]] = None  # [(thickness_um, speed_m/h), ...]
@@ -75,6 +77,8 @@ class EquipmentSpec(BaseModel):
     # Ламинатор: скорость м/час (число или таблица по плотности)
     meter_per_hour: float = 0.0
     meter_per_hour_table: Optional[List[Tuple[float, float]]] = None  # [(density_um, speed_m/h), ...]
+    # УФ-принтер: плоский meterPerHour, м²/час по индексу разрешения [0, 1, 2]
+    meter_per_hour_by_resolution: Optional[List[float]] = None
 
     # Принтер: листов/час по плотности бумаги, себестоимость листа [ч/б, цвет]
     sheets_per_hour_table: Optional[List[Tuple[float, float]]] = None  # [(density, sheets_per_hour), ...]

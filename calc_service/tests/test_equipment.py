@@ -97,6 +97,18 @@ def test_get_time_ready_default():
     assert spec.get_time_ready(2) == BASE_TIME_READY[1]
 
 
+def test_uv_printer_speed_and_cost_by_layer():
+    # meterPerHour [1.2, 0.6, 0.3] — по разрешению, costProcess [1300, 800, 800] — по слоям
+    spec = load_generic_catalog("printer.json").get("RimalSuvUV")
+    assert spec.meter_per_hour_by_resolution[2] == pytest.approx(0.3)
+    cost_4_1 = spec.cost_process_by_layer[0] + spec.cost_process_by_layer[1]
+    assert cost_4_1 == pytest.approx(2100)
+    # прежние поля не меняются: ламинация и process_tools читают их как раньше
+    assert spec.cost_process == pytest.approx(1300)
+    assert spec.meter_per_hour == 0.0
+    assert spec.meter_per_hour_table is None
+
+
 def test_defect_rate():
     from equipment import laser
 

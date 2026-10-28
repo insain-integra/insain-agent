@@ -1,6 +1,6 @@
 # calc-fix-plaque-port
 
-Статус: черновик
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -45,17 +45,17 @@ Reviewer: Grok 4.7
 
 Каждый пункт — команда и ожидаемый результат.
 
-- [ ] Для `{"quantity":2,"plaque_id":"Plaque2330","material_id":"PVC3","application":"isUVPrint","mode":1}` и того же с `"application":"isGrave"`: `node scripts/run_js_calc.mjs calcPlaque --data current --params '<json>'` и `python -c "import sys,json; sys.path.insert(0,'calc_service'); from calculators.plaque import PlaqueCalculator; print(json.dumps(PlaqueCalculator().execute(json.loads(sys.argv[1]))))" '<json>'` — шесть полей в допуске 0.03. Ориентир JS: УФ 2698.3 / 6205.71 / 1.32 / 35.67 / 1.18, гравировка 9497.1 / 20224.31 / 8.9 / 42.7 / 1.18.
-- [ ] `python -c "import pathlib,re; t=pathlib.Path(r'calc_service/tests/test_calculators/test_plaque.py').read_text(encoding='utf-8'); m=re.findall(r'JS, \d{2}\.\d{2}\.\d{4}', t); print(len(m)); assert 5<=len(m)<=10"` — число от 5 до 10, код 0.
-- [ ] `python -m pytest calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_calculators/test_uv_print.py calc_service/tests/test_calculators/test_tablets.py -q` — код 0, `skipped` нет.
-- [ ] Тест загрузчика из пункта 5 падает на `main` и проходит на ветке.
-- [ ] `git diff main -- calc_service/data js_legacy scripts/run_js_calc.mjs` — пусто.
-- [ ] `git diff main --name-only` — только `calc_service/equipment/`, `calc_service/calculators/{uv_print,tablets,plaque}.py`, `calc_service/tests/`, `docs/refactoring-plan.md`, этот файл.
+- [x] Для `{"quantity":2,"plaque_id":"Plaque2330","material_id":"PVC3","application":"isUVPrint","mode":1}` и того же с `"application":"isGrave"`: `node scripts/run_js_calc.mjs calcPlaque --data current --params '<json>'` и `python -c "import sys,json; sys.path.insert(0,'calc_service'); from calculators.plaque import PlaqueCalculator; print(json.dumps(PlaqueCalculator().execute(json.loads(sys.argv[1]))))" '<json>'` — шесть полей в допуске 0.03. Ориентир JS: УФ 2698.3 / 6205.71 / 1.32 / 35.67 / 1.18, гравировка 9497.1 / 20224.31 / 8.9 / 42.7 / 1.18.
+- [x] `python -c "import pathlib,re; t=pathlib.Path(r'calc_service/tests/test_calculators/test_plaque.py').read_text(encoding='utf-8'); m=re.findall(r'JS, \d{2}\.\d{2}\.\d{4}', t); print(len(m)); assert 5<=len(m)<=10"` — число от 5 до 10, код 0.
+- [x] `python -m pytest calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_calculators/test_uv_print.py calc_service/tests/test_calculators/test_tablets.py -q` — код 0, `skipped` нет.
+- [x] Тест загрузчика из пункта 5 падает на `main` и проходит на ветке.
+- [x] `git diff main -- calc_service/data js_legacy scripts/run_js_calc.mjs` — пусто.
+- [x] `git diff main --name-only` — только `calc_service/equipment/`, `calc_service/calculators/{uv_print,tablets,plaque}.py`, `calc_service/tests/`, `docs/refactoring-plan.md`, этот файл.
 
 ## Проверки
 
-- [ ] `make check` (или `python scripts/dev.py check`) — зелёный вывод
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `make check` (или `python scripts/dev.py check`) — зелёный вывод
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
 ## Риски
 
@@ -69,8 +69,26 @@ Reviewer: Grok 4.7
 
 ## Результат
 
-- Ветка, PR или коммит:
+- Ветка, PR или коммит: `task/calc-fix-plaque-port`
 - Сделано:
+  - `EquipmentSpec`: новые поля `meter_per_hour_by_resolution` (плоский `meterPerHour`) и `cost_process_by_layer` (массив `costProcess`), загрузчик заполняет их через `_parse_flat_list`. `meter_per_hour`, `meter_per_hour_table`, `cost_process` не менялись.
+  - `uv_print.py`: скорость `meterPerHour[resolution]`, расходники по слоям (`4+1` = `[0]+[1]`), `vol_print` и число загрузок — по раскладке на столе, как `calcLayoutOnSheet` и `calcUVPrint.js` (`_layout_on_printer`, `_vol_print_plain`). Принтеры без массивов считаются по прежней ветке.
+  - `plaque.py`: для `isUVPrint` и `isGrave` пластина считается `_calc_plate` — прямые вызовы `LaserCalculator` (резка с материалом, `size_item` = меньшая сторона, гравировка `is_grave` 2 + `is_grave_fill`) и `UVPrintCalculator` (`RimalSuvUV`, resolution 2, `4+1`, plain). Итог как в `calcTablets`: `marginTablets`, время `ceil`, `time_ready` = время + максимум сроков, вес `ceil`; затем `calcPlaque` ещё раз прибавляет время. `tablets.py` не менялся, сублимация идёт прежним путём.
+  - Тесты: `test_equipment.py::test_uv_printer_speed_and_cost_by_layer`; в `test_plaque.py` `EXPECTED_REF` заменён числами JS и 7 параметризованных кейсов JS — всего 8 пометок `JS, 29.10.2026` (тиражи 2 и 5, `Plaque2330`/`Plaque1520`, `PVC3`/`AcrylWhite3`, УФ/гравировка). Чекбокс 5.6 в плане отмечен.
+  - `REF_PARAMS` перепрогнан: старые числа (2062 / 4906 / 0.37 / 32.74 / 1.17) были не JS и в допуск не попадали; новый расчёт совпал с JS (2698.3 / 6205.71 / 1.32 / 35.67 / 1.18), числа JS вписаны с пометкой.
+  - Ожидаемые числа других тестов (было → стало), все из-за пунктов 1–2:
+    - `test_uv_print` (resolution 0, `4+0`): cost 2460 → 2430, price 3936 → 3888, time_hours 1.14 → 1.05, time_ready 33.14 → 33.05.
+    - `test_tablets`: time_hours 0.65 → 0.6, time_ready 32.65 → 32.6.
+    - `test_shild`: cost 2868 → 2843, price 4634 → 4594, time_hours 1.04 → 0.94, time_ready 33.04 → 32.94.
+    - `test_uv_badge` (resolution 2): cost 3206 → 4735, price 5929.40 → 8742.30, time_hours 1.64 → 2.98, time_ready 33.64 → 34.98.
+    - `test_acrylic_prizes` (resolution 2, `4+1`): cost 1134.45 → 1667.45, price 1816 → 2669, time_hours 1.96 → 2.44, time_ready 34.36 → 35.32.
+    - `test_badge`: без изменений.
 - Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+  - Критерий 1, команды из критерия: УФ JS `2698.3 / 6205.71 / 3102.86 / 1.32 / 35.67 / 1.18`, Python `2698.3 / 6206 / 3103.0 / 1.32 / 35.67 / 1.18`; гравировка JS `9497.1 / 20224.31 / 10112.16 / 8.9 / 42.7 / 1.18`, Python `9497.1 / 20225 / 10112.5 / 8.9 / 42.7 / 1.18`. Дополнительно сетка 16 кейсов (тираж 2 и 5 × две плакетки × два материала × УФ/гравировка) — все 16 в допуске по шести полям, отличие только `math.ceil` цены.
+  - Подсчёт пометок: `8`, код 0.
+  - `pytest test_plaque.py test_uv_print.py test_tablets.py -q`: `31 passed`, skipped нет.
+  - Тест загрузчика: на коде `main` — `FAILED ... AttributeError` (поля нет), на ветке — passed.
+  - `git diff main -- calc_service/data js_legacy scripts/run_js_calc.mjs` — пусто; `--name-only` — только разрешённые пути.
+  - `python scripts/dev.py check`: `441 passed`, `81 passed`.
+- Не сделано и почему: соседние расхождения `uv_print.py` с JS, вне scope: скидка от объёма `discount` (`PrintUV`) не применяется; круговая печать берёт `timePrepare` вместо `timePrepareAround`. `test_equipment.py` при запуске отдельным файлом не находит `common` (нет вставки `calc_service` в `sys.path`), в составе `calc_service/tests` проходит — так и на `main`.
+- Требуется решение: бизнес-вопрос из `calc-reconcile-plaque` остаётся — гравировка заливкой всей пластины перенесена как в JS (8.9 ч, 20 225 руб. на две плакетки 2330).
