@@ -55,11 +55,13 @@ description: Смена цены, наценки, курса или срока �
    python -m pytest calc_service/tests/test_calculators/test_<slug>.py -q
    ```
 
-   Ожидается: `passed`. Упал эталон с числом, в который входит эта позиция, — это ожидаемо: пересчитать эталон на новом прайсе и записать с датой в комментарии. Эталоны `JS_CASES` пересчитываются скриптом с `--data current` (в PowerShell 5.1 кавычки JSON экранируются `\"`):
+   Ожидается: `passed`. Упал эталон с числом, в который входит эта позиция, — это ожидаемо: пересчитать эталон на новом прайсе и записать с датой в комментарии. Эталоны `JS_CASES` пересчитываются скриптом `scripts/run_js_calc.mjs` с `--data current`: имя JS-функции затронутого калькулятора и вход из его `JS_CASES`. Сейчас в скрипт подключена только `calcPlaque`; для другого калькулятора её не вызывать — чужая функция даст чужую цену. Пример для плакеток, он же образец кавычек PowerShell 5.1 (JSON экранируется `\"`):
 
    ```powershell
    node scripts/run_js_calc.mjs calcPlaque --data current --params '{\"quantity\":2,\"plaque_id\":\"Plaque1520\",\"material_id\":\"PVC3\",\"application\":\"isUVPrint\",\"mode\":1}'
    ```
+
+   Ожидается: JSON с `price`. Ответ `Калькулятор не подключён: calc…` и код 1 — калькулятор в скрипт не подключён: сверка этой командой пропускается, это строка в отчёт, скрипт не править.
 
    Допуск сравнения в тесте не расширять. Упало что-то кроме эталона (ошибка загрузки JSON, `KeyError`) — правка сломала формат, вернуться к шагу 3.
 
@@ -85,13 +87,13 @@ description: Смена цены, наценки, курса или срока �
 
 9. Коммит — по просьбе человека, одна правка — один коммит. Push в `main` — только с подтверждения человека.
 
-10. CI на этом коммите зелёный: GitHub Actions, workflow с `make check`, статус `success` у коммита из `git rev-parse --short HEAD`. Если установлен `gh`:
+10. CI на этом коммите зелёный: GitHub Actions, workflow `check` (`make check`), `conclusion` = `success` у коммита из `git rev-parse HEAD`. Сверка по SHA, не по последнему запуску ветки:
 
     ```powershell
-    gh run list --branch main --limit 1
+    $sha = git rev-parse HEAD; $sha; if (Get-Command gh -ErrorAction SilentlyContinue) { gh run list --commit $sha --json headSha,workflowName,status,conclusion | ConvertFrom-Json | Format-Table } else { "gh не установлен: https://github.com/insain-integra/insain-agent/actions, запуск check для $sha" }
     ```
 
-    Ожидается: `completed  success` и тот же коммит. Красный или ещё идёт — не выкатывать.
+    Ожидается: полный SHA, затем строка с тем же `headSha`, `check`, `completed`, `success`. Без `gh` — строка со ссылкой: на странице Actions у запуска `check` с этим коммитом зелёная галочка. Пустая таблица, `in_progress`, `failure` — не выкатывать.
 
 ## Выкатка
 

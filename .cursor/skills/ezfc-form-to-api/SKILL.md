@@ -69,7 +69,7 @@ ssh insain-prod "sudo -u www-data wp db query --skip-column-names --path=/var/ww
 
 Спросить человека: дубль формы `<id>` и черновик товара для него. Без ответа «да» дальше не идти.
 
-6. В админке ezFC (Browser MCP) у формы `<id>` — «Duplicate». Id копии:
+6. В админке ezFC (Browser MCP) у формы `<id>` — «Duplicate». Id копии, SQL через файл:
 
    ```sql
    SELECT id, name FROM wp_insain_ezfc_forms ORDER BY id DESC LIMIT 1;
@@ -209,7 +209,30 @@ print(len(snap["elements"]), len(snap["options"]), "forms/<slug>.js" in text, "c
 
     Ожидается: число элементов, число опций, `True True`. `$OutputEncoding` нужен, иначе PowerShell 5.1 отдаёт Python кириллицу как `???`.
 
-23. Реестр `docs/site/forms.md`: строка страницы — slug `<slug>`, статус «API через `insaincalc.calcApi`»; сводные числа пересчитаны. Остальные строки не трогать. Коммит снимка и реестра — по просьбе человека.
+23. Реестр `docs/site/forms.md`. Одна форма бывает на нескольких товарах (61 — на трёх, 64 — на двух), и `read_file` переключает их все. Поэтому slug `<slug>` и статус «API через `insaincalc.calcApi`» ставятся во всех строках с формой `<id>`, остальные строки не трогать. Затем раздел «Итог» пересчитывается по таблице, не прибавлением единицы:
+
+```powershell
+$OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+@'
+from pathlib import Path
+import re
+rows = []
+for line in Path("docs/site/forms.md").read_text(encoding="utf-8").splitlines():
+    c = [x.strip() for x in line.strip().strip("|").split("|")]
+    if len(c) == 4 and re.match(r"\d+ \S", c[1]):
+        rows.append((c[0], c[1].split()[0], c[2], c[3]))
+groups = [("API через `insaincalc.calcApi`", "API"), ("старый JS `insaincalc.calc…`", "старый JS"), ("не калькулятор", "не калькулятор")]
+for title, pref in groups:
+    g = [r for r in rows if r[3].startswith(pref)]
+    print(f"| {title} | {len({r[1] for r in g})} | {sum(r[0].startswith('http') for r in g)} |")
+print("Форм ezFC:", len({r[1] for r in rows}), "Опубликованных товаров с формой:", sum(r[0].startswith("http") for r in rows))
+old = [r for r in rows if r[3].startswith("старый JS")]
+print("Непереведённых форм:", len({r[1] for r in old}), "на опубликованных товарах:", len({r[1] for r in old if r[0].startswith("http")}))
+print("slug через calcApi:", sorted({r[2] for r in rows if r[3].startswith("API")}))
+'@ | python -
+```
+
+    Ожидается: три строки таблицы «Итог» (форм — число разных id формы, страниц — число строк с URL), всего форм и товаров без изменений, число непереведённых форм и список slug через `calcApi` с `<slug>`. Эти числа переносятся в таблицу «Итог», в абзацы «Непереведённых форм», «К форме через `calcApi` привязан…» и «Не привязаны ни к одной форме» (из последнего списка убрать `<slug>`, число в скобках — длина оставшегося списка). Всего форм или товаров изменилось — значит, правка задела чужие строки. Коммит снимка и реестра — по просьбе человека.
 
 24. Копия. Форма `<copy>` и черновик `<product>` больше не нужны; удаление — только с подтверждения человека. Без подтверждения оставить черновиком и записать id в отчёт.
 
