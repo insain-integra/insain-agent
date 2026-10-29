@@ -49,21 +49,29 @@ API этой командой не деплоить. Выкатка `calc_servic
 
    Ожидается: пустой вывод, файл `$env:TEMP\insain-calc-bridge.zip` создан.
 
+   `wp-plugin/AGENTS.md` — правила для агентов, на сайт не попадает. Убрать его из архива:
+
+   ```powershell
+   Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem; $z = [IO.Compression.ZipFile]::Open("$env:TEMP\insain-calc-bridge.zip", 'Update'); @($z.Entries | Where-Object FullName -eq 'AGENTS.md') | ForEach-Object { $_.Delete() }; $z.Dispose()
+   ```
+
+   Ожидается: пустой вывод.
+
 5. Содержимое архива:
 
    ```powershell
    Add-Type -AssemblyName System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::OpenRead("$env:TEMP\insain-calc-bridge.zip").Entries | ForEach-Object FullName
    ```
 
-   Ожидается: в корне zip лежит `insain-calc-bridge.php`, рядом `js/insain-calc-bridge.js`. Каталог `forms/`, если он есть в `wp-plugin/`, попадает в архив рядом с php: `forms/<slug>.js`. Строк вида `wp-plugin/insain-calc-bridge.php` быть не должно — значит, заархивирован каталог, а не содержимое; повторить шаг 4 с `-Path wp-plugin\*`.
+   Ожидается: в корне zip лежит `insain-calc-bridge.php`, рядом `js/insain-calc-bridge.js`. Каталог `forms/`, если он есть в `wp-plugin/`, попадает в архив рядом с php: `forms/<slug>.js`. `AGENTS.md` в списке нет — есть, значит, пропущено удаление из шага 4. Строк вида `wp-plugin/insain-calc-bridge.php` быть не должно — значит, заархивирован каталог, а не содержимое; повторить шаг 4 с `-Path wp-plugin\*`.
 
-   Пути с обратным слэшем (`js\insain-calc-bridge.js`) — признак Windows PowerShell 5.1 с модулем `Microsoft.PowerShell.Archive` 1.0.1.0. WordPress на Linux распакует такую запись как файл с `\` в имени в корне плагина, без каталога `js/`. Тогда архив собирается из закоммиченного `wp-plugin/` и шаг 5 повторяется:
+   Пути с обратным слэшем (`js\insain-calc-bridge.js`) — признак Windows PowerShell 5.1 с модулем `Microsoft.PowerShell.Archive` 1.0.1.0. WordPress на Linux распакует такую запись как файл с `\` в имени в корне плагина, без каталога `js/`. Тогда архив собирается из закоммиченного `wp-plugin/`, `AGENTS.md` удаляется командой из шага 4, шаг 5 повторяется:
 
    ```powershell
    git archive --format=zip -o $env:TEMP\insain-calc-bridge.zip HEAD:wp-plugin
    ```
 
-   Ожидается: пути через `/`, состав тот же.
+   Ожидается: пути через `/`, состав тот же, без `AGENTS.md`.
 
 ## Выкладка
 
@@ -109,7 +117,7 @@ API этой командой не деплоить. Выкатка `calc_servic
     ssh insain-prod "ls -R /var/www/insain.ru/wp-content/plugins/insain-calc-bridge"
     ```
 
-    Ожидается: в корне `insain-calc-bridge.php` и каталог `js/` с `insain-calc-bridge.js`; если в архиве был `forms/` — каталог `forms/` с теми же `<slug>.js`, что в `wp-plugin/forms/`. Имя файла с `\` в корне — архив с обратными слэшами: пересобрать по шагу 5 и выложить заново.
+    Ожидается: в корне `insain-calc-bridge.php` и каталог `js/` с `insain-calc-bridge.js`; если в архиве был `forms/` — каталог `forms/` с теми же `<slug>.js`, что в `wp-plugin/forms/`. `AGENTS.md` нет. Имя файла с `\` в корне — архив с обратными слэшами: пересобрать по шагу 5 и выложить заново.
 
 11. API на месте (плагин его не трогает, проверка, что сайт жив):
 
@@ -129,7 +137,7 @@ API этой командой не деплоить. Выкатка `calc_servic
     git archive --format=zip -o $env:TEMP\insain-calc-bridge.zip <прежний коммит>:wp-plugin
     ```
 
-    Ожидается: пустой вывод. Дальше шаги 5–9 без изменений. Удалять файлы на сервере для отката не нужно: `--force` заменяет плагин целиком.
+    Ожидается: пустой вывод. Дальше удаление `AGENTS.md` из шага 4 и шаги 5–9 без изменений. Удалять файлы на сервере для отката не нужно: `--force` заменяет плагин целиком.
 
 ## Отчёт
 
