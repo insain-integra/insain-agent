@@ -41,21 +41,15 @@ API этой командой не деплоить. Выкатка `calc_servic
 
 ## Сборка архива
 
-4. Архив собирается из содержимого каталога, не из самого каталога:
+4. Архив собирается из закоммиченного содержимого `wp-plugin/`:
 
    ```powershell
-   Compress-Archive -Path wp-plugin\* -DestinationPath $env:TEMP\insain-calc-bridge.zip -Force
+   git archive --format=zip -o $env:TEMP\insain-calc-bridge.zip HEAD:wp-plugin
    ```
 
-   Ожидается: пустой вывод, файл `$env:TEMP\insain-calc-bridge.zip` создан.
+   Ожидается: пустой вывод, файл `$env:TEMP\insain-calc-bridge.zip` создан. Незакоммиченные правки в zip не попадают — поэтому шаг 1 требует чистое дерево на `main`.
 
-   `wp-plugin/AGENTS.md` — правила для агентов, на сайт не попадает. Убрать его из архива:
-
-   ```powershell
-   Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem; $z = [IO.Compression.ZipFile]::Open("$env:TEMP\insain-calc-bridge.zip", 'Update'); @($z.Entries | Where-Object FullName -eq 'AGENTS.md') | ForEach-Object { $_.Delete() }; $z.Dispose()
-   ```
-
-   Ожидается: пустой вывод.
+   `AGENTS.md` и сам `.gitattributes` исключены из архива через `wp-plugin/.gitattributes` (`export-ignore`), удалять их вручную не нужно.
 
 5. Содержимое архива:
 
@@ -63,17 +57,7 @@ API этой командой не деплоить. Выкатка `calc_servic
    Add-Type -AssemblyName System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::OpenRead("$env:TEMP\insain-calc-bridge.zip").Entries | ForEach-Object FullName
    ```
 
-   Ожидается: в корне zip лежит `insain-calc-bridge.php`, рядом `js/insain-calc-bridge.js`. Каталог `forms/`, если он есть в `wp-plugin/`, попадает в архив рядом с php: `forms/<slug>.js`. `AGENTS.md` в списке нет — есть, значит, пропущено удаление из шага 4. Строк вида `wp-plugin/insain-calc-bridge.php` быть не должно — значит, заархивирован каталог, а не содержимое; повторить шаг 4 с `-Path wp-plugin\*`.
-
-   Пути с обратным слэшем (`js\insain-calc-bridge.js`) — признак Windows PowerShell 5.1 с модулем `Microsoft.PowerShell.Archive` 1.0.1.0. WordPress на Linux распакует такую запись как файл с `\` в имени в корне плагина, без каталога `js/`. Тогда архив собирается заново из закоммиченного `wp-plugin/`, по порядку:
-
-   ```powershell
-   git archive --format=zip -o $env:TEMP\insain-calc-bridge.zip HEAD:wp-plugin
-   ```
-
-   Ожидается: пустой вывод. `git archive` перезаписывает zip и кладёт `AGENTS.md` в его корень: удаление из шага 4 сделано до этой команды и пропало. Поэтому дальше — команда удаления `AGENTS.md` из шага 4, затем команда просмотра содержимого из начала этого шага.
-
-   Ожидается на повторном просмотре: пути через `/`, состав тот же, `AGENTS.md` в списке нет.
+   Ожидается: в корне zip лежит `insain-calc-bridge.php`, рядом `js/insain-calc-bridge.js`. Каталог `forms/`, если он есть в `wp-plugin/`, попадает в архив рядом с php: `forms/<slug>.js`. В списке нет `AGENTS.md`, `.gitattributes`, путей с обратным слэшем и префикса `wp-plugin/`. Есть — архив собран не той командой: повторить шаг 4.
 
 ## Выкладка
 
@@ -139,7 +123,13 @@ API этой командой не деплоить. Выкатка `calc_servic
     git archive --format=zip -o $env:TEMP\insain-calc-bridge.zip <прежний коммит>:wp-plugin
     ```
 
-    Ожидается: пустой вывод. Дальше удаление `AGENTS.md` из шага 4 и шаги 5–9 без изменений. Удалять файлы на сервере для отката не нужно: `--force` заменяет плагин целиком.
+    Ожидается: пустой вывод. Дальше шаг 5. Коммит до появления `wp-plugin/.gitattributes` кладёт `AGENTS.md` в корень zip — тогда убрать его и повторить шаг 5:
+
+    ```powershell
+    Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem; $z = [IO.Compression.ZipFile]::Open("$env:TEMP\insain-calc-bridge.zip", 'Update'); @($z.Entries | Where-Object FullName -eq 'AGENTS.md') | ForEach-Object { $_.Delete() }; $z.Dispose()
+    ```
+
+    Ожидается: пустой вывод. Затем шаги 6–9 без изменений. Удалять файлы на сервере для отката не нужно: `--force` заменяет плагин целиком.
 
 ## Отчёт
 

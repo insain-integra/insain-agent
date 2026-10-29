@@ -391,11 +391,11 @@ wp-content/plugins/insain-calc-bridge/
 С ПК (PowerShell в корне репозитория):
 
 ```powershell
-Compress-Archive -Path wp-plugin\* -DestinationPath $env:TEMP\insain-calc-bridge.zip -Force
+git archive --format=zip -o $env:TEMP\insain-calc-bridge.zip HEAD:wp-plugin
 scp $env:TEMP\insain-calc-bridge.zip insain-prod:/tmp/insain-calc-bridge.zip
 ```
 
-> zip должен содержать `insain-calc-bridge.php` в корне (не вложенную папку `wp-plugin/`). Если структура не та — заархивируйте содержимое каталога, а не сам каталог.
+> zip содержит `insain-calc-bridge.php` в корне (не вложенную папку `wp-plugin/`). Архив собирается из закоммиченного `HEAD`: незакоммиченные правки в него не попадают. `AGENTS.md` исключён из архива через `wp-plugin/.gitattributes`.
 
 На сервере (через ssh, без root):
 
@@ -553,7 +553,7 @@ alwaysApply: false
 ## Окружение VDS (важно)
 - wp-команды: sudo -u www-data wp ... --path=/var/www/insain.ru
   (www-data переключён на php8.2; mysqli есть только в 8.2)
-- Деплой плагина: Compress-Archive → scp /tmp → sudo -u www-data wp plugin install zip --force --activate
+- Деплой плагина: git archive → scp /tmp → sudo -u www-data wp plugin install zip --force --activate
   (rsync/cp от root недоступны: sudoers только wp+nginx)
 - sudo доступен только для: nginx -t, systemctl reload nginx, wp (как www-data)
 - docker compose — без sudo (agent в группе docker)

@@ -61,7 +61,7 @@ Git на VDS: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent …`
 
 ### Деплой плагина и WordPress
 
-- Плагин: `Compress-Archive` → `scp` в `/tmp` → `sudo -u www-data wp plugin install <zip> --force --activate --path=/var/www/insain.ru`.
+- Плагин: `git archive HEAD:wp-plugin` → `scp` в `/tmp` → `sudo -u www-data wp plugin install <zip> --force --activate --path=/var/www/insain.ru`.
 - Любой wp-cli: `sudo -u www-data wp … --path=/var/www/insain.ru`. Warning `Wt::__wakeup()` — шум.
 - Каналы доступа к WP (wp-cli, REST, Browser MCP) и ограничения по объектам — `docs/site/access-tools.md`.
 - **Формы ezFC:** структуру форм правят в админке ezFC; после правки агент снимает форму в репозиторий
