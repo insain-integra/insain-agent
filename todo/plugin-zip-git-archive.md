@@ -1,6 +1,6 @@
 # plugin-zip-git-archive
 
-Статус: в работе
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -53,7 +53,7 @@ Zip плагина `insain-calc-bridge` собирается одной кома
 
 Каждый пункт — команда из корня репозитория. Ожидается stdout `ok` и код выхода 0. Иначе stdout — список промахов. Если в stdout кириллица `???`, перед командой — `$OutputEncoding = [System.Text.UTF8Encoding]::new($false)`.
 
-- [ ] Тексты. Stdout `ok`.
+- [x] Тексты. Stdout `ok`.
 
 ```powershell
 @'
@@ -80,7 +80,7 @@ print("ok" if not bad else "\n".join(bad))
 '@ | python -
 ```
 
-- [ ] `wp-plugin/.gitattributes` — ровно две строки. Stdout `ok`.
+- [x] `wp-plugin/.gitattributes` — ровно две строки. Stdout `ok`.
 
 ```powershell
 @'
@@ -91,7 +91,7 @@ print("ok" if lines == ["AGENTS.md export-ignore", ".gitattributes export-ignore
 '@ | python -
 ```
 
-- [ ] Состав zip из закоммиченного `HEAD` (гонять после коммита в ветку задачи). Stdout `ok`.
+- [x] Состав zip из закоммиченного `HEAD` (гонять после коммита в ветку задачи). Stdout `ok`.
 
 ```powershell
 @'
@@ -112,8 +112,8 @@ print("ok" if not bad else "\n".join(bad))
 
 ## Проверки
 
-- [ ] `make check` (или `python scripts/dev.py check`) — зелёный вывод. Если в diff нет Python — можно не гонять, написать это в «Результате».
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `make check` (или `python scripts/dev.py check`) — зелёный вывод. Если в diff нет Python — можно не гонять, написать это в «Результате».
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
 ## Риски
 
@@ -130,7 +130,7 @@ print("ok" if not bad else "\n".join(bad))
 ## Результат
 
 - Ветка, PR или коммит: `task/plugin-zip-git-archive` от `main`, merge fast-forward. PR не обязателен. `git push` — спросить.
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+- Сделано: коммит `10e5ed6` в `task/plugin-zip-git-archive`. Новый `wp-plugin/.gitattributes` (две строки `export-ignore`). Skill `deploy-wp-plugin`: шаг 4 — `git archive … HEAD:wp-plugin` и фраза про `wp-plugin/.gitattributes`; шаг 5 — просмотр с новым списком «чего нет», абзац про обратные слэши и запасной путь убран; шаг 13 — та же команда с `<прежний коммит>:wp-plugin`, команда удаления `AGENTS.md` — только для коммитов до `.gitattributes`. `AGENTS.md`, rule прода, `docs/agent-autonomous-environment.md` (C.2 и «Окружение VDS») — `Compress-Archive` заменён на `git archive`.
+- Чем проверено: три критерия приёмки — stdout `ok` каждый; состав zip из `HEAD`: `insain-calc-bridge.php`, `js/`, `js/insain-calc-bridge.js`. `python scripts/dev.py check` — `441 passed`, `81 passed`, код выхода 0.
+- Не сделано и почему: прод не трогали, плагин не выкатывали — не-scope.
+- Требуется решение: шаг 10 skill (вне scope, не менялся) по-прежнему говорит про файл с `\` и «пересобрать по шагу 5» — при `git archive` неактуально, можно упростить отдельной правкой.
