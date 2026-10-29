@@ -103,7 +103,7 @@ API этой командой не деплоить. Выкатка `calc_servic
     ssh insain-prod "ls -R /var/www/insain.ru/wp-content/plugins/insain-calc-bridge"
     ```
 
-    Ожидается: в корне `insain-calc-bridge.php` и каталог `js/` с `insain-calc-bridge.js`; если в архиве был `forms/` — каталог `forms/` с теми же `<slug>.js`, что в `wp-plugin/forms/`. `AGENTS.md` нет. Имя файла с `\` в корне — архив с обратными слэшами: пересобрать по шагу 5 и выложить заново.
+    Ожидается: в корне `insain-calc-bridge.php` и каталог `js/` с `insain-calc-bridge.js`; если в архиве был `forms/` — каталог `forms/` с теми же `<slug>.js`, что в `wp-plugin/forms/`. `AGENTS.md` и `.gitattributes` нет. Состав не тот — собрать архив по шагам 4–5 и выложить заново.
 
 11. API на месте (плагин его не трогает, проверка, что сайт жив):
 

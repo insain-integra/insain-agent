@@ -133,4 +133,5 @@ print("ok" if not bad else "\n".join(bad))
 - Сделано: коммит `10e5ed6` в `task/plugin-zip-git-archive`. Новый `wp-plugin/.gitattributes` (две строки `export-ignore`). Skill `deploy-wp-plugin`: шаг 4 — `git archive … HEAD:wp-plugin` и фраза про `wp-plugin/.gitattributes`; шаг 5 — просмотр с новым списком «чего нет», абзац про обратные слэши и запасной путь убран; шаг 13 — та же команда с `<прежний коммит>:wp-plugin`, команда удаления `AGENTS.md` — только для коммитов до `.gitattributes`. `AGENTS.md`, rule прода, `docs/agent-autonomous-environment.md` (C.2 и «Окружение VDS») — `Compress-Archive` заменён на `git archive`.
 - Чем проверено: три критерия приёмки — stdout `ok` каждый; состав zip из `HEAD`: `insain-calc-bridge.php`, `js/`, `js/insain-calc-bridge.js`. `python scripts/dev.py check` — `441 passed`, `81 passed`, код выхода 0.
 - Не сделано и почему: прод не трогали, плагин не выкатывали — не-scope.
-- Требуется решение: шаг 10 skill (вне scope, не менялся) по-прежнему говорит про файл с `\` и «пересобрать по шагу 5» — при `git archive` неактуально, можно упростить отдельной правкой.
+- Шаг 10 skill — по просьбе человека: убрана фраза про файл с `\` в имени, при несовпадении состава — пересборка по шагам 4–5.
+- Требуется решение: нет.
