@@ -115,7 +115,7 @@ def test_unknown_application_raises(calc, base_params):
 
 # ── Эталонный тест ───────────────────────────────────────────────────
 
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
+def _cmp(a: float, b: float, rel: float = 0.001) -> bool:
     return abs(a - b) <= rel * max(abs(b), 1e-9)
 
 
@@ -151,7 +151,7 @@ def test_expected_values_plaque(ref_result):
     r = ref_result
     e = EXPECTED_REF
     em = EXPECTED_MATERIAL
-    rel = 0.03
+    rel = 0.001
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
     ok_price = _cmp(r["price"], e["price"], rel)
@@ -204,6 +204,13 @@ def test_expected_values_plaque(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+def test_ref_price_kopecks(ref_result):
+    """Цена эталона до копеек: округление до рубля допуск 0.1% не ловит."""
+    assert abs(ref_result["price"] - EXPECTED_REF["price"]) < 0.02, (
+        f"price: got {ref_result['price']}, JS {EXPECTED_REF['price']}"
+    )
 
 
 # Эталоны calcPlaque: node scripts/run_js_calc.mjs calcPlaque --data current --params '<json>'

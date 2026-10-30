@@ -335,7 +335,7 @@ class PlaqueCalculator(BaseCalculator):
         cost_total = cost_plaque + cost_plate
         price_total = price_plaque + price_plate
         margin_plaque = get_margin("marginPlaque")
-        price_total = math.ceil(price_total * (1 + margin_plaque))
+        price_total = round(price_total * (1 + margin_plaque), 2)
 
         time_hours = math.ceil(time_plate * 100) / 100.0
 
@@ -349,7 +349,7 @@ class PlaqueCalculator(BaseCalculator):
 
         return {
             "cost": float(cost_total),
-            "price": int(price_total),
+            "price": float(price_total),
             "unit_price": round(float(price_total) / max(1, n), 2),
             "time_hours": time_hours,
             "time_ready": time_ready,
