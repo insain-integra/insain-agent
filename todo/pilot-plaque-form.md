@@ -1,6 +1,6 @@
 # pilot-plaque-form
 
-Статус: черновик
+Статус: в работе
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
