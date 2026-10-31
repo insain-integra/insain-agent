@@ -1,6 +1,6 @@
 # js-port-gaps
 
-Статус: черновик
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -101,8 +101,8 @@ print("ok")
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+- Ветка, PR или коммит: `task/js-port-gaps`, один коммит от `main` (`6249ac7`).
+- Сделано: `scripts/js_port_gaps.py` (отчёт по функции и цепочке, `--list`, `--check`, `--allowed`); `scripts/js_port_gaps_allowed.txt` — 78 строк, создан из `--list`; `calc_service/tests/test_js_port_gaps.py` — 5 тестов, `MAX_ALLOWED = 78`; шаг 0 в skills `ezfc-form-to-api` и `new-calculator`; раздел «Порт из JS» в `calc_service/AGENTS.md`.
+- Чем проверено: все критерии приёмки — `ok` / код 0; `python scripts/dev.py check` — 447 passed (calc_service), 81 passed (bot_service).
+- Не сделано и почему: опции с динамическим ключом (`options.get(transferID)` в `calcHeatPress`, `options.has(stamp)` в `calcMetalPins`) скрипт не видит — разбираются только строковые литералы.
+- Требуется решение: в `docs/data-formats.md` указан `calculators/calendar.py`, фактический модуль — `calendar_calc.py` (вне scope). Скрипты приёмки через `@'…'@ | python -` в PowerShell 5.1 требуют `$OutputEncoding = New-Object System.Text.UTF8Encoding $false`, иначе кириллица в них превращается в `?`.
