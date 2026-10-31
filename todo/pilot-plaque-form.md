@@ -13,6 +13,7 @@ Reviewer: Grok 4.7
 
 ## Контекст и ссылки
 
+- Пилот ждёт эпик `todo/EPIC-calc-port-structure.md` (задача `plaque-thin-wrapper`); форма 69 переводится со всеми нанесениями, включая сублимацию.
 - `todo/skills-recipes.md` и skills `.cursor/skills/ezfc-form-to-api/SKILL.md`, `.cursor/skills/deploy-wp-plugin/SKILL.md` — как делать. Начинать после их merge в `main`.
 - `docs/ezfc-api-migration.md` — сбор полей, `calcApi`, `showResult`.
 - `docs/site/access-tools.md` — «Принятый режим»: `read_file`, снимок `SELECT … --raw`, обратный импорт запрещён.
