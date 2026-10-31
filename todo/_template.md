@@ -26,6 +26,7 @@ Reviewer: <не та модель, что у Implementer>
 ## Критерии приёмки
 
 Каждый пункт — команда и ожидаемый результат.
+Скрипт через `@'…'@ | python -` в PowerShell 5.1 — первой строкой `$OutputEncoding = New-Object System.Text.UTF8Encoding $false`, иначе кириллица в нём станет `?`.
 
 - [ ] `<команда>` — <что в выводе>
 
