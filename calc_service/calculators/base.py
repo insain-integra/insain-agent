@@ -147,10 +147,34 @@ class BaseCalculator(ABC):
         Выполнить расчёт и добавить share_url к результату.
         """
         result = dict(self.calculate(params))
+        self.validate_materials(result.get("materials") or [])
         # Добавляем share_url только если его ещё нет
         if "share_url" not in result:
             result["share_url"] = self.make_share_url(params)
         return result
+
+    def validate_materials(self, materials: List[Dict[str, Any]]) -> None:
+        """
+        Контракт элемента materials: name и title — непустые строки, не равные code;
+        quantity — число (int или float, не bool); unit — строка.
+        Клиент видит name, поэтому внутренний code не должен в него просочиться.
+        """
+        slug = self.slug or self.__class__.__name__
+        for item in materials:
+            code = item.get("code")
+            for field in ("name", "title"):
+                value = item.get(field)
+                if not isinstance(value, str) or not value.strip():
+                    raise ValueError(f"Калькулятор {slug}: у материала {code!r} пустое поле {field}")
+                if value.strip() == str(code or "").strip():
+                    raise ValueError(f"Калькулятор {slug}: у материала {code!r} поле {field} совпадает с code")
+            quantity = item.get("quantity")
+            if isinstance(quantity, bool) or not isinstance(quantity, (int, float)):
+                raise ValueError(
+                    f"Калькулятор {slug}: у материала {code!r} quantity должно быть числом, получено {quantity!r}"
+                )
+            if not isinstance(item.get("unit"), str):
+                raise ValueError(f"Калькулятор {slug}: у материала {code!r} unit должно быть строкой")
 
     def get_required_params(self) -> List[str]:
         """

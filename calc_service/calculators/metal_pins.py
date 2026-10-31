@@ -416,8 +416,4 @@ class MetalPinsCalculator(BaseCalculator):
 
     def execute(self, params: Mapping[str, Any]) -> Dict[str, Any]:
         """Нормализуем имена полей до share_url (width → width_mm), чтобы ссылка совпадала с сайтом."""
-        norm = self._normalize_input_params(params)
-        result = dict(self.calculate(norm))
-        if "share_url" not in result:
-            result["share_url"] = self.make_share_url(norm)
-        return result
+        return super().execute(self._normalize_input_params(params))
