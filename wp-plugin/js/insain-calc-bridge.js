@@ -61,7 +61,7 @@
                 return;
             }
             material.set(code, [
-                item.title || item.name || code,
+                item.name || item.title || '',
                 item.size_mm || item.size || null,
                 item.quantity || item.quantity_approx || 0
             ]);
