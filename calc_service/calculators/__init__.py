@@ -42,7 +42,7 @@ from .embossing import EmbossingCalculator
 from .pad_print import PadPrintCalculator
 from .magnets import MagnetAcrylicCalculator, MagnetLaminatedCalculator
 from .badge import BadgeCalculator
-from .calendar_calc import CalendarCalculator
+from .calendar import CalendarCalculator
 from .heat_press import HeatPressCalculator
 from .canvas import CanvasCalculator
 from .tablets import TabletsCalculator

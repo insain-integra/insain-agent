@@ -13,7 +13,7 @@ _calc_service = Path(__file__).resolve().parent.parent.parent
 if _calc_service.name == "calc_service" and str(_calc_service) not in sys.path:
     sys.path.insert(0, str(_calc_service))
 
-from calculators.calendar_calc import CalendarCalculator
+from calculators.calendar import CalendarCalculator
 
 
 @pytest.fixture(scope="module")

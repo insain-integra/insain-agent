@@ -38,9 +38,9 @@ DEFAULT_ALLOWED = Path(__file__).resolve().parent / "js_port_gaps_allowed.txt"
 PORTS: Dict[str, str] = {
     "calcAcrilycPrizes": "calculators.acrylic_prizes",
     "calcBadge": "calculators.badge",
-    "calcCalendarQuarterly": "calculators.calendar_calc",
-    "calcCalendarFlip": "calculators.calendar_calc",
-    "calcCalendarTableFlip": "calculators.calendar_calc",
+    "calcCalendarQuarterly": "calculators.calendar",
+    "calcCalendarFlip": "calculators.calendar",
+    "calcCalendarTableFlip": "calculators.calendar",
     "calcCanvas": "calculators.canvas",
     "calcSetCanvasFrame": "common.process_tools:calc_set_canvas_frame",
     "calcPlasticCards": "calculators.cards",
