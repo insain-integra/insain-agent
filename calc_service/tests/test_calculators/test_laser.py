@@ -47,7 +47,7 @@ EXPECTED = {
     "time_ready": 19.0,
     "weight_kg": 0.57,
     "materials": [
-        {"code": "AcrylColor3", "quantity_approx": 0.033, "unit": "sheet"},
+        {"code": "AcrylColor3", "quantity_approx": 0.033, "unit": "лист"},
     ],
 }
 
@@ -59,7 +59,7 @@ EXPECTED_HIGH = {
     "time_ready": 21.81,
     "weight_kg": 0.57,
     "materials": [
-        {"code": "AcrylColor3", "quantity_approx": 0.033, "unit": "sheet"},
+        {"code": "AcrylColor3", "quantity_approx": 0.033, "unit": "лист"},
     ],
 }
 
@@ -150,7 +150,7 @@ def test_laser_real_nomerki(nomerki_result):
     for i, exp_mat in enumerate(e["materials"]):
         code = exp_mat["code"]
         exp_q = exp_mat["quantity_approx"]
-        exp_unit = exp_mat.get("unit", "sheet")
+        exp_unit = exp_mat.get("unit", "лист")
         got = next((m for m in mats if m.get("code") == code), None)
         if got is None:
             print("    %s  (нет в результате) ~ %s %s  FAIL" % (code, exp_q, exp_unit))
@@ -230,7 +230,7 @@ def test_laser_real_nomerki_high(nomerki_high_result):
     for exp_mat in e["materials"]:
         code = exp_mat["code"]
         exp_q = exp_mat["quantity_approx"]
-        exp_unit = exp_mat.get("unit", "sheet")
+        exp_unit = exp_mat.get("unit", "лист")
         got = next((m for m in mats if m.get("code") == code), None)
         if got is None:
             print("    %s  (нет в результате) ~ %s %s  FAIL" % (code, exp_q, exp_unit))

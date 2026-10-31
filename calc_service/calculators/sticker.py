@@ -254,7 +254,7 @@ class StickerCalculator(BaseCalculator):
             if m.get("code") == material_id:
                 qty = m.get("quantity", 0)
                 unit = m.get("unit", "")
-                if unit == "sheet":
+                if unit == "лист":
                     num_sheet = float(qty)
                     size_sheet = (material.sizes[0] if material.sizes else [320, 450])[:2]
                 else:
@@ -379,7 +379,7 @@ class StickerCalculator(BaseCalculator):
                     "name": film.description,
                     "title": film.title,
                     "quantity": round(sum_area / (film_width / 1000) * 1000, 4),
-                    "unit": "m",
+                    "unit": "мм",
                 }]
             except Exception:
                 pass

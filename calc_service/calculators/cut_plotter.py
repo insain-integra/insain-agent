@@ -388,7 +388,7 @@ class CutPlotterCalculator(BaseCalculator):
                         "name": material.description,
                         "title": material.title,
                         "quantity": round(len_material_mm / 1000.0, 2),
-                        "unit": "m",
+                        "unit": "м",
                     }
                 ]
             else:
@@ -398,7 +398,7 @@ class CutPlotterCalculator(BaseCalculator):
                         "name": material.description,
                         "title": material.title,
                         "quantity": num_sheet,
-                        "unit": "sheet",
+                        "unit": "лист",
                     }
                 ]
 

@@ -674,7 +674,7 @@ class PrintSheetCalculator(BaseCalculator):
                 "name": material.description,
                 "title": material.title,
                 "quantity": num_sheets_physical,
-                "unit": "sheet",
+                "unit": "лист",
             }
         ]
         if lamination_result:

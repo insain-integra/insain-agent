@@ -23,7 +23,7 @@ EXPECTED_CUT_PLOTTER = {
     "time_hours": 0.21,
     "time_ready": 16.23,
     "materials": [
-        {"name": "Плёнка AVERY, серия 500, цветная", "quantity_approx": 0.4, "unit": "m"},
+        {"name": "Плёнка AVERY, серия 500, цветная", "quantity_approx": 0.4, "unit": "м"},
     ],
 }
 
@@ -34,7 +34,7 @@ EXPECTED_CUT_PLOTTER_1000 = {
     "time_hours": 1.64,
     "time_ready": 17.64,
     "materials": [
-        {"name": "Плёнка AVERY, серия 500, цветная", "quantity_approx": 3.22, "unit": "m"},
+        {"name": "Плёнка AVERY, серия 500, цветная", "quantity_approx": 3.22, "unit": "м"},
     ],
 }
 

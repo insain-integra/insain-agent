@@ -24,7 +24,7 @@ EXPECTED_MILLING = {
     "time_ready": 56.05,
     "weight_kg": 8.25,
     "materials": [
-        {"code": "PVC3", "name": "ПВХ Unext Strong 3 мм", "quantity_approx": 1, "unit": "sheet"},
+        {"code": "PVC3", "name": "ПВХ Unext Strong 3 мм", "quantity_approx": 1, "unit": "лист"},
     ],
 }
 

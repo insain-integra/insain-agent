@@ -206,7 +206,7 @@ class FlagCalculator(BaseCalculator):
                 "name": m.get("name", ""),
                 "title": m.get("title", ""),
                 "quantity": m.get("quantity", 0),
-                "unit": m.get("unit", "sheet"),
+                "unit": m.get("unit", "лист"),
             })
         for m in cost_staples.materials:
             materials_out.append({

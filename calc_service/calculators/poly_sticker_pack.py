@@ -175,7 +175,7 @@ class PolyStickerPackCalculator(BaseCalculator):
             if m.get("code") == material_id:
                 qty = m.get("quantity", 0)
                 unit = m.get("unit", "")
-                if unit == "sheet":
+                if unit == "лист":
                     num_sheet = int(qty)
                 size_mm = m.get("size_mm")
                 if size_mm and isinstance(size_mm, (list, tuple)) and len(size_mm) >= 2:

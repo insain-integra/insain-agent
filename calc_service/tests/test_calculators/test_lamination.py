@@ -23,7 +23,7 @@ EXPECTED_ROLL = {
     "time_hours": 0.1987,
     "weight_kg": 0.1317,
     "materials": [
-        {"name": "Пленка для ламинации Roll film 305мм х 100м х 32 mic GLOSS", "quantity_approx": 12.831, "unit": "m"},
+        {"name": "Пленка для ламинации Roll film 305мм х 100м х 32 mic GLOSS", "quantity_approx": 12.831, "unit": "м"},
     ],
 }
 
@@ -34,7 +34,7 @@ EXPECTED_PACKET = {
     "time_hours": 0.85,
     "weight_kg": 0.102564,
     "materials": [
-        {"name": "Пленка для ламинирования А6 (111х154мм, 2х60мкм), глянцевая", "quantity_approx": 105, "unit": "sheet"},
+        {"name": "Пленка для ламинирования А6 (111х154мм, 2х60мкм), глянцевая", "quantity_approx": 105, "unit": "лист"},
     ],
 }
 

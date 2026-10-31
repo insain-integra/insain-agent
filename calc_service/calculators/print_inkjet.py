@@ -188,7 +188,7 @@ class PrintInkjetCalculator(BaseCalculator):
             "name": material.description,
             "title": material.title,
             "quantity": num_with_defects,
-            "unit": "sheet",
+            "unit": "лист",
         }]
 
         return {

@@ -226,7 +226,7 @@ class LaminationCalculator(BaseCalculator):
                     "name": laminat.description,
                     "title": laminat.title,
                     "quantity": round(2 * length_m, 4),
-                    "unit": "m",
+                    "unit": "м",
                 }
             ]
         else:
@@ -258,7 +258,7 @@ class LaminationCalculator(BaseCalculator):
                     "name": laminat.description,
                     "title": laminat.title,
                     "quantity": num_with_defects,
-                    "unit": "sheet",
+                    "unit": "лист",
                 }
             ]
 

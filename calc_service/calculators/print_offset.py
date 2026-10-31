@@ -170,7 +170,7 @@ class PrintOffsetCalculator(BaseCalculator):
             "name": paper_name,
             "title": paper_name,
             "quantity": adjust_paper + num_sheet_sra2,
-            "unit": "sheet",
+            "unit": "лист",
         }]
 
         return {

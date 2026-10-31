@@ -353,7 +353,7 @@ class MillingCalculator(BaseCalculator):
                     "name": material.description,
                     "title": material.title,
                     "quantity": num_sheet,
-                    "unit": "sheet",
+                    "unit": "лист",
                 }
             ]
 

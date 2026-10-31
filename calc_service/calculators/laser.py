@@ -483,10 +483,10 @@ class LaserCalculator(BaseCalculator):
                 material_unit: str
                 if size_material[1] == 0.0:
                     material_qty = len_material
-                    material_unit = "mm"
+                    material_unit = "мм"
                 else:
                     material_qty = num_sheet
-                    material_unit = "sheet"
+                    material_unit = "лист"
 
                 materials.append(
                     {
@@ -567,7 +567,7 @@ class LaserCalculator(BaseCalculator):
                     "title": mat_adh.title,
                     "size_mm": size_adh,
                     "quantity": num_adh_sheets,
-                    "unit": "sheet",
+                    "unit": "лист",
                 }
             )
 
