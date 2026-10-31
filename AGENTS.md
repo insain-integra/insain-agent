@@ -87,7 +87,7 @@ Git на VDS: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent …`
 - **Ответ калькулятора** обязательно содержит `cost`, `price`, `unit_price`, `time_hours`, `time_ready`,
   `weight_kg`, `materials`; `share_url` добавляет `BaseCalculator.execute()`
   (`calc_service/calculators/base.py`). Каждый элемент `materials` — с `code`, `name`, `title`.
-- **Внутренние `code` материалов** не показывать пользователям сайта и бота — только `title`/`description`.
+- **Внутренние `code` материалов** не показывать пользователям сайта и бота — только `name`/`title`.
 - Размеры на входе — в мм. Комментарии в коде и тексты ошибок — по-русски.
 - Новый калькулятор: копия `calc_service/calculators/_template.py`, эталон — `laser.py`, регистрация в
   `calc_service/calculators/__init__.py`, тесты в `calc_service/tests/test_calculators/`

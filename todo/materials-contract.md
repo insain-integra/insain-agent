@@ -1,6 +1,6 @@
 # materials-contract
 
-Статус: черновик
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -42,9 +42,9 @@ Reviewer: Grok 4.7
 
 ## Критерии приёмки
 
-- [ ] `python -m pytest calc_service/tests -q -k materials_contract` — `passed`, не меньше 4 тестов (пустой `name`, `name` равен `code`, пустой `title`, `quantity` строкой — каждый даёт `ValueError` из `execute()`), без `failed`.
-- [ ] `rg -n "\"unit\":\s*\"(sheet|mm|pcs|m|m2)\"|_unit = \"(sheet|mm)\"" calc_service/calculators` — пустой вывод, код 1.
-- [ ] Bridge, версия, правила, доки. Stdout `ok`:
+- [x] `python -m pytest calc_service/tests -q -k materials_contract` — `passed`, не меньше 4 тестов (пустой `name`, `name` равен `code`, пустой `title`, `quantity` строкой — каждый даёт `ValueError` из `execute()`), без `failed`.
+- [x] `rg -n "\"unit\":\s*\"(sheet|mm|pcs|m|m2)\"|_unit = \"(sheet|mm)\"" calc_service/calculators` — пустой вывод, код 1.
+- [x] Bridge, версия, правила, доки. Stdout `ok`:
 
 ```powershell
 @'
@@ -66,7 +66,7 @@ print("ok")
 '@ | python -
 ```
 
-- [ ] Прод-API после деплоя. Stdout `ok`:
+- [ ] (после деплоя) Прод-API после деплоя. Stdout `ok`:
 
 ```powershell
 @'
@@ -82,14 +82,14 @@ print("ok")
 '@ | python -
 ```
 
-- [ ] `ssh insain-prod "sudo -u www-data wp plugin get insain-calc-bridge --field=version --path=/var/www/insain.ru"` — `0.2.4`.
-- [ ] `ssh insain-prod "grep -c 'item.name || item.title' /var/www/insain.ru/wp-content/plugins/insain-calc-bridge/js/insain-calc-bridge.js"` — `1`.
+- [ ] (после деплоя) `ssh insain-prod "sudo -u www-data wp plugin get insain-calc-bridge --field=version --path=/var/www/insain.ru"` — `0.2.4`.
+- [ ] (после деплоя) `ssh insain-prod "grep -c 'item.name || item.title' /var/www/insain.ru/wp-content/plugins/insain-calc-bridge/js/insain-calc-bridge.js"` — `1`.
 
 ## Проверки
 
-- [ ] `make check` (или `python scripts/dev.py check`) — зелёный вывод
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
-- [ ] Форма 79 (Browser MCP, https://insain.ru/catalog/kalkulyator-pazlov/), вход `REF_PARAMS` пазлов: цена прежняя (как до выкатки), таблица материалов показывает `name` из ответа API, внутренних `code` нет. В «Чем проверено» — цена и строки материалов до и после.
+- [x] `make check` (или `python scripts/dev.py check`) — зелёный вывод
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [ ] (после деплоя) Форма 79 (Browser MCP, https://insain.ru/catalog/kalkulyator-pazlov/), вход `REF_PARAMS` пазлов: цена прежняя (как до выкатки), таблица материалов показывает `name` из ответа API, внутренних `code` нет. В «Чем проверено» — цена и строки материалов до и после.
 
 ## Риски
 
@@ -103,9 +103,9 @@ print("ok")
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
-- Как откатить:
+- Ветка, PR или коммит: `task/materials-contract` от `main` (6249ac7), без push.
+- Сделано: шаги 1–5 Scope. `BaseCalculator.validate_materials()` вызывается из `execute()`; `metal_pins.execute()` теперь делегирует в базовый. Единицы `sheet`/`mm`/`m` → `лист`/`мм`/`м` в laser, cut_plotter, cut_roller, lamination, milling, print_sheet, print_inkjet, print_offset, sticker и дефолты в flag/pennant; сравнения `unit == "sheet"` в sticker и poly_sticker_pack переведены на `лист`. Bridge — `item.name || item.title || ''`, плагин 0.2.4. Правила и `docs/data-formats.md` по шагу 5.
+- Чем проверено: `-k materials_contract` — 25 passed (без правок в `calculators/` — 23 failed); `rg` по единицам — пусто, код 1; скрипт bridge/доки — `ok` (в Windows PowerShell 5 нужен `$OutputEncoding = [Text.UTF8Encoding]::new($false)`, иначе кириллица в heredoc портится и assert падает); `python scripts/dev.py check` — calc 465 passed, 2 skipped; bot 81 passed. Разовый прогон `execute()` по всем 40 калькуляторам × материалам из схемы — 1462 расчёта, нарушений контракта 0.
+- Не сделано и почему: шаг 6 и критерии «прод-API», «версия плагина на сервере», «grep на сервере», проверка формы 79 — после деплоя (Site ops, после ревью, merge и push).
+- Требуется решение: `sticker` — монтажная плёнка: Python отдаёт количество в мм (`… * 1000`), JS — в метрах; единица поставлена `мм` под текущее число, само число не менялось. `bot_service/agent.py:1462` сравнивает `unit` с `"sheet"` (после правки ветка не сработает), `:1363`/`:1400` берут сначала `title` — бот в консервации, не правился; тесты бота зелёные. В каталогах 14 позиций без имени (`presswall` Joker…/Tritix…, `calendar` DoubleSide…/OneSide…) — в `materials` не попадают, данные не трогались.
+- Как откатить: до деплоя — не мержить ветку. После — откат API образом `insain-agent-calc-api:rollback`, плагин — zip `wp-plugin` из коммита `main` до merge (0.2.3).
