@@ -173,6 +173,8 @@ curl.exe -sS -o NUL -w "%{http_code}" "https://insain.ru/catalog/kalkulyator-nag
 
 - Ветка, PR или коммит: `task/pilot-plaque-form` от `main`. Merge fast-forward после ревью. `git push` — спросить. SHA коммита, из которого собран zip плагина:
 - Сделано:
+- Ворота (после `663864d`, деплой API): stdout `6205.71`, код 0. До деплоя было `STOP 6206.0`: `plaque.py` округлял `price` до рубля.
+- Копия до боевой формы: форма-копия `86` (CalcPlaque duplicate), товар `2586879`, `post_status` `draft`, `curl.exe` без cookies на `https://insain.ru/?post_type=product&p=2586879` — `404`. В элементе 3321 копии — текст `plaque.js` с id копии (3317, 3318, 3319, 3334), `read_file` = 0. Прогон под админом: 2 шт., Plaque2330, AcrylWhite3, УФ-печать, mode 1 — `POST /api/v1/calc/plaque` 200, тело `{"quantity":2,"plaque_id":"Plaque2330","material_id":"AcrylWhite3","application":"isUVPrint","mode":1}`, `price` API 6618.96 (как `JS_CASES`), на странице 6620 (округление вывода `showResult`), вес 1.37, «Срок 4 дня» с подсказкой дат, материалы без `code`. mode 2 — на странице 8400, «Срок 3 дня», API 8338.66. Эталон с PVC3 через форму не набрать: PVC3 нет в списке материалов формы 69.
 - Чем проверено:
 - Не сделано и почему:
 - Требуется решение:
