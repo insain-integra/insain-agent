@@ -26,7 +26,7 @@ Reviewer: Grok 4.7
 
 1. `print_sheet.py`: выбор расчёта по `printer_code` как в `calcPrintSheet`; струйные принтеры — вызов `PrintInkjetCalculator` (порт), не пересчёт. Качество по умолчанию: 1 для `EPSONWF7610`, 0 для `DTFTransfer`; параметр качества в схеме, если его нет. Лазерная ветка не меняется, включая её округление.
 2. Отдельным коммитом: элемент материала печати в ответе `print_sheet` получает `size_mm` — размер листа из каталога (`material.sizes[0]`), как `material.size` в JS.
-3. Одна строка решения в `calc_service/AGENTS.md`, раздел «Контракт ответа»: где округляется `price`. По умолчанию, как в `663864d`: API отдаёт `price` в копейках без округления до рубля, округление вывода — `showResult`. Если решение меняет цену лазерной ветки или пазлов — стоп, вопрос человеку.
+3. Одна строка решения в `calc_service/AGENTS.md`, раздел «Контракт ответа»: API отдаёт `price` в копейках без округления до рубля, округление вывода — `insaincalc.showResult` (как `663864d`). Решено 31.10.2026, не переспрашивать. Лазерная ветка `print_sheet` и пазлы в этой задаче не меняются: правило пишется в док, округление лазерной ветки не трогать.
 4. Тесты `test_print_sheet.py`: эталоны из JS для `EPSONWF7610` на тираже 1 и ≥ 2 и для `DTFTransfer`, допуск 0.1%, пометка `# JS, ДД.ММ.ГГГГ`; тест `size_mm`.
 5. Тесты `heat_press` и `mug`, которые упали из-за смены маршрута, — `pytest.mark.xfail(strict=True, reason="переснять с JS в heat-press-mug-vs-js")`, эталоны не трогать. Снимаются в следующей задаче.
 
@@ -69,7 +69,17 @@ print("ok")
 ```
 
 - [ ] `rg -n "\"size_mm\"" calc_service/calculators/print_sheet.py` — одна строка в элементе `materials`.
-- [ ] `rg -n "showResult|округл" calc_service/AGENTS.md` — одна строка решения в разделе «Контракт ответа».
+- [ ] Строка решения про округление. Stdout `ok`:
+
+```powershell
+@'
+from pathlib import Path
+t = Path("calc_service/AGENTS.md").read_text(encoding="utf-8")
+block = t.split("## Контракт ответа", 1)[1].split("## ", 1)[0]
+assert "копейках" in block and "showResult" in block
+print("ok")
+'@ | python -
+```
 - [ ] `rg -n "xfail" calc_service/tests/test_calculators` — только тесты `test_heat_press.py` и `test_mug.py` с `reason` про `heat-press-mug-vs-js`, или пустой вывод.
 
 ## Проверки

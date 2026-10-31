@@ -28,9 +28,9 @@ Reviewer: Grok 4.7
 
 1. `BaseCalculator.execute()`: после `calculate()` проверить каждый элемент `materials`. `name` и `title` — строки, непустые после `strip()`, не равны `code`; `quantity` — `int` или `float` (не `bool`, не строка); `unit` — строка. Нарушение — `ValueError` с русским текстом.
 2. Калькуляторы, у которых проверка падает, исправить: `name` — полное имя из каталога (`description`, как `material.name` в JS), `title` — короткое.
-3. Единицы по-русски во всех калькуляторах: `sheet` → `лист`, `mm` → `мм` и т.п. Количество не округлять до целого там, где в JS оно дробное.
+3. Единицы по-русски во всех калькуляторах (решено 31.10.2026): `sheet` → `лист`, `mm` → `мм`, `pcs`/`m`/`m2` — тоже по-русски (`шт`, `м`, `м²`). Количество не округлять до целого там, где в JS оно дробное.
 4. Bridge: `item.name || item.title`, `code` в подпись не попадает никогда. Версия плагина `0.2.3` → `0.2.4` в обоих местах `insain-calc-bridge.php`.
-5. Доки и правила, по строке: `calc_service/AGENTS.md` — на сайт и в бот уходит `name`; корневой `AGENTS.md` — пользователю только `name`/`title`; `docs/data-formats.md` — раздел «Элемент `materials` в ответе»: `code` (ключ, клиенту не показывается), `name` (полное имя, показывается клиенту), `title` (короткое), `unit` (по-русски), `quantity` (число, может быть дробным), `size_mm` (необязательно). Строки 43–44 не должны противоречить: в файлах данных старое `name` — это `description`, в ответе `name` = `description` материала.
+5. Доки и правила, по строке (решено 31.10.2026, корневой `AGENTS.md` править): `calc_service/AGENTS.md` — на сайт и в бот уходит `name`; корневой `AGENTS.md` — пользователю только `name`/`title`; `docs/data-formats.md` — раздел «Элемент `materials` в ответе»: `code` (ключ, клиенту не показывается), `name` (полное имя, показывается клиенту), `title` (короткое), `unit` (по-русски), `quantity` (число, может быть дробным), `size_mm` (необязательно). Строки 43–44 не должны противоречить: в файлах данных старое `name` — это `description`, в ответе `name` = `description` материала.
 6. Прод, после merge в `main`: сначала API (`bash infra/deploy.sh`), затем плагин по skill `deploy-wp-plugin`. После выкатки — форма 79: строки материалов показывают `name`, а не `title`.
 
 ## Не-scope
@@ -59,6 +59,7 @@ calc = Path("calc_service/AGENTS.md").read_text(encoding="utf-8")
 assert "уходит `title`" not in calc and "уходит `name`" in calc
 root = Path("AGENTS.md").read_text(encoding="utf-8")
 assert "только `title`/`description`" not in root
+assert "name`/`title" in root or "name/title" in root
 df = Path("docs/data-formats.md").read_text(encoding="utf-8")
 assert "Элемент `materials` в ответе" in df
 print("ok")
