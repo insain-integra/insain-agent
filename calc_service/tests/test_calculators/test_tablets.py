@@ -124,7 +124,57 @@ def test_get_param_schema(calc):
 
 
 # ── Эталоны JS, 02.11.2026 ───────────────────────────────────────────
-# Пересняты с calcTablets (ранее эталон print_method=uv 297×210 был не с JS).
+
+# JS, 02.11.2026 — УФ + лазер 297×210, тираж 5 (переснят старый сценарий)
+# calcTablets(5, [297,210], 'PVC3', {isCutLaser:{sizeItem:210,density:0,difficulty:1,lenCut:0},
+#   isUVPrint:{printerID:'RimalSuvUV',resolution:2,surface:'isPlain',color:'4+1'}}, 1)
+REF_UV_LASER_297 = {
+    "quantity": 5,
+    "width": 297,
+    "height": 210,
+    "material_id": "PVC3",
+    "mode": 1,
+    "is_cut_laser": {"size_item": 210, "density": 0, "difficulty": 1, "len_cut": 0},
+    "is_uv_print": {
+        "printerID": "RimalSuvUV",
+        "resolution": 2,
+        "surface": "isPlain",
+        "color": "4+1",
+    },
+}
+EXPECTED_UV_LASER_297 = {
+    "cost": 4551.0,
+    "price": 7301.0,
+    "unit_price": 1460.2,
+    "time_hours": 3.02,
+    "time_ready": 37.66,
+    "weight_kg": 0.52,
+}
+
+# JS, 02.11.2026 — только УФ 297×210, тираж 5
+# calcTablets(5, [297,210], 'PVC3', {isUVPrint:{printerID:'RimalSuvUV',resolution:2,
+#   surface:'isPlain',color:'4+1'}}, 1)
+REF_UV_ONLY_297 = {
+    "quantity": 5,
+    "width": 297,
+    "height": 210,
+    "material_id": "PVC3",
+    "mode": 1,
+    "is_uv_print": {
+        "printerID": "RimalSuvUV",
+        "resolution": 2,
+        "surface": "isPlain",
+        "color": "4+1",
+    },
+}
+EXPECTED_UV_ONLY_297 = {
+    "cost": 3723.0,
+    "price": 5957.0,
+    "unit_price": 1191.4,
+    "time_hours": 2.64,
+    "time_ready": 37.28,
+    "weight_kg": 0.0,
+}
 
 # JS, 02.11.2026 — УФ + лазер, тираж 1
 # calcTablets(1, [195,265], 'PVC3', {isCutLaser:{sizeItem:195,density:0,difficulty:1,lenCut:0},
@@ -231,12 +281,14 @@ EXPECTED_SUB_5 = {
 }
 
 
-def _assert_js(r: dict, e: dict) -> None:
+def _assert_js(r: dict, e: dict, *, check_unit_price: bool = False) -> None:
     assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
     assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
     assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL)
     assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
     assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=JS_REL_TOL)
+    if check_unit_price and "unit_price" in e:
+        assert r["unit_price"] == pytest.approx(e["unit_price"], rel=JS_REL_TOL)
 
 
 def test_expected_uv_qty1(calc):
@@ -275,7 +327,17 @@ def test_expected_sublimation_qty5(calc):
     _assert_js(calc.calculate(REF_SUB_5), EXPECTED_SUB_5)
 
 
-# Старый эталон (print_method=uv, 297×210) переснят как УФ+лазер на sizePlate — см. REF_UV_5.
+def test_expected_uv_only_297(calc):
+    """JS, 02.11.2026: только УФ PVC3 297×210, тираж 5."""
+    _assert_js(calc.calculate(REF_UV_ONLY_297), EXPECTED_UV_ONLY_297, check_unit_price=True)
+
+
 def test_expected_values_tablets(calc):
-    """JS, 02.11.2026: переснят старый эталон → УФ qty5 (plaque args)."""
-    _assert_js(calc.calculate(REF_UV_5), EXPECTED_UV_5)
+    """JS, 02.11.2026: УФ + лазер PVC3 297×210, тираж 5."""
+    r = calc.calculate(REF_UV_LASER_297)
+    _assert_js(r, EXPECTED_UV_LASER_297, check_unit_price=True)
+    materials = r.get("materials") or []
+    assert materials
+    assert any(m.get("code") == "PVC3" for m in materials)
+    for m in materials:
+        assert "title" in m

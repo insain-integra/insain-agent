@@ -91,9 +91,10 @@ print("ok")
 
 - Ветка, PR или коммит: `task/tablets-for-plaque` @ `de81a1b` (push не делался)
 - Сделано: ветки `is_cut_manual_metal`, `is_sublimation`, `is_cut_laser` (+ `is_grave`/`is_grave_fill`), `is_uv_print` в `tablets.py` через порты; 6 JS-эталонов (+ переснят старый); из `js_port_gaps_allowed.txt` удалены 4 строки, `MAX_ALLOWED` 76→72
-- Чем проверено: `python scripts/dev.py check` — 487 passed / 2 skipped (calc) + 81 passed (bot); критерии шапки (pytest tablets 13, rg JS-меток ≥6, gaps-опции ok, allowed shrink ok, `--check` ok)
+- Чем проверено: после фикса Reviewer — `pytest test_tablets.py` 14 passed; `js_port_gaps.py --check` ok; `python scripts/dev.py check` — 488 passed / 2 skipped (calc) + 81 passed (bot)
 - Не сделано и почему: `plaque.py` / остальные ветки calcTablets — вне scope
 - Требуется решение: нет
+- Публичный параметр `print_method` из tablets удалён (заменён опциями `is_cut_laser` / `is_uv_print` / `is_grave` / `is_sublimation`); `plaque.py` его ещё передаёт в ветке сублимации (`elif application != "noApplication"`). Цена сублимации в plaque изменилась (на main 2390.76, на ветке 1516.41 при quantity=2, Plaque2330, AluminiumSU055; обе не совпадают с JS). Чинится в `plaque-thin-wrapper`. До его мержа не деплоить API с main.
 
 ### Расхождения до правки (старый tablets vs JS calcTablets)
 
