@@ -1,6 +1,6 @@
 # print-sheet-routing
 
-Статус: в работе
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -99,8 +99,22 @@ print("ok")
 
 ## Результат
 
-- Ветка, PR или коммит:
+- Ветка, PR или коммит: `task/print-sheet-routing` — `02822cb` (routing), `b0f2273` (size_mm), `805a0f5` (js_port_gaps). Push не делался.
 - Сделано:
+  - Эталоны до правки: лазер `print_sheet` qty=10 90×50 PaperSublimation128 → cost `495.50320000000005`, price `799`; пазл Puzzle300420 → price `1171`.
+  - Маршрутизация: `EPSONWF7610` / `DTFTransfer` → `PrintInkjetCalculator`; качество по умолчанию 1 / 0; параметр `quality` в схемах. Лазерная ветка без изменений (включая `math.ceil` цены).
+  - `size_mm` в элементе `materials` печати — отдельным коммитом.
+  - Строка про округление в `calc_service/AGENTS.md` (контракт ответа).
+  - JS-эталоны в `test_print_sheet.py` (EPSON 1 и 2, DTF); `test_heat_press` / `test_mug` expected — `xfail(strict=True)`.
+  - Удалён пропуск `calcPrintSheet call calcPrintInkJet` из allowlist.
 - Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+  - JS runner: cost 523.1 / price 841.856 → `ok`.
+  - `python -m pytest …/test_print_sheet.py -q` → `20 passed`.
+  - `rg` 523.1 / 841.856; `JS, …2026` ≥ 3; `size_mm` одна строка в коде.
+  - `git diff main --stat -- …/test_puzzle.py` пусто; `test_puzzle.py` → `6 passed`.
+  - Лазер: `(cost, price) == (495.50320000000005, 799)` → `ok`.
+  - AGENTS блок «Контракт ответа»: копейках + showResult → `ok`.
+  - `python scripts/dev.py check` → calc `476 passed, 2 skipped, 2 xfailed`; bot `81 passed`.
+  - Self-review по AGENTS.md: scope только задача; цен в Python нет; обязательные поля ответа на месте; эталоны лазер/пазлы не тронуты; xfail только expected heat_press/mug.
+- Не сделано и почему: эталоны heat_press/mug не пересняты (следующая задача `heat-press-mug-vs-js`); `calcPrintSheet call calcPrintLaser` остаётся в allowlist (лазер inlined, ветку не трогали); push нет по запросу.
+- Требуется решение: нет.
