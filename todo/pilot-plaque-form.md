@@ -36,8 +36,8 @@ Reviewer: Grok 4.7
 | 4 | Ревью человека на `plaque.js` | нужно перед переключением 69 |
 | 5 | Деплой плагина | **не нужен**, пока `plaque.js` не меняется: на проде уже 0.2.4 и `forms/plaque.js` с `calcApi` |
 | 6 | Дубль формы 69 → копия 86, товар 2586879 draft | сделано |
-| 7 | Отладка копии на боевом API (УФ + гравировка + сублимация) | в работе: JS↔API ок; UI гравировки/сублимации на копии — ждёт Browser MCP |
-| 8–12 | Боевая 69, снимок, `forms.md`, `wp-plugin/AGENTS.md`, приписка 5.5 | **стоп** до записи блока «Копия…» с тремя нанесениями и подтверждения человека |
+| 7 | Отладка копии на боевом API (УФ + гравировка + сублимация) | сделано (JS↔API + UI под админом) |
+| 8–12 | Боевая 69, снимок, `forms.md`, `wp-plugin/AGENTS.md`, приписка 5.5 | **стоп** — ждёт подтверждения человека на переключение 69 |
 
 1. Ворота боевого API. Тело `{"quantity":2,"plaque_id":"Plaque2330","material_id":"PVC3","application":"isUVPrint","mode":1}` на `POST https://insain.ru/api/v1/calc/plaque`. В ответе `price` равен 6205.71 (допуск 0.02). Другое число или нет slug — стоп: форму 69 не переключать.
 2. До перевода ещё раз локальная сверка тем же скриптом и эталоном. Новые кейсы не писать.
@@ -184,39 +184,44 @@ curl.exe -sS -o NUL -w "%{http_code}" "https://insain.ru/catalog/kalkulyator-nag
 
 ## Результат
 
-- Ветка, PR или коммит: `task/pilot-plaque-form` = `main` @ `86e9da1` (ff-only 02.11.2026). Merge fast-forward после ревью. `git push` — спросить. Zip плагина не собирали: на проде уже `insain-calc-bridge` **0.2.4**, файл `/wp-content/plugins/insain-calc-bridge/forms/plaque.js` с `calcApi('plaque'`.
+- Ветка, PR или коммит: `task/pilot-plaque-form` (ff от `main` @ `86e9da1`, затем `8305045` + этот коммит). Merge fast-forward после ревью. `git push` — спросить. Zip плагина не собирали: на проде уже `insain-calc-bridge` **0.2.4**, `forms/plaque.js` с `calcApi('plaque'`.
 - Сделано:
   - Ворота прод-API УФ: stdout `6205.71`, код 0.
   - Локальный JS эталон: `price` 6205.71. `pytest test_plaque.py` — 22 passed.
-  - `plaque.js` в git: проверка `ok` (calcApi / showResult / поля).
-  - Копия: форма `86`, товар `2586879`, `draft`, guest permalink `404`. Элемент 3321 — inline `calcApi` с id копии (3317/3318/3319/3334), `read_file` = 0. Боевая 69 — ещё старый `calcPlaque`.
-  - JS↔API (rel ≤ 0.001), материалы из списка формы (PVC3 в форме нет):
+  - `plaque.js` в git: проверка `ok`.
+  - **Копия до боевой формы:** форма `86`, товар `2586879`, `draft`, guest `https://insain.ru/?post_type=product&p=2586879` → `404`. Элемент 3321 — inline `calcApi` с id копии (3317/3318/3319/3334), `read_file` = 0. Боевая 69 — ещё старый `calcPlaque`. PVC3 в списке формы нет.
+  - JS↔API (rel ≤ 0.001):
 
-    | qty | material | application | mode | JS price | API price |
-    | --- | --- | --- | --- | --- | --- |
-    | 2 | AcrylWhite3 | isUVPrint | 1 | 6618.96 | 6618.96 |
-    | 1 | AcrylWhite3 | isUVPrint | 1 | 4367.26 | 4367.26 |
-    | 2 | AcrylWhite3 | isUVPrint | 2 | 6618.96 | 6618.96 |
-    | 2 | AcrylWhite3 | isGrave | 1 | 20637.56 | 20637.56 |
-    | 1 | AcrylWhite3 | isGrave | 1 | 10845.85 | 10845.85 |
-    | 2 | Plywood3 | isGrave | 1 | 20228.66 | 20228.66 |
-    | 2 | ZENOMARKLASER | isGrave | 1 | 20905.81 | 20905.81 |
-    | 2 | AluminiumSU055 | isSublimation | 1 | 4018.24 | 4018.24 |
-    | 1 | AluminiumSU055 | isSublimation | 1 | 2564.31 | 2564.31 |
-    | 2 | AluminiumSU055 | isSublimation | 2 | 4018.24 | 4018.24 |
+    | qty | material | application | mode | JS/API price |
+    | --- | --- | --- | --- | --- |
+    | 2 | AcrylWhite3 | isUVPrint | 1 | 6618.96 |
+    | 1 | AcrylWhite3 | isUVPrint | 1 | 4367.26 |
+    | 2 | AcrylWhite3 | isUVPrint | 2 | 6618.96 |
+    | 2 | AcrylWhite3 | isGrave | 1 | 20637.56 |
+    | 1 | AcrylWhite3 | isGrave | 1 | 10845.85 |
+    | 2 | Plywood3 | isGrave | 1 | 20228.66 |
+    | 2 | ZENOMARKLASER | isGrave | 1 | 20905.81 |
+    | 2 | AluminiumSU055 | isSublimation | 1 | 4018.24 |
+    | 1 | AluminiumSU055 | isSublimation | 1 | 2564.31 |
+    | 2 | AluminiumSU055 | isSublimation | 2 | 4018.24 |
 
-  - UI копии (ранее, под админом): УФ AcrylWhite3 ×2 mode 1 — POST 200, API 6618.96, на странице 6620 (`showResult`), вес 1.37, срок/материалы без `code`.
-  - Известное расхождение (не чинить): JS `AcrylWhite3` + `isSublimation` → NaN (`scripts/run_js_calc.mjs` падает); Python/API → 3605.49. Форма штатно не даёт пару: у `dpdMaterial` условие `hide_option` — пока не выбран option id `4` (`AluminiumSU055`), прячется нанесение id `3` (`isSublimation`) на 69 и на 86.
-- Чем проверено:
-  - Ворота Python one-liner → `6205.71`.
-  - `node scripts/run_js_calc.mjs calcPlaque --data current --params '…'` и `POST https://insain.ru/api/v1/calc/plaque` по таблице выше.
-  - `python -m pytest calc_service/tests/test_calculators/test_plaque.py -q` → `22 passed`.
-  - `ssh`/`curl`: товар 2586879 draft, guest 404; витрина плакеток 200; плагин 0.2.4; `grep calcApi …/forms/plaque.js`.
+  - UI копии под админом (Browser MCP, preview), все POST `/api/v1/calc/plaque` → 200; цена на странице = API с округлением `showResult`; материалы без `code`:
+
+    | qty | material | application | mode | тело POST | API price | на странице |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | 2 | AcrylWhite3 | isUVPrint | 1 | да | 6618.96 | 6620; вес 1.37; «Срок 4 дня» |
+    | 1 | AcrylWhite3 | isUVPrint | 2 | да | 4367.26 | 4400; «Срок 4 дня» |
+    | 2 | AcrylWhite3 | isGrave | 1 | да | 20637.56 | 20640; «Срок 5 дней» |
+    | 1 | AcrylWhite3 | isGrave | 1 | да | 10845.85 | 10900; «Срок 5 дней» |
+    | 2 | AluminiumSU055 | isSublimation | 1 | да | 4018.24 | 4020; «Срок 2 дня» |
+    | 1 | AluminiumSU055 | isSublimation | 1 | да | 2564.31 | 2600; «Срок 2 дня» |
+    | 1 | AluminiumSU055 | isSublimation | 2 | да | 2564.31 | 2600 (mode 2 в теле; цена как mode 1 — thin wrapper) |
+
+  - Известное расхождение (не чинить): JS `AcrylWhite3`+`isSublimation` → NaN; Python → 3605.49. Форма штатно пару не даёт (`hide_option` сублимации без `AluminiumSU055`).
+- Чем проверено: ворота one-liner; `run_js_calc.mjs` + prod API; `pytest test_plaque.py`; Browser MCP Network на копии; `curl` guest 404 / витрина 200; плагин 0.2.4.
 - Не сделано и почему:
-  - UI-прогон копии 86 под админом для **гравировки** и **сублимации** (и повтор mode 2 на странице) — Browser MCP: `No connection to browser extension` / timeout. Без этого блок «Копия до боевой формы» с тремя нанесениями не закрыт → форму 69 не переключаем.
-  - Шаги 8–12 (read_file на 69, снимок, forms.md, AGENTS.md, приписка 5.5, `make check` сдачи) — после UI копии и подтверждения человека.
-  - Деплой плагина — не требуется без изменения `plaque.js`.
+  - Шаги 8–12 (read_file на 69, снимок, forms.md, AGENTS.md, приписка 5.5, `make check` сдачи) — ждут подтверждения человека.
+  - Деплой плагина — не нужен без изменения `plaque.js`.
 - Требуется решение:
-  - Подключить Browser MCP (Connect в расширении Chrome) и подтвердить UI-прогон копии 86: УФ / гравировка / сублимация, 1 и 2 шт., mode 1 + один mode 2.
-  - После записи UI-цен по трём нанесениям — подтвердить переключение боевой формы 69 на `forms/plaque.js` (`read_file` = 1).
-- Как откатить: форма 69 ещё на старом JS — откат не нужен. Копия 86 / draft 2586879 — оставить или удалить только с подтверждения. Плагин не меняли.
+  - Подтвердить переключение боевой формы **69** на `{{abspath}}wp-content/plugins/insain-calc-bridge/forms/plaque.js` (`read_file` = 1). После «да» — Site ops + git-шаги 9–12.
+- Как откатить: форма 69 ещё на старом JS. После переключения — выключить `read_file` у элемента расчёта 69, сохранить, `wp litespeed-purge all`. Копия 86 / 2586879 — только с подтверждения.
