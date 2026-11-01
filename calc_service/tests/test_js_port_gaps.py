@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "js_port_gaps.py"
 ALLOWED = ROOT / "scripts" / "js_port_gaps_allowed.txt"
 
-MAX_ALLOWED = 76
+MAX_ALLOWED = 72
 
 
 def _allowed_lines() -> list[str]:
@@ -70,4 +70,4 @@ def test_report_follows_call_chain():
     blocks = {b.splitlines()[0].split(" ->")[0]: b for b in r.stdout.strip().split("\n\n")}
     assert "calcTablets" in blocks
     missing = [s for s in blocks["calcTablets"].splitlines() if s.startswith("нет в Python:")]
-    assert missing and "isSublimation" in missing[0]
+    assert missing and "calcCutRoller" in missing[0]

@@ -1,5 +1,8 @@
 """
 Тесты калькулятора табличек (tablets).
+
+Эталоны calcTablets: node scripts/run_js_calc.mjs calcTablets --data current --args '…'
+size = sizePlate Plaque2330 [195, 265]; sizeItem = min(w,h) = 195.
 """
 
 from __future__ import annotations
@@ -15,22 +18,46 @@ if _calc_service.name == "calc_service" and str(_calc_service) not in sys.path:
 
 from calculators.tablets import TabletsCalculator
 
+JS_REL_TOL = 0.001  # 0.1%
+
 
 @pytest.fixture(scope="module")
 def calc():
     return TabletsCalculator()
 
 
+# Аргументы как из calcPlaque для УФ
+_UV_OPTS = {
+    "is_cut_laser": {"size_item": 195, "density": 0, "difficulty": 1, "len_cut": 0},
+    "is_uv_print": {
+        "printerID": "RimalSuvUV",
+        "resolution": 2,
+        "surface": "isPlain",
+        "color": "4+1",
+    },
+}
+# Гравировка
+_GRAVE_OPTS = {
+    "is_cut_laser": {"size_item": 195, "density": 0, "difficulty": 1, "len_cut": 0},
+    "is_grave": 2,
+    "is_grave_fill": [195, 265],
+}
+# Сублимация
+_SUB_OPTS = {
+    "is_cut_manual_metal": "AccusheadPro12",
+    "is_sublimation": True,
+}
+
+
 @pytest.fixture(scope="module")
 def base_params():
     return {
         "quantity": 5,
-        "width": 297,
-        "height": 210,
+        "width": 195,
+        "height": 265,
         "material_id": "PVC3",
-        "print_method": "uv",
-        "is_frame": False,
         "mode": 1,
+        **_UV_OPTS,
     }
 
 
@@ -80,98 +107,175 @@ def test_get_tool_schema(calc):
     schema = calc.get_tool_schema()
     assert schema.get("name") == "calc_tablets"
     assert "parameters" in schema
+    props = schema["parameters"]["properties"]
+    assert "is_cut_manual_metal" in props
+    assert "is_sublimation" in props
+    assert "is_cut_laser" in props
+    assert "is_uv_print" in props
 
 
-# ── Эталонный тест ───────────────────────────────────────────────────
+def test_get_param_schema(calc):
+    schema = calc.get_param_schema()
+    names = {p["name"] for p in schema["params"]}
+    assert "is_cut_manual_metal" in names
+    assert "is_sublimation" in names
+    assert "is_cut_laser" in names
+    assert "is_uv_print" in names
 
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
-    return abs(a - b) <= rel * max(abs(b), 1e-9)
 
+# ── Эталоны JS, 02.11.2026 ───────────────────────────────────────────
+# Пересняты с calcTablets (ранее эталон print_method=uv 297×210 был не с JS).
 
-REF_PARAMS = {
-    "quantity": 5,
-    "width": 297,
-    "height": 210,
+# JS, 02.11.2026 — УФ + лазер, тираж 1
+# calcTablets(1, [195,265], 'PVC3', {isCutLaser:{sizeItem:195,density:0,difficulty:1,lenCut:0},
+#   isUVPrint:{printerID:'RimalSuvUV',resolution:2,surface:'isPlain',color:'4+1'}}, 1)
+REF_UV_1 = {
+    "quantity": 1,
+    "width": 195,
+    "height": 265,
     "material_id": "PVC3",
-    "print_method": "uv",
-    "is_frame": False,
     "mode": 1,
+    **_UV_OPTS,
 }
-EXPECTED_REF = {
-    "cost": 2025.0,
-    "price": 3285.0,
-    "time_hours": 0.6,
-    "time_ready": 32.6,
-    "weight_kg": 0.51,
-}
-EXPECTED_MATERIAL = {
-    "code": "PVC3",
-    "name_substring": "ПВХ",
-    "quantity_approx": 1,
+EXPECTED_UV_1 = {
+    "cost": 1479.9,
+    "price": 2299.0,
+    "time_hours": 0.91,
+    "time_ready": 33.55,
+    "weight_kg": 0.09,
 }
 
+# JS, 02.11.2026 — УФ + лазер, тираж ≥ 2
+REF_UV_5 = {
+    "quantity": 5,
+    "width": 195,
+    "height": 265,
+    "material_id": "PVC3",
+    "mode": 1,
+    **_UV_OPTS,
+}
+EXPECTED_UV_5 = {
+    "cost": 3886.0,
+    "price": 6234.0,
+    "time_hours": 2.57,
+    "time_ready": 36.77,
+    "weight_kg": 0.43,
+}
 
-@pytest.fixture(scope="module")
-def ref_result(calc):
-    try:
-        return calc.execute(REF_PARAMS)
-    except Exception:
-        return None
+# JS, 02.11.2026 — гравировка, тираж 1
+REF_GRAVE_1 = {
+    "quantity": 1,
+    "width": 195,
+    "height": 265,
+    "material_id": "PVC3",
+    "mode": 1,
+    **_GRAVE_OPTS,
+}
+EXPECTED_GRAVE_1 = {
+    "cost": 4650.8,
+    "price": 6768.0,
+    "time_hours": 4.58,
+    "time_ready": 25.16,
+    "weight_kg": 0.09,
+}
+
+# JS, 02.11.2026 — гравировка, тираж ≥ 2
+REF_GRAVE_5 = {
+    "quantity": 5,
+    "width": 195,
+    "height": 265,
+    "material_id": "PVC3",
+    "mode": 1,
+    **_GRAVE_OPTS,
+}
+EXPECTED_GRAVE_5 = {
+    "cost": 23456.0,
+    "price": 37546.0,
+    "time_hours": 26.2,
+    "time_ready": 68.4,
+    "weight_kg": 0.43,
+}
+
+# JS, 02.11.2026 — сублимация, тираж 1
+REF_SUB_1 = {
+    "quantity": 1,
+    "width": 195,
+    "height": 265,
+    "material_id": "AluminiumSU055",
+    "mode": 1,
+    **_SUB_OPTS,
+}
+EXPECTED_SUB_1 = {
+    "cost": 771.539047586521,
+    "price": 1245.5898189936247,
+    "time_hours": 0.45,
+    "time_ready": 17.53972222222222,
+    "weight_kg": 0.1,
+}
+
+# JS, 02.11.2026 — сублимация, тираж ≥ 2
+REF_SUB_5 = {
+    "quantity": 5,
+    "width": 195,
+    "height": 265,
+    "material_id": "AluminiumSU055",
+    "mode": 1,
+    **_SUB_OPTS,
+}
+EXPECTED_SUB_5 = {
+    "cost": 1948.6952379326049,
+    "price": 3163.829094968124,
+    "time_hours": 1.01,
+    "time_ready": 19.388611111111114,
+    "weight_kg": 0.47,
+}
 
 
-def test_expected_values_tablets(ref_result):
-    if ref_result is None:
-        pytest.skip("расчёт эталонного кейса не выполнен")
-    r = ref_result
-    e = EXPECTED_REF
-    em = EXPECTED_MATERIAL
-    rel = 0.03
+def _assert_js(r: dict, e: dict) -> None:
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=JS_REL_TOL)
 
-    ok_cost = _cmp(r["cost"], e["cost"], rel)
-    ok_price = _cmp(r["price"], e["price"], rel)
-    ok_time = _cmp(r["time_hours"], e["time_hours"], rel)
-    ok_ready = _cmp(r["time_ready"], e["time_ready"], rel)
-    ok_weight = _cmp(r["weight_kg"], e["weight_kg"], rel)
 
+def test_expected_uv_qty1(calc):
+    """JS, 02.11.2026: УФ + лазер PVC3, тираж 1."""
+    _assert_js(calc.calculate(REF_UV_1), EXPECTED_UV_1)
+
+
+def test_expected_uv_qty5(calc):
+    """JS, 02.11.2026: УФ + лазер PVC3, тираж 5."""
+    r = calc.calculate(REF_UV_5)
+    _assert_js(r, EXPECTED_UV_5)
     materials = r.get("materials") or []
-    mat = materials[0] if materials else {}
-    ok_mat_code = mat.get("code") == em["code"]
-    ok_mat_name = em["name_substring"] in (mat.get("name") or "")
-    ok_mat_q = _cmp(float(mat.get("quantity") or 0), float(em["quantity_approx"]), 0.15) if materials else False
+    assert materials
+    assert any(m.get("code") == "PVC3" for m in materials)
+    for m in materials:
+        assert "title" in m
 
-    print("")
-    print("  [таблички] quantity=%s  |  size=%s×%s  |  material_id=%s  |  print_method=%s  |  mode=%s"
-          % (REF_PARAMS["quantity"], REF_PARAMS["width"], REF_PARAMS["height"],
-             REF_PARAMS["material_id"], REF_PARAMS["print_method"], REF_PARAMS["mode"]))
-    print("  ---")
-    print("  cost        %s  (ожид. %s)  %s" % (r["cost"], e["cost"], "ok" if ok_cost else "FAIL"))
-    print("  price       %s  (ожид. %s)  %s" % (r["price"], e["price"], "ok" if ok_price else "FAIL"))
-    print("  time_hours  %s  (ожид. %s)  %s" % (r["time_hours"], e["time_hours"], "ok" if ok_time else "FAIL"))
-    print("  time_ready  %s  (ожид. %s)  %s" % (r["time_ready"], e["time_ready"], "ok" if ok_ready else "FAIL"))
-    print("  weight_kg   %s  (ожид. %s)  %s" % (r["weight_kg"], e["weight_kg"], "ok" if ok_weight else "FAIL"))
-    if materials:
-        print(
-            "  material    code=%s  name=%s  quantity=%s  (ожид. code=%s, name содержит '%s', qty ~%s)  %s"
-            % (
-                mat.get("code"),
-                (mat.get("name") or "")[:50],
-                mat.get("quantity"),
-                em["code"],
-                em["name_substring"],
-                em["quantity_approx"],
-                "ok" if (ok_mat_code and ok_mat_name and ok_mat_q) else "FAIL",
-            )
-        )
-        assert "title" in mat
-    else:
-        print("  material    (нет в результате, ожид. code=%s, qty ~%s)  FAIL" % (em["code"], em["quantity_approx"]))
 
-    assert ok_cost, f"cost: got {r['cost']}, expected ~{e['cost']}"
-    assert ok_price, f"price: got {r['price']}, expected ~{e['price']}"
-    assert ok_time, f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
-    assert ok_ready, f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
-    assert ok_weight, f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
-    assert materials, "ожидается материал в результате"
-    assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
-    assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
-    assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+def test_expected_grave_qty1(calc):
+    """JS, 02.11.2026: гравировка PVC3, тираж 1."""
+    _assert_js(calc.calculate(REF_GRAVE_1), EXPECTED_GRAVE_1)
+
+
+def test_expected_grave_qty5(calc):
+    """JS, 02.11.2026: гравировка PVC3, тираж 5."""
+    _assert_js(calc.calculate(REF_GRAVE_5), EXPECTED_GRAVE_5)
+
+
+def test_expected_sublimation_qty1(calc):
+    """JS, 02.11.2026: сублимация AluminiumSU055, тираж 1."""
+    _assert_js(calc.calculate(REF_SUB_1), EXPECTED_SUB_1)
+
+
+def test_expected_sublimation_qty5(calc):
+    """JS, 02.11.2026: сублимация AluminiumSU055, тираж 5."""
+    _assert_js(calc.calculate(REF_SUB_5), EXPECTED_SUB_5)
+
+
+# Старый эталон (print_method=uv, 297×210) переснят как УФ+лазер на sizePlate — см. REF_UV_5.
+def test_expected_values_tablets(calc):
+    """JS, 02.11.2026: переснят старый эталон → УФ qty5 (plaque args)."""
+    _assert_js(calc.calculate(REF_UV_5), EXPECTED_UV_5)

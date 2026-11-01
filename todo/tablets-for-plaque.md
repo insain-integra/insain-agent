@@ -1,6 +1,6 @@
 # tablets-for-plaque
 
-Статус: черновик
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -89,8 +89,24 @@ print("ok")
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+- Ветка, PR или коммит: `task/tablets-for-plaque` (push не делался)
+- Сделано: ветки `is_cut_manual_metal`, `is_sublimation`, `is_cut_laser` (+ `is_grave`/`is_grave_fill`), `is_uv_print` в `tablets.py` через порты; 6 JS-эталонов (+ переснят старый); из `js_port_gaps_allowed.txt` удалены 4 строки, `MAX_ALLOWED` 76→72
+- Чем проверено: `python scripts/dev.py check` — 487 passed / 2 skipped (calc) + 81 passed (bot); критерии шапки (pytest tablets 13, rg JS-меток ≥6, gaps-опции ok, allowed shrink ok, `--check` ok)
+- Не сделано и почему: `plaque.py` / остальные ветки calcTablets — вне scope
+- Требуется решение: нет
+
+### Расхождения до правки (старый tablets vs JS calcTablets)
+
+| Слагаемое | JS | Python (до) | Причина |
+| --- | --- | --- | --- |
+| Лазер `len_cut` / `size_item` | `lenCut=0`, `sizeItem=min(w,h)` | `(w+h)*2`, `size_item=w*h` | `print_method=laser` не брал аргументы calcPlaque |
+| УФ vs лазер | УФ **поверх** лазерной резки | взаимоисключение через `print_method` | нет раздельных опций |
+| `isCutManualMetal` | `calcCutSaber` + раскладка A4/A3 + материал | отсутствовало | не перенесено |
+| `isSublimation` | `calcHeatPress(sublimation, metal)` | отсутствовало | не перенесено |
+| `time_ready` | `time + max(component.timeReady)` | `max(component.time_ready)` | другая формула |
+| Эталон 297×210 UV | не с JS | cost 2025 / price 3285 | снят с Python, не с calcTablets |
+
+### js_port_gaps calcTablets
+
+- **До:** `нет в Python: option isCutManual, option isCutManualMetal, option isCutMilling, option isSublimation, option isFilm, option isBackgroundFilm, option isShaft, option isAdhesiveLayer, option isEVAFoam, call calcCutRoller, call calcCutSaber, call calcMilling, call calcHeatPress, call calcPrintRoll, call calcManualRoll, call calcSticker, call calcPockets, call calcFrame`
+- **После:** `нет в Python: option isCutManual, option isCutMilling, option isFilm, option isBackgroundFilm, option isShaft, option isAdhesiveLayer, option isEVAFoam, call calcCutRoller, call calcMilling, call calcPrintRoll, call calcManualRoll, call calcSticker, call calcPockets, call calcFrame`
