@@ -39,7 +39,7 @@ Reviewer: Grok 4.7
 
 ## Критерии приёмки
 
-- [ ] Раннер на замере. Stdout `ok`:
+- [x] Раннер на замере. Stdout `ok`:
 
 ```powershell
 @'
@@ -52,10 +52,10 @@ print("ok")
 '@ | python -
 ```
 
-- [ ] `python -m pytest calc_service/tests/test_calculators/test_print_sheet.py -q` — `passed`, не меньше 17 тестов, без `failed`.
-- [ ] `rg -n "523\.1|841\.86?" calc_service/tests/test_calculators/test_print_sheet.py` — оба числа найдены; `rg -c "JS, \d\d\.\d\d\.2026" calc_service/tests/test_calculators/test_print_sheet.py` — не меньше 3.
-- [ ] Пазлы не изменились: `git diff main --stat -- calc_service/tests/test_calculators/test_puzzle.py` — пустой вывод; `python -m pytest calc_service/tests/test_calculators/test_puzzle.py -q` — `6 passed`.
-- [ ] Лазерная ветка не изменилась. Stdout `ok` (числа `main` снять до правки и вписать вместо `<…>`):
+- [x] `python -m pytest calc_service/tests/test_calculators/test_print_sheet.py -q` — `passed`, не меньше 17 тестов, без `failed` (факт: 20 passed).
+- [x] `rg -n "523\.1|841\.86?" calc_service/tests/test_calculators/test_print_sheet.py` — оба числа найдены; `rg -c "JS, \d\d\.\d\d\.2026" calc_service/tests/test_calculators/test_print_sheet.py` — не меньше 3 (факт: 6).
+- [x] Пазлы не изменились: `git diff main --stat -- calc_service/tests/test_calculators/test_puzzle.py` — пустой вывод; `python -m pytest calc_service/tests/test_calculators/test_puzzle.py -q` — `6 passed`.
+- [x] Лазерная ветка не изменилась. Stdout `ok` (числа `main` до правки):
 
 ```powershell
 @'
@@ -63,13 +63,13 @@ import sys
 sys.path.insert(0, "calc_service")
 from calculators.print_sheet import PrintSheetCalculator
 r = PrintSheetCalculator().calculate({"quantity": 10, "width": 90, "height": 50, "material_id": "PaperSublimation128", "color": "4+0", "mode": 1})
-assert (r["cost"], r["price"]) == (<cost main>, <price main>), (r["cost"], r["price"])
+assert (r["cost"], r["price"]) == (495.50320000000005, 799), (r["cost"], r["price"])
 print("ok")
 '@ | python -
 ```
 
-- [ ] `rg -n "\"size_mm\"" calc_service/calculators/print_sheet.py` — одна строка в элементе `materials`.
-- [ ] Строка решения про округление. Stdout `ok`:
+- [x] `rg -n "size_mm" calc_service/calculators/print_sheet.py` — одна строка в элементе `materials`.
+- [x] Строка решения про округление. Stdout `ok`:
 
 ```powershell
 @'
@@ -80,12 +80,12 @@ assert "копейках" in block and "showResult" in block
 print("ok")
 '@ | python -
 ```
-- [ ] `rg -n "xfail" calc_service/tests/test_calculators` — только тесты `test_heat_press.py` и `test_mug.py` с `reason` про `heat-press-mug-vs-js`, или пустой вывод.
+- [x] `rg -n "xfail" calc_service/tests/test_calculators` — только тесты `test_heat_press.py` и `test_mug.py` с `reason` про `heat-press-mug-vs-js`.
 
 ## Проверки
 
-- [ ] `make check` (или `python scripts/dev.py check`) — зелёный вывод
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `make check` (или `python scripts/dev.py check`) — зелёный вывод
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
 ## Риски
 
