@@ -246,3 +246,55 @@ def test_matches_js_calc_plaque(calc, case):
     fields = ("cost", "price", "unit_price", "time_hours", "time_ready", "weight_kg")
     for field, value in zip(fields, expected):
         assert _cmp(r[field], value), f"{field}: got {r[field]}, JS {value}"
+
+
+# Сублимация: node scripts/run_js_calc.mjs calcPlaque --data current --params '...'
+# JS, 02.11.2026
+SUBLIMATION_CASES = [
+    # JS, 02.11.2026
+    (
+        (2, "Plaque2330", "AluminiumSU055", "isSublimation"),
+        1696.078095173042,
+        4018.24,
+        2009.12,
+        0.58,
+        18.54944444444444,
+        1.19,
+    ),
+    # JS, 02.11.2026
+    (
+        (1, "Plaque2330", "AluminiumSU055", "isSublimation"),
+        1086.539047586521,
+        2564.31,
+        2564.31,
+        0.45,
+        17.98972222222222,
+        0.6,
+    ),
+]
+
+
+@pytest.mark.parametrize("case", SUBLIMATION_CASES, ids=lambda c: "-".join(str(x) for x in c[0]))
+def test_matches_js_calc_plaque_sublimation(calc, case):
+    (quantity, plaque_id, material_id, application), *expected = case
+    r = calc.execute({
+        "quantity": quantity,
+        "plaque_id": plaque_id,
+        "material_id": material_id,
+        "application": application,
+        "mode": 1,
+    })
+    fields = ("cost", "price", "unit_price", "time_hours", "time_ready", "weight_kg")
+    for field, value in zip(fields, expected):
+        assert _cmp(r[field], value), f"{field}: got {r[field]}, JS {value}"
+
+
+def test_plate_mode_always_standard(calc, base_params):
+    """Как JS строка 640: пластина всегда mode 1 — mode плакетки не меняет цену."""
+    p1 = dict(base_params, mode=1)
+    p2 = dict(base_params, mode=2)
+    r1 = calc.calculate(p1)
+    r2 = calc.calculate(p2)
+    assert _cmp(r1["price"], r2["price"])
+    assert _cmp(r1["cost"], r2["cost"])
+    assert _cmp(r1["time_hours"], r2["time_hours"])

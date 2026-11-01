@@ -4,6 +4,9 @@
 Мигрировано из js_legacy/calc/calcTablets.js (функция calcPlaque, строки 582–661).
 Плакетка = деревянная основа (дощечка) + металлическая пластина с нанесением
 (УФ-печать / лазерная гравировка / сублимация).
+
+Пластина считается через TabletsCalculator с опциями как в calcPlaque (строки 620–640):
+режим пластины всегда стандартный (modeProduction = 1).
 """
 
 from __future__ import annotations
@@ -15,9 +18,7 @@ from typing import Any, Dict, List, Mapping, Optional
 import json5
 
 from calculators.base import BaseCalculator, ProductionMode
-from calculators.laser import LaserCalculator
 from calculators.tablets import TabletsCalculator
-from calculators.uv_print import UVPrintCalculator
 from common.markups import BASE_TIME_READY, MARGIN_MATERIAL, get_margin
 from materials import plaque as plaque_catalog, hardsheet as hardsheet_catalog
 
@@ -62,78 +63,51 @@ def _get_plaque_extra(plaque_id: str) -> Dict[str, Any]:
     }
 
 
-# Маппинг способа нанесения → print_method для TabletsCalculator
-_APPLICATION_TO_PRINT_METHOD: Dict[str, str] = {
-    "noApplication": "none",
-    "isUVPrint": "uv",
-    "isGrave": "laser",
-    "isSublimation": "none",
-}
+APPLICATIONS = ("noApplication", "isUVPrint", "isGrave", "isSublimation")
 
-# Параметры нанесения на пластину из calcPlaque
+# Параметры нанесения на пластину из calcPlaque (строки 620–639)
 PLATE_UV_PRINTER = "RimalSuvUV"
 PLATE_UV_RESOLUTION = 2
 PLATE_UV_COLOR = "4+1"
 PLATE_GRAVE_RESOLUTION = 2
+PLATE_METAL_CUTTER = "AccusheadPro12"
 
 
-def _calc_plate(
-    n: int,
-    size_plate: List[float],
-    material_id: str,
-    application: str,
-    mode: ProductionMode,
-) -> Dict[str, Any]:
-    """
-    Пластина с УФ-печатью или гравировкой — как calcTablets с опциями из calcPlaque:
-    лазерная резка с материалом плюс нанесение, итог с наценкой marginTablets.
-    """
-    laser_params: Dict[str, Any] = {
-        "quantity": n,
-        "width": size_plate[0],
-        "height": size_plate[1],
-        "material_id": material_id,
-        "mode": mode.value,
-        "is_cut_laser": {
-            "len_cut": 0,
-            "size_item": min(size_plate),
-            "density": 0,
-            "difficulty": 1,
-        },
-    }
-    if application == "isGrave":
-        laser_params["is_grave"] = PLATE_GRAVE_RESOLUTION
-        laser_params["is_grave_fill"] = list(size_plate)
-    parts = [LaserCalculator().calculate(laser_params)]
-
+def _plate_options(application: str, size_plate: List[float]) -> Dict[str, Any]:
+    """Опции нанесения для TabletsCalculator — как optionsApplication в JS."""
+    size_item = min(size_plate[0], size_plate[1])
     if application == "isUVPrint":
-        parts.append(UVPrintCalculator().calculate({
-            "quantity": n,
-            "width": size_plate[0],
-            "height": size_plate[1],
-            "item_width": size_plate[0],
-            "item_height": size_plate[1],
-            "resolution": PLATE_UV_RESOLUTION,
-            "color": PLATE_UV_COLOR,
-            "surface": "plain",
-            "printer_code": PLATE_UV_PRINTER,
-            "mode": mode.value,
-        }))
-
-    materials: List[Dict[str, Any]] = []
-    for part in parts:
-        materials.extend(part.get("materials", []))
-
-    # JS calcTablets: время готовности = время работ + максимум сроков частей
-    time_hours = math.ceil(sum(float(p["time_hours"]) for p in parts) * 100) / 100.0
-    return {
-        "cost": sum(float(p["cost"]) for p in parts),
-        "price": sum(float(p["price"]) for p in parts) * (1 + get_margin("marginTablets")),
-        "time_hours": time_hours,
-        "time_ready": time_hours + max(float(p["time_ready"]) for p in parts),
-        "weight_kg": math.ceil(sum(float(p["weight_kg"]) for p in parts) * 100) / 100.0,
-        "materials": materials,
-    }
+        return {
+            "is_cut_laser": {
+                "size_item": size_item,
+                "density": 0,
+                "difficulty": 1,
+                "len_cut": 0,
+            },
+            "is_uv_print": {
+                "printerID": PLATE_UV_PRINTER,
+                "resolution": PLATE_UV_RESOLUTION,
+                "surface": "isPlain",
+                "color": PLATE_UV_COLOR,
+            },
+        }
+    if application == "isGrave":
+        return {
+            "is_cut_laser": {
+                "size_item": size_item,
+                "density": 0,
+                "difficulty": 1,
+                "len_cut": 0,
+            },
+            "is_grave": PLATE_GRAVE_RESOLUTION,
+            "is_grave_fill": list(size_plate),
+        }
+    if application == "isSublimation":
+        return {
+            "is_cut_manual_metal": PLATE_METAL_CUTTER,
+            "is_sublimation": True,
+        }
+    return {}
 
 
 APPLICATION_CHOICES = [
@@ -274,7 +248,7 @@ class PlaqueCalculator(BaseCalculator):
             raise ValueError("plaque_id обязателен")
         if not material_id:
             raise ValueError("material_id обязателен")
-        if application not in _APPLICATION_TO_PRINT_METHOD:
+        if application not in APPLICATIONS:
             raise ValueError(f"Неизвестный способ нанесения: {application!r}")
 
         # --- 1. Стоимость основы (деревянная дощечка) ---
@@ -296,50 +270,31 @@ class PlaqueCalculator(BaseCalculator):
             }
         ]
 
-        # --- 2. Расчёт пластины ---
-        cost_plate = 0.0
-        price_plate = 0.0
-        time_plate = 0.0
-        time_ready_plate = 0.0
-        weight_plate = 0.0
+        # --- 2. Пластина через TabletsCalculator (JS строка 640: modeProduction = 1) ---
+        tablets_params: Dict[str, Any] = {
+            "quantity": n,
+            "width": size_plate[0],
+            "height": size_plate[1],
+            "material_id": material_id,
+            "mode": ProductionMode.STANDARD.value,
+        }
+        tablets_params.update(_plate_options(application, size_plate))
+        plate_result = TabletsCalculator().calculate(tablets_params)
 
-        if application in ("isUVPrint", "isGrave"):
-            plate_result = _calc_plate(n, size_plate, material_id, application, mode)
-            cost_plate = plate_result["cost"]
-            price_plate = plate_result["price"]
-            time_plate = plate_result["time_hours"]
-            time_ready_plate = plate_result["time_ready"]
-            weight_plate = plate_result["weight_kg"]
-            materials_out.extend(plate_result["materials"])
-        elif application != "noApplication":
-            print_method = _APPLICATION_TO_PRINT_METHOD[application]
-            tablets_calc = TabletsCalculator()
-            tablets_params: Dict[str, Any] = {
-                "quantity": n,
-                "width": size_plate[0],
-                "height": size_plate[1],
-                "material_id": material_id,
-                "print_method": print_method,
-                "mode": mode.value,
-            }
-            plate_result = tablets_calc.calculate(tablets_params)
+        cost_plate = float(plate_result.get("cost", 0))
+        price_plate = float(plate_result.get("price", 0))
+        time_plate = float(plate_result.get("time_hours", 0))
+        time_ready_plate = float(plate_result.get("time_ready", 0))
+        weight_plate = float(plate_result.get("weight_kg", 0))
+        materials_out.extend(plate_result.get("materials", []))
 
-            cost_plate = float(plate_result.get("cost", 0))
-            price_plate = float(plate_result.get("price", 0))
-            time_plate = float(plate_result.get("time_hours", 0))
-            time_ready_plate = float(plate_result.get("time_ready", 0))
-            weight_plate = float(plate_result.get("weight_kg", 0))
-            materials_out.extend(plate_result.get("materials", []))
-
-        # --- 3. Итог ---
+        # --- 3. Итог как в JS calcPlaque ---
         cost_total = cost_plaque + cost_plate
-        price_total = price_plaque + price_plate
         margin_plaque = get_margin("marginPlaque")
-        price_total = round(price_total * (1 + margin_plaque), 2)
+        price_total = round((price_plaque + price_plate) * (1 + margin_plaque), 2)
 
         time_hours = math.ceil(time_plate * 100) / 100.0
-
-        # JS: result.timeReady = result.time + Math.max(costPlate.timeReady, costPlaque.timeReady, costSet.timeReady)
+        # JS: result.timeReady = result.time + Math.max(costPlate.timeReady, ...)
         time_ready = time_hours + max(time_ready_plate, 0)
         if time_ready <= 0:
             idx = max(0, min(len(BASE_TIME_READY) - 1, mode.value))

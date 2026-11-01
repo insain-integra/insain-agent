@@ -1,6 +1,6 @@
 # plaque-thin-wrapper
 
-Статус: черновик
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -88,8 +88,21 @@ print("ok")
 
 ## Результат
 
-- Ветка, PR или коммит:
+- Ветка, PR или коммит: `task/plaque-thin-wrapper` (коммит локально, push не делался)
+- Baseline JS до правки (`run_js_calc.mjs calcPlaque --data current`):
+  - 2 шт., Plaque2330, AluminiumSU055, isSublimation, mode 1 → `price` 4018.239… ≈ **4018.24**, cost 1696.078…, time_hours 0.58, time_ready 18.549…, weight_kg 1.19
+  - 1 шт., те же → `price` 2564.310… ≈ **2564.31**, cost 1086.539…, time_hours 0.45, time_ready 17.989…, weight_kg 0.6
 - Сделано:
+  - `plaque.py` — thin wrapper: основа + опции 620–639 + `TabletsCalculator()` с mode=1 + итог как в JS; удалены `_calc_plate`, импорты Laser/UV
+  - эталоны сублимации (2 шт. / 1 шт.) с пометкой `# JS, 02.11.2026`
+  - тест поведения `test_plate_mode_always_standard` (JS mode 1 == mode 2)
+  - 22 теста plaque (было 19 на main)
 - Чем проверено:
+  - `python -m pytest calc_service/tests/test_calculators/test_plaque.py -q` → 22 passed
+  - `python scripts/dev.py check` → 491 passed + 81 passed
+  - критерии rg / assert `4018.24` / runner JS / `js_port_gaps.py --check` → ok
+  - `js_port_gaps.py calcPlaque`: блок calcPlaque `нет в Python:` пусто
+  - строк `plaque.py`: main **358** → после **313**
 - Не сделано и почему:
-- Требуется решение:
+  - тесты поведения из `314893f` не перенесены: JS при пустом `material_id` падает для isUVPrint/isGrave/isSublimation одинаково (материал не найден), а не «только УФ-печать»; AcrylWhite3+isSublimation в JS даёт NaN cost, не сообщение «только на алюминии» — Python tablets на акриле считает цену. Строка в отчёт, как в задаче.
+- Требуется решение: нет
