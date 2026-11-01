@@ -34,7 +34,6 @@ calcPrintOffsetPromo module
 calcPrintRoll option isJoing
 calcPrintRoll call calcLaminationWide
 calcPrintSheet call calcCutRoller
-calcPrintSheet call calcPrintInkJet
 calcPrintSheet call calcPrintLaser
 calcButtonPins call calcSticker
 calcPuzzle call calcTablets
