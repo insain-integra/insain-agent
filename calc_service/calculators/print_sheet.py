@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Mapping, Optional
 from calculators.base import BaseCalculator, ProductionMode
 from calculators.cut_guillotine import CutGuillotineCalculator
 from calculators.lamination import LaminationCalculator, LAMINATOR_CODE
+from calculators.print_inkjet import PrintInkjetCalculator
 from common.helpers import calc_weight
 from common.layout import layout_on_sheet
 from common.process_tools import calc_crease, calc_punching, calc_rounding
@@ -33,6 +34,10 @@ from materials import sheet as sheet_catalog
 from materials import get_material as get_material_any
 
 PRINTER_CODE = "KMBizhubC220"
+# Струйные принтеры — как switch в js_legacy/calc/calcPrintSheet.js (строки 83–97).
+INKJET_PRINTERS = frozenset({"EPSONWF7610", "DTFTransfer"})
+# Качество по умолчанию: EPSONWF7610 → 1, DTFTransfer → 0.
+_INKJET_DEFAULT_QUALITY = {"EPSONWF7610": 1, "DTFTransfer": 0}
 
 # Доп. опции постпечати — как в js_legacy/calc/calcPrintSheet.js (costOptions).
 # Фиксированные надбавки за шт. (себестоимость / цена до marginPrintSheet).
@@ -265,6 +270,21 @@ class PrintSheetCalculator(BaseCalculator):
                     },
                 },
                 {
+                    "name": "quality",
+                    "type": "enum",
+                    "required": False,
+                    "default": 1,
+                    "title": "Качество печати",
+                    "description": "Для струйных принтеров: 0=стандарт, 1=высокое, 2=фото. EPSONWF7610 по умолчанию 1, DTFTransfer — 0.",
+                    "choices": {
+                        "inline": [
+                            {"id": 0, "title": "Стандарт"},
+                            {"id": 1, "title": "Высокое"},
+                            {"id": 2, "title": "Фото"},
+                        ]
+                    },
+                },
+                {
                     "name": "option_numbering",
                     "type": "boolean",
                     "required": False,
@@ -318,7 +338,7 @@ class PrintSheetCalculator(BaseCalculator):
             "param_groups": {
                 "main": ["quantity", "width_mm", "height_mm"],
                 "material": ["material"],
-                "processing": ["color", "lamination", "lamination_double_side"],
+                "processing": ["color", "quality", "lamination", "lamination_double_side"],
                 "extras": [
                     "option_numbering",
                     "option_barcode",
@@ -344,6 +364,11 @@ class PrintSheetCalculator(BaseCalculator):
             "materials": materials[:60],
             "printers": printers,
             "colors": ["1+0", "4+0", "1+1", "4+1", "4+4"],
+            "qualities": [
+                {"value": 0, "label": "Стандарт"},
+                {"value": 1, "label": "Высокое"},
+                {"value": 2, "label": "Фото"},
+            ],
             "modes": [
                 {"value": ProductionMode.ECONOMY, "label": "Экономичный"},
                 {"value": ProductionMode.STANDARD, "label": "Стандартный"},
@@ -366,6 +391,12 @@ class PrintSheetCalculator(BaseCalculator):
                     "interval": {"type": "number", "description": "Отступ между изделиями, мм"},
                     "material_id": {"type": "string"},
                     "printer_code": {"type": "string"},
+                    "quality": {
+                        "type": "integer",
+                        "enum": [0, 1, 2],
+                        "default": 1,
+                        "description": "Качество струйной печати: 0=стандарт, 1=высокое, 2=фото. Для EPSONWF7610 по умолчанию 1, для DTFTransfer — 0.",
+                    },
                     "lamination_id": {
                         "type": "string",
                         "description": "Код плёнки ламинации (из каталога laminat). Пусто — без ламинации.",
@@ -436,6 +467,11 @@ class PrintSheetCalculator(BaseCalculator):
         lamination_id = str(params.get("lamination_id", "") or "").strip()
         lamination_double_side = bool(params.get("lamination_double_side", True))
         mode = ProductionMode(int(params.get("mode", 1)))
+        # Качество струйной печати: явное или по умолчанию как в calcPrintSheet.
+        if "quality" in params and params.get("quality") is not None:
+            quality = int(params.get("quality"))
+        else:
+            quality = int(_INKJET_DEFAULT_QUALITY.get(printer_code, 1))
 
         if color == "0+0":
             return self._empty_result(size, quantity, mode)
@@ -503,32 +539,62 @@ class PrintSheetCalculator(BaseCalculator):
                 except Exception:
                     pass
 
-        defects_printer = printer.get_defect_rate(float(num_sheet_to_print))
-        if mode.value >= 2:
-            defects_printer += defects_printer * (mode.value - 1)
-        num_with_defects = math.ceil(num_sheet_to_print * (1 + defects_printer))
+        is_inkjet = printer_code in INKJET_PRINTERS
+        print_weight_kg: Optional[float] = None
 
-        # Печать (лазерная логика как в calcPrintLaser)
-        coeff_size = 1.0
-        half_sheet = [max_printer[0], max_printer[1] / 2.0]
-        layout_half = layout_on_sheet(size_sheet, half_sheet, None, 0.0)
-        if layout_half["num"] > 0:
-            coeff_size = 0.5
-        sheets_per_hour = printer.get_sheets_per_hour(getattr(material, "density", 80) or 80)
-        if sheets_per_hour <= 0:
-            sheets_per_hour = 250.0
-        double_side = 2 if color in ("1+1", "4+1", "4+4") else 1
-        time_prepare = (printer.time_prepare or 0.1) * max(1, mode.value)
-        time_print = num_with_defects / sheets_per_hour * coeff_size * double_side + time_prepare
-        time_operator = time_print * 0.5 * (1 + defects_printer) + time_prepare
+        if is_inkjet:
+            # Как calcPrintSheet: EPSONWF7610 / DTFTransfer → calcPrintInkJet (порт PrintInkjetCalculator).
+            # defectsPrinter для материала — без mode-надбавки (её применяет сам inkjet).
+            defects_printer = printer.get_defect_rate(float(num_sheet_to_print))
+            inkjet_result = PrintInkjetCalculator().calculate(
+                {
+                    "num_sheet": int(num_sheet_to_print),
+                    "width": float(size_sheet[0]),
+                    "height": float(size_sheet[1]),
+                    "quality": quality,
+                    "color": color,
+                    "material_id": material_id,
+                    "printer_code": printer_code,
+                    "mode": mode.value,
+                }
+            )
+            cost_print_total = float(inkjet_result.get("cost", 0.0))
+            price_print = float(inkjet_result.get("price", 0.0))
+            time_print = float(inkjet_result.get("time_hours", 0.0))
+            print_time_ready = float(inkjet_result.get("time_ready", 0.0))
+            print_weight_kg = float(inkjet_result.get("weight_kg", 0.0))
+        else:
+            # Печать (лазерная логика как в calcPrintLaser) — ветка не меняется.
+            defects_printer = printer.get_defect_rate(float(num_sheet_to_print))
+            if mode.value >= 2:
+                defects_printer += defects_printer * (mode.value - 1)
+            num_with_defects = math.ceil(num_sheet_to_print * (1 + defects_printer))
 
-        cost_print_sheet_list = getattr(printer, "cost_print_sheet", None) or [4.0, 12.0]
-        cost_per_sheet_val = _cost_per_sheet_laser(color, cost_print_sheet_list)
-        cost_depreciation = printer.depreciation_per_hour * time_print
-        cost_consumables = cost_per_sheet_val * coeff_size * num_with_defects
-        cost_print = cost_depreciation + cost_consumables
-        cost_operator = time_operator * printer.operator_cost_per_hour
-        cost_print_total = cost_print + cost_operator
+            coeff_size = 1.0
+            half_sheet = [max_printer[0], max_printer[1] / 2.0]
+            layout_half = layout_on_sheet(size_sheet, half_sheet, None, 0.0)
+            if layout_half["num"] > 0:
+                coeff_size = 0.5
+            sheets_per_hour = printer.get_sheets_per_hour(getattr(material, "density", 80) or 80)
+            if sheets_per_hour <= 0:
+                sheets_per_hour = 250.0
+            double_side = 2 if color in ("1+1", "4+1", "4+4") else 1
+            time_prepare = (printer.time_prepare or 0.1) * max(1, mode.value)
+            time_print = num_with_defects / sheets_per_hour * coeff_size * double_side + time_prepare
+            time_operator = time_print * 0.5 * (1 + defects_printer) + time_prepare
+
+            cost_print_sheet_list = getattr(printer, "cost_print_sheet", None) or [4.0, 12.0]
+            cost_per_sheet_val = _cost_per_sheet_laser(color, cost_print_sheet_list)
+            cost_depreciation = printer.depreciation_per_hour * time_print
+            cost_consumables = cost_per_sheet_val * coeff_size * num_with_defects
+            cost_print = cost_depreciation + cost_consumables
+            cost_operator = time_operator * printer.operator_cost_per_hour
+            cost_print_total = cost_print + cost_operator
+            margin_print_laser = get_margin("marginPrintLaser")
+            price_print = cost_print * (1 + MARGIN_MATERIAL + margin_print_laser) + cost_operator * (
+                1 + MARGIN_OPERATION + margin_print_laser
+            )
+            print_time_ready = None  # задаётся ниже как time_print + base_ready
 
         # Материал: costMaterial = material.cost * ceil(numSheetToPrint*(1+defectsPrinter)) / layoutOnMaterial.num
         layout_num = max(1, layout_on_material.get("num", 1))
@@ -621,13 +687,9 @@ class PrintSheetCalculator(BaseCalculator):
             + cost_cut_guillotine
             + opt_cost
         )
-        # JS: result.price = (costMaterial*(1+marginMaterial) + costCut.price + costPrint.price + costLamination.price + costCutGuillotine.price + costOptions.price) * (1+marginPrintSheet)
-        # costPrint.price (calcPrintLaser): costPrint*(1+marginMaterial+marginPrintLaser) + costOperator*(1+marginOperation+marginPrintLaser)
+        # JS: result.price = (costMaterial*(1+marginMaterial) + costCut.price + costPrint.price + …) * (1+marginPrintSheet)
+        # price_print уже посчитан выше (лазер / inkjet).
         price_material = cost_material * (1 + MARGIN_MATERIAL)
-        margin_print_laser = get_margin("marginPrintLaser")
-        price_print = cost_print * (1 + MARGIN_MATERIAL + margin_print_laser) + cost_operator * (
-            1 + MARGIN_OPERATION + margin_print_laser
-        )
         margin_print_sheet = get_margin("marginPrintSheet")
         price = (
             price_material
@@ -636,32 +698,36 @@ class PrintSheetCalculator(BaseCalculator):
             + price_lamination
             + opt_price
         ) * (1 + margin_print_sheet)
-        price = math.ceil(price)
+        # Лазерная ветка: округление вверх до рубля сохраняем. Струйная — как JS, без ceil.
+        if not is_inkjet:
+            price = math.ceil(price)
 
         time_total = time_print + time_cut + time_lamination + time_cut_guillotine + opt_time
-        # В JS: result.time = Math.ceil((costCut.time+costPrint.time+costLamination.time+costCutGuillotine.time+costOptions.time)*100)/100
-        # Используем такое же округление вверх до сотых.
+        # В JS: result.time = Math.ceil((costCut.time+costPrint.time+…)*100)/100
         time_hours = math.ceil(time_total * 100) / 100.0
         base_time_ready_list = get_time_ready("baseTimeReadyPrintSheet")
         idx = max(0, min(len(base_time_ready_list) - 1, mode.value))
         base_ready = float(base_time_ready_list[idx])
-        # JS: result.timeReady = result.time + Math.max(baseTimeReady, costPrint.timeReady); costPrint.timeReady = timePrint + baseTimeReady
-        print_time_ready = time_print + base_ready
+        # JS: result.timeReady = result.time + Math.max(baseTimeReady, costPrint.timeReady)
+        if print_time_ready is None:
+            print_time_ready = time_print + base_ready
         time_ready = time_hours + max(base_ready, print_time_ready)
 
-        # Вес по количеству выдаваемой продукции (тираж × размер изделия), не по листам с браком.
-        # Плюс вес плёнки ламинации, если она есть.
+        # Лазер: вес по тиражу изделий. Струй: вес из calcPrintInkJet + ламинация (как JS).
         weight_kg = 0.0
-        try:
-            weight_kg = calc_weight(
-                quantity=quantity,
-                density=getattr(material, "density", 80) or 80,
-                thickness=getattr(material, "thickness", 0) or 0,
-                size=size,
-                density_unit=getattr(material, "density_unit", "гм2") or "гм2",
-            )
-        except Exception:
-            pass
+        if is_inkjet and print_weight_kg is not None:
+            weight_kg = float(print_weight_kg)
+        else:
+            try:
+                weight_kg = calc_weight(
+                    quantity=quantity,
+                    density=getattr(material, "density", 80) or 80,
+                    thickness=getattr(material, "thickness", 0) or 0,
+                    size=size,
+                    density_unit=getattr(material, "density_unit", "гм2") or "гм2",
+                )
+            except Exception:
+                pass
         if lamination_result:
             try:
                 weight_kg += float(lamination_result.get("weight_kg", 0.0))
@@ -681,9 +747,11 @@ class PrintSheetCalculator(BaseCalculator):
             for m in lamination_result.get("materials") or []:
                 materials_out.append(m)
 
+        # Струй: price в копейках (float); лазер: int после ceil — как было.
+        price_out: Any = float(price) if is_inkjet else int(price)
         return {
             "cost": float(cost),
-            "price": int(price),
+            "price": price_out,
             "unit_price": float(price) / max(1, quantity),
             "time_hours": time_hours,
             "time_ready": time_ready,

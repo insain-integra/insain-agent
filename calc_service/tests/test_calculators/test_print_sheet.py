@@ -484,3 +484,90 @@ def test_print_sheet_legacy_js_keys_still_work(calc, base_params):
     )
     assert r["cost"] > 0
     assert r["price"] > 0
+
+
+# ── Эталоны струйной ветки (calcPrintSheet → calcPrintInkJet) ─────────
+JS_INKJET_REL_TOL = 0.001  # 0.1%
+
+# JS, 31.10.2026
+# calcPrintSheet(1, [420,297], '4+0', [0,0,0,0], 2, 'PaperSublimation128', {printer: EPSONWF7610}, 1)
+REF_PARAMS_EPSON_1 = {
+    "quantity": 1,
+    "width": 420,
+    "height": 297,
+    "color": "4+0",
+    "margins": [0, 0, 0, 0],
+    "interval": 2,
+    "material_id": "PaperSublimation128",
+    "printer_code": "EPSONWF7610",
+    "mode": 1,
+}
+EXPECTED_EPSON_1 = {
+    "cost": 523.1,
+    "price": 841.856,
+    "time_hours": 0.35,
+    "time_ready": 8.66,
+    "weight_kg": 0.01596672,
+}
+
+# JS, 31.10.2026 — тираж ≥ 2
+REF_PARAMS_EPSON_2 = {
+    **REF_PARAMS_EPSON_1,
+    "quantity": 2,
+}
+EXPECTED_EPSON_2 = {
+    "cost": 644.2,
+    "price": 1037.932,
+    "time_hours": 0.44,
+    "time_ready": 8.84,
+}
+
+# JS, 01.11.2026 — DTFTransfer, quality по умолчанию 0
+REF_PARAMS_DTF = {
+    "quantity": 2,
+    "width": 100,
+    "height": 100,
+    "color": "4+0",
+    "margins": [0, 0, 0, 0],
+    "interval": 0,
+    "material_id": "PaperSublimation128",
+    "printer_code": "DTFTransfer",
+    "mode": 1,
+}
+EXPECTED_DTF = {
+    "cost": 1114.05,
+    "price": 1810.548,
+    "time_hours": 0.31,
+    "time_ready": 32.57,
+}
+
+
+def test_expected_values_print_sheet_epson_qty1(calc):
+    """JS, 31.10.2026: EPSONWF7610, тираж 1 — cost 523.1, price 841.856."""
+    r = calc.calculate(REF_PARAMS_EPSON_1)
+    e = EXPECTED_EPSON_1
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_INKJET_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_INKJET_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_INKJET_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_INKJET_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=JS_INKJET_REL_TOL)
+
+
+def test_expected_values_print_sheet_epson_qty2(calc):
+    """JS, 31.10.2026: EPSONWF7610, тираж 2."""
+    r = calc.calculate(REF_PARAMS_EPSON_2)
+    e = EXPECTED_EPSON_2
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_INKJET_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_INKJET_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_INKJET_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_INKJET_REL_TOL)
+
+
+def test_expected_values_print_sheet_dtf(calc):
+    """JS, 01.11.2026: DTFTransfer, тираж 2, quality по умолчанию 0."""
+    r = calc.calculate(REF_PARAMS_DTF)
+    e = EXPECTED_DTF
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_INKJET_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_INKJET_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_INKJET_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_INKJET_REL_TOL)
