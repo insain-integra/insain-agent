@@ -734,6 +734,8 @@ class PrintSheetCalculator(BaseCalculator):
             except Exception:
                 pass
 
+        # Размер листа из каталога (как material.size в JS calcPrintSheet).
+        catalog_size = material.sizes[0] if material.sizes else size_sheet
         materials_out: List[Dict[str, Any]] = [
             {
                 "code": material.code,
@@ -741,6 +743,7 @@ class PrintSheetCalculator(BaseCalculator):
                 "title": material.title,
                 "quantity": num_sheets_physical,
                 "unit": "лист",
+                "size_mm": [float(catalog_size[0]), float(catalog_size[1])],
             }
         ]
         if lamination_result:

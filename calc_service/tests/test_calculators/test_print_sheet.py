@@ -571,3 +571,13 @@ def test_expected_values_print_sheet_dtf(calc):
     assert r["price"] == pytest.approx(e["price"], rel=JS_INKJET_REL_TOL)
     assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_INKJET_REL_TOL)
     assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_INKJET_REL_TOL)
+
+
+def test_print_sheet_material_size_mm(calc):
+    """Элемент materials печати несёт size_mm листа из каталога."""
+    r = calc.calculate(REF_PARAMS_EPSON_1)
+    materials = r.get("materials") or []
+    assert materials, "ожидается материал печати"
+    mat = materials[0]
+    assert "size_mm" in mat
+    assert mat["size_mm"] == [297.0, 420.0]
