@@ -9,16 +9,16 @@ Reviewer: Grok 4.7
 
 ## Цель
 
-Форма 69 CalcPlaque на https://insain.ru/catalog/kalkulyator-nagradnyh-plaketok/ считает через `insaincalc.calcApi('plaque', …)`. Сначала сверка уже существующим скриптом, затем дубль формы на товар, который видит только админ, отладка этой копии на боевом API, затем то же на боевой форме. Если боевой API ещё не отдаёт эталон плакеток, форма остаётся на старом JS.
+Форма 69 CalcPlaque на https://insain.ru/catalog/kalkulyator-nagradnyh-plaketok/ считает через `insaincalc.calcApi('plaque', …)`. Сначала сверка уже существующим скриптом, затем дубль формы на товар, который видит только админ, отладка этой копии на боевом API, затем то же на боевой форме.
 
 ## Контекст и ссылки
 
-- Пилот ждёт эпик `todo/EPIC-calc-port-structure.md` (задача `plaque-thin-wrapper`); форма 69 переводится со всеми нанесениями, включая сублимацию.
-- `todo/skills-recipes.md` и skills `.cursor/skills/ezfc-form-to-api/SKILL.md`, `.cursor/skills/deploy-wp-plugin/SKILL.md` — как делать. Начинать после их merge в `main`.
+- Эпик `todo/EPIC-calc-port-structure.md` закрыт (`tablets-for-plaque`, `plaque-thin-wrapper` в `main`, прод-API выкачен). Форма 69 переводится со всеми нанесениями, включая сублимацию. Ворота API: УФ 6205.71, сублимация 4018.24 / 2564.31.
+- Skills `.cursor/skills/ezfc-form-to-api/SKILL.md`, `.cursor/skills/deploy-wp-plugin/SKILL.md` — как делать.
 - `docs/ezfc-api-migration.md` — сбор полей, `calcApi`, `showResult`.
 - `docs/site/access-tools.md` — «Принятый режим»: `read_file`, снимок `SELECT … --raw`, обратный импорт запрещён.
-- `docs/site/forms.md` — строка формы 69 и сводные числа. Сейчас: старый JS `insaincalc.calcPlaque`, непереведённых 45.
-- `calc_service/tests/test_calculators/test_plaque.py` — `REF_PARAMS` и `EXPECTED_REF`: quantity 2, Plaque2330, PVC3, isUVPrint, mode 1, `price` 6205.71. Пометка эталонов `JS, 29.10.2026`.
+- `docs/site/forms.md` — строка формы 69 и сводные числа. До переключения 69: старый JS `insaincalc.calcPlaque`, непереведённых **45**. После перевода — **44** (см. Scope п.10).
+- `calc_service/tests/test_calculators/test_plaque.py` — `REF_PARAMS` / `EXPECTED_REF` (УФ PVC3 → 6205.71) и `SUBLIMATION_CASES` (AluminiumSU055 → 4018.24 / 2564.31).
 - `wp-plugin/js/insain-calc-bridge.js` — уже есть `insaincalc.calcApi` и `showResult`. Файл не читать целиком: сигнатура `calcApi(slug, params)`.
 - `.cursor/rules/insain-site-autonomous.mdc` — целиком, до первого действия на сервере.
 - `docs/refactoring-plan.md` — только пункт 5.5, когда дописывается приписка о прогоне.
@@ -26,18 +26,29 @@ Reviewer: Grok 4.7
 
 ## Scope
 
-Порядок жёсткий. Критерии про форму и плагин выполняются только после записанного в «Результат» вывода ворот и вывода по копии.
+Порядок жёсткий. Критерии про форму и плагин выполняются только после записанного в «Результат» вывода ворот и вывода по копии с **тремя** нанесениями. Факт на 02.11.2026:
 
-1. Ворота боевого API. Тело `{"quantity":2,"plaque_id":"Plaque2330","material_id":"PVC3","application":"isUVPrint","mode":1}` на `POST https://insain.ru/api/v1/calc/plaque`. В ответе `price` равен 6205.71 (допуск 0.02). Другое число, в том числе прежнее расхождение около 4977, или нет slug — стоп: форму не дублировать, плагин не ставить, форму 69 не переключать. Локальные критерии 2 и 3 при стопе всё равно снять в отчёт.
-2. До перевода ещё раз локальная сверка тем же скриптом и эталоном. Это проверка, что перенос уже сошёлся. Новые кейсы не писать и скрипт сверкой не подменять дубль.
-3. `wp-plugin/forms/plaque.js`. Вызов дословно содержит `insaincalc.calcApi('plaque'`. Параметры API: `quantity`, `plaque_id`, `material_id`, `application`, `mode`. Дальше `insaincalc.showResult`. Id элементов формы снять с формы 69, не выдумывать. В JS нет формул цены.
-4. Ревью человека на diff `plaque.js` — до деплоя плагина.
-5. Деплой плагина по skill `deploy-wp-plugin` (это в списке «Делай самостоятельно»). Архив с коммита, который прошёл это ревью. В архиве есть `forms/plaque.js`. `infra/deploy.sh` не запускать.
-6. Дубль формы 69 в админке ezFC. Копия на черновик или приватный товар, гость permalink копии не открывает. У копии свои id; `get_value_from` в JS копии совпадает с id копии. Перед дублем спросить человека: шаг вне списка «Делай самостоятельно».
-7. Отладка копии на боевом API. В «Результат» до правки формы 69 записать: id формы-копии, id товара, `post_status`, код `curl.exe` без cookies на permalink копии, `price` расчёта на копии.
-8. То же на боевой форме 69. У элемента расчёта один раз `custom_calculation_function_read_file` = 1 и путь `{{abspath}}wp-content/plugins/insain-calc-bridge/forms/plaque.js`. Id элементов формы 69 не менять. Снимок обратно не импортировать. Перед переключением снова спросить человека.
-9. Снимок боевой формы в `site/forms/69.json` (`SELECT … --raw`, файл проходит `json.loads`). В снимке есть `forms/plaque.js` и `custom_calculation_function_read_file`.
-10. `docs/site/forms.md`: строка страницы плакеток — slug `plaque`, статус API через `insaincalc.calcApi`, без «старый JS». Форма 69 — один опубликованный товар, поэтому ячейки таблицы итога: API `2` и `2`, старый JS `44` и `46`. Текст: непереведённых **44**, `43 из них на опубликованных товарах`. Строка про привязанные slug содержит `puzzle` и `plaque`. В строке «Не привязаны» — `36 из 38` и нет `plaque`. Другие строки форм не переписывать.
+| # | Шаг | Статус |
+| --- | --- | --- |
+| 1 | Ворота прод-API (УФ 6205.71) | сделано |
+| 2 | Локальная сверка JS эталона | сделано |
+| 3 | `wp-plugin/forms/plaque.js` | сделано (в git и на проде) |
+| 4 | Ревью человека на `plaque.js` | нужно перед переключением 69 |
+| 5 | Деплой плагина | **не нужен**, пока `plaque.js` не меняется: на проде уже 0.2.4 и `forms/plaque.js` с `calcApi` |
+| 6 | Дубль формы 69 → копия 86, товар 2586879 draft | сделано |
+| 7 | Отладка копии на боевом API (УФ + гравировка + сублимация) | в работе: JS↔API ок; UI гравировки/сублимации на копии — ждёт Browser MCP |
+| 8–12 | Боевая 69, снимок, `forms.md`, `wp-plugin/AGENTS.md`, приписка 5.5 | **стоп** до записи блока «Копия…» с тремя нанесениями и подтверждения человека |
+
+1. Ворота боевого API. Тело `{"quantity":2,"plaque_id":"Plaque2330","material_id":"PVC3","application":"isUVPrint","mode":1}` на `POST https://insain.ru/api/v1/calc/plaque`. В ответе `price` равен 6205.71 (допуск 0.02). Другое число или нет slug — стоп: форму 69 не переключать.
+2. До перевода ещё раз локальная сверка тем же скриптом и эталоном. Новые кейсы не писать.
+3. `wp-plugin/forms/plaque.js`. Вызов дословно содержит `insaincalc.calcApi('plaque'`. Параметры API: `quantity`, `plaque_id`, `material_id`, `application`, `mode`. Дальше `insaincalc.showResult`. Id — боевой формы 69. В JS нет формул цены.
+4. Ревью человека на diff `plaque.js` — до деплоя плагина / переключения 69.
+5. Деплой плагина по skill `deploy-wp-plugin` — только если `plaque.js` изменился относительно прода. `infra/deploy.sh` не запускать.
+6. Дубль формы 69 (уже есть: 86 / 2586879). Перед новым дублем — спросить человека.
+7. Отладка копии на боевом API. В «Результат» до правки формы 69: id копии, id товара, `post_status`, `curl` permalink, `price` по **трём** нанесениям формы (УФ, гравировка `isGrave`, сублимация) на материалах из списка формы, 1 и 2 шт., mode 1 (+ mode 2 хотя бы для одного). Сверка с `node scripts/run_js_calc.mjs calcPlaque …` (rel ≤ 0.001 + округление `showResult`). Расхождение больше допуска — стоп, форму 69 не трогать.
+8. То же на боевой форме 69. `custom_calculation_function_read_file` = 1, путь `{{abspath}}wp-content/plugins/insain-calc-bridge/forms/plaque.js`. Id элементов 69 не менять. Перед переключением спросить человека.
+9. Снимок боевой формы в `site/forms/69.json` (`SELECT … --raw`, `json.loads`). В снимке — `forms/plaque.js` и `custom_calculation_function_read_file`.
+10. `docs/site/forms.md`: плакетки — slug `plaque`, API через `insaincalc.calcApi`. Итог: API `2`/`2`, старый JS `44`/`46`; непереведённых **44**, `43 из них на опубликованных товарах`; привязаны `puzzle` и `plaque`; «Не привязаны» — `36 из 38` без `plaque`.
 11. Одна строка в `wp-plugin/AGENTS.md`: custom JS переведённых форм лежит в `forms/<slug>.js`.
 12. В пункте 5.5 `docs/refactoring-plan.md` дописать, не ставя чекбокс: `прогнаны на форме 69: ezfc-form-to-api, deploy-wp-plugin. new-calculator и json-price-rollout не прогонялись — чекбокс открыт.`
 
@@ -49,15 +60,16 @@ Git-файлы пишет Implementer. Дубль, деплой плагина, 
 - Новый калькулятор «чтобы прогнать skill».
 - Правка цен, любые файлы в `calc_service/data/`, `calc_service/calculators/plaque.py`, эталоны в `test_plaque.py`.
 - Дубль сайта, тестовый контейнер API, `infra/deploy.sh`, пересборка `insain-calc-api`.
-- Версия плагина 0.2.3 и `wp-plugin/js/insain-calc-bridge.js`: расчёт идёт через уже существующий `calcApi`.
+- Версия плагина 0.2.4 и `wp-plugin/js/insain-calc-bridge.js`: расчёт идёт через уже существующий `calcApi`; без правки `plaque.js` повторный деплой не делать.
 - Обратный импорт `site/forms/69.json` в ezFC.
 - Закрытие чекбокса 5.5 и правки других пунктов плана.
+- Чинить JS NaN на AcrylWhite3 + isSublimation (см. «Результат»).
 
 ## Критерии приёмки
 
 Команды из корня репозитория, если не сказано иначе. Критерии 4–8 не выполнять, пока критерий 1 не напечатал `6205.71`.
 
-- [ ] Ворота прод-API. Stdout `6205.71`, код выхода 0. Иначе stdout начинается с `STOP` — форму не переключать.
+- [x] Ворота прод-API. Stdout `6205.71`, код выхода 0. Иначе stdout начинается с `STOP` — форму не переключать.
 
 ```powershell
 @'
@@ -77,15 +89,15 @@ print("6205.71")
 '@ | python -
 ```
 
-- [ ] Локальная сверка до перевода. В stdout JSON с `"price": 6205.71`, код выхода 0. Файлы `js_legacy/` и `calc_service/data/` не меняются.
+- [x] Локальная сверка до перевода. В stdout JSON с `"price": 6205.71`, код выхода 0. Файлы `js_legacy/` и `calc_service/data/` не меняются.
 
 ```powershell
 node scripts/run_js_calc.mjs calcPlaque --data current --params '{"quantity":2,"plaque_id":"Plaque2330","material_id":"PVC3","application":"isUVPrint","mode":1}'
 ```
 
-- [ ] `python -m pytest calc_service/tests/test_calculators/test_plaque.py -q` — код выхода 0, в конце строка с `passed`.
+- [x] `python -m pytest calc_service/tests/test_calculators/test_plaque.py -q` — код выхода 0, в конце строка с `passed`.
 
-- [ ] Файл формы в git. Stdout `ok`.
+- [x] Файл формы в git. Stdout `ok`.
 
 ```powershell
 @'
@@ -97,14 +109,14 @@ print("ok" if not bad else "\n".join(bad))
 '@ | python -
 ```
 
-- [ ] Копия ещё не на витрине. Подставить id товара копии. Ожидается одна строка с `draft` или `private`, и код HTTP permalink без cookies не `200` (ожидаемо `404`).
+- [x] Копия ещё не на витрине. Подставить id товара копии. Ожидается одна строка с `draft` или `private`, и код HTTP permalink без cookies не `200` (ожидаемо `404`).
 
 ```powershell
 ssh insain-prod "sudo -u www-data wp post list --post_type=product --post_status=draft,private --fields=ID,post_status,post_name --meta_key=ezfc_form_id --meta_value=ID_КОПИИ --path=/var/www/insain.ru"
 curl.exe -sS -o NUL -w "%{http_code}" "PERMALINK_КОПИИ"
 ```
 
-- [ ] На сервере лежит JS из git. В stdout есть `insaincalc.calcApi('plaque'`.
+- [x] На сервере лежит JS из git. В stdout есть `insaincalc.calcApi('plaque'`.
 
 ```powershell
 ssh insain-prod "grep calcApi /var/www/insain.ru/wp-content/plugins/insain-calc-bridge/forms/plaque.js"
@@ -172,11 +184,39 @@ curl.exe -sS -o NUL -w "%{http_code}" "https://insain.ru/catalog/kalkulyator-nag
 
 ## Результат
 
-- Ветка, PR или коммит: `task/pilot-plaque-form` от `main`. Merge fast-forward после ревью. `git push` — спросить. SHA коммита, из которого собран zip плагина:
+- Ветка, PR или коммит: `task/pilot-plaque-form` = `main` @ `86e9da1` (ff-only 02.11.2026). Merge fast-forward после ревью. `git push` — спросить. Zip плагина не собирали: на проде уже `insain-calc-bridge` **0.2.4**, файл `/wp-content/plugins/insain-calc-bridge/forms/plaque.js` с `calcApi('plaque'`.
 - Сделано:
-- Ворота (после `663864d`, деплой API): stdout `6205.71`, код 0. До деплоя было `STOP 6206.0`: `plaque.py` округлял `price` до рубля.
-- Копия до боевой формы: форма-копия `86` (CalcPlaque duplicate), товар `2586879`, `post_status` `draft`, `curl.exe` без cookies на `https://insain.ru/?post_type=product&p=2586879` — `404`. В элементе 3321 копии — текст `plaque.js` с id копии (3317, 3318, 3319, 3334), `read_file` = 0. Прогон под админом: 2 шт., Plaque2330, AcrylWhite3, УФ-печать, mode 1 — `POST /api/v1/calc/plaque` 200, тело `{"quantity":2,"plaque_id":"Plaque2330","material_id":"AcrylWhite3","application":"isUVPrint","mode":1}`, `price` API 6618.96 (как `JS_CASES`), на странице 6620 (округление вывода `showResult`), вес 1.37, «Срок 4 дня» с подсказкой дат, материалы без `code`. mode 2 — на странице 8400, «Срок 3 дня», API 8338.66. Эталон с PVC3 через форму не набрать: PVC3 нет в списке материалов формы 69.
+  - Ворота прод-API УФ: stdout `6205.71`, код 0.
+  - Локальный JS эталон: `price` 6205.71. `pytest test_plaque.py` — 22 passed.
+  - `plaque.js` в git: проверка `ok` (calcApi / showResult / поля).
+  - Копия: форма `86`, товар `2586879`, `draft`, guest permalink `404`. Элемент 3321 — inline `calcApi` с id копии (3317/3318/3319/3334), `read_file` = 0. Боевая 69 — ещё старый `calcPlaque`.
+  - JS↔API (rel ≤ 0.001), материалы из списка формы (PVC3 в форме нет):
+
+    | qty | material | application | mode | JS price | API price |
+    | --- | --- | --- | --- | --- | --- |
+    | 2 | AcrylWhite3 | isUVPrint | 1 | 6618.96 | 6618.96 |
+    | 1 | AcrylWhite3 | isUVPrint | 1 | 4367.26 | 4367.26 |
+    | 2 | AcrylWhite3 | isUVPrint | 2 | 6618.96 | 6618.96 |
+    | 2 | AcrylWhite3 | isGrave | 1 | 20637.56 | 20637.56 |
+    | 1 | AcrylWhite3 | isGrave | 1 | 10845.85 | 10845.85 |
+    | 2 | Plywood3 | isGrave | 1 | 20228.66 | 20228.66 |
+    | 2 | ZENOMARKLASER | isGrave | 1 | 20905.81 | 20905.81 |
+    | 2 | AluminiumSU055 | isSublimation | 1 | 4018.24 | 4018.24 |
+    | 1 | AluminiumSU055 | isSublimation | 1 | 2564.31 | 2564.31 |
+    | 2 | AluminiumSU055 | isSublimation | 2 | 4018.24 | 4018.24 |
+
+  - UI копии (ранее, под админом): УФ AcrylWhite3 ×2 mode 1 — POST 200, API 6618.96, на странице 6620 (`showResult`), вес 1.37, срок/материалы без `code`.
+  - Известное расхождение (не чинить): JS `AcrylWhite3` + `isSublimation` → NaN (`scripts/run_js_calc.mjs` падает); Python/API → 3605.49. Форма штатно не даёт пару: у `dpdMaterial` условие `hide_option` — пока не выбран option id `4` (`AluminiumSU055`), прячется нанесение id `3` (`isSublimation`) на 69 и на 86.
 - Чем проверено:
+  - Ворота Python one-liner → `6205.71`.
+  - `node scripts/run_js_calc.mjs calcPlaque --data current --params '…'` и `POST https://insain.ru/api/v1/calc/plaque` по таблице выше.
+  - `python -m pytest calc_service/tests/test_calculators/test_plaque.py -q` → `22 passed`.
+  - `ssh`/`curl`: товар 2586879 draft, guest 404; витрина плакеток 200; плагин 0.2.4; `grep calcApi …/forms/plaque.js`.
 - Не сделано и почему:
+  - UI-прогон копии 86 под админом для **гравировки** и **сублимации** (и повтор mode 2 на странице) — Browser MCP: `No connection to browser extension` / timeout. Без этого блок «Копия до боевой формы» с тремя нанесениями не закрыт → форму 69 не переключаем.
+  - Шаги 8–12 (read_file на 69, снимок, forms.md, AGENTS.md, приписка 5.5, `make check` сдачи) — после UI копии и подтверждения человека.
+  - Деплой плагина — не требуется без изменения `plaque.js`.
 - Требуется решение:
-- Как откатить:
+  - Подключить Browser MCP (Connect в расширении Chrome) и подтвердить UI-прогон копии 86: УФ / гравировка / сублимация, 1 и 2 шт., mode 1 + один mode 2.
+  - После записи UI-цен по трём нанесениям — подтвердить переключение боевой формы 69 на `forms/plaque.js` (`read_file` = 1).
+- Как откатить: форма 69 ещё на старом JS — откат не нужен. Копия 86 / draft 2586879 — оставить или удалить только с подтверждения. Плагин не меняли.
