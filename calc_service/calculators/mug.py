@@ -2,115 +2,26 @@
 Калькулятор кружек с сублимационной печатью.
 
 Перенесено из js_legacy/calc/calcMug.js.
-Использует calcHeatPress (сублимация) + заготовки кружек.
+Вызывает порт heat_press (сублимация, item_type=mug) + заготовки кружек.
 """
 
 from __future__ import annotations
 
 import math
-from pathlib import Path
 from typing import Any, Dict, List, Mapping
 
-import json5
-
 from calculators.base import BaseCalculator, ProductionMode
-from calculators.print_sheet import PrintSheetCalculator
+from calculators.heat_press import HeatPressCalculator
 from common.markups import (
     COST_OPERATOR,
     MARGIN_MATERIAL,
     MARGIN_OPERATION,
     get_margin,
 )
+from equipment import heatpress as heatpress_catalog
 
-HEATPRESS_JSON = Path(__file__).parent.parent / "data" / "equipment" / "heatpress.json"
 MUG_PRINT_SIZE = [214, 82]  # размер нанесения для кружки, мм
-SUBLIMATION_MATERIAL = "PaperSublimation128"
-SUBLIMATION_PRINTER = "EPSONWF7610"
-
-
-def _load_heatpress_raw(code: str = "EconopressMUGH") -> Dict[str, Any]:
-    """Загрузить сырые данные термопресса для кружек."""
-    with open(HEATPRESS_JSON, "r", encoding="utf-8") as f:
-        data = json5.load(f)
-    return data.get(code, {})
-
-
-def _calc_heatpress_sublimation(
-    n: int,
-    size: List[float],
-    mode: int,
-    heatpress_raw: Dict[str, Any],
-) -> Dict[str, Any]:
-    """
-    Упрощённый расчёт термопереноса сублимацией.
-    Аналог calcHeatPress(transferID='sublimation', itemID='mug').
-    """
-    from equipment import heatpress as heatpress_catalog
-
-    heatpress = heatpress_catalog.get("EconopressMUGH")
-
-    defects = heatpress.get_defect_rate(float(n))
-    if mode > 1:
-        defects += defects * (mode - 1)
-    num_with_defects = int(round(n * (1 + defects)))
-
-    # Печать трансфера через PrintSheetCalculator
-    print_calc = PrintSheetCalculator()
-    print_params = {
-        "quantity": num_with_defects,
-        "width": size[0],
-        "height": size[1],
-        "material_id": SUBLIMATION_MATERIAL,
-        "color": "4+0",
-        "margins": [0, 0, 0, 0],
-        "interval": 2,
-        "printer_code": SUBLIMATION_PRINTER,
-        "mode": mode,
-    }
-    cost_transfer_result = print_calc.calculate(print_params)
-
-    cost_transfer = float(cost_transfer_result.get("cost", 0))
-    price_transfer = float(cost_transfer_result.get("price", 0))
-    time_transfer = float(cost_transfer_result.get("time_hours", 0))
-    weight_transfer = float(cost_transfer_result.get("weight_kg", 0))
-    time_ready_transfer = float(cost_transfer_result.get("time_ready", 0))
-    materials_transfer = cost_transfer_result.get("materials", [])
-
-    # Время переноса: 35 сек на изделие
-    time_press_per_item = 35 / 3600.0
-    time_load_arr = heatpress_raw.get("timeLoad", [0.02, 0.05])
-    time_load = float(time_load_arr[0]) if time_load_arr else 0.02
-    time_press_total = (time_press_per_item + time_load) * num_with_defects
-    time_prepare = float(heatpress_raw.get("timePrepare", 0.05)) * max(1, mode)
-    time_operator = time_press_total + time_prepare
-
-    cost_depreciation_hour = heatpress.depreciation_per_hour
-    cost_power = float(heatpress_raw.get("costPower", 5.0))
-    power_per_hour = float(heatpress_raw.get("powerPerHour", 0.45))
-    cost_press_per_hour = cost_power * power_per_hour
-    cost_press = cost_depreciation_hour * time_press_total + cost_press_per_hour * time_press_total
-    cost_operator = time_operator * heatpress.operator_cost_per_hour
-
-    cost_total = cost_operator + cost_press + cost_transfer
-    margin_heatpress = get_margin("marginHeatPress")
-    price_total = (
-        cost_operator * (1 + MARGIN_OPERATION)
-        + cost_press * (1 + MARGIN_MATERIAL)
-        + price_transfer
-    ) * (1 + margin_heatpress)
-
-    base_time_ready = heatpress_raw.get("baseTimeReady", [16, 8, 1])
-    idx = min(max(0, mode), len(base_time_ready) - 1)
-    time_ready = time_operator + time_transfer + float(base_time_ready[idx])
-
-    return {
-        "cost": cost_total,
-        "price": price_total,
-        "time_hours": time_operator + time_transfer,
-        "time_ready": time_ready,
-        "weight_kg": weight_transfer,
-        "materials": materials_transfer,
-    }
+MUG_HEATPRESS_CODE = "EconopressMUGH"
 
 
 class MugCalculator(BaseCalculator):
@@ -227,15 +138,21 @@ class MugCalculator(BaseCalculator):
         if quantity < min_num and min_num > 0:
             raise ValueError(f"Минимальный объём заказа данного вида кружек {min_num} шт")
 
-        heatpress_raw = _load_heatpress_raw("EconopressMUGH")
-        heatpress_result = _calc_heatpress_sublimation(
-            quantity, MUG_PRINT_SIZE, mode, heatpress_raw
-        )
+        heatpress_result = HeatPressCalculator().calculate({
+            "quantity": quantity,
+            "width": MUG_PRINT_SIZE[0],
+            "height": MUG_PRINT_SIZE[1],
+            "transfer_type": "sublimation",
+            "item_type": "mug",
+            "mode": mode,
+        })
 
-        defects = 0.01  # из heatpress defects для кружек
+        heatpress = heatpress_catalog.get(MUG_HEATPRESS_CODE)
+        defects = heatpress.get_defect_rate(float(quantity))
         if mode > 1:
             defects += defects * (mode - 1)
-        num_with_defects = int(round(quantity * (1 + defects)))
+        # JS Math.round: половина вверх
+        num_with_defects = int(quantity * (1 + defects) + 0.5)
 
         cost_mug = float(mug.cost or 0) * num_with_defects
         weight_mug = float(mug_raw.get("weight", 0.41)) * quantity
@@ -248,23 +165,24 @@ class MugCalculator(BaseCalculator):
         time_operator_extra = time_packing + time_prepare_extra
         cost_operator_extra = time_operator_extra * COST_OPERATOR
 
-        cost = heatpress_result["cost"] + cost_mug
+        cost = float(heatpress_result["cost"]) + cost_mug
         margin_mug = get_margin("marginMug")
         price = (
-            heatpress_result["price"]
+            float(heatpress_result["price"])
             + cost_mug * (1 + MARGIN_MATERIAL)
             + (cost_shipment + cost_operator_extra) * (1 + MARGIN_OPERATION)
         ) * (1 + margin_mug)
 
         time_hours = math.ceil(
-            (time_operator_extra + heatpress_result["time_hours"]) * 100
+            (time_operator_extra + float(heatpress_result["time_hours"])) * 100
         ) / 100
         weight_kg = math.ceil(
-            (heatpress_result["weight_kg"] + weight_mug) * 100
+            (float(heatpress_result["weight_kg"]) + weight_mug) * 100
         ) / 100
-        time_ready = time_hours + time_shipment + heatpress_result["time_ready"]
+        # JS: result.time + timeShipment + costHeatPress.timeReady
+        time_ready = time_hours + time_shipment + float(heatpress_result["time_ready"])
 
-        materials: List[Dict[str, Any]] = list(heatpress_result.get("materials", []))
+        materials: List[Dict[str, Any]] = list(heatpress_result.get("materials") or [])
         materials.append({
             "code": mug_id,
             "name": mug.description,
@@ -274,9 +192,9 @@ class MugCalculator(BaseCalculator):
         })
 
         return {
-            "cost": float(math.ceil(cost)),
-            "price": float(math.ceil(price)),
-            "unit_price": float(math.ceil(price)) / float(quantity),
+            "cost": float(cost),
+            "price": float(price),
+            "unit_price": float(price) / float(quantity),
             "time_hours": float(time_hours),
             "time_ready": float(time_ready),
             "weight_kg": float(weight_kg),

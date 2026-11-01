@@ -13,9 +13,7 @@ if _calc_service.name == "calc_service" and str(_calc_service) not in sys.path:
 
 from calculators.mug import MugCalculator
 
-
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
-    return abs(a - b) <= rel * max(abs(b), 1e-9)
+JS_REL_TOL = 0.001  # 0.1%
 
 
 @pytest.fixture(scope="module")
@@ -81,63 +79,57 @@ def test_get_tool_schema(calc):
     assert "parameters" in schema
 
 
-# ── Эталонный тест ───────────────────────────────────────────────────
+# ── Эталоны: node scripts/run_js_calc.mjs calcMug --data current --args '…' ─
 
-REF_PARAMS = {"quantity": 10, "mug_id": "MugStandartWhite", "is_packing": False, "mode": 1}
-EXPECTED_REF = {"cost": 1790, "price": 2920, "time_hours": 0.54, "time_ready": 9.077, "weight_kg": 4.13}
-EXPECTED_MATERIAL = {"code": "MugStandartWhite", "name_substring": "Кружка", "quantity_approx": 10}
+# JS, 01.11.2026 — тираж 1
+# calcMug(1, 'MugStandartWhite', {}, 1)
+REF_PARAMS_1 = {"quantity": 1, "mug_id": "MugStandartWhite", "is_packing": False, "mode": 1}
+EXPECTED_REF_1 = {
+    "cost": 777.8066805555555,
+    "price": 1254.5140897222223,
+    "time_hours": 0.46,
+    "time_ready": 17.609722222222224,
+    "weight_kg": 0.43,
+}
+
+# JS, 01.11.2026 — тираж ≥ 2
+# calcMug(10, 'MugStandartWhite', {}, 1)
+REF_PARAMS_10 = {"quantity": 10, "mug_id": "MugStandartWhite", "is_packing": False, "mode": 1}
+EXPECTED_REF_10 = {
+    "cost": 2287.0734861111114,
+    "price": 3723.2469869444444,
+    "time_hours": 0.96,
+    "time_ready": 18.996944444444445,
+    "weight_kg": 4.15,
+}
+EXPECTED_MATERIAL_10 = {"code": "MugStandartWhite", "name_substring": "Кружка", "quantity_approx": 11}
 
 
-@pytest.fixture(scope="module")
-def ref_result(calc):
-    try:
-        return calc.execute(REF_PARAMS)
-    except Exception:
-        return None
+def test_expected_values_mug_qty1(calc):
+    """JS, 01.11.2026: MugStandartWhite, тираж 1."""
+    r = calc.calculate(REF_PARAMS_1)
+    e = EXPECTED_REF_1
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=JS_REL_TOL)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="переснять с JS в heat-press-mug-vs-js",
-)
-def test_expected_values_mug(ref_result):
-    if ref_result is None:
-        pytest.skip("расчёт эталонного кейса не выполнен")
-    rel = 0.03
-    r, e, em = ref_result, EXPECTED_REF, EXPECTED_MATERIAL
-
-    ok_cost = _cmp(r["cost"], e["cost"], rel)
-    ok_price = _cmp(r["price"], e["price"], rel)
-    ok_time = _cmp(r["time_hours"], e["time_hours"], rel)
-    ok_ready = _cmp(r["time_ready"], e["time_ready"], rel)
-    ok_weight = _cmp(r["weight_kg"], e["weight_kg"], rel)
-
+def test_expected_values_mug_qty10(calc):
+    """JS, 01.11.2026: MugStandartWhite, тираж 10."""
+    r = calc.calculate(REF_PARAMS_10)
+    e = EXPECTED_REF_10
+    em = EXPECTED_MATERIAL_10
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=JS_REL_TOL)
     materials = r.get("materials") or []
+    assert materials
     mat = next((m for m in materials if m.get("code") == em["code"]), {})
-    ok_mat_code = mat.get("code") == em["code"]
-    ok_mat_name = em["name_substring"] in (mat.get("name") or "")
-    ok_mat_q = _cmp(float(mat.get("quantity") or 0), float(em["quantity_approx"]), 0.15) if materials else False
-
-    print()
-    print("  quantity=%s  mug_id=%s  mode=%s" % (REF_PARAMS["quantity"], REF_PARAMS["mug_id"], REF_PARAMS["mode"]))
-    print("  ---")
-    print("  cost        %s  (ожид. %s)  %s" % (r["cost"], e["cost"], "ok" if ok_cost else "FAIL"))
-    print("  price       %s  (ожид. %s)  %s" % (r["price"], e["price"], "ok" if ok_price else "FAIL"))
-    print("  time_hours  %s  (ожид. %s)  %s" % (r["time_hours"], e["time_hours"], "ok" if ok_time else "FAIL"))
-    print("  time_ready  %s  (ожид. %s)  %s" % (r["time_ready"], e["time_ready"], "ok" if ok_ready else "FAIL"))
-    print("  weight_kg   %s  (ожид. %s)  %s" % (r["weight_kg"], e["weight_kg"], "ok" if ok_weight else "FAIL"))
-    if materials:
-        print("  material    code=%s  name=%s  qty=%s  %s" % (
-            mat.get("code"), (mat.get("name") or "")[:50], mat.get("quantity"),
-            "ok" if (ok_mat_code and ok_mat_name and ok_mat_q) else "FAIL"))
-        assert "title" in mat
-
-    assert ok_cost, f"cost: got {r['cost']}, expected ~{e['cost']}"
-    assert ok_price, f"price: got {r['price']}, expected ~{e['price']}"
-    assert ok_time, f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
-    assert ok_ready, f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
-    assert ok_weight, f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
-    assert materials, "ожидается материал в результате"
-    assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
-    assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
-    assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+    assert mat.get("code") == em["code"]
+    assert em["name_substring"] in (mat.get("name") or "")
+    assert float(mat.get("quantity") or 0) == pytest.approx(float(em["quantity_approx"]), rel=0.15)
+    assert "title" in mat

@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "js_port_gaps.py"
 ALLOWED = ROOT / "scripts" / "js_port_gaps_allowed.txt"
 
-MAX_ALLOWED = 77
+MAX_ALLOWED = 76
 
 
 def _allowed_lines() -> list[str]:

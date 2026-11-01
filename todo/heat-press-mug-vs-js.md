@@ -1,6 +1,6 @@
 # heat-press-mug-vs-js
 
-Статус: черновик
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -84,8 +84,8 @@ print(r.stdout or r.stderr)
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+- Ветка, PR или коммит: `task/heat-press-mug-vs-js` (коммит без push)
+- Сделано: раннер `calcMug` + прайс mug; эталоны JS для heat_press (1 и 20) и mug (1 и 10); mug вызывает `HeatPressCalculator`; один `_load_heatpress_raw` в `heat_press.py`; xfail снят; `calcMug call calcHeatPress` убран из allowed, `MAX_ALLOWED` 77→76
+- Чем проверено: `pytest …test_heat_press.py …test_mug.py` — 15 passed; `python scripts/dev.py check` — 480+81 passed; `js_port_gaps --check` — ok; JS vs Python совпали в 0%
+- Не сделано и почему: ветки film/filmSublimation/filmEcosolvent/paperLaser и cut в dtf — в docstring и allowed (вне кейсов тестов)
+- Требуется решение: нет

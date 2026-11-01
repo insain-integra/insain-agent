@@ -28,7 +28,6 @@ calcMagnetLamination option isBarcode
 calcMagnetLamination option isVariables
 calcMetalPins option isPacking
 calcMilling option isCutMilling
-calcMug call calcHeatPress
 calcPadPrint option Material
 calcPrintOffsetPromo module
 calcPrintRoll option isJoing

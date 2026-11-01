@@ -17,6 +17,7 @@
  *   js_legacy/calc/calcUVPrint.js
  *   js_legacy/calc/calcTablets.js
  *   js_legacy/calc/calcHeatPress.js
+ *   js_legacy/calc/calcMug.js
  *   js_legacy/calc/calcPrintSheet.js
  *   js_legacy/calc/calcPrintInkJet.js
  *   js_legacy/calc/calcCutGuillotine.js
@@ -25,6 +26,7 @@
  * Прайс legacy:
  *   js_legacy/calc/common.json
  *   js_legacy/material/misc.json
+ *   js_legacy/material/mug.json
  *   js_legacy/material/hardsheet.json
  *   js_legacy/material/sheet.json
  *   js_legacy/material/roll.json
@@ -34,7 +36,7 @@
  *   js_legacy/equipment/heatpress.json
  *   js_legacy/equipment/laminator.json
  * --data current подменяет числа в памяти из calc_service/data (файлы не пишутся):
- *   common.json, materials/plaque.json, materials/misc.json,
+ *   common.json, materials/plaque.json, materials/misc.json, materials/mug.json,
  *   materials/hardsheet.json, materials/sheet.json, materials/roll.json,
  *   equipment/laser.json, equipment/printer.json, equipment/cutter.json,
  *   equipment/heatpress.json, equipment/laminator.json
@@ -55,6 +57,7 @@ const JS_FILES = [
     'js_legacy/calc/calcUVPrint.js',
     'js_legacy/calc/calcTablets.js',
     'js_legacy/calc/calcHeatPress.js',
+    'js_legacy/calc/calcMug.js',
     'js_legacy/calc/calcPrintSheet.js',
     'js_legacy/calc/calcPrintInkJet.js',
     'js_legacy/calc/calcCutGuillotine.js',
@@ -65,6 +68,7 @@ const JS_FILES = [
 const LEGACY_DATA = [
     ['common', 'js_legacy/calc/common.json'],
     ['misc', 'js_legacy/material/misc.json'],
+    ['mug', 'js_legacy/material/mug.json'],
     ['hardsheet', 'js_legacy/material/hardsheet.json'],
     ['sheet', 'js_legacy/material/sheet.json'],
     ['roll', 'js_legacy/material/roll.json'],
@@ -241,6 +245,7 @@ const CURRENT_FILES = [
     'calc_service/data/common.json',
     'calc_service/data/materials/plaque.json',
     'calc_service/data/materials/misc.json',
+    'calc_service/data/materials/mug.json',
     'calc_service/data/materials/hardsheet.json',
     'calc_service/data/materials/sheet.json',
     'calc_service/data/materials/roll.json',

@@ -3,6 +3,13 @@
 
 Мигрировано из js_legacy/calc/calcHeatPress.js.
 Типы трансфера: сублимация, DTF, шелкотрансфер.
+
+Не перенесено (ветки JS):
+- transfer film → calcSticker
+- transfer filmSublimation → calcLayoutOnSheet, рекурсивный calcHeatPress, calcCutPlotter
+- transfer filmEcosolvent → calcPrintRoll, calcCutPlotter
+- transfer paperLaser
+- в ветке dtf нет calcCutSaber (и calcLayoutOnSheet для резки)
 """
 
 from __future__ import annotations
@@ -135,19 +142,27 @@ class HeatPressCalculator(BaseCalculator):
         defects = heatpress.get_defect_rate(float(n))
         if mode.value > 1:
             defects += defects * (mode.value - 1)
-        num_with_defects = int(round(n * (1 + defects)))
+        # JS Math.round: половина вверх; Python round(10.5)==10
+        num_with_defects = int(n * (1 + defects) + 0.5)
 
         item_difficulty = ITEM_DIFFICULTY.get(item_type, 0)
         time_load_arr = heatpress_raw.get("timeLoad", [0.02, 0.05])
         time_load = float(time_load_arr[item_difficulty]) if item_difficulty < len(time_load_arr) else float(time_load_arr[0])
         base_time_ready = heatpress_raw.get("baseTimeReady", [16, 8, 1])
-        idx = min(max(0, mode.value), len(base_time_ready) - 1)
+        # JS: baseTimeReady[Math.ceil(modeProduction)]
+        idx = min(max(0, math.ceil(mode.value)), len(base_time_ready) - 1)
         base_ready = float(base_time_ready[idx])
 
         cost_transfer = 0.0
         price_transfer = 0.0
         time_transfer = 0.0
+        time_ready_transfer = 0.0
         weight_transfer = 0.0
+        cost_cut = 0.0
+        price_cut = 0.0
+        time_cut = 0.0
+        time_ready_cut = 0.0
+        weight_cut = 0.0
         materials_out: List[Dict[str, Any]] = []
 
         if transfer_type == "sublimation":
@@ -167,6 +182,7 @@ class HeatPressCalculator(BaseCalculator):
             cost_transfer = float(print_result.get("cost", 0))
             price_transfer = float(print_result.get("price", 0))
             time_transfer = float(print_result.get("time_hours", 0))
+            time_ready_transfer = float(print_result.get("time_ready", 0))
             weight_transfer = float(print_result.get("weight_kg", 0))
             materials_out = list(print_result.get("materials") or [])
             time_press_per_item = 35 / 3600.0
@@ -183,16 +199,19 @@ class HeatPressCalculator(BaseCalculator):
                 "material_id": DTF_MATERIAL,
                 "printer_code": DTF_PRINTER,
                 "mode": mode.value,
+                "no_cut": True,
             }
             try:
                 print_result = print_calc.calculate(print_params)
                 cost_transfer = float(print_result.get("cost", 0))
                 price_transfer = float(print_result.get("price", 0))
                 time_transfer = float(print_result.get("time_hours", 0))
+                time_ready_transfer = float(print_result.get("time_ready", 0))
                 weight_transfer = float(print_result.get("weight_kg", 0))
                 materials_out = list(print_result.get("materials") or [])
             except KeyError:
                 pass
+            # JS: calcCutSaber — не перенесено
             time_press_per_item = 15 / 3600.0
 
         elif transfer_type == "silk":
@@ -206,6 +225,7 @@ class HeatPressCalculator(BaseCalculator):
             cost_transfer = silk_result.cost
             price_transfer = silk_result.price
             time_transfer = silk_result.time_hours
+            time_ready_transfer = silk_result.time_ready
             materials_out = list(silk_result.materials)
             time_press_per_item = 10 / 3600.0
 
@@ -213,7 +233,8 @@ class HeatPressCalculator(BaseCalculator):
             raise ValueError(f"Неизвестный тип трансфера: {transfer_type!r}")
 
         time_press_total = (time_press_per_item + time_load) * num_with_defects
-        time_prepare = float(heatpress_raw.get("timePrepare", 0.05)) * max(1, mode.value)
+        # JS: heatpress.timePrepare * modeProduction (при mode=0 → 0)
+        time_prepare = float(heatpress_raw.get("timePrepare", 0.05)) * mode.value
         time_operator = time_press_total + time_prepare
 
         cost_depreciation_hour = heatpress.depreciation_per_hour
@@ -223,23 +244,24 @@ class HeatPressCalculator(BaseCalculator):
         cost_press = cost_depreciation_hour * time_press_total + cost_press_per_hour * time_press_total
         cost_operator = time_operator * heatpress.operator_cost_per_hour
 
-        cost_total = cost_operator + cost_press + cost_transfer
+        cost_total = cost_operator + cost_press + cost_transfer + cost_cut
         margin_heatpress = get_margin("marginHeatPress")
         price_total = (
             cost_operator * (1 + MARGIN_OPERATION)
             + cost_press * (1 + MARGIN_MATERIAL)
-            + price_transfer
+            + (price_transfer + price_cut)
         ) * (1 + margin_heatpress)
 
-        time_hours = time_operator + time_transfer
-        time_ready = time_hours + base_ready
+        time_hours = time_operator + time_transfer + time_cut
+        # JS: result.time + costTransfer.timeReady + baseTimeReady (+ costCut)
+        time_ready = time_hours + time_ready_transfer + time_ready_cut + base_ready
 
         return {
             "cost": float(cost_total),
-            "price": int(math.ceil(price_total)),
+            "price": float(price_total),
             "unit_price": float(price_total) / max(1, n),
-            "time_hours": math.ceil(time_hours * 100) / 100,
-            "time_ready": time_ready,
-            "weight_kg": weight_transfer,
+            "time_hours": float(time_hours),
+            "time_ready": float(time_ready),
+            "weight_kg": float(weight_transfer + weight_cut),
             "materials": materials_out,
         }

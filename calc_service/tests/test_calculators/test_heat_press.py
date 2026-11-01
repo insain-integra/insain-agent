@@ -15,6 +15,8 @@ if _calc_service.name == "calc_service" and str(_calc_service) not in sys.path:
 
 from calculators.heat_press import HeatPressCalculator
 
+JS_REL_TOL = 0.001  # 0.1%
+
 
 @pytest.fixture(scope="module")
 def calc():
@@ -82,13 +84,30 @@ def test_get_tool_schema(calc):
     assert "parameters" in schema
 
 
-# ── Эталонный тест ───────────────────────────────────────────────────
+# ── Эталоны: node scripts/run_js_calc.mjs calcHeatPress --data current --args '…' ─
 
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
-    return abs(a - b) <= rel * max(abs(b), 1e-9)
+# JS, 01.11.2026 — тираж 1
+# calcHeatPress(1, [150,100], 'sublimation', 'tshirt', {}, 1)
+REF_PARAMS_1 = {
+    "quantity": 1,
+    "width": 150,
+    "height": 100,
+    "transfer_type": "sublimation",
+    "item_type": "tshirt",
+    "silk_colors": 1,
+    "mode": 1,
+}
+EXPECTED_REF_1 = {
+    "cost": 682.1217361111111,
+    "price": 1095.9170819444444,
+    "time_hours": 0.44972222222222225,
+    "time_ready": 17.12972222222222,
+    "weight_kg": 0.01596672,
+}
 
-
-REF_PARAMS = {
+# JS, 01.11.2026 — тираж ≥ 2
+# calcHeatPress(20, [150,100], 'sublimation', 'tshirt', {}, 1)
+REF_PARAMS_20 = {
     "quantity": 20,
     "width": 150,
     "height": 100,
@@ -97,85 +116,45 @@ REF_PARAMS = {
     "silk_colors": 1,
     "mode": 1,
 }
-EXPECTED_REF = {
-    "cost": 1508.96,
-    "price": 2428,
-    "time_hours": 0.84,
-    "time_ready": 8.834,
-    "weight_kg": 0.038,
+EXPECTED_REF_20 = {
+    "cost": 2021.9347222222223,
+    "price": 3249.381638888889,
+    "time_hours": 1.4044444444444446,
+    "time_ready": 18.864444444444445,
+    "weight_kg": 0.07983359999999999,
 }
-EXPECTED_MATERIAL = {
+EXPECTED_MATERIAL_20 = {
     "code": "PaperSublimation128",
     "name_substring": "Бумага сублимационная",
     "quantity_approx": 6,
 }
 
 
-@pytest.fixture(scope="module")
-def ref_result(calc):
-    try:
-        return calc.execute(REF_PARAMS)
-    except Exception:
-        return None
+def test_expected_values_heat_press_qty1(calc):
+    """JS, 01.11.2026: sublimation tshirt, тираж 1."""
+    r = calc.calculate(REF_PARAMS_1)
+    e = EXPECTED_REF_1
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=JS_REL_TOL)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="переснять с JS в heat-press-mug-vs-js",
-)
-def test_expected_values_heat_press(ref_result):
-    if ref_result is None:
-        pytest.skip("расчёт эталонного кейса не выполнен")
-    r = ref_result
-    e = EXPECTED_REF
-    em = EXPECTED_MATERIAL
-    rel = 0.03
-
-    ok_cost = _cmp(r["cost"], e["cost"], rel)
-    ok_price = _cmp(r["price"], e["price"], rel)
-    ok_time = _cmp(r["time_hours"], e["time_hours"], rel)
-    ok_ready = _cmp(r["time_ready"], e["time_ready"], rel)
-    ok_weight = _cmp(r["weight_kg"], e["weight_kg"], rel)
-
+def test_expected_values_heat_press_qty20(calc):
+    """JS, 01.11.2026: sublimation tshirt, тираж 20."""
+    r = calc.calculate(REF_PARAMS_20)
+    e = EXPECTED_REF_20
+    em = EXPECTED_MATERIAL_20
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=JS_REL_TOL)
     materials = r.get("materials") or []
-    mat = materials[0] if materials else {}
-    ok_mat_code = mat.get("code") == em["code"]
-    ok_mat_name = em["name_substring"] in (mat.get("name") or "")
-    ok_mat_q = _cmp(float(mat.get("quantity") or 0), float(em["quantity_approx"]), 0.15) if materials else False
-
-    print("")
-    print("  [термопресс] quantity=%s  |  size=%s×%s  |  transfer_type=%s  |  item_type=%s  |  mode=%s"
-          % (REF_PARAMS["quantity"], REF_PARAMS["width"], REF_PARAMS["height"],
-             REF_PARAMS["transfer_type"], REF_PARAMS["item_type"], REF_PARAMS["mode"]))
-    print("  ---")
-    print("  cost        %s  (ожид. %s)  %s" % (r["cost"], e["cost"], "ok" if ok_cost else "FAIL"))
-    print("  price       %s  (ожид. %s)  %s" % (r["price"], e["price"], "ok" if ok_price else "FAIL"))
-    print("  time_hours  %s  (ожид. %s)  %s" % (r["time_hours"], e["time_hours"], "ok" if ok_time else "FAIL"))
-    print("  time_ready  %s  (ожид. %s)  %s" % (r["time_ready"], e["time_ready"], "ok" if ok_ready else "FAIL"))
-    print("  weight_kg   %s  (ожид. %s)  %s" % (r["weight_kg"], e["weight_kg"], "ok" if ok_weight else "FAIL"))
-    if materials:
-        print(
-            "  material    code=%s  name=%s  quantity=%s  (ожид. code=%s, name содержит '%s', qty ~%s)  %s"
-            % (
-                mat.get("code"),
-                (mat.get("name") or "")[:50],
-                mat.get("quantity"),
-                em["code"],
-                em["name_substring"],
-                em["quantity_approx"],
-                "ok" if (ok_mat_code and ok_mat_name and ok_mat_q) else "FAIL",
-            )
-        )
-        assert "title" in mat
-    else:
-        print("  material    (нет в результате, ожид. code=%s, qty ~%s)  FAIL" % (em["code"], em["quantity_approx"]))
-
-    assert ok_cost, f"cost: got {r['cost']}, expected ~{e['cost']}"
-    assert ok_price, f"price: got {r['price']}, expected ~{e['price']}"
-    assert ok_time, f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
-    assert ok_ready, f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
-    assert ok_weight, f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
-    assert materials, "ожидается материал в результате"
-    assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
-    assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
-    assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+    assert materials
+    mat = materials[0]
+    assert mat.get("code") == em["code"]
+    assert em["name_substring"] in (mat.get("name") or "")
+    assert float(mat.get("quantity") or 0) == pytest.approx(float(em["quantity_approx"]), rel=0.15)
+    assert "title" in mat
