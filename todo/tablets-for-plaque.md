@@ -89,7 +89,7 @@ print("ok")
 
 ## Результат
 
-- Ветка, PR или коммит: `task/tablets-for-plaque` (push не делался)
+- Ветка, PR или коммит: `task/tablets-for-plaque` @ `de81a1b` (push не делался)
 - Сделано: ветки `is_cut_manual_metal`, `is_sublimation`, `is_cut_laser` (+ `is_grave`/`is_grave_fill`), `is_uv_print` в `tablets.py` через порты; 6 JS-эталонов (+ переснят старый); из `js_port_gaps_allowed.txt` удалены 4 строки, `MAX_ALLOWED` 76→72
 - Чем проверено: `python scripts/dev.py check` — 487 passed / 2 skipped (calc) + 81 passed (bot); критерии шапки (pytest tablets 13, rg JS-меток ≥6, gaps-опции ok, allowed shrink ok, `--check` ok)
 - Не сделано и почему: `plaque.py` / остальные ветки calcTablets — вне scope
