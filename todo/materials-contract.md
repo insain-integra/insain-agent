@@ -66,7 +66,7 @@ print("ok")
 '@ | python -
 ```
 
-- [ ] (после деплоя) Прод-API после деплоя. Stdout `ok`:
+- [x] (после деплоя) Прод-API после деплоя. Stdout `ok`:
 
 ```powershell
 @'
@@ -82,14 +82,14 @@ print("ok")
 '@ | python -
 ```
 
-- [ ] (после деплоя) `ssh insain-prod "sudo -u www-data wp plugin get insain-calc-bridge --field=version --path=/var/www/insain.ru"` — `0.2.4`.
-- [ ] (после деплоя) `ssh insain-prod "grep -c 'item.name || item.title' /var/www/insain.ru/wp-content/plugins/insain-calc-bridge/js/insain-calc-bridge.js"` — `1`.
+- [x] (после деплоя) `ssh insain-prod "sudo -u www-data wp plugin get insain-calc-bridge --field=version --path=/var/www/insain.ru"` — `0.2.4`.
+- [x] (после деплоя) `ssh insain-prod "grep -c 'item.name || item.title' /var/www/insain.ru/wp-content/plugins/insain-calc-bridge/js/insain-calc-bridge.js"` — `1`.
 
 ## Проверки
 
 - [x] `make check` (или `python scripts/dev.py check`) — зелёный вывод
 - [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
-- [ ] (после деплоя) Форма 79 (Browser MCP, https://insain.ru/catalog/kalkulyator-pazlov/), вход `REF_PARAMS` пазлов: цена прежняя (как до выкатки), таблица материалов показывает `name` из ответа API, внутренних `code` нет. В «Чем проверено» — цена и строки материалов до и после.
+- [x] (после деплоя) Форма 79 (Browser MCP, https://insain.ru/catalog/kalkulyator-pazlov/), вход `REF_PARAMS` пазлов: цена прежняя (как до выкатки), таблица материалов показывает `name` из ответа API, внутренних `code` нет. В «Чем проверено» — цена и строки материалов до и после.
 
 ## Риски
 
@@ -103,9 +103,14 @@ print("ok")
 
 ## Результат
 
-- Ветка, PR или коммит: `task/materials-contract` от `main` (6249ac7), без push.
-- Сделано: шаги 1–5 Scope. `BaseCalculator.validate_materials()` вызывается из `execute()`; `metal_pins.execute()` теперь делегирует в базовый. Единицы `sheet`/`mm`/`m` → `лист`/`мм`/`м` в laser, cut_plotter, cut_roller, lamination, milling, print_sheet, print_inkjet, print_offset, sticker и дефолты в flag/pennant; сравнения `unit == "sheet"` в sticker и poly_sticker_pack переведены на `лист`. Bridge — `item.name || item.title || ''`, плагин 0.2.4. Правила и `docs/data-formats.md` по шагу 5. Единицы под текущее число (решение подтверждено 01.11.2026): `sticker`, монтажная плёнка — `мм` (Python отдаёт мм, JS — метры; число не менялось, перевод в метры — отдельная правка); `cut_roller`, рулон — `м` (число в метрах, как в JS).
-- Чем проверено: `-k materials_contract` — 25 passed (без правок в `calculators/` — 23 failed); `rg` по единицам — пусто, код 1; скрипт bridge/доки — `ok` (в Windows PowerShell 5 нужен `$OutputEncoding = [Text.UTF8Encoding]::new($false)`, иначе кириллица в heredoc портится и assert падает); `python scripts/dev.py check` — calc 465 passed, 2 skipped; bot 81 passed. Разовый прогон `execute()` по всем 40 калькуляторам × материалам из схемы — 1462 расчёта, нарушений контракта 0.
-- Не сделано и почему: шаг 6 и критерии «прод-API», «версия плагина на сервере», «grep на сервере», проверка формы 79 — после деплоя (Site ops, после ревью, merge и push).
-- Требуется решение: `bot_service/agent.py:1462` сравнивает `unit` с `"sheet"` (после правки ветка не сработает), `:1363`/`:1400` берут сначала `title` — бот в консервации, не правился; тесты бота зелёные. В каталогах 14 позиций без имени (`presswall` Joker…/Tritix…, `calendar` DoubleSide…/OneSide…) — в `materials` не попадают, данные не трогались.
-- Как откатить: до деплоя — не мержить ветку. После — откат API образом `insain-agent-calc-api:rollback`, плагин — zip `wp-plugin` из коммита `main` до merge (0.2.3).
+- Ветка, PR или коммит: прод с `main` `a8e1f2a` (человек снял условие «main = 80697b4» и разрешил выкатить вместе с print-sheet-routing). Push этого коммита с записью шага 6 — не делался.
+- Сделано: шаги 1–5 — как в предыдущей записи (`validate_materials()`, русские единицы, bridge `item.name || item.title`, плагин 0.2.4, доки). Шаг 6: API через `bash infra/deploy.sh` (`663864d` → `a8e1f2a`, smoke пройден, образ `insain-agent-calc-api:rollback` = `f93f0c109e5a`); плагин 0.2.4 архивом `git archive a8e1f2a:wp-plugin`, `wp plugin install --force --activate`.
+- Чем проверено:
+  - До API. `POST /api/v1/calc/puzzle` `{"quantity":1,"puzzle_id":"Puzzle300420","mode":1}` — `price` 1171. Бумага в ответе: `unit` `sheet`.
+  - Форма 79 до плагина (тот же вход, `POST` 200, тело ответа `price` 1171). Экран: 1200 руб., 1200 руб./шт, со скидкой 939 руб. и 939 руб./шт, вес 0.2 кг. Таблица (подписи `title`): «Пазл картонный 300×420 мм», размер 300,420, кол-во 1; «Бумага сублимационная 128г/м²», размер null, кол-во 2.
+  - После API. Тот же POST пазла — `price` 1171. Скрипт критерия (name ≠ code, в `unit` нет латиницы) — `ok`. Бумага: `unit` `лист`, `size_mm` 297×420 (это print-sheet-routing в том же `main`). `POST /api/v1/calc/plaque` `quantity` 2, `plaque_id` Plaque2330, `material_id` PVC3, `application` isUVPrint, `mode` 1 — `price` 6205.71. `GET /api/v1/calculators` — 200.
+  - Плагин: `wp plugin get` — `0.2.4`, `is-active` — `ACTIVE`. `grep -c 'item.name || item.title'` — `1`. В каталоге плагина `insain-calc-bridge.php`, `js/insain-calc-bridge.js`, `forms/plaque.js`.
+  - Форма 79 после плагина. Скрипт `insain-calc-bridge.js?ver=0.2.4`. `POST /api/v1/calc/puzzle` 200, `price` 1171. Экран тот же: 1200 руб. / 1200 руб./шт, скидка 939 / 939, вес 0.2 кг. Таблица (`name`, кодов Puzzle300420 и PaperSublimation128 нет): «Пазл для сублимации, картонный, в рамке, прямоугольный 300×420 мм (300 элементов)», 300,420, 1; «Бумага сублимационная А3 (Китай BS), 128гр/м2», 297,420, 2. Ошибок `insaincalc` в консоли нет.
+- Не сделано и почему: `wp litespeed-purge all` дважды ответил `Error: Something went wrong! Got 400` (при установке плагина была строка «Успешная очистка всех кэшей»). Страница калькулятора сброшена отдельно: `wp litespeed-purge url https://insain.ru/catalog/kalkulyator-pazlov/` — `Success: Purged the URL!`. Повторный локальный `python scripts/dev.py check` не запускался: CI Run 17 на этот же `a8e1f2a` зелёный, дерево было чистым. Push не делался.
+- Требуется решение: push коммита с этой записью. `bot_service/agent.py:1462` сравнивает `unit` с `"sheet"` (ветка не сработает), `:1363`/`:1400` берут сначала `title` — бот в консервации, не правился. В каталогах 14 позиций без имени (`presswall` Joker…/Tritix…, `calendar` DoubleSide…/OneSide…) — в `materials` не попадают, данные не трогались.
+- Как откатить: API — в `/opt/insain-agent` тег `insain-agent-calc-api:rollback` (`f93f0c109e5a`, код до выкатки `663864d`): `git reset --hard 663864d`, `docker tag insain-agent-calc-api:rollback insain-agent-calc-api:latest`, `docker compose -f docker-compose.calc-only.yml up -d --no-build --force-recreate`. Плагин — zip `git archive 663864d:wp-plugin` (на сервере до этой выкладки была 0.2.3) и тот же `wp plugin install --force --activate`. `9639b5e~` уже содержит плагин 0.2.4, им откатывать нельзя.
