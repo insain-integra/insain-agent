@@ -35,10 +35,11 @@ ssh insain-prod "sudo -u www-data wp db query --skip-column-names --path=/var/ww
 
    Ожидается: `passed`, `failed` нет. Выбрать один эталон с тиражом ≥ 2 — его вход и `price` нужны в шагах 3, 13 и 20.
 
-2. Если калькулятор подключён в `scripts/run_js_calc.mjs` (сейчас только `calcPlaque`), старый JS на том же входе даёт ту же цену. В PowerShell 5.1 кавычки JSON экранируются `\"`:
+2. Если калькулятор подключён в `scripts/run_js_calc.mjs`, старый JS на том же входе даёт ту же цену. `calcPlaque` — по `--params`, остальные загруженные функции — по `--args` (JSON-массив позиционных аргументов). В PowerShell 5.1 кавычки JSON экранируются `\"`:
 
    ```powershell
    node scripts/run_js_calc.mjs calcPlaque --data current --params '{\"quantity\":2,\"plaque_id\":\"Plaque2330\",\"material_id\":\"PVC3\",\"application\":\"isUVPrint\",\"mode\":1}'
+   node scripts/run_js_calc.mjs calcPrintInkJet --data current --args '[1,[297,420],1,\"4+0\",\"PaperSublimation128\",\"EPSONWF7610\",1]'
    ```
 
    Ожидается: `price` равна эталону из шага 1 (допуск 0.02). Не подключён — сверка только эталонами из теста; новый кейс в скрипт ради перевода формы не добавлять.

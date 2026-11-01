@@ -109,6 +109,15 @@ def test_uv_printer_speed_and_cost_by_layer():
     assert spec.meter_per_hour_table is None
 
 
+def test_inkjet_sheets_per_hour_by_quality():
+    # sheetsPerHour [210, 10, 7] — плоский массив по качеству (стандарт, высокое, фото)
+    spec = load_generic_catalog("printer.json").get("EPSONWF7610")
+    assert spec.sheets_per_hour_by_quality == pytest.approx([210.0, 10.0, 7.0])
+    assert spec.sheets_per_hour_table is None
+    dtf = load_generic_catalog("printer.json").get("DTFTransfer")
+    assert dtf.sheets_per_hour_by_quality == pytest.approx([100.0])
+
+
 def test_defect_rate():
     from equipment import laser
 

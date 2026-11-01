@@ -191,6 +191,8 @@ def load_generic_catalog(filename: str) -> EquipmentCatalog:
         sph_table = _parse_pairs(raw_sph) if isinstance(raw_sph, (list, tuple)) and raw_sph and isinstance(raw_sph[0], (list, tuple)) else None
         if sph_table is None and isinstance(raw_sph, (int, float)):
             sph_table = [(0.0, float(raw_sph))]
+        # Плоский [стандарт, высокое, фото] — струйный принтер (не таблица по плотности)
+        sph_by_quality = _parse_flat_list(raw_sph)
         cost_print_sheet = None
         raw_cps = raw.get("costPrintSheet")
         if isinstance(raw_cps, (list, tuple)) and len(raw_cps) >= 2:
@@ -240,6 +242,7 @@ def load_generic_catalog(filename: str) -> EquipmentCatalog:
             meter_per_hour_table=mph_table,
             meter_per_hour_by_resolution=_parse_flat_list(raw_mph),
             sheets_per_hour_table=sph_table,
+            sheets_per_hour_by_quality=sph_by_quality,
             cost_print_sheet=cost_print_sheet,
             cost_print_m2=_to_float(raw.get("costPrint")),
             min_vol_print=_to_float(raw.get("minVolPrint")),

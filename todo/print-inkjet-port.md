@@ -1,6 +1,6 @@
 # print-inkjet-port
 
-Статус: черновик
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -93,8 +93,8 @@ print(json.loads(r.stdout)["price"])
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+- Ветка, PR или коммит: `task/print-inkjet-port`
+- Сделано: раннер `--args` для любой `insaincalc.calcX`; порт `print_inkjet` как `calcPrintInkJet` (плоский `sheetsPerHour` по качеству); эталоны JS в тестах; skill шаг 2.
+- Чем проверено: критерии приёмки + `python scripts/dev.py check` (474 passed calc + 81 passed bot).
+- Не сделано и почему: ратчет `js_port_gaps_allowed` не трогали — до и после `нет в Python` пусто; `calcPrintSheet call calcPrintInkJet` в allowed — не-scope (`print_sheet`).
+- Требуется решение: нет.

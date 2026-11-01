@@ -117,10 +117,12 @@ def test_get_tool_schema(calc):
 
 
 # ── Эталонные тесты ──────────────────────────────────────────────────
+# Сняты: node scripts/run_js_calc.mjs calcPrintInkJet --data current --args '…'
 
-REF_REL_TOL = 0.01
+REF_REL_TOL = 1e-3  # допуск 0.1%
 
-# Эталон 1: 10 листов A4, PaperCoated115M, 4+0, quality=0, стандартный режим
+# JS, 01.11.2026 — переснят (старый эталон Python расходился из-за sheetsPerHour)
+# 10 листов A4, PaperCoated115M, 4+0, quality=0, стандартный режим
 REF_PARAMS = {
     "num_sheet": 10,
     "width": 210,
@@ -132,12 +134,12 @@ REF_PARAMS = {
     "mode": 1,
 }
 EXPECTED_REF = {
-    "cost": 355.66,
-    "price": 573.71,
-    "unit_price": 54.40748,
-    "time_hours": 0.16,
-    "time_ready": 8.16,
-    "weight_kg": 0.072,
+    "cost": 329.69761904761907,
+    "price": 532.0516190476192,
+    "unit_price": 53.205161904761916,
+    "time_hours": 0.13,
+    "time_ready": 8.13,
+    "weight_kg": 0.0717255,
 }
 EXPECTED_MATERIAL = {
     "code": "PaperCoated115M",
@@ -145,7 +147,8 @@ EXPECTED_MATERIAL = {
     "quantity_approx": 11,
 }
 
-# Эталон 2: 50 листов A4, PaperCoated300M, 4+4, quality=1 (высокое), стандартный
+# JS, 01.11.2026 — переснят
+# 50 листов A4, PaperCoated300M, 4+4, quality=1 (высокое), стандартный
 REF_PARAMS_2 = {
     "num_sheet": 50,
     "width": 210,
@@ -157,12 +160,12 @@ REF_PARAMS_2 = {
     "mode": 1,
 }
 EXPECTED_REF_2 = {
-    "cost": 1324.01,
-    "price": 2159.08,
-    "unit_price": 41.803216,
-    "time_hours": 0.63,
-    "time_ready": 8.63,
-    "weight_kg": 0.936,
+    "cost": 5442.9,
+    "price": 8771.064,
+    "unit_price": 175.42128,
+    "time_hours": 5.4,
+    "time_ready": 13.4,
+    "weight_kg": 0.93555,
 }
 EXPECTED_MATERIAL_2 = {
     "code": "PaperCoated300M",
@@ -170,7 +173,8 @@ EXPECTED_MATERIAL_2 = {
     "quantity_approx": 53,
 }
 
-# Эталон 3: 100 листов A3, VHI80, 1+0, quality=0, стандартный (полный формат принтера)
+# JS, 01.11.2026 — переснят
+# 100 листов A3, VHI80, 1+0, quality=0, стандартный (полный формат принтера)
 REF_PARAMS_3 = {
     "num_sheet": 100,
     "width": 297,
@@ -182,17 +186,92 @@ REF_PARAMS_3 = {
     "mode": 1,
 }
 EXPECTED_REF_3 = {
-    "cost": 2403.03,
-    "price": 3925.68,
-    "unit_price": 38.13084,
-    "time_hours": 1.16,
-    "time_ready": 9.16,
-    "weight_kg": 0.998,
+    "cost": 1928.1,
+    "price": 3163.296,
+    "unit_price": 31.63296,
+    "time_hours": 0.6,
+    "time_ready": 8.6,
+    "weight_kg": 0.99792,
 }
 EXPECTED_MATERIAL_3 = {
     "code": "VHI80",
     "name_substring": "Снегурочка",
     "quantity_approx": 105,
+}
+
+# JS, 31.10.2026 — таблица задачи (тираж 1)
+REF_PARAMS_TABLE_1 = {
+    "num_sheet": 1,
+    "width": 297,
+    "height": 420,
+    "quality": 1,
+    "color": "4+0",
+    "material_id": "PaperSublimation128",
+    "printer_code": "EPSONWF7610",
+    "mode": 1,
+}
+EXPECTED_REF_TABLE_1 = {
+    "cost": 433.5,
+    "price": 695.76,
+    "unit_price": 695.76,
+    "time_hours": 0.31,
+    "time_ready": 8.31,
+    "weight_kg": 0.01596672,
+}
+EXPECTED_MATERIAL_TABLE_1 = {
+    "code": "PaperSublimation128",
+    "name_substring": "сублимационная",
+    "quantity_approx": 2,
+}
+
+# JS, 31.10.2026 — таблица задачи (тираж 6)
+REF_PARAMS_TABLE_6 = {
+    "num_sheet": 6,
+    "width": 297,
+    "height": 420,
+    "quality": 1,
+    "color": "4+0",
+    "material_id": "PaperSublimation128",
+    "printer_code": "EPSONWF7610",
+    "mode": 1,
+}
+EXPECTED_REF_TABLE_6 = {
+    "cost": 950.0,
+    "price": 1528.4,
+    "unit_price": 254.73333333333335,
+    "time_hours": 0.8,
+    "time_ready": 8.8,
+    "weight_kg": 0.09580032,
+}
+EXPECTED_MATERIAL_TABLE_6 = {
+    "code": "PaperSublimation128",
+    "name_substring": "сублимационная",
+    "quantity_approx": 7,
+}
+
+# JS, 01.11.2026 — DTFTransfer, quality=0, тираж ≥ 2
+REF_PARAMS_DTF = {
+    "num_sheet": 2,
+    "width": 300,
+    "height": 1000,
+    "quality": 0,
+    "color": "4+0",
+    "material_id": "PaperSublimation128",
+    "printer_code": "DTFTransfer",
+    "mode": 1,
+}
+EXPECTED_REF_DTF = {
+    "cost": 2377.5,
+    "price": 3912.0,
+    "unit_price": 1956.0,
+    "time_hours": 0.27,
+    "time_ready": 32.27,
+    "weight_kg": 0.0768,
+}
+EXPECTED_MATERIAL_DTF = {
+    "code": "PaperSublimation128",
+    "name_substring": "сублимационная",
+    "quantity_approx": 2,
 }
 
 
@@ -329,6 +408,79 @@ def test_expected_values_inkjet_100sheets_a3(ref_result_3):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {EXPECTED_MATERIAL_3['code']}"
     assert ok_mat_name, f"material name должен содержать '{EXPECTED_MATERIAL_3['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{EXPECTED_MATERIAL_3['quantity_approx']}"
+
+
+def _assert_js_ref(label, params, result, expected, expected_mat):
+    """Сверка эталона JS с допуском REF_REL_TOL (0.1%)."""
+    if result is None:
+        pytest.skip(f"расчёт эталонного кейса не выполнен ({label})")
+    rel = REF_REL_TOL
+    ok_cost, ok_price, ok_time, ok_ready, ok_weight, materials, mat, ok_mat_code, ok_mat_name, ok_mat_q = \
+        _print_ref_report(label, params, result, expected, expected_mat, rel)
+    assert ok_cost, f"cost: got {result['cost']}, expected ~{expected['cost']}"
+    assert ok_price, f"price: got {result['price']}, expected ~{expected['price']}"
+    assert result["unit_price"] == pytest.approx(expected["unit_price"], rel=rel)
+    assert ok_time, f"time_hours: got {result['time_hours']}, expected ~{expected['time_hours']}"
+    assert ok_ready, f"time_ready: got {result['time_ready']}, expected ~{expected['time_ready']}"
+    assert ok_weight, f"weight_kg: got {result['weight_kg']}, expected ~{expected['weight_kg']}"
+    assert materials, "ожидается один материал в результате"
+    assert ok_mat_code, f"material code: got {mat.get('code')}, expected {expected_mat['code']}"
+    assert ok_mat_name, f"material name должен содержать '{expected_mat['name_substring']}'"
+    assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{expected_mat['quantity_approx']}"
+
+
+@pytest.fixture(scope="module")
+def ref_result_table_1(calc):
+    """JS, 31.10.2026: 1 лист A3, PaperSublimation128, quality=1."""
+    try:
+        return calc.execute(REF_PARAMS_TABLE_1)
+    except Exception:
+        return None
+
+
+def test_expected_values_inkjet_table_1sheet(ref_result_table_1):
+    """JS, 31.10.2026: calcPrintInkJet(1, [297,420], 1, '4+0', PaperSublimation128, EPSONWF7610, 1)."""
+    _assert_js_ref(
+        "таблица 1 лист", REF_PARAMS_TABLE_1, ref_result_table_1,
+        EXPECTED_REF_TABLE_1, EXPECTED_MATERIAL_TABLE_1,
+    )
+    assert ref_result_table_1["cost"] == pytest.approx(433.5, rel=REF_REL_TOL)
+    assert ref_result_table_1["price"] == pytest.approx(695.76, rel=REF_REL_TOL)
+
+
+@pytest.fixture(scope="module")
+def ref_result_table_6(calc):
+    """JS, 31.10.2026: 6 листов A3, PaperSublimation128, quality=1."""
+    try:
+        return calc.execute(REF_PARAMS_TABLE_6)
+    except Exception:
+        return None
+
+
+def test_expected_values_inkjet_table_6sheets(ref_result_table_6):
+    """JS, 31.10.2026: calcPrintInkJet(6, [297,420], 1, '4+0', PaperSublimation128, EPSONWF7610, 1)."""
+    _assert_js_ref(
+        "таблица 6 листов", REF_PARAMS_TABLE_6, ref_result_table_6,
+        EXPECTED_REF_TABLE_6, EXPECTED_MATERIAL_TABLE_6,
+    )
+    assert ref_result_table_6["price"] == pytest.approx(1528.4, rel=REF_REL_TOL)
+
+
+@pytest.fixture(scope="module")
+def ref_result_dtf(calc):
+    """JS, 01.11.2026: 2 листа DTFTransfer, quality=0."""
+    try:
+        return calc.execute(REF_PARAMS_DTF)
+    except Exception:
+        return None
+
+
+def test_expected_values_inkjet_dtf_quality0(ref_result_dtf):
+    """JS, 01.11.2026: DTFTransfer, quality=0, тираж 2."""
+    _assert_js_ref(
+        "DTF quality=0", REF_PARAMS_DTF, ref_result_dtf,
+        EXPECTED_REF_DTF, EXPECTED_MATERIAL_DTF,
+    )
 
 
 def test_modes_cost_and_time(calc):

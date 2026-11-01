@@ -1,8 +1,11 @@
 /**
  * Прогон старого калькулятора из js_legacy в Node (без npm).
  *
- * Сейчас считается только calcPlaque. Поднимаются файлы, без которых
- * его ветки isUVPrint / isGrave / isSublimation / noApplication не считаются.
+ * Вызов:
+ *   calcPlaque — --params '{…}' (как раньше);
+ *   любая загруженная insaincalc.calcX — --args '[…]' (позиционные аргументы).
+ * Поднимаются файлы, без которых ветки calcPlaque
+ * (isUVPrint / isGrave / isSublimation / noApplication) не считаются.
  * loadData из icdc_ls.js ходит в icalc/ через XMLHttpRequest — в Node
  * этот вызов снимается, JSON читается с диска и передаётся в StructDat.
  *
@@ -131,10 +134,11 @@ function isRateValue(value) {
 function parseArgs(argv) {
     const name = argv[0];
     if (!name || name.startsWith('--')) {
-        fail('Укажите имя калькулятора: node scripts/run_js_calc.mjs <имя> --params \'<json>\' [--data legacy|current]');
+        fail('Укажите имя калькулятора: node scripts/run_js_calc.mjs <имя> (--params|--args) \'<json>\' [--data legacy|current]');
     }
     let dataMode = 'legacy';
     let paramsRaw = null;
+    let argsRaw = null;
     for (let i = 1; i < argv.length; i += 1) {
         const arg = argv[i];
         if (arg === '--data') {
@@ -149,6 +153,12 @@ function parseArgs(argv) {
                 fail('После --params нужен JSON');
             }
             i += 1;
+        } else if (arg === '--args') {
+            argsRaw = argv[i + 1];
+            if (argsRaw === undefined) {
+                fail('После --args нужен JSON-массив');
+            }
+            i += 1;
         } else {
             fail(`Неизвестный аргумент: ${arg}`);
         }
@@ -156,7 +166,10 @@ function parseArgs(argv) {
     if (dataMode !== 'legacy' && dataMode !== 'current') {
         fail(`Неизвестный режим прайса: ${dataMode}`);
     }
-    return { name, dataMode, paramsRaw };
+    if (paramsRaw !== null && argsRaw !== null) {
+        fail('Укажите либо --params, либо --args');
+    }
+    return { name, dataMode, paramsRaw, argsRaw };
 }
 
 function readText(rel) {
@@ -417,7 +430,7 @@ function roundHalfEven(value, digits) {
     return (sign * rounded) / factor;
 }
 
-function runPlaque(params, dataMode) {
+function createContext(dataMode, plaqueParamsForCodes) {
     const sandbox = {
         console: {
             log: (...args) => process.stderr.write(`${args.map(String).join(' ')}\n`),
@@ -438,8 +451,37 @@ function runPlaque(params, dataMode) {
     }
     if (dataMode === 'current') {
         const byCode = applyCurrentPrices(context);
-        requireCurrentCodes(byCode, params);
+        if (plaqueParamsForCodes) {
+            requireCurrentCodes(byCode, plaqueParamsForCodes);
+        }
     }
+    return context;
+}
+
+function normalizeResult(raw, quantity) {
+    if (!raw) {
+        fail('Калькулятор не вернул результат');
+    }
+    const n = Math.max(1, Number(quantity) || 1);
+    const price = Number(raw.price);
+    const fields = {
+        cost: Number(raw.cost),
+        price,
+        unit_price: roundHalfEven(price / n, 2),
+        time_hours: Number(raw.time),
+        time_ready: Number(raw.timeReady),
+        weight_kg: Number(raw.weight),
+    };
+    for (const [key, value] of Object.entries(fields)) {
+        if (!Number.isFinite(value)) {
+            fail(`Поле ${key} не число (${value})`);
+        }
+    }
+    return fields;
+}
+
+function runPlaque(params, dataMode) {
+    const context = createContext(dataMode, params);
     context.__params = params;
     let caught = null;
     try {
@@ -468,49 +510,84 @@ function runPlaque(params, dataMode) {
         const message = caught && caught.message ? caught.message : String(caught);
         fail(message);
     }
-    const raw = context.__result;
-    if (!raw) {
-        fail('calcPlaque не вернул результат');
+    return normalizeResult(context.__result, params.quantity);
+}
+
+/** Объект верхнего уровня в args → Map; вложенные объекты остаются plain. */
+function argsToCallList(args) {
+    return args.map((item) => {
+        if (item !== null && typeof item === 'object' && !Array.isArray(item)) {
+            return new Map(Object.entries(item));
+        }
+        return item;
+    });
+}
+
+function runByArgs(name, args, dataMode) {
+    const context = createContext(dataMode, null);
+    const fn = context.insaincalc?.[name];
+    if (typeof fn !== 'function') {
+        fail(`Калькулятор не подключён: ${name}`);
     }
-    const n = Math.max(1, Number(params.quantity) || 1);
-    const price = Number(raw.price);
-    const fields = {
-        cost: Number(raw.cost),
-        price,
-        unit_price: roundHalfEven(price / n, 2),
-        time_hours: Number(raw.time),
-        time_ready: Number(raw.timeReady),
-        weight_kg: Number(raw.weight),
-    };
-    for (const [key, value] of Object.entries(fields)) {
-        if (!Number.isFinite(value)) {
-            fail(`Поле ${key} не число (${value})`);
+    context.__callArgs = argsToCallList(args);
+    context.__fnName = name;
+    let caught = null;
+    try {
+        vm.runInContext(`
+            __raw = insaincalc[__fnName].apply(insaincalc, __callArgs);
+            __result = {
+                cost: __raw.cost,
+                price: __raw.price,
+                time: __raw.time,
+                timeReady: __raw.timeReady,
+                weight: __raw.weight
+            };
+        `, context, { filename: `${name}-call.js` });
+    } catch (err) {
+        caught = err;
+    }
+    if (caught) {
+        const message = caught && caught.message ? caught.message : String(caught);
+        fail(message);
+    }
+    // unit_price = price / args[0] (тираж / кол-во листов)
+    return normalizeResult(context.__result, args[0]);
+}
+
+const { name, dataMode, paramsRaw, argsRaw } = parseArgs(process.argv.slice(2));
+
+if (paramsRaw !== null) {
+    if (name !== 'calcPlaque') {
+        fail(`--params поддерживается только для calcPlaque; для ${name} используйте --args`);
+    }
+    let params;
+    try {
+        params = JSON.parse(paramsRaw);
+    } catch (err) {
+        fail(`params не JSON: ${err.message}`);
+    }
+    if (!params || typeof params !== 'object' || Array.isArray(params)) {
+        fail('params должен быть объектом');
+    }
+    for (const key of ['quantity', 'plaque_id', 'material_id', 'application', 'mode']) {
+        if (!(key in params)) {
+            fail(`В params нет поля ${key}`);
         }
     }
-    return fields;
-}
-
-const { name, dataMode, paramsRaw } = parseArgs(process.argv.slice(2));
-if (name !== 'calcPlaque') {
-    fail(`Калькулятор не подключён: ${name}`);
-}
-if (paramsRaw === null) {
-    fail('Нужен --params с JSON');
-}
-let params;
-try {
-    params = JSON.parse(paramsRaw);
-} catch (err) {
-    fail(`params не JSON: ${err.message}`);
-}
-if (!params || typeof params !== 'object' || Array.isArray(params)) {
-    fail('params должен быть объектом');
-}
-for (const key of ['quantity', 'plaque_id', 'material_id', 'application', 'mode']) {
-    if (!(key in params)) {
-        fail(`В params нет поля ${key}`);
+    const fields = runPlaque(params, dataMode);
+    process.stdout.write(`${JSON.stringify(fields)}\n`);
+} else if (argsRaw !== null) {
+    let args;
+    try {
+        args = JSON.parse(argsRaw);
+    } catch (err) {
+        fail(`args не JSON: ${err.message}`);
     }
+    if (!Array.isArray(args)) {
+        fail('args должен быть JSON-массивом');
+    }
+    const fields = runByArgs(name, args, dataMode);
+    process.stdout.write(`${JSON.stringify(fields)}\n`);
+} else {
+    fail('Нужен --params или --args с JSON');
 }
-
-const fields = runPlaque(params, dataMode);
-process.stdout.write(`${JSON.stringify(fields)}\n`);

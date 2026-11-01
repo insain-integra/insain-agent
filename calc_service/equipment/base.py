@@ -82,6 +82,8 @@ class EquipmentSpec(BaseModel):
 
     # Принтер: листов/час по плотности бумаги, себестоимость листа [ч/б, цвет]
     sheets_per_hour_table: Optional[List[Tuple[float, float]]] = None  # [(density, sheets_per_hour), ...]
+    # Струйный: плоский sheetsPerHour [стандарт, высокое, фото] по индексу качества
+    sheets_per_hour_by_quality: Optional[List[float]] = None
     cost_print_sheet: Optional[List[float]] = None  # [cost_bw, cost_color] руб./лист SRA3
 
     # Широкоформатный принтер

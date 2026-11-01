@@ -1,8 +1,10 @@
 """
 Калькулятор СТРУЙНОЙ / СУБЛИМАЦИОННОЙ ПЕЧАТИ на листовом принтере.
 
-Мигрировано из js_legacy/calc/calcPrintInkJet.js.
-Считает печать на EPSON WF-7610 и аналогичных листовых струйных принтерах.
+Мигрировано из js_legacy/calc/calcPrintInkJet.js (calcPrintInkJet).
+Считает печать на EPSON WF-7610, DTFTransfer и аналогичных листовых струйных принтерах.
+
+Порт полный: calcLayoutOnSheet, calcWeight. Не перенесено: —
 """
 
 from __future__ import annotations
@@ -26,15 +28,42 @@ DEFAULT_PRINTER = "EPSONWF7610"
 
 
 def _cost_per_sheet(color: str, cost_list: List[float] | None) -> float:
+    """Себестоимость расходников листа по цветности (как в JS)."""
     if not cost_list:
-        return 12.0
+        raise ValueError("Не задана себестоимость печати листа")
     bw = cost_list[0]
     cl = cost_list[1] if len(cost_list) > 1 else cost_list[0]
     mapping = {
-        "1+0": bw, "1+1": 2 * bw,
-        "4+0": cl, "4+1": bw + cl, "4+4": 2 * cl,
+        "1+0": bw,
+        "1+1": 2 * bw,
+        "4+0": cl,
+        "4+1": bw + cl,
+        "4+4": 2 * cl,
     }
-    return mapping.get(color, cl)
+    if color not in mapping:
+        raise ValueError("Не задана или неверно задана цветность печати")
+    return mapping[color]
+
+
+def _sheets_per_hour(printer: Any, quality: int) -> float:
+    """
+    Скорость листов/час: в JS printer.sheetsPerHour[quality] —
+    плоский массив [стандарт, высокое, фото].
+    """
+    by_q = getattr(printer, "sheets_per_hour_by_quality", None) or None
+    if by_q:
+        idx = max(0, min(len(by_q) - 1, int(quality)))
+        rate = float(by_q[idx])
+        if rate > 0:
+            return rate
+    # Запас: таблица по плотности (лазерный формат) — не используется струйным JS
+    sph_table = printer.sheets_per_hour_table
+    if sph_table:
+        idx = max(0, min(len(sph_table) - 1, int(quality)))
+        rate = float(sph_table[idx][1])
+        if rate > 0:
+            return rate
+    raise ValueError("Не задана скорость печати листов (sheetsPerHour)")
 
 
 class PrintInkjetCalculator(BaseCalculator):
@@ -101,6 +130,7 @@ class PrintInkjetCalculator(BaseCalculator):
         }
 
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
+        # Как calcPrintInkJet(numSheet, sizeSheet, quality, color, materialID, printerID, modeProduction)
         num_sheet = int(params.get("num_sheet", 1))
         width = float(params.get("width", 0))
         height = float(params.get("height", 0))
@@ -125,43 +155,44 @@ class PrintInkjetCalculator(BaseCalculator):
         if not material:
             return self._empty(mode)
 
+        # JS: baseTimeReady[Math.ceil(modeProduction)]
         base_time_ready = printer.base_time_ready or BASE_TIME_READY
-        idx = max(0, min(len(base_time_ready) - 1, mode.value))
+        idx = max(0, min(len(base_time_ready) - 1, int(math.ceil(mode.value))))
         base_ready = float(base_time_ready[idx])
-        time_prepare = (printer.time_prepare or 0) * max(1, mode.value)
+        # JS: timePrepare * modeProduction (без max(1, …))
+        time_prepare = (printer.time_prepare or 0) * float(mode.value)
 
         max_printer = printer.max_size or [297, 420]
         layout_check = layout_on_sheet(size_sheet, max_printer, None, 0.0)
         if layout_check["num"] == 0:
-            raise ValueError("Размер листа больше допустимого для принтера")
+            raise ValueError("Размер изделия больше допустимого")
 
-        # Коэффициент размера (SRA3 или половина)
+        # Коэффициент SRA3 / половина (как layoutOnHalfSheet в JS)
         coeff_size = 1.0
         half = [max_printer[0], max_printer[1] / 2.0]
         if layout_on_sheet(size_sheet, half, None, 0.0)["num"] > 0:
             coeff_size = 0.5
 
-        # Скорость: sheetsPerHour по качеству (в JS — массив [стандарт, высокое, фото])
-        sph_table = printer.sheets_per_hour_table
-        if sph_table and len(sph_table) > quality:
-            sheets_per_hour = sph_table[quality][1]
-        elif sph_table:
-            sheets_per_hour = sph_table[0][1]
-        else:
-            sheets_per_hour = 100.0
-        if sheets_per_hour <= 0:
-            sheets_per_hour = 100.0
+        sheets_per_hour = _sheets_per_hour(printer, quality)
 
         defects = printer.get_defect_rate(float(num_sheet))
-        if mode.value >= 2:
+        # JS: defects += modeProduction > 1 ? defects*(modeProduction-1) : 0
+        if mode.value > 1:
             defects += defects * (mode.value - 1)
 
-        double_side = 2 if color in ("1+1", "4+1", "4+4") else 1
-        time_print = math.ceil(num_sheet * (1 + defects)) / sheets_per_hour * coeff_size * double_side + time_prepare
+        double_side = 1 if color in ("1+0", "4+0") else 2
+        # JS: Math.ceil(numSheet*(1+defects))/sheetsPerHour*coeffSizeSheet*doubleSide+timePrepare
+        time_print = (
+            math.ceil(num_sheet * (1 + defects)) / sheets_per_hour * coeff_size * double_side
+            + time_prepare
+        )
         time_operator = time_print * 0.5 * (1 + defects) + time_prepare
 
         cost_per_sheet_val = _cost_per_sheet(color, printer.cost_print_sheet)
-        cost_print = printer.depreciation_per_hour * time_print + cost_per_sheet_val * coeff_size * num_sheet * (1 + defects)
+        cost_print = (
+            printer.depreciation_per_hour * time_print
+            + cost_per_sheet_val * coeff_size * num_sheet * (1 + defects)
+        )
         cost_operator = time_operator * printer.operator_cost_per_hour
 
         cost = cost_print + cost_operator
@@ -197,13 +228,13 @@ class PrintInkjetCalculator(BaseCalculator):
             "unit_price": float(price) / max(1, num_sheet),
             "time_hours": time_hours,
             "time_ready": time_ready,
-            "weight_kg": round(weight_kg, 3),
+            "weight_kg": float(weight_kg),
             "materials": materials_out,
         }
 
     def _empty(self, mode: ProductionMode) -> Dict[str, Any]:
         btr = BASE_TIME_READY
-        idx = max(0, min(len(btr) - 1, mode.value))
+        idx = max(0, min(len(btr) - 1, int(math.ceil(mode.value))))
         return {
             "cost": 0.0, "price": 0.0, "unit_price": 0.0,
             "time_hours": 0.0, "time_ready": float(btr[idx]),
