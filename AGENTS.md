@@ -24,6 +24,7 @@
 ## Режимы работы
 
 Задачи — [todo/AGENTS.md](todo/AGENTS.md). Роли — [docs/agents/roles/](docs/agents/roles/).
+Сообщение начинается с имени роли (Analyst, Implementer, Reviewer, Site ops) — прочитать её файл в `docs/agents/roles/` и работать только в этой роли.
 
 - **Быстрый** — один файл, цена, опечатка. Правка → `make check` → просмотр diff.
 - **Обычный** — калькулятор, bridge, форма, модуль. `todo/<задача>.md` → Implementer (модель из шапки
