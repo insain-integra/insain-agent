@@ -10,6 +10,7 @@
  *   insaincalc.syncUrl(params)           — query-строка, имена = GET полей формы
  *
  * Сбор параметров формы остаётся в custom JS. Расчёт и вывод вызываются отдельно.
+ * Вывод цен (менеджер + скидка) — только здесь: формы не пишут цены сами.
  */
 (function () {
     'use strict';
@@ -29,6 +30,19 @@
         return document;
     }
 
+    function $form(formId) {
+        if (!window.jQuery || !formId) {
+            return null;
+        }
+        var $el = window.jQuery('#ezfc-form-' + formId);
+        return $el.length ? $el : null;
+    }
+
+    /**
+     * Записать сумму в элемент формы и в модель ezFC.
+     * Без sync ezFC HTML-плейсхолдеры {{sbtPriceTotalDiscount}} в htmCost
+     * остаются от предыдущего синхронного прохода (async calcApi).
+     */
     function setNamedAmount(formId, name, number) {
         if (typeof ezfc_functions === 'undefined' || !ezfc_functions.get_element_id_by_name) {
             return;
@@ -37,18 +51,53 @@
         if (!id) {
             return;
         }
+        var num = Number(number);
+        if (!isFinite(num)) {
+            num = 0;
+        }
+
+        if (window.EZFC && typeof EZFC.set_element_object_value === 'function') {
+            EZFC.set_element_object_value(String(id), 'current_value', num);
+            EZFC.set_element_object_value(String(id), 'current_value_forced', num);
+        }
+
         var field = document.querySelector('#ezfc_element-' + id);
         if (!field) {
             return;
         }
         var caption = field.querySelector('.ezfc-text');
         if (caption) {
-            caption.textContent = String(number);
+            caption.textContent = String(num);
         }
-        var hiddenInput = field.querySelector('input.ezfc-element-subtotal');
+        var hiddenInput = field.querySelector('input.ezfc-element-subtotal, input.ezfc-element-numbers, input.ezfc-element-input-hidden');
         if (hiddenInput) {
-            hiddenInput.value = number;
+            hiddenInput.value = num;
+            if (window.jQuery) {
+                window.jQuery(hiddenInput).data('converted', 0);
+            }
         }
+    }
+
+    /** Обновить подписи subtotal и HTML с {{имяПоля}} после async-ответа API. */
+    function refreshEzfcPriceDisplay(formId) {
+        var $f = $form(formId);
+        if (!$f || !window.EZFC) {
+            return;
+        }
+        if (typeof EZFC.set_subtotal_values === 'function') {
+            EZFC.set_subtotal_values($f, formId);
+        }
+        if (typeof EZFC.populate_html_placeholders === 'function') {
+            EZFC.populate_html_placeholders($f);
+        }
+    }
+
+    function materialSize(item) {
+        var size = item.size_mm != null ? item.size_mm : item.size;
+        if (size == null) {
+            return '';
+        }
+        return size;
     }
 
     function adaptLegacyResult(result) {
@@ -62,7 +111,7 @@
             }
             material.set(code, [
                 item.name || item.title || '',
-                item.size_mm || item.size || null,
+                materialSize(item),
                 item.quantity || item.quantity_approx || 0
             ]);
         });
@@ -159,6 +208,7 @@
         window.CostTotal = cost;
         window.WeightTotal = weight;
 
+        // Менеджерская и скидочная цена — одним проходом, до refresh плейсхолдеров.
         setNamedAmount(formId, 'sbtPriceTotalManager', price);
         setNamedAmount(formId, 'sbtPriceManager', unit(price));
         setNamedAmount(formId, 'sbtPriceTotalDiscount', discount);
@@ -166,6 +216,7 @@
         setNamedAmount(formId, 'sbtCostTotal', cost);
         setNamedAmount(formId, 'sbtCost', unit(cost));
         setNamedAmount(formId, 'sbtWeightTotal', weight);
+        refreshEzfcPriceDisplay(formId);
 
         var root = formRoot(formId);
         if (calc.timeToWords && calc.calcDateReady) {

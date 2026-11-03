@@ -79,6 +79,9 @@ insaincalc.calcApi('SLUG', {
 `showResult` ищет их по имени через `get_element_id_by_name`. Новые id выдумывать не нужно.
 
 Цена со скидкой: `cost * (1 + marginMin)`, как в calcUVPrint, не сырая себестоимость.
+Менеджерская и скидочная цена пишутся только в `insaincalc.showResult` (в т.ч. HTML
+`{{sbtPriceTotalDiscount}}` в `htmCost` через `populate_html_placeholders` после async API).
+В `forms/<slug>.js` своего вывода цен нет.
 
 ## Чеклист перевода
 
