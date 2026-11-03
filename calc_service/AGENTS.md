@@ -16,7 +16,7 @@
 
 API отдаёт `price` в копейках без округления до рубля; округление вывода делает `insaincalc.showResult` (как `663864d`). Решено 31.10.2026, не переспрашивать.
 
-Элемент `materials` содержит `code`, `name` и `title`. На сайт и в бот уходит `name` (полное имя, `description` материала); `code` остаётся ключом вызова и логов. Единицы `unit` — по-русски. Поля проверяет `execute()`, формат — `docs/data-formats.md`, «Элемент `materials` в ответе».
+Элемент `materials` содержит `code`, `name` и `title`; размер — только `size_mm` (не `size`), если известен. На сайт и в бот уходит `name` (полное имя, `description` материала); `code` остаётся ключом вызова и логов. Единицы `unit` — по-русски. Собирать через `material_line()`; поля проверяет `execute()`, формат — `docs/data-formats.md`, «Элемент `materials` в ответе».
 
 Схема полей — `get_param_schema()` и `get_tool_schema()` (`/api/v1/param_schema/{slug}`, `/api/v1/tool_schema/{slug}`). Вторую схему в комментарии к калькулятору не заводить.
 

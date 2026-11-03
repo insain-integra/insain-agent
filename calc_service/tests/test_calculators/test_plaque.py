@@ -139,6 +139,7 @@ EXPECTED_MATERIAL = {
     "code": "Plaque2330",
     "name_substring": "Дощечка-плакетка",
     "quantity_approx": 2,
+    "size_mm": [230.0, 300.0],
 }
 
 
@@ -165,6 +166,7 @@ def test_expected_values_plaque(ref_result):
     ok_mat_code = mat.get("code") == em["code"]
     ok_mat_name = em["name_substring"] in (mat.get("name") or "")
     ok_mat_q = _cmp(float(mat.get("quantity") or 0), float(em["quantity_approx"]), 0.15) if materials else False
+    ok_mat_size = mat.get("size_mm") == em["size_mm"]
 
     print("")
     print("  [плакетки] quantity=%s  |  plaque_id=%s  |  material_id=%s  |  application=%s  |  mode=%s"
@@ -204,6 +206,7 @@ def test_expected_values_plaque(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+    assert ok_mat_size, f"material size_mm: got {mat.get('size_mm')}, expected {em['size_mm']}"
 
 
 def test_ref_price_kopecks(ref_result):

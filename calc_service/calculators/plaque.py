@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Mapping, Optional
 
 import json5
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import BaseCalculator, ProductionMode, material_line
 from calculators.tablets import TabletsCalculator
 from common.markups import BASE_TIME_READY, MARGIN_MATERIAL, get_margin
 from materials import plaque as plaque_catalog, hardsheet as hardsheet_catalog
@@ -57,7 +57,11 @@ def _get_plaque_extra(plaque_id: str) -> Dict[str, Any]:
     size_plate = spec.get("sizePlate")
     if not size_plate or len(size_plate) < 2:
         raise ValueError(f"sizePlate не задан для плакетки {plaque_id!r}")
+    size = spec.get("size")
+    if not size or len(size) < 2:
+        raise ValueError(f"size не задан для плакетки {plaque_id!r}")
     return {
+        "size": [float(size[0]), float(size[1])],
         "size_plate": [float(size_plate[0]), float(size_plate[1])],
         "weight": float(spec.get("weight", 0)),
     }
@@ -261,13 +265,14 @@ class PlaqueCalculator(BaseCalculator):
         weight_plaque = extra["weight"] * n
 
         materials_out: List[Dict[str, Any]] = [
-            {
-                "code": plaque_id,
-                "name": plaque.description,
-                "title": plaque.title,
-                "quantity": n,
-                "unit": "шт",
-            }
+            material_line(
+                code=plaque_id,
+                name=plaque.description,
+                title=plaque.title,
+                quantity=n,
+                unit="шт",
+                size_mm=list(extra["size"]),
+            )
         ]
 
         # --- 2. Пластина через TabletsCalculator (JS строка 640: modeProduction = 1) ---

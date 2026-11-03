@@ -95,6 +95,22 @@ def test_materials_contract_unit_not_string():
         _execute(unit=None)
 
 
+def test_materials_contract_size_key_forbidden():
+    with pytest.raises(ValueError, match="size_mm"):
+        _execute(size=[230, 300])
+
+
+def test_materials_contract_size_mm_valid():
+    result = _execute(size_mm=[230.0, 300.0])
+    assert result["materials"][0]["size_mm"] == [230.0, 300.0]
+
+
+@pytest.mark.parametrize("value", [None, [], "230x300", [230, "x"]])
+def test_materials_contract_size_mm_invalid(value):
+    with pytest.raises(ValueError, match="size_mm"):
+        _execute(size_mm=value)
+
+
 def test_materials_contract_metal_pins_execute_checks(monkeypatch):
     """metal_pins переопределяет execute(): проверка контракта не должна теряться."""
     calc = MetalPinsCalculator()

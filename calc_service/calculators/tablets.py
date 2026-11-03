@@ -17,7 +17,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List, Mapping, MutableMapping, Sequence
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import BaseCalculator, ProductionMode, material_line
 from calculators.heat_press import HeatPressCalculator
 from calculators.laser import LaserCalculator
 from calculators.uv_print import UVPrintCalculator
@@ -238,13 +238,14 @@ class TabletsCalculator(BaseCalculator):
             "time_ready": float(cut.time_ready),
             "weight_kg": weight,
             "materials": [
-                {
-                    "code": material_id,
-                    "name": material.description,
-                    "title": material.title,
-                    "quantity": num_material_sheet,
-                    "unit": "лист",
-                }
+                material_line(
+                    code=material_id,
+                    name=material.description,
+                    title=material.title,
+                    quantity=num_material_sheet,
+                    unit="лист",
+                    size_mm=[float(sheet[0]), float(sheet[1])],
+                )
             ],
         }
 

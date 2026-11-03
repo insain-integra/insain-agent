@@ -47,6 +47,31 @@ class ProductionMode(IntEnum):
     EXPRESS = 2
 
 
+def material_line(
+    *,
+    code: str,
+    name: str,
+    title: str,
+    quantity: float | int,
+    unit: str,
+    size_mm: List[float] | None = None,
+) -> Dict[str, Any]:
+    """
+    Элемент materials ответа: единый набор ключей для всех калькуляторов.
+    size_mm — размеры в мм (лист, заготовка, изделие), если известны.
+    """
+    item: Dict[str, Any] = {
+        "code": code,
+        "name": name,
+        "title": title,
+        "quantity": quantity,
+        "unit": unit,
+    }
+    if size_mm is not None:
+        item["size_mm"] = [float(x) for x in size_mm]
+    return item
+
+
 class BaseCalculator(ABC):
     """
     Базовый класс калькулятора.
@@ -156,7 +181,9 @@ class BaseCalculator(ABC):
     def validate_materials(self, materials: List[Dict[str, Any]]) -> None:
         """
         Контракт элемента materials: name и title — непустые строки, не равные code;
-        quantity — число (int или float, не bool); unit — строка.
+        quantity — число (int или float, не bool); unit — строка;
+        size_mm (если есть) — список чисел длиной ≥ 1. Ключ `size` в ответе не допускается —
+        только `size_mm` (см. docs/data-formats.md).
         Клиент видит name, поэтому внутренний code не должен в него просочиться.
         """
         slug = self.slug or self.__class__.__name__
@@ -175,6 +202,20 @@ class BaseCalculator(ABC):
                 )
             if not isinstance(item.get("unit"), str):
                 raise ValueError(f"Калькулятор {slug}: у материала {code!r} unit должно быть строкой")
+            if "size" in item:
+                raise ValueError(
+                    f"Калькулятор {slug}: у материала {code!r} используйте size_mm, не size"
+                )
+            if "size_mm" in item:
+                size_mm = item.get("size_mm")
+                if not isinstance(size_mm, (list, tuple)) or len(size_mm) < 1:
+                    raise ValueError(
+                        f"Калькулятор {slug}: у материала {code!r} size_mm должен быть непустым списком"
+                    )
+                if any(isinstance(x, bool) or not isinstance(x, (int, float)) for x in size_mm):
+                    raise ValueError(
+                        f"Калькулятор {slug}: у материала {code!r} size_mm должен содержать только числа"
+                    )
 
     def get_required_params(self) -> List[str]:
         """
