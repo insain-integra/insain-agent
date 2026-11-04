@@ -85,7 +85,8 @@ def test_get_tool_schema(calc):
 # ── Эталонный тест ───────────────────────────────────────────────────
 
 REF_PARAMS = {"quantity": 50, "width_mm": 80, "height_mm": 120, "material_id": "PaperCoated115M", "color": "4+0", "mode": 1}
-EXPECTED_REF = {"cost": 1357.90, "price": 2192, "time_hours": 0.67, "time_ready": 9.004, "weight_kg": 0.105}
+# JS, 04.11.2026 — сверка с calcPennantPaper --data current
+EXPECTED_REF = {"cost": 1351.9012, "price": 2181.133696, "time_hours": 0.67, "time_ready": 9.164, "weight_kg": 0.1052}
 EXPECTED_MATERIAL = {"code": "PaperCoated115M", "name_substring": "Титан DIGITAL", "quantity_approx": 6}
 
 

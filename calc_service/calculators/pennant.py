@@ -14,7 +14,7 @@ from calculators.base import BaseCalculator, ProductionMode
 from calculators.print_sheet import PrintSheetCalculator
 from common.markups import get_margin, get_time_ready
 from materials import sheet as sheet_catalog
-from common.process_tools import calc_punching, calc_set_rope
+from common.process_tools import calc_set_rope
 
 DEFAULT_ROPE_ID = "RopeForPack"
 NUM_HOLES_PER_ITEM = 2  # как в JS: isHole = 2
@@ -162,12 +162,16 @@ class PennantCalculator(BaseCalculator):
 
         # 1. Печать (calcPrintSheet)
         print_calc = PrintSheetCalculator()
+        # Как в JS calcPennantPaper: margins=[2,2,2,2], interval=4; isHole через options print_sheet
         print_params = {
             "quantity": n,
             "width": width,
             "height": height,
             "material_id": material_id,
             "color": color,
+            "margins": [2, 2, 2, 2],
+            "interval": 4,
+            "is_hole": NUM_HOLES_PER_ITEM,
             "mode": mode.value,
         }
         if lamination_id:
@@ -177,24 +181,20 @@ class PennantCalculator(BaseCalculator):
         except (KeyError, ValueError):
             return self._empty_result(mode)
 
-        # 2. Пробивка отверстий (2 на изделие, как в JS isHole=2)
-        cost_punching = calc_punching(n * NUM_HOLES_PER_ITEM, material_id, mode.value)
-
-        # 3. Установка шнура (calcSetRope)
+        # 3. Установка шнура (calcSetRope) — отверстия уже в print_sheet (isHole), как в JS
         cost_rope = calc_set_rope(n, rope_id, mode.value)
 
-        # Итог (как в JS)
-        cost = cost_print["cost"] + cost_punching.cost + cost_rope.cost
-        price_sum = cost_print["price"] + cost_punching.price + cost_rope.price
+        # Итог (как в JS: без Math.ceil на price)
+        cost = cost_print["cost"] + cost_rope.cost
+        price_sum = cost_print["price"] + cost_rope.price
         margin_pennant = get_margin("marginPennantPaper")
-        price = math.ceil(price_sum * (1 + margin_pennant))
+        price = price_sum * (1 + margin_pennant)
 
         time_hours = math.ceil(
-            (cost_print["time_hours"] + cost_punching.time_hours + cost_rope.time_hours) * 100
+            (cost_print["time_hours"] + cost_rope.time_hours) * 100
         ) / 100.0
         time_ready = time_hours + max(
             cost_print.get("time_ready", 0),
-            cost_punching.time_ready,
             cost_rope.time_ready,
         )
 
@@ -220,7 +220,7 @@ class PennantCalculator(BaseCalculator):
 
         return {
             "cost": float(cost),
-            "price": int(price),
+            "price": float(price),
             "unit_price": float(price) / max(1, n),
             "time_hours": time_hours,
             "time_ready": time_ready,

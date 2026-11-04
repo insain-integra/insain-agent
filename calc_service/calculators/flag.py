@@ -161,12 +161,15 @@ class FlagCalculator(BaseCalculator):
 
         # 1. Печать (calcPrintSheet)
         print_calc = PrintSheetCalculator()
+        # Как в JS calcFlagPaper: margins=[2,2,2,2], interval=4
         print_params = {
             "quantity": n,
             "width": width,
             "height": height,
             "material_id": material_id,
             "color": color,
+            "margins": [2, 2, 2, 2],
+            "interval": 4,
             "mode": mode.value,
         }
         if lamination_id:
@@ -182,11 +185,11 @@ class FlagCalculator(BaseCalculator):
         # 3. Палочка (calcSetShaft)
         cost_shaft = calc_set_shaft(n, shaft_id, mode.value)
 
-        # Итог (как в JS)
+        # Итог (как в JS: без Math.ceil на price)
         cost = cost_print["cost"] + cost_staples.cost + cost_shaft.cost
         price_sum = cost_print["price"] + cost_staples.price + cost_shaft.price
         margin_flag = get_margin("marginFlag")
-        price = math.ceil(price_sum * (1 + margin_flag))
+        price = price_sum * (1 + margin_flag)
 
         time_hours = math.ceil(
             (cost_print["time_hours"] + cost_staples.time_hours + cost_shaft.time_hours) * 100
@@ -227,7 +230,7 @@ class FlagCalculator(BaseCalculator):
 
         return {
             "cost": float(cost),
-            "price": int(price),
+            "price": float(price),
             "unit_price": float(price) / max(1, n),
             "time_hours": time_hours,
             "time_ready": time_ready,
