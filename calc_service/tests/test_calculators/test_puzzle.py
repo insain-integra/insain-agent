@@ -14,7 +14,7 @@ if _calc_service.name == "calc_service" and str(_calc_service) not in sys.path:
 from calculators.puzzle import PuzzleCalculator
 
 
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
+def _cmp(a: float, b: float, rel: float = 0.001) -> bool:
     return abs(a - b) <= rel * max(abs(b), 1e-9)
 
 
@@ -88,9 +88,11 @@ REF_PARAMS = {
     "puzzle_id": "Puzzle300420",
     "mode": 1,
 }
+# JS, 05.11.2026 — ceil снят, как в JS. Сублимация через print_sheet.
+# Полный calcPuzzle в JS другой (heat press): price 1581.18.
 EXPECTED_REF = {
-    "cost": 722,
-    "price": 1171,
+    "cost": 711,
+    "price": 1152,
     "time_hours": 0.17,
     "time_ready": 8.424,
     "weight_kg": 0.2,

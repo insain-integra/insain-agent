@@ -14,7 +14,7 @@ if _calc_service.name == "calc_service" and str(_calc_service) not in sys.path:
 from calculators.notebook import NotebookCalculator
 
 
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
+def _cmp(a: float, b: float, rel: float = 0.001) -> bool:
     return abs(a - b) <= rel * max(abs(b), 1e-9)
 
 
@@ -102,9 +102,10 @@ REF_PARAMS = {
     "binding_edge": "long",
     "mode": 1,
 }
+# JS, 05.11.2026 — ceil снят, как в JS. Обложка и блок через print_sheet.
 EXPECTED_REF = {
-    "cost": 9679.99,
-    "price": 20817,
+    "cost": 9885.25,
+    "price": 20800,
     "time_hours": 2.15,
     "time_ready": 58.15,
     "weight_kg": 8.23,

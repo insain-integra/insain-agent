@@ -123,16 +123,17 @@ REF_PARAMS = {
     "printer_code": "",
     "mode": 1,
 }
+# JS, 05.11.2026 — ceil снят, как в JS. calcPrintLaser --data current.
 EXPECTED_REF = {
-    "cost": 2494.04,
-    "price": 4081,
-    "time_hours": 1.07,
-    "time_ready": 9.07,
+    "cost": 2482.039090909091,
+    "price": 4060,
+    "time_hours": 1.06,
+    "time_ready": 9.06,
     "weight_kg": 2.16,
 }
 
 
-def _cmp(a: float, b: float, rel: float = 0.02) -> bool:
+def _cmp(a: float, b: float, rel: float = 0.001) -> bool:
     """Сравнение с относительным допуском."""
     return abs(a - b) <= rel * max(abs(b), 1e-9)
 
@@ -152,7 +153,7 @@ def test_expected_values_print_laser(ref_result):
         pytest.skip("расчёт эталонного кейса не выполнен (материал PaperCoated300M?)")
     r = ref_result
     e = EXPECTED_REF
-    rel = 0.02
+    rel = 0.001
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
     ok_price = _cmp(r["price"], e["price"], rel)

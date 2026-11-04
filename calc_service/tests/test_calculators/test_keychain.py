@@ -14,7 +14,7 @@ if _calc_service.name == "calc_service" and str(_calc_service) not in sys.path:
 from calculators.keychain import KeychainCalculator
 
 
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
+def _cmp(a: float, b: float, rel: float = 0.001) -> bool:
     return abs(a - b) <= rel * max(abs(b), 1e-9)
 
 
@@ -84,7 +84,8 @@ def test_get_tool_schema(calc):
 # ── Эталонный тест ───────────────────────────────────────────────────
 
 REF_PARAMS = {"quantity": 50, "keychain_id": "KeychainAcrylic3939", "color": 1, "is_packing": True, "mode": 1}
-EXPECTED_REF = {"cost": 1917.54, "price": 3117, "time_hours": 0.68, "time_ready": 16.93, "weight_kg": 0.635}
+# JS, 05.11.2026 — ceil снят, как в JS. Вставка через print_laser. color 1 → «4+0».
+EXPECTED_REF = {"cost": 1906.74, "price": 3098, "time_hours": 0.68, "time_ready": 16.93, "weight_kg": 0.635}
 EXPECTED_MATERIAL = {"code": "KeychainAcrylic3939", "name_substring": "брелок", "quantity_approx": 50}
 
 
@@ -99,7 +100,7 @@ def ref_result(calc):
 def test_expected_values_keychain(ref_result):
     if ref_result is None:
         pytest.skip("расчёт эталонного кейса не выполнен")
-    rel = 0.03
+    rel = 0.001
     r, e, em = ref_result, EXPECTED_REF, EXPECTED_MATERIAL
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)

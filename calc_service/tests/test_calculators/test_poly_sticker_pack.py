@@ -94,7 +94,7 @@ def test_zero_area_raises(calc, base_params):
 
 # ── Эталонный тест ───────────────────────────────────────────────────
 
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
+def _cmp(a: float, b: float, rel: float = 0.001) -> bool:
     return abs(a - b) <= rel * max(abs(b), 1e-9)
 
 
@@ -110,10 +110,11 @@ REF_PARAMS = {
     "print_method": "KMBizhubC220",
     "mode": 1,
 }
+# JS, 05.11.2026 — ceil снят, как в JS. Печать наклеек через print_laser.
 EXPECTED_REF = {
-    "cost": 3231,
-    "price": 5983.45,
-    "unit_price": 299.17,
+    "cost": 3220,
+    "price": 5961.6,
+    "unit_price": 298.08,
     "time_hours": 1.68,
     "time_ready": 41.68,
     "weight_kg": 0.19,
@@ -134,7 +135,7 @@ def test_expected_values_poly_sticker_pack(ref_result):
     r = ref_result
     e = EXPECTED_REF
     em = EXPECTED_MATERIAL
-    rel = 0.03
+    rel = 0.001
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
     ok_price = _cmp(r["price"], e["price"], rel)

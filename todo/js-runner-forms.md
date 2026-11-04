@@ -121,7 +121,8 @@ print("ok", js, api, abs_d, rel)
 
 ## Результат
 
-- Ветка, PR или коммит: `task/js-runner-forms` @ `23854d1` (поверх `main` @ `5f9dfd0`). Push/merge не делались.
+- пазл 1171→1152 принято человеком 05.11.2026; smoke infra/deploy.sh число не проверяет. Бейдж JS 4708 и стикер JS 1308 — отдельные задачи, не этот PR.
+- Ветка, PR или коммит: `task/js-runner-forms` (поверх `main` @ `5f9dfd0`). Push/merge не делались. Эталоны после ceil: puzzle/badge/sticker/notebook/calendar/keychain/poly_sticker/poly_sticker_pack/print_laser/print_sheet, rel=0.001.
 - Период: 04.11.2026
 - Часы человека: не учтено
 - Работа агентов: Implementer (Opus 5.5), продолжение после эскалации расхождений

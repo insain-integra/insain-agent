@@ -86,7 +86,7 @@ def test_get_tool_schema(calc):
 
 # ── Эталонный тест ───────────────────────────────────────────────────
 
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
+def _cmp(a: float, b: float, rel: float = 0.001) -> bool:
     return abs(a - b) <= rel * max(abs(b), 1e-9)
 
 
@@ -101,9 +101,10 @@ REF_PARAMS = {
     "is_uv_print": False,
     "mode": 1,
 }
+# JS, 05.11.2026 — ceil снят, как в JS. Печать бейджа через print_sheet.
 EXPECTED_REF = {
-    "cost": 3575.34,
-    "price": 6523,
+    "cost": 3568.14,
+    "price": 6509,
     "time_hours": 1.35,
     "time_ready": 16.55,
     "weight_kg": 1.18,
@@ -129,7 +130,7 @@ def test_expected_values_badge(ref_result):
     r = ref_result
     e = EXPECTED_REF
     em = EXPECTED_MATERIAL
-    rel = 0.03
+    rel = 0.001
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
     ok_price = _cmp(r["price"], e["price"], rel)

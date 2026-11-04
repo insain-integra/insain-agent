@@ -90,7 +90,7 @@ def test_get_tool_schema(calc):
 
 # ── Эталонный тест ───────────────────────────────────────────────────
 
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
+def _cmp(a: float, b: float, rel: float = 0.001) -> bool:
     return abs(a - b) <= rel * max(abs(b), 1e-9)
 
 
@@ -103,9 +103,10 @@ REF_PARAMS = {
     "difficulty": 1,
     "mode": 1,
 }
+# JS, 05.11.2026 — ceil снят, как в JS. Печать наклейки через print_laser.
 EXPECTED_REF = {
-    "cost": 2151,
-    "price": 4007.75,
+    "cost": 2140,
+    "price": 3985.9,
     "time_hours": 0.85,
     "time_ready": 40.85,
     "weight_kg": 0.27,
@@ -131,7 +132,7 @@ def test_expected_values_poly_sticker(ref_result):
     r = ref_result
     e = EXPECTED_REF
     em = EXPECTED_MATERIAL
-    rel = 0.03
+    rel = 0.001
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
     ok_price = _cmp(r["price"], e["price"], rel)

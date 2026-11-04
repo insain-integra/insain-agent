@@ -119,7 +119,7 @@ def test_get_tool_schema(calc):
 
 
 # Эталон: 100 шт, 210×297 мм, PaperCoated300M, цветность 4+4
-REF_REL_TOL = 0.01
+REF_REL_TOL = 0.001
 
 REF_PARAMS = {
     "quantity": 100,
@@ -130,11 +130,12 @@ REF_PARAMS = {
     "printer_code": "",
     "mode": 1,
 }
+# JS, 05.11.2026 — ceil снят, как в JS. calcPrintSheet --data current.
 EXPECTED_REF = {
-    "cost": 3222.48,
-    "price": 5287,
-    "time_hours": 1.13,
-    "time_ready": 10.2,
+    "cost": 3210.479090909091,
+    "price": 5266.918472727273,
+    "time_hours": 1.12,
+    "time_ready": 10.183636363636364,
     "weight_kg": 1.8711,
 }
 EXPECTED_MATERIAL = {
@@ -153,11 +154,12 @@ REF_PARAMS_2 = {
     "printer_code": "",
     "mode": 1,
 }
+# JS, 05.11.2026 — ceil снят, как в JS. calcPrintSheet --data current.
 EXPECTED_REF_2 = {
-    "cost": 17568.01,
-    "price": 28921,
-    "time_hours": 4.95,
-    "time_ready": 17.69,
+    "cost": 17568.012727272726,
+    "price": 28920.942036363638,
+    "time_hours": 4.91,
+    "time_ready": 17.65,
     "weight_kg": 18.711,
 }
 EXPECTED_MATERIAL_2 = {
@@ -179,9 +181,10 @@ REF_PARAMS_3 = {
     "lamination_double_side": True,
     "mode": 1,
 }
+# JS, 05.11.2026 — ceil снят, как в JS. calcPrintSheet с ламинацией, price раннера 6297.625.
 EXPECTED_REF_3 = {
-    "cost": 3860.55,
-    "price": 6306,
+    "cost": 3856.346317948718,
+    "price": 6297.62536871795,
     "time_hours": 1.01,
     "time_ready": 9.49,
     "weight_kg": 2.06613,
@@ -200,7 +203,7 @@ EXPECTED_MATERIALS_3 = {
 }
 
 
-def _cmp(a: float, b: float, rel: float = 0.02) -> bool:
+def _cmp(a: float, b: float, rel: float = 0.001) -> bool:
     """Сравнение с относительным допуском."""
     return abs(a - b) <= rel * max(abs(b), 1e-9)
 
