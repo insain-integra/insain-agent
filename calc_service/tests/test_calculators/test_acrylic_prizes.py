@@ -123,12 +123,13 @@ REF_PARAMS = {
     "mode": 1,
 }
 
+# JS, 04.11.2026 — сверка с calcAcrilycPrizes --data current
 EXPECTED_REF = {
-    "cost": 1667.45,
-    "price": 2669,
-    "time_hours": 2.44,
-    "time_ready": 35.32,
-    "weight_kg": 0.0,
+    "cost": 2092.45,
+    "price": 3353.72,
+    "time_hours": 2.67,
+    "time_ready": 35.45,
+    "weight_kg": 0.17,
 }
 
 

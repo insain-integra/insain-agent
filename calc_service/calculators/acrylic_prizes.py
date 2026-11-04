@@ -159,7 +159,10 @@ class AcrylicPrizesCalculator(BaseCalculator):
             time_ready_layer = 0.0
             materials_layer: List[Dict[str, Any]] = []
 
-            if options.get("isGrave") is not None or options.get("isCutLaser"):
+            # Как в JS: options.has('isCutLaser') — пустой {} тоже включает резку.
+            has_cut_laser = "isCutLaser" in options and options.get("isCutLaser") is not None
+            has_grave = options.get("isGrave") is not None
+            if has_grave or has_cut_laser:
                 laser_params = {
                     "quantity": n,
                     "width": size[0],
@@ -167,14 +170,15 @@ class AcrylicPrizesCalculator(BaseCalculator):
                     "material_id": material_id or "PVC3",
                     "mode": mode_laser,
                 }
-                if options.get("isGrave") is not None:
+                if has_grave:
                     laser_params["is_grave"] = options["isGrave"]
                     if "is_grave_fill" in options:
                         laser_params["is_grave_fill"] = options["is_grave_fill"]
                     if "is_grave_contur" in options:
                         laser_params["is_grave_contur"] = options["is_grave_contur"]
-                if options.get("isCutLaser"):
-                    laser_params["is_cut_laser"] = options["isCutLaser"] if isinstance(options["isCutLaser"], dict) else {}
+                if has_cut_laser:
+                    cut_raw = options.get("isCutLaser")
+                    laser_params["is_cut_laser"] = cut_raw if isinstance(cut_raw, dict) else {}
                 try:
                     laser_result = laser_calc.calculate(laser_params)
                     cost_layer += laser_result["cost"]
@@ -196,12 +200,14 @@ class AcrylicPrizesCalculator(BaseCalculator):
                     size_print = size
                 if len(size_print) < 2:
                     size_print = size
+                # Как в JS calcAcrilycPrizes: sizeItem = sizePrint (не размер слоя).
+                size_print_f = [float(size_print[0]), float(size_print[1])]
                 uv_params = {
                     "quantity": n,
-                    "width": size_print[0],
-                    "height": size_print[1],
-                    "item_width": size[0],
-                    "item_height": size[1],
+                    "width": size_print_f[0],
+                    "height": size_print_f[1],
+                    "item_width": size_print_f[0],
+                    "item_height": size_print_f[1],
                     "resolution": uv_opts.get("resolution", 2) if isinstance(uv_opts, dict) else 2,
                     "color": uv_opts.get("color", "4+1") if isinstance(uv_opts, dict) else "4+1",
                     "surface": uv_opts.get("surface", "plain") if isinstance(uv_opts, dict) else "plain",
@@ -242,13 +248,14 @@ class AcrylicPrizesCalculator(BaseCalculator):
             materials_out = _merge_materials(materials_out, materials_layer)
 
         margin = get_margin("marginAcrilycPrizes")
-        price = math.ceil((price_layers) * (1 + margin))
+        # JS: без Math.ceil на price
+        price = (price_layers) * (1 + margin)
         time_hours = math.ceil(time_layers * 100) / 100
         time_ready = time_hours + time_ready_layers
 
         return {
             "cost": float(cost_layers),
-            "price": int(price),
+            "price": float(price),
             "unit_price": float(price) / max(1, n),
             "time_hours": time_hours,
             "time_ready": time_ready,
