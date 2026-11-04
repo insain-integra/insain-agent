@@ -1,6 +1,6 @@
 # js-runner-forms
 
-Статус: черновик
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -121,13 +121,37 @@ print("ok", js, api, abs_d, rel)
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Период:
+- Ветка, PR или коммит: `task/js-runner-forms` (незакоммичено). Push/merge не делались.
+- Период: 04.11.2026
 - Часы человека: не учтено
-- Работа агентов:
-- Было / стало:
+- Работа агентов: Implementer (Opus 5.5), продолжение после эскалации расхождений
+- Было / стало: порты Python расходились с JS; после правок локальный Python = JS на всех шести кейсах (abs=0).
 - Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+  - раннер: шесть функций + зависимости (`calcPrintLaser`/`PrintRoll`/`PrintWide`, `presswall`/`tools`);
+  - порты: embossing (`findIndex > n`), acrylic (`isCutLaser:{}` + `sizeItem=sizePrint`), print_laser/print_sheet (расходники без ceil, price float), flag/pennant (margins/interval, is_hole, без ceil price), print_roll (`isJoing` всегда + `wide` из layout), presswall (`price_cut` не `cost_cut`), layout_on_roll.wide;
+  - эталоны тестов пересняты; `js_port_gaps_allowed` — убран `calcPrintRoll option isJoing`;
+  - `python scripts/dev.py check` зелёный.
+- Чем проверено: JS runner vs локальный Python — все шесть `ok` abs=0; `python scripts/dev.py check` 498+81.
+- Не сделано и почему: боевой API ещё на старом коде — после merge нужен деплой `infra/deploy.sh` с `main`, иначе `Invoke-RestMethod` на prod снова разойдётся.
+- Требуется решение: закоммитить / review / merge / деплой API.
 - Команды и `price` (их копируют задачи форм):
+
+```powershell
+node scripts/run_js_calc.mjs calcFlagPaper --data current --args '[100,[100,150],\"4+0\",\"PaperCoated115M\",{},1]'
+# price 3934.410784
+
+node scripts/run_js_calc.mjs calcPennantPaper --data current --args '[50,[80,120],\"4+0\",\"PaperCoated115M\",{},1]'
+# price 2181.133696
+
+node scripts/run_js_calc.mjs calcRollup --data current --args '[1,\"Rollup_econom_85\",\"BannerFronlitCoat400\",{},1]'
+# price 8321
+
+node scripts/run_js_calc.mjs calcPresswall --data current --args '[1,\"Joker30_20_eyelet\",\"BannerFronlitCoat400\",{\"isPresswall\":true,\"isRent\":0},1]'
+# price 11453.624
+
+node scripts/run_js_calc.mjs calcEmbossing --data current --args '[500,[50,30],\"\",\"foil\",\"diary\",[],{\"isCliche\":true},1]'
+# price 14046
+
+node scripts/run_js_calc.mjs calcAcrilycPrizes --data current --args '[10,[{\"materialID\":\"PVC3\",\"size\":[100,100],\"isTop\":false,\"options\":{}},{\"materialID\":\"PVC3\",\"size\":[100,100],\"isTop\":true,\"options\":{\"isCutLaser\":{\"lenCut\":0,\"sizeItem\":0,\"density\":0,\"difficulty\":1},\"isUVPrint\":{\"size\":[80,80]}}}],{},1]'
+# price 3353.72
+```
