@@ -1,6 +1,6 @@
 # form-mug
 
-Статус: в работе
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -120,19 +120,30 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 
 ## Результат
 
-- Ветка, PR или коммит: `task/form-mug` (от `main` @ 437a5d1); коммит с `wp-plugin/forms/mug.js`
+- Ветка, PR или коммит: `task/form-mug` (от `main` @ 437a5d1)
 - Период: 05.11.2026
 - Часы человека: не учтено
 - Работа агентов: Implementer (Opus 5.5), эта сессия
-- Было / стало: боевая 41 на `calcMug`; в git появился `forms/mug.js` с id боевой 41; дубль и GET ещё нет
+- Было / стало: боевая 41 на `calcMug`; копия 88 на draft 2586882 считает `POST /api/v1/calc/mug`
 - Сделано:
-  - сверка эталона REF_PARAMS_10: JS runner = прод-API = 3723.2469869444444 (abs 0, rel 0); `test_mug.py` не переписывался
-  - порт `calcMug`: `нет в Python:` пусто; дыры `calcHeatPress` уже в `js_port_gaps_allowed.txt`
-  - read-only поля формы 41; `wp-plugin/forms/mug.js` (`calcApi('mug'`, `syncUrl`, `showResult`)
-  - `python scripts/dev.py check` зелёный (499 passed + 2 skipped calc; 81 passed bot)
-- Чем проверено: команды критериев приёмки (порт, runner, API, assert ok, pytest mug+forms, Select-String, scripts/dev.py check)
-- Не сделано и почему: дубль формы 41 / draft-товар / GET на копии / прогон под админом — ждут «да»; строка в `forms-batch-switch.md` — после принятия копии; `read_file` и выкатка плагина — вне scope
-- Требуется решение: подтверждение «да» на дубль формы 41 и черновик товара
-- Строка в «Состав пакета» `todo/forms-batch-switch.md` (id копии и товар — после принятия копии):
+  - сверка эталона REF_PARAMS_10: JS = API = 3723.2469869444444 (abs 0, rel 0); `test_mug.py` не трогал
+  - `wp-plugin/forms/mug.js` (id боевой 41): `calcApi('mug'`, `syncUrl`, `showResult`
+  - копия формы **88**, товар **2586882** (`draft`, гость `404`)
+  - GET на копии (см. таблицу ниже); custom JS копии с id 88 без `read_file`
+  - прогон под админом: эталон → API 200, price 3723.25, на странице 3800 (showResult/round); смена типа кружки меняет цену; ссылка с GET и перезагрузка сохраняют режим/срок
+- Чем проверено: критерии приёмки + Browser MCP на `?p=2586882&preview=true`; `python scripts/dev.py check` → 499 passed, 2 skipped; bot 81 passed
+- Не сделано и почему: строка в `forms-batch-switch.md` — после принятия копии; `read_file`/выкатка плагина/боевая 41 — вне scope. На форме нет `.data-material-table` и `<a>` в `htmTime` (как на боевой 41) — таблица материалов и подсказка дат в DOM не появляются
+- Требуется решение: принять копию **88** / товар **2586882**?
+- GET на копии 88:
 
-| 41 CalcMug | `mug` | /catalog/kalkulyator-sublimaczionnoj-pechati-na-kruzhki/ | COPY / PRODUCT (draft) | todo/form-mug.md |
+| поле | имя элемента | GET | GET_check |
+| --- | --- | --- | --- |
+| тираж | numN | numN | — |
+| тип кружки | dpdTypeMug | dpdTypeMug | index |
+| упаковка | ckbPacking | ckbPacking | index (вкл. → 0) |
+| разные макеты | ckbDifferent | ckbDifferent | index (вкл. → 0) |
+| режим | rdoModeProduction | rdoModeProduction | value |
+
+- Строка в «Состав пакета» `todo/forms-batch-switch.md` (после принятия):
+
+| 41 CalcMug | `mug` | /catalog/kalkulyator-sublimaczionnoj-pechati-na-kruzhki/ | 88 / 2586882 (draft) | todo/form-mug.md |
