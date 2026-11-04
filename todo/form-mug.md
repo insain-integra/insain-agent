@@ -1,6 +1,6 @@
 # form-mug
 
-Статус: черновик
+Статус: в работе
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -120,15 +120,19 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Период:
+- Ветка, PR или коммит: `task/form-mug` (от `main` @ 437a5d1); коммит с `wp-plugin/forms/mug.js`
+- Период: 05.11.2026
 - Часы человека: не учтено
-- Работа агентов:
-- Было / стало:
+- Работа агентов: Implementer (Opus 5.5), эта сессия
+- Было / стало: боевая 41 на `calcMug`; в git появился `forms/mug.js` с id боевой 41; дубль и GET ещё нет
 - Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+  - сверка эталона REF_PARAMS_10: JS runner = прод-API = 3723.2469869444444 (abs 0, rel 0); `test_mug.py` не переписывался
+  - порт `calcMug`: `нет в Python:` пусто; дыры `calcHeatPress` уже в `js_port_gaps_allowed.txt`
+  - read-only поля формы 41; `wp-plugin/forms/mug.js` (`calcApi('mug'`, `syncUrl`, `showResult`)
+  - `python scripts/dev.py check` зелёный (499 passed + 2 skipped calc; 81 passed bot)
+- Чем проверено: команды критериев приёмки (порт, runner, API, assert ok, pytest mug+forms, Select-String, scripts/dev.py check)
+- Не сделано и почему: дубль формы 41 / draft-товар / GET на копии / прогон под админом — ждут «да»; строка в `forms-batch-switch.md` — после принятия копии; `read_file` и выкатка плагина — вне scope
+- Требуется решение: подтверждение «да» на дубль формы 41 и черновик товара
 - Строка в «Состав пакета» `todo/forms-batch-switch.md` (id копии и товар — после принятия копии):
 
 | 41 CalcMug | `mug` | /catalog/kalkulyator-sublimaczionnoj-pechati-na-kruzhki/ | COPY / PRODUCT (draft) | todo/form-mug.md |
