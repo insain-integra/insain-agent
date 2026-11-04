@@ -26,18 +26,18 @@ Reviewer: Grok 4.7
 
 ## Scope
 
-Порядок жёсткий. Критерии про форму и плагин выполняются только после записанного в «Результат» вывода ворот и вывода по копии с **тремя** нанесениями. Факт на 02.11.2026:
+Порядок жёсткий. Критерии про форму и плагин выполняются только после записанного в «Результат» вывода ворот и вывода по копии с **тремя** нанесениями. Факт на 04.11.2026:
 
 | # | Шаг | Статус |
 | --- | --- | --- |
 | 1 | Ворота прод-API (УФ 6205.71) | сделано |
 | 2 | Локальная сверка JS эталона | сделано |
 | 3 | `wp-plugin/forms/plaque.js` | сделано (в git и на проде) |
-| 4 | Ревью человека на `plaque.js` | нужно перед переключением 69 |
-| 5 | Деплой плагина | **не нужен**, пока `plaque.js` не меняется: на проде уже 0.2.4 и `forms/plaque.js` с `calcApi` |
+| 4 | Ревью человека на `plaque.js` | копия принята; перед переключением 69 — ещё раз по diff при необходимости |
+| 5 | Деплой плагина / API | сделано: на проде плагин **0.2.5** (`showResult` + refresh скидки) и API с `size_mm` в materials (`main` @ `52676c2`) |
 | 6 | Дубль формы 69 → копия 86, товар 2586879 draft | сделано |
-| 7 | Отладка копии на боевом API (УФ + гравировка + сублимация) | сделано (JS↔API + UI под админом) |
-| 8–12 | Боевая 69, снимок, `forms.md`, `wp-plugin/AGENTS.md`, приписка 5.5 | **стоп** — ждёт подтверждения человека на переключение 69 |
+| 7 | Отладка копии на боевом API (УФ + гравировка + сублимация) | сделано (JS↔API + UI; человек принял после фикса скидки/`size_mm`) |
+| 8–12 | Боевая 69, снимок, `forms.md`, `wp-plugin/AGENTS.md`, приписка 5.5 | **отложено** — 69 не переключаем до перевода ещё нескольких форм; переключение пакетом |
 
 1. Ворота боевого API. Тело `{"quantity":2,"plaque_id":"Plaque2330","material_id":"PVC3","application":"isUVPrint","mode":1}` на `POST https://insain.ru/api/v1/calc/plaque`. В ответе `price` равен 6205.71 (допуск 0.02). Другое число или нет slug — стоп: форму 69 не переключать.
 2. До перевода ещё раз локальная сверка тем же скриптом и эталоном. Новые кейсы не писать.
@@ -60,7 +60,7 @@ Git-файлы пишет Implementer. Дубль, деплой плагина, 
 - Новый калькулятор «чтобы прогнать skill».
 - Правка цен, любые файлы в `calc_service/data/`, `calc_service/calculators/plaque.py`, эталоны в `test_plaque.py`.
 - Дубль сайта, тестовый контейнер API, `infra/deploy.sh`, пересборка `insain-calc-api`.
-- Версия плагина 0.2.4 и `wp-plugin/js/insain-calc-bridge.js`: расчёт идёт через уже существующий `calcApi`; без правки `plaque.js` повторный деплой не делать.
+- Без нужды не трогать плагин/API вне правок по багам bridge или контракта materials; на проде уже **0.2.5** и `size_mm`.
 - Обратный импорт `site/forms/69.json` в ezFC.
 - Закрытие чекбокса 5.5 и правки других пунктов плана.
 - Чинить JS NaN на AcrylWhite3 + isSublimation (см. «Результат»).
@@ -184,7 +184,19 @@ curl.exe -sS -o NUL -w "%{http_code}" "https://insain.ru/catalog/kalkulyator-nag
 
 ## Результат
 
-- Ветка, PR или коммит: `task/pilot-plaque-form` (ff от `main` @ `86e9da1`, затем `8305045` + этот коммит). Merge fast-forward после ревью. `git push` — спросить. Zip плагина не собирали: на проде уже `insain-calc-bridge` **0.2.4**, `forms/plaque.js` с `calcApi('plaque'`.
+- Ветка / коммит: `task/plaque-sync-url` (поверх `main` @ `52676c2`). На проде ещё плагин **0.2.5**; форма 69 — `calcPlaque`; копия 86 — `calcApi` inline без `syncUrl`.
+- Решение человека (04.11.2026): копия принята; **боевую 69 пока не переключаем** — сначала ещё несколько форм на API, тесты, затем пакетное переключение.
+- **GET share-URL (пилот, копия 86):** имена = имена элементов формы. Снято read-only с прод (wp-cli). Поле в БД — `GET` / `GET_check_option_value` (в UI ezFC — GET / GET_check).
+
+  | поле | id 86 | имя элемента | GET сейчас | GET_check сейчас | GET целевой | GET_check целевой |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | количество | 3316 | numN | `""` | — | numN | — |
+  | плакетка | 3317 | dpdFormat | `""` | index | dpdFormat | index |
+  | материал | 3318 | dpdMaterial | `""` | index | dpdMaterial | index |
+  | нанесение | 3319 | dpdApplication | `""` | index | dpdApplication | index |
+  | режим | 3334 | rdoModeProduction | `""` | **index** | rdoModeProduction | **value** |
+
+  Условие переключения боевой 69: те же GET (numN, dpdFormat, dpdMaterial, dpdApplication, rdoModeProduction) и GET_check (dropdown=index, radio=value) прописать и на форме 69 (сейчас GET пустые, у режима тоже index).
 - Сделано:
   - Ворота прод-API УФ: stdout `6205.71`, код 0.
   - Локальный JS эталон: `price` 6205.71. `pytest test_plaque.py` — 22 passed.
@@ -218,10 +230,17 @@ curl.exe -sS -o NUL -w "%{http_code}" "https://insain.ru/catalog/kalkulyator-nag
     | 1 | AluminiumSU055 | isSublimation | 2 | да | 2564.31 | 2600 (mode 2 в теле; цена как mode 1 — thin wrapper) |
 
   - Известное расхождение (не чинить): JS `AcrylWhite3`+`isSublimation` → NaN; Python → 3605.49. Форма штатно пару не даёт (`hide_option` сублимации без `AluminiumSU055`).
-- Чем проверено: ворота one-liner; `run_js_calc.mjs` + prod API; `pytest test_plaque.py`; Browser MCP Network на копии; `curl` guest 404 / витрина 200; плагин 0.2.4.
+  - После UI-теста человека: stale «со скидкой» в `showResult` (refresh `populate_html_placeholders`) и `size_mm` у плакетки/tablets в materials — пофикшено и выкачено (`52676c2`, плагин 0.2.5).
+  - `plaque.js`: `insaincalc.syncUrl` с GET-именами выше (индексы dropdown, value режима) перед `calcApi`. Плагин версия **0.2.6**.
+  - Тест `calc_service/tests/test_wp_plugin_forms.py`: в каждом `wp-plugin/forms/*.js` есть `insaincalc.calcApi(` и `insaincalc.syncUrl(` (на `main` plaque.js без syncUrl — упал бы).
+  - В `todo/_template.md` — критерий перевода формы про GET/URL.
+- Чем проверено: ворота one-liner; `run_js_calc.mjs` + prod API; `pytest` / `python scripts/dev.py check` — **498 passed, 2 skipped** (calc) + **81 passed** (bot), код 0; `git show main:…/plaque.js` — syncUrl нет; Browser MCP Network на копии (ранее); `curl` guest 404 / витрина 200; плагин на проде ещё 0.2.5.
 - Не сделано и почему:
-  - Шаги 8–12 (read_file на 69, снимок, forms.md, AGENTS.md, приписка 5.5, `make check` сдачи) — ждут подтверждения человека.
-  - Деплой плагина — не нужен без изменения `plaque.js`.
+  - GET на копии 86 в админке ezFC — ждёт подтверждения человека (правка структуры формы).
+  - Обновление inline JS элемента 3321 (syncUrl + id копии) и деплой плагина 0.2.6 / проверка URL на копии — ждёт подтверждения.
+  - Шаги 8–12 (read_file на 69, снимок, forms.md, AGENTS.md, приписка 5.5) — **отложено** до пакетного переключения.
 - Требуется решение:
-  - Подтвердить переключение боевой формы **69** на `{{abspath}}wp-content/plugins/insain-calc-bridge/forms/plaque.js` (`read_file` = 1). После «да» — Site ops + git-шаги 9–12.
-- Как откатить: форма 69 ещё на старом JS. После переключения — выключить `read_file` у элемента расчёта 69, сохранить, `wp litespeed-purge all`. Копия 86 / 2586879 — только с подтверждения.
+  1. Прописать GET на копии 86 по таблице выше (и сменить GET_check режима на value)?
+  2. Вставить в 3321 тот же JS, что в `plaque.js`, с id 3317/3318/3319/3334; выкатить плагин 0.2.6; проверить share-URL под админом?
+  Переключение 69 — только явным «да» пакетом; при нём — те же GET на 69.
+- Как откатить: форма 69 ещё на старом JS. После переключения — выключить `read_file` у элемента расчёта 69, сохранить, `wp litespeed-purge all`. Копия 86 / 2586879 — только с подтверждения. API — образ `insain-agent-calc-api:rollback`; плагин — zip предыдущей версии (0.2.5).
