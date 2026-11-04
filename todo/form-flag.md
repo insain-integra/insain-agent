@@ -18,13 +18,13 @@ Reviewer: Grok 4.7
 - `docs/site/forms.md` — строка формы 55, только читать.
 - `todo/forms-batch-switch.md` — в конце одна строка в «Состав пакета».
 - `todo/EPIC-forms-to-api.md` — очередь, после `todo/form-pennant.md`.
-- `todo/js-runner-forms.md` — раннер уже считает `calcFlagPaper`. Команда и `price` — в её «Результате».
+- `docs/js-runner-cases.md` — команда раннера и `price` для `calcFlagPaper`.
 - Эталон: `REF_PARAMS` в `calc_service/tests/test_calculators/test_flag.py` — 100 шт., 100×150, `PaperCoated115M`, `4+0`, mode 1. Порог `price` — прогон JS против API, не число из файла. JS: `js_legacy/calc/calcFlag.js`, сигнатура `calcFlagPaper(n, size, color, materialID, options, modeProduction)`.
 - Остальное не открывать.
 
 ## Scope
 
-- Старт после закрытия `todo/js-runner-forms.md`. Кейс и команда раннера — из её «Результата». `calc_service/data/` и калькулятор не менять.
+- Раннер готов (`js-runner-forms` закрыта 05.11.2026). Кейс и команда раннера — из `docs/js-runner-cases.md`. `calc_service/data/` и калькулятор не менять.
 - JS и API сошлись — переснять эталон в `test_flag.py` с пометкой `JS, ДД.ММ.ГГГГ`, как в `test_tablets.py`. Допуск assert — `rel=0.001`. Не сошлись — файл не трогать. Новый кейс не добавлять.
 - `wp-plugin/forms/flag.js`: id элементов боевой формы 55, `insaincalc.syncUrl`, `insaincalc.calcApi('flag'`, `insaincalc.showResult`. Своих формул цены и чтения через DOM нет.
 - Дубль формы и черновик товара — только после «да» человека. На копию — тот же JS с id копии, без `read_file`.
@@ -50,10 +50,10 @@ Reviewer: Grok 4.7
 python scripts/js_port_gaps.py calcFlagPaper
 ```
 
-- [ ] Раннер на входе эталона печатает `price`. Команда — из «Результата» `todo/js-runner-forms.md` для `calcFlagPaper`. 404 API или расхождение — стоп, форму не дублировать. Калькулятор и `calc_service/data/` не править.
+- [ ] Раннер на входе эталона печатает `price`. Команда — из `docs/js-runner-cases.md` для `calcFlagPaper`. 404 API или расхождение — стоп, форму не дублировать. Калькулятор и `calc_service/data/` не править.
 
 ```powershell
-node scripts/run_js_calc.mjs calcFlagPaper --data current --args '<args из js-runner-forms>'
+node scripts/run_js_calc.mjs calcFlagPaper --data current --args '<args из docs/js-runner-cases.md>'
 Invoke-RestMethod -Method Post -Uri https://insain.ru/api/v1/calc/flag -ContentType 'application/json' -Body '{"quantity":100,"width_mm":100,"height_mm":150,"material_id":"PaperCoated115M","color":"4+0","mode":1}' | Select-Object price
 ```
 

@@ -18,7 +18,7 @@ Reviewer: Grok 4.7
 - `docs/site/forms.md` — строка формы 78, только читать.
 - `todo/forms-batch-switch.md` — в конце одна строка в «Состав пакета».
 - `todo/EPIC-forms-to-api.md` — очередь, после `todo/form-embossing.md`.
-- `todo/js-runner-forms.md` — раннер уже считает `calcAcrilycPrizes`. Команда и `price` — в её «Результате».
+- `docs/js-runner-cases.md` — команда раннера и `price` для `calcAcrilycPrizes`.
 - Эталон: `REF_PARAMS` в `calc_service/tests/test_calculators/test_acrylic_prizes.py` — 10 шт., два слоя PVC3 100×100, у верхнего рез лазером и УФ 80×80, mode 1. Порог `price` — прогон JS против API, не число из файла. JS: `js_legacy/calc/calcAcrilycPrizes.js`, сигнатура `calcAcrilycPrizes(n, layers, options, modeProduction)`.
 - В вызов УФ у эталона не входят штрихкод, переменные данные и материал заказчика.
 - На эталоне `materials` должен быть непустым. Пустой ответ — стоп, `acrylic_prizes.py` не дописывать.
@@ -26,7 +26,7 @@ Reviewer: Grok 4.7
 
 ## Scope
 
-- Старт после закрытия `todo/js-runner-forms.md`. Кейс и команда раннера — из её «Результата». `calc_service/data/` и калькулятор не менять.
+- Раннер готов (`js-runner-forms` закрыта 05.11.2026). Кейс и команда раннера — из `docs/js-runner-cases.md`. `calc_service/data/` и калькулятор не менять.
 - JS и API сошлись — переснять эталон в `test_acrylic_prizes.py` с пометкой `JS, ДД.ММ.ГГГГ`, как в `test_tablets.py`. Допуск assert — `rel=0.001`. Не сошлись — файл не трогать. Новый кейс не добавлять.
 - До дубля снять поля формы 78. Отдельное поле штрихкода, переменных данных или материала заказчика, от которого старый JS меняет цену, — стоп: в калькулятор этой задачи их не дописывать.
 - `wp-plugin/forms/acrylic_prizes.js`: id элементов боевой формы 78, `insaincalc.syncUrl`, `insaincalc.calcApi('acrylic_prizes'`, `insaincalc.showResult`. Своих формул цены и чтения через DOM нет.
@@ -53,10 +53,10 @@ Reviewer: Grok 4.7
 python scripts/js_port_gaps.py calcAcrilycPrizes
 ```
 
-- [ ] Раннер на входе эталона печатает `price`. Команда — из «Результата» `todo/js-runner-forms.md` для `calcAcrilycPrizes`. 404 API или расхождение — стоп, форму не дублировать. Калькулятор и `calc_service/data/` не править.
+- [ ] Раннер на входе эталона печатает `price`. Команда — из `docs/js-runner-cases.md` для `calcAcrilycPrizes`. 404 API или расхождение — стоп, форму не дублировать. Калькулятор и `calc_service/data/` не править.
 
 ```powershell
-node scripts/run_js_calc.mjs calcAcrilycPrizes --data current --args '<args из js-runner-forms>'
+node scripts/run_js_calc.mjs calcAcrilycPrizes --data current --args '<args из docs/js-runner-cases.md>'
 $api = Invoke-RestMethod -Method Post -Uri https://insain.ru/api/v1/calc/acrylic_prizes -ContentType 'application/json' -Body '{"quantity":10,"layers":[{"materialID":"PVC3","size":[100,100],"isTop":false,"options":{}},{"materialID":"PVC3","size":[100,100],"isTop":true,"options":{"isCutLaser":{},"isUVPrint":{"size":[80,80]}}}],"mode":1}'
 $api | Select-Object price
 $api.materials.Count

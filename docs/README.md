@@ -12,6 +12,7 @@
 | [data-formats.md](data-formats.md) | Справочник форматов JSON и маппинг JS → Python | живой |
 | [ezfc-api-migration.md](ezfc-api-migration.md) | Runbook перевода формы ezFC на Python API | живой |
 | [gemini-prompt-caching.md](gemini-prompt-caching.md) | Заметка про кэш промптов Gemini; явный кэш в боте не внедрён | архив |
+| [js-runner-cases.md](js-runner-cases.md) | Команды JS-раннера и `price` для сверки форм с API | живой |
 | [migration-guide.md](migration-guide.md) | Runbook миграции калькулятора JS → Python | живой |
 | [project_summary.md](project_summary.md) | Обзор репозитория с примерами для внешней LLM; не регламент | архив |
 | [README.md](README.md) | Это оглавление | живой |

@@ -4,11 +4,11 @@
 
 ## Цель
 
-Восемь форм ezFC посчитаны через `insaincalc.calcApi` на принятой человеком копии (черновик товара, GET = имя элемента, та же цена по ссылке). Шесть функций, которых не было в раннере, сначала считает `todo/js-runner-forms.md`. Боевые формы этой пачки ещё на старом JS. Переключение, снимки `site/forms/<id>.json` и реестр `docs/site/forms.md` делает `todo/forms-batch-switch.md`, когда строка формы есть в его «Составе пакета».
+Восемь форм ezFC посчитаны через `insaincalc.calcApi` на принятой человеком копии (черновик товара, GET = имя элемента, та же цена по ссылке). Шесть функций, которых не было в раннере, добавила `js-runner-forms` (закрыта 05.11.2026, команды — `docs/js-runner-cases.md`). Боевые формы этой пачки ещё на старом JS. Переключение, снимки `site/forms/<id>.json` и реестр `docs/site/forms.md` делает `todo/forms-batch-switch.md`, когда строка формы есть в его «Составе пакета».
 
 ## Задачи
 
-- `todo/js-runner-forms.md` — `scripts/run_js_calc.mjs` считает шесть функций, цена сходится с API.
+- `js-runner-forms` — закрыта 05.11.2026: `scripts/run_js_calc.mjs` считает шесть функций, команды — `docs/js-runner-cases.md`.
 - Форма 26, slug `uv_print`, закрыта 05.11.2026: копия 87 принята, боевая страница ждёт `todo/forms-batch-switch.md`.
 - `todo/form-mug.md` — форма 41, slug `mug`. Путь кружки — сублимация. Раннер уже умеет `calcMug`.
 - `todo/form-embossing.md` — форма 85, slug `embossing`, цепочка 3.
@@ -20,7 +20,7 @@
 
 ## Порядок
 
-1. `todo/js-runner-forms.md`
+1. `js-runner-forms` — закрыта 05.11.2026
 2. Форма 26 закрыта. `todo/form-mug.md` — параллельно раннеру, на форму 26 не завязана
 3. `todo/form-embossing.md` — после закрытия раннера
 4. `todo/form-acrylic-prizes.md`

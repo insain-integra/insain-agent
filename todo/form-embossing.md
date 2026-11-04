@@ -17,14 +17,14 @@ Reviewer: Grok 4.7
 - `docs/ezfc-api-migration.md` — шаблон `cjsCalc`, GET = имя элемента, `GET_check`: dropdown с кодом — `index`, radio `1`/`2` — `value`.
 - `docs/site/forms.md` — строка формы 85, только читать.
 - `todo/forms-batch-switch.md` — в конце одна строка в «Состав пакета».
-- `todo/EPIC-forms-to-api.md` — очередь, после `todo/js-runner-forms.md`.
-- `todo/js-runner-forms.md` — раннер уже считает `calcEmbossing`. Команда и `price` — в её «Результате».
+- `todo/EPIC-forms-to-api.md` — очередь; `js-runner-forms` закрыта 05.11.2026.
+- `docs/js-runner-cases.md` — команда раннера и `price` для `calcEmbossing`.
 - Эталон: `REF_PARAMS` в `calc_service/tests/test_calculators/test_embossing.py` — 500 шт., клише 50×30, foil, diary, mode 1. Порог `price` — прогон JS против API, не число из файла. JS: `js_legacy/calc/calcEmbossing.js`, сигнатура `calcEmbossing(n, size, materialID, embossingID, itemID, sizeItem, options, modeProduction)`.
 - Остальное не открывать.
 
 ## Scope
 
-- Старт после закрытия `todo/js-runner-forms.md`. Кейс и команда раннера — из её «Результата». `calc_service/data/` и калькулятор не менять.
+- Раннер готов (`js-runner-forms` закрыта 05.11.2026). Кейс и команда раннера — из `docs/js-runner-cases.md`. `calc_service/data/` и калькулятор не менять.
 - JS и API сошлись — переснять эталон в `test_embossing.py` с пометкой `JS, ДД.ММ.ГГГГ`, как в `test_tablets.py`. Допуск assert — `rel=0.001`. Не сошлись — файл не трогать. Новый кейс не добавлять.
 - `wp-plugin/forms/embossing.js`: id элементов боевой формы 85, `insaincalc.syncUrl`, `insaincalc.calcApi('embossing'`, `insaincalc.showResult`. Своих формул цены и чтения через DOM нет.
 - Дубль формы и черновик товара — только после «да» человека. На копию — тот же JS с id копии, без `read_file`.
@@ -50,10 +50,10 @@ Reviewer: Grok 4.7
 python scripts/js_port_gaps.py calcEmbossing
 ```
 
-- [ ] Раннер на входе эталона печатает `price`. Команда — из «Результата» `todo/js-runner-forms.md` для `calcEmbossing`. 404 API или расхождение — стоп, форму не дублировать. Калькулятор и `calc_service/data/` не править.
+- [ ] Раннер на входе эталона печатает `price`. Команда — из `docs/js-runner-cases.md` для `calcEmbossing`. 404 API или расхождение — стоп, форму не дублировать. Калькулятор и `calc_service/data/` не править.
 
 ```powershell
-node scripts/run_js_calc.mjs calcEmbossing --data current --args '<args из js-runner-forms>'
+node scripts/run_js_calc.mjs calcEmbossing --data current --args '<args из docs/js-runner-cases.md>'
 Invoke-RestMethod -Method Post -Uri https://insain.ru/api/v1/calc/embossing -ContentType 'application/json' -Body '{"quantity":500,"cliche_width_mm":50,"cliche_height_mm":30,"embossing_type":"foil","item_type":"diary","is_cliche":true,"mode":1}' | Select-Object price
 ```
 
