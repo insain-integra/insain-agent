@@ -263,11 +263,11 @@ class PresswallCalculator(BaseCalculator):
             except Exception:
                 pass
 
-        # Итог (как в JS)
+        # Итог (как в JS: priceCut + priceBanner + priceBag, без Math.ceil)
         margin_pw = get_margin("marginPresswall")
         cost = cost_cut + cost_banner + cost_materials + cost_bag + cost_rent
         price = (
-            (cost_cut + price_banner + price_bag) * (1 + margin_pw)
+            (price_cut + price_banner + price_bag) * (1 + margin_pw)
             + (cost_materials + cost_rent) * (1 + MARGIN_MATERIAL + margin_pw)
         )
         time_hours = math.ceil((time_cut + time_banner + time_bag) * 100) / 100
@@ -275,9 +275,9 @@ class PresswallCalculator(BaseCalculator):
         weight_kg += weight_banner + weight_bag
 
         return {
-            "cost": math.ceil(cost),
-            "price": math.ceil(price),
-            "unit_price": math.ceil(price) / max(1, n),
+            "cost": float(cost),
+            "price": float(price),
+            "unit_price": float(price) / max(1, n),
             "time_hours": time_hours,
             "time_ready": time_ready,
             "weight_kg": round(weight_kg, 2),

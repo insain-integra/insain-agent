@@ -90,11 +90,12 @@ REF_PARAMS = {
     "material_id": "BannerFronlitCoat400",
     "mode": 1,
 }
+# JS, 04.11.2026 — сверка с calcRollup --data current
 EXPECTED_REF = {
-    "cost": 4789.0,
-    "price": 7849.0,
-    "time_hours": 0.8,
-    "time_ready": 24.8,
+    "cost": 5086.0,
+    "price": 8321.0,
+    "time_hours": 0.98,
+    "time_ready": 24.98,
     "weight_kg": 3.18,
 }
 EXPECTED_MATERIAL = {

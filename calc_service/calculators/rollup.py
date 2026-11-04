@@ -222,11 +222,11 @@ class RollupCalculator(BaseCalculator):
 
         cost = cost_install + cost_banner + cost_ship.cost + cost_materials
         margin_rollup = get_margin("marginRollup")
+        # JS: без Math.ceil на price
         price = (
             (price_install + price_banner + cost_ship.price) * (1 + margin_rollup)
             + cost_materials * (1 + MARGIN_MATERIAL + margin_rollup)
         )
-        price = math.ceil(price)
 
         time_hours = math.ceil((time_install + time_banner) * 100) / 100.0
         base_ready = ROLLUP_BASE_TIME_READY[min(mode.value, len(ROLLUP_BASE_TIME_READY) - 1)]
@@ -236,7 +236,7 @@ class RollupCalculator(BaseCalculator):
 
         return {
             "cost": float(cost),
-            "price": int(price),
+            "price": float(price),
             "unit_price": float(price) / max(1, n),
             "time_hours": time_hours,
             "time_ready": time_ready,

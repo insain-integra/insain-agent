@@ -94,11 +94,12 @@ REF_PARAMS = {
     "is_rent": 0,
     "mode": 1,
 }
+# JS, 04.11.2026 — сверка с calcPresswall --data current
 EXPECTED_REF = {
-    "cost": 6989.0,
-    "price": 10642.0,
-    "time_hours": 1.36,
-    "time_ready": 18.36,
+    "cost": 7018.0,
+    "price": 11453.624,
+    "time_hours": 1.34,
+    "time_ready": 18.3,
     "weight_kg": 9.78,
 }
 EXPECTED_MATERIAL = {
