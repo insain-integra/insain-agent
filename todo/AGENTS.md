@@ -15,6 +15,7 @@
 
 ## После закрытия
 
-После merge файл удаляется. Устойчивое знание переносится в `docs/`. В `todo/` не остаются решения и регламенты.
+После merge файл удаляется. Устойчивое знание переносится в `docs/`. До удаления запись
+о задаче или эпике переносится в [docs/history/log.md](../docs/history/log.md) по формату из её README. В `todo/` не остаются решения и регламенты.
 
 Роли: [Analyst](../docs/agents/roles/analyst.md), [Implementer](../docs/agents/roles/implementer.md), [Reviewer](../docs/agents/roles/reviewer.md), [Site ops](../docs/agents/roles/site-ops.md).

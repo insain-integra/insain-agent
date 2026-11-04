@@ -17,6 +17,10 @@
 | [README.md](README.md) | Это оглавление | живой |
 | [refactoring-plan.md](refactoring-plan.md) | План работ по фазам; закрытые задачи отмечены в тексте | живой |
 | [wordpress-integration.md](wordpress-integration.md) | Связка WordPress, bridge и share-ссылок с API | живой |
+| [history/README.md](history/README.md) | История проекта: правила ведения и формат записи | живой |
+| [history/passport.md](history/passport.md) | Дата старта, цель, исходное состояние | живой |
+| [history/log.md](history/log.md) | Журнал крупных задач: срок, затраты, было / стало | живой |
+| [history/snapshots.md](history/snapshots.md) | Срезы состояния с одинаковыми метриками | живой |
 | [archive/README.md](archive/README.md) | Индекс документов в `docs/archive/` | архив |
 | [archive/production-cutover-plan.md](archive/production-cutover-plan.md) | План уже выполненного переключения DNS insain.ru | архив |
 | [archive/site-performance-optimization.md](archive/site-performance-optimization.md) | Журнал замеров PageSpeed на test.insain.ru | архив |
