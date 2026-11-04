@@ -18,11 +18,20 @@
  *   js_legacy/calc/calcTablets.js
  *   js_legacy/calc/calcHeatPress.js
  *   js_legacy/calc/calcMug.js
+ *   js_legacy/calc/calcPrintLaser.js
  *   js_legacy/calc/calcPrintSheet.js
  *   js_legacy/calc/calcPrintInkJet.js
+ *   js_legacy/calc/calcPrintRoll.js
+ *   js_legacy/calc/calcPrintWide.js
  *   js_legacy/calc/calcCutGuillotine.js
  *   js_legacy/calc/calcCutRoller.js
  *   js_legacy/calc/calcProcessTools.js
+ *   js_legacy/calc/calcFlag.js
+ *   js_legacy/calc/calcPennant.js
+ *   js_legacy/calc/calcRollup.js
+ *   js_legacy/calc/calcPresswall.js
+ *   js_legacy/calc/calcEmbossing.js
+ *   js_legacy/calc/calcAcrilycPrizes.js
  * Прайс legacy:
  *   js_legacy/calc/common.json
  *   js_legacy/material/misc.json
@@ -30,16 +39,19 @@
  *   js_legacy/material/hardsheet.json
  *   js_legacy/material/sheet.json
  *   js_legacy/material/roll.json
+ *   js_legacy/material/presswall.json
  *   js_legacy/equipment/laser.json
  *   js_legacy/equipment/printer.json
  *   js_legacy/equipment/cutter.json
  *   js_legacy/equipment/heatpress.json
  *   js_legacy/equipment/laminator.json
+ *   js_legacy/equipment/tools.json
  * --data current подменяет числа в памяти из calc_service/data (файлы не пишутся):
  *   common.json, materials/plaque.json, materials/misc.json, materials/mug.json,
  *   materials/hardsheet.json, materials/sheet.json, materials/roll.json,
+ *   materials/presswall.json,
  *   equipment/laser.json, equipment/printer.json, equipment/cutter.json,
- *   equipment/heatpress.json, equipment/laminator.json
+ *   equipment/heatpress.json, equipment/laminator.json, equipment/tools.json
  */
 
 import fs from 'node:fs';
@@ -58,11 +70,20 @@ const JS_FILES = [
     'js_legacy/calc/calcTablets.js',
     'js_legacy/calc/calcHeatPress.js',
     'js_legacy/calc/calcMug.js',
+    'js_legacy/calc/calcPrintLaser.js',
     'js_legacy/calc/calcPrintSheet.js',
     'js_legacy/calc/calcPrintInkJet.js',
+    'js_legacy/calc/calcPrintRoll.js',
+    'js_legacy/calc/calcPrintWide.js',
     'js_legacy/calc/calcCutGuillotine.js',
     'js_legacy/calc/calcCutRoller.js',
     'js_legacy/calc/calcProcessTools.js',
+    'js_legacy/calc/calcFlag.js',
+    'js_legacy/calc/calcPennant.js',
+    'js_legacy/calc/calcRollup.js',
+    'js_legacy/calc/calcPresswall.js',
+    'js_legacy/calc/calcEmbossing.js',
+    'js_legacy/calc/calcAcrilycPrizes.js',
 ];
 
 const LEGACY_DATA = [
@@ -72,11 +93,13 @@ const LEGACY_DATA = [
     ['hardsheet', 'js_legacy/material/hardsheet.json'],
     ['sheet', 'js_legacy/material/sheet.json'],
     ['roll', 'js_legacy/material/roll.json'],
+    ['presswall', 'js_legacy/material/presswall.json'],
     ['laser', 'js_legacy/equipment/laser.json'],
     ['printer', 'js_legacy/equipment/printer.json'],
     ['cutter', 'js_legacy/equipment/cutter.json'],
     ['heatpress', 'js_legacy/equipment/heatpress.json'],
     ['laminator', 'js_legacy/equipment/laminator.json'],
+    ['tools', 'js_legacy/equipment/tools.json'],
 ];
 
 // Коды оборудования и бумаги, которые ветка читает напрямую, не из параметров.
@@ -249,11 +272,13 @@ const CURRENT_FILES = [
     'calc_service/data/materials/hardsheet.json',
     'calc_service/data/materials/sheet.json',
     'calc_service/data/materials/roll.json',
+    'calc_service/data/materials/presswall.json',
     'calc_service/data/equipment/laser.json',
     'calc_service/data/equipment/printer.json',
     'calc_service/data/equipment/cutter.json',
     'calc_service/data/equipment/heatpress.json',
     'calc_service/data/equipment/laminator.json',
+    'calc_service/data/equipment/tools.json',
 ];
 
 function loadLegacyStruct(context, name, rel) {
@@ -518,11 +543,26 @@ function runPlaque(params, dataMode) {
     return normalizeResult(context.__result, params.quantity);
 }
 
-/** Объект верхнего уровня в args → Map; вложенные объекты остаются plain. */
+/** Объект верхнего уровня в args → Map; в массиве слоёв поле options → Map. */
 function argsToCallList(args) {
     return args.map((item) => {
         if (item !== null && typeof item === 'object' && !Array.isArray(item)) {
             return new Map(Object.entries(item));
+        }
+        if (Array.isArray(item)) {
+            return item.map((el) => {
+                if (
+                    el !== null
+                    && typeof el === 'object'
+                    && !Array.isArray(el)
+                    && el.options !== null
+                    && typeof el.options === 'object'
+                    && !Array.isArray(el.options)
+                ) {
+                    return { ...el, options: new Map(Object.entries(el.options)) };
+                }
+                return el;
+            });
         }
         return item;
     });
