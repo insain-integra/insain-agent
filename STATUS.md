@@ -2,6 +2,8 @@
 
 Календарная дата снимка: **25.10.2026**. Команды ниже выполнены по SSH на хосте `insain-prod` (пользователь `agent`) и ничего на сервере не меняли. Точные метки времени — UTC, как их вернул `date -u` в начале соответствующей команды. Окно снимка: **2026-10-25T07:10:26Z – 2026-10-25T07:18:48Z**. Значения секретов в этот файл не записывались.
 
+Версия плагина `insain-calc-bridge` перепроверена отдельно **2026-11-04T04:28:40Z**: **0.2.6**, Active. Остальной снимок — 25.10.2026.
+
 ## Хост и адреса
 
 Проверено `hostname`, `hostname -I` в **2026-10-25T07:17:22Z**.
@@ -118,13 +120,15 @@ Nginx, активный файл `/etc/nginx/sites-enabled/insain.ru` (`ls -l`: 
 
 ### insain-calc-bridge
 
-`sudo -u www-data wp plugin get insain-calc-bridge --field=version --path=/var/www/insain.ru` — **0.2.3** (**2026-10-25T07:12:02Z** и **2026-10-25T07:17:22Z**).
+`sudo -u www-data wp plugin get insain-calc-bridge --field=version --path=/var/www/insain.ru` — **0.2.6** (**2026-11-04T04:28:40Z**).
 
-`sudo -u www-data wp plugin status insain-calc-bridge --path=/var/www/insain.ru`, **2026-10-25T07:12:02Z**: имя Insain Calc Bridge, статус Active, версия 0.2.3, автор Insain. Описание: мост ez Form Calculator и Python calc_service (методы `insaincalc.calcApi`, `showResult`, `showError`, `syncUrl`).
+`sudo -u www-data wp plugin status insain-calc-bridge --path=/var/www/insain.ru`, **2026-11-04T04:28:40Z**: имя Insain Calc Bridge, статус Active, версия 0.2.6, автор Insain. Описание: мост ez Form Calculator и Python calc_service (методы `insaincalc.calcApi`, `showResult`, `showError`, `syncUrl`).
+
+Снимок **2026-10-25T07:12:02Z** и **2026-10-25T07:17:22Z**: `wp plugin get` вернул **0.2.3**; `wp plugin status` — Active, версия 0.2.3.
 
 ### Активные плагины
 
-`sudo -u www-data wp plugin list --path=/var/www/insain.ru --status=active --fields=name,status,version,update`, **2026-10-25T07:12:02Z**. 29 активных. Колонка `update` — как её вернул wp-cli.
+`sudo -u www-data wp plugin list --path=/var/www/insain.ru --status=active --fields=name,status,version,update`, **2026-10-25T07:12:02Z**. 29 активных. Колонка `update` — как её вернул wp-cli. Строка `insain-calc-bridge` в таблице — версия на дату этого списка (**0.2.3**); на **2026-11-04T04:28:40Z** версия **0.2.6** (см. выше).
 
 | name | version | update |
 | --- | --- | --- |

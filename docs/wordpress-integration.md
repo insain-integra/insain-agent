@@ -33,7 +33,7 @@ document.getElementsByClassName('data-material-table')[0].innerHTML =
 5. тот же обработчик вызывает `insaincalc.syncUrl(...)` для обновления шаринговой ссылки;
 6. `insaincalc.showResult(...)` выводит цену, срок, вес и материалы.
 
-> Bridge (v0.2.3) не знает коды материалов конкретной формы и не ходит в `/product/{slug}`.
+> Bridge (v0.2.6) не знает коды материалов конкретной формы и не ходит в `/product/{slug}`.
 > Сбор параметров — в custom JS формы. Расчёт (`calcApi`) и вывод (`showResult`) — отдельные методы `insaincalc`.
 > Пошаговый перевод: [ezfc-api-migration.md](ezfc-api-migration.md).
 
@@ -71,7 +71,7 @@ wp-plugin/
 └── js/insain-calc-bridge.js
 ```
 
-Методы на объекте `insaincalc` (v0.2.3):
+Методы на объекте `insaincalc` (v0.2.6):
 
 - `calcApi(slug, params)` — `POST /api/v1/calc/{slug}` и адаптер в старый `calcCost`. Устаревший ответ (если форму пересчитали раньше) возвращает `null`.
 - `showResult(calcCost, qty, formId)` — цена, вес, срок с подсказкой, материалы.
