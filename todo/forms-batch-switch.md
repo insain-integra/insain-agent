@@ -1,0 +1,152 @@
+# forms-batch-switch
+
+Статус: черновик
+Сложность: высокая
+Implementer: Opus 5.5
+Reviewer: Grok 4.7
+Почему: прод и два контура сразу (git и WordPress), боевые формы переключаются одним пакетом.
+Чат: человек открывает новый чат с моделью из поля Implementer.
+
+## Цель
+
+Боевые формы ezFC, уже переведённые на `insaincalc.calcApi` на копиях, переключены на API одним пакетом по одному подтверждению человека. Первая в пакете — форма 69 CalcPlaque (страница https://insain.ru/catalog/kalkulyator-nagradnyh-plaketok/). Остальные формы добавляются в «Состав пакета» по мере закрытия их задач на перевод.
+
+## Состав пакета
+
+Заполняется по мере закрытия задач на перевод. Форма попадает в пакет, если её копия принята человеком, а `forms/<slug>.js` с `calcApi` и `syncUrl` в `main`.
+
+| Форма | Slug API | Страница | Копия (форма / товар) | Задача на перевод |
+| --- | --- | --- | --- | --- |
+| 69 CalcPlaque | `plaque` | `/catalog/kalkulyator-nagradnyh-plaketok/` | 86 / 2586879 (draft) | пилот закрыт |
+
+## Контекст и ссылки
+
+- Skills `.cursor/skills/ezfc-form-to-api/SKILL.md` и `.cursor/skills/deploy-wp-plugin/SKILL.md` — как делать. Правила прода — `.cursor/rules/insain-site-autonomous.mdc`, целиком, до первого действия на сервере.
+- `docs/ezfc-api-migration.md` — GET и share-URL, чеклист перевода; `docs/site/access-tools.md`, «Принятый режим»: `read_file`, снимок `SELECT … --raw`, обратный импорт запрещён.
+- `docs/site/forms.md` — реестр форм и сводка.
+- `wp-plugin/forms/<slug>.js` — custom JS переведённых форм (в 0.2.6 есть `plaque.js`).
+- Что дала форма 69 (пилот): на копии 86 UV, гравировка и сублимация сошлись с JS (rel ≤ 0.001), UI и share-URL проверены под админом, плагин 0.2.6 и API (`main` @ `52676c2` и новее) на проде. На боевой 69 пока старый `calcPlaque`, GET пустые, у режима `GET_check` = index.
+- GET и `GET_check`, которые надо прописать на боевой 69 (id элементов боевой формы снять `SELECT --raw`, не переносить с копии 86):
+
+  | поле | имя элемента → GET | GET_check |
+  | --- | --- | --- |
+  | количество | numN | — |
+  | плакетка | dpdFormat | index |
+  | материал | dpdMaterial | index |
+  | нанесение | dpdApplication | index |
+  | режим | rdoModeProduction | **value** |
+
+- Остальное не открывать.
+
+## Scope
+
+Порядок жёсткий. Каждое действие на проде — только с подтверждения человека, если оно вне списка «Делай самостоятельно» в `.cursor/rules/insain-site-autonomous.mdc`.
+
+1. Предполётная регрессия по каждой форме пакета: на копии под админом прогнать эталонный набор (для 69 — три нанесения, 1 и 2 шт., режимы), открыть URL с GET в новой вкладке, перезагрузить. Плагин и API менялись после первых проверок (`showResult`, `size_mm`, `syncUrl`), поэтому прогон повторяется. Расхождение с API (`price`) или с JS (rel > 0.001) — стоп.
+2. Дрейф: снять боевую форму и копию (`SELECT … --raw`), сверить id элементов, GET, список материалов и нанесений. Список расхождений — в «Результат»; решение по ним — человека.
+3. GET на боевых формах пакета: прописать те же имена и `GET_check`, что на копиях. Перед записью — бэкап `wp db export` в `/tmp`; запись через `wp eval-file` или админку ezFC; подтверждение человека.
+4. Одно «да» человека на пакет. Затем по форме по очереди: у элемента расчёта `custom_calculation_function_read_file` = 1 и путь `{{abspath}}wp-content/plugins/insain-calc-bridge/forms/<slug>.js`; id элементов не менять; сброс кэша (`wp litespeed-purge all`, при ошибке 400 — `purge url <страница>`); проверка страницы и расчёта (в Network `POST /api/v1/calc/<slug>` → 200, цена на странице = API с округлением `showResult`); только потом следующая форма. Расхождение — стоп, откат формы, остальные не трогать.
+5. Снимок каждой боевой формы в `site/forms/<id>.json` (`SELECT … --raw`, файл проходит `json.loads`, в нём есть `forms/<slug>.js` и `custom_calculation_function_read_file`). Снимок обратно не импортировать.
+6. `docs/site/forms.md`: у каждой формы пакета слот «API через `insaincalc.calcApi`», сводка (непереведённых форм, число на опубликованных товарах, привязанные slug) пересчитана по факту. Другие строки не переписывать.
+7. Одна строка в `wp-plugin/AGENTS.md`: custom JS переведённых форм лежит в `forms/<slug>.js`.
+8. В пункте 5.5 `docs/refactoring-plan.md` дописать, не ставя чекбокс: `прогнаны на форме 69: ezfc-form-to-api, deploy-wp-plugin. new-calculator и json-price-rollout не прогонялись — чекбокс открыт.` Если к этому моменту `new-calculator` или `json-price-rollout` прогонялись — поправить фразу по факту.
+9. Копии (86 и остальные) оставить на черновике. Удаление — отдельным решением человека.
+
+Git-файлы пишет Implementer. Дубль, `read_file`, GET на проде, сброс кэша и проверка страниц — Site ops.
+
+## Не-scope
+
+- Перевод новых форм и новые калькуляторы: каждая форма сначала проходит свою задачу на перевод (сверка, `calcApi`, копия, GET), потом попадает в «Состав пакета».
+- Правка цен, `calc_service/data/`, калькуляторов, эталонов, плагина и `insain-calc-bridge.js`. Баг bridge или API — стоп, отдельная задача.
+- Обратный импорт снимков в ezFC; `infra/deploy.sh`; пересборка `insain-calc-api`.
+- JS NaN на AcrylWhite3 + isSublimation (строка в `BACKLOG.md`).
+- Закрытие чекбокса 5.5.
+
+## Критерии приёмки
+
+Команды из корня репозитория. `ID` — id боевой формы, `SLUG` — slug её JS. Для каждой формы пакета выполняется отдельно. Скрипт через `@'…'@ | python -` в PowerShell 5.1 — первой строкой `$OutputEncoding = New-Object System.Text.UTF8Encoding $false`.
+
+- [ ] Копия не на витрине. Одна строка `draft` или `private`, HTTP без cookies не `200` (ожидаемо `404`).
+
+```powershell
+ssh insain-prod "sudo -u www-data wp post list --post_type=product --post_status=draft,private --fields=ID,post_status,post_name --meta_key=ezfc_form_id --meta_value=ID_КОПИИ --path=/var/www/insain.ru"
+curl.exe -sS -o NUL -w "%{http_code}" "PERMALINK_КОПИИ"
+```
+
+- [ ] На сервере лежит JS из git. В stdout есть `insaincalc.calcApi('SLUG'` и `insaincalc.syncUrl`.
+
+```powershell
+ssh insain-prod "grep -E 'calcApi|syncUrl' /var/www/insain.ru/wp-content/plugins/insain-calc-bridge/forms/SLUG.js"
+```
+
+- [ ] Боевая форма читает файл плагина. В выводе шапка `id` и ровно одна строка с числом.
+
+```powershell
+ssh insain-prod 'sudo -u www-data wp db query --raw --path=/var/www/insain.ru "SELECT id FROM wp_insain_ezfc_forms_elements WHERE f_id=ID AND data LIKE ''%forms/SLUG.js%'' AND data LIKE ''%custom_calculation_function_read_file%''"'
+```
+
+- [ ] GET боевой формы совпадают с копией. Снимок GET-полей боевой и копии (`SELECT … --raw`) — имена и `GET_check` одинаковы, расхождений нет. Результат сравнения — в «Результат».
+- [ ] Снимок в git. Stdout `ok`.
+
+```powershell
+@'
+import json
+from pathlib import Path
+snap = Path("site/forms/ID.json").read_text(encoding="utf-8")
+json.loads(snap)
+assert "forms/SLUG.js" in snap
+assert "custom_calculation_function_read_file" in snap
+print("ok")
+'@ | python -
+```
+
+- [ ] Расчёт на боевой странице: набор эталона даёт `POST /api/v1/calc/SLUG` → 200 и `price` равный API (с округлением `showResult`); URL с GET открывает форму с теми же значениями. В «Результат» — код и `price` каждого прогона для каждой формы. Для 69: 2 шт., Plaque2330, AcrylWhite3, УФ-печать, режим 1 — API `6618.96`, на странице `6620`.
+- [ ] Витрина открывается. Stdout `200`.
+
+```powershell
+curl.exe -sS -o NUL -w "%{http_code}" "СТРАНИЦА_ФОРМЫ"
+```
+
+- [ ] Реестр, правило плагина, приписка 5.5. Stdout `ok`. Перед запуском в `SLUGS` подставить slug форм пакета; число непереведённых форм Implementer пересчитывает по реестру и сверяет с текстом «Непереведённых форм: **N**» в `docs/site/forms.md` (в проверку подставляет фактическое N).
+
+```powershell
+@'
+from pathlib import Path
+SLUGS = ["plaque"]
+forms = Path("docs/site/forms.md").read_text(encoding="utf-8")
+for slug in SLUGS:
+    row = next(ln for ln in forms.splitlines() if f"| {slug} |" in ln)
+    assert "calcApi" in row and "старый JS" not in row, slug
+plugin = Path("wp-plugin/AGENTS.md").read_text(encoding="utf-8")
+assert "forms/<slug>.js" in plugin
+plan = Path("docs/refactoring-plan.md").read_text(encoding="utf-8")
+assert "- [ ] **5.5." in plan
+assert "прогнаны на форме 69: ezfc-form-to-api, deploy-wp-plugin." in plan
+print("ok")
+'@ | python -
+```
+
+## Проверки
+
+- [ ] `python scripts/dev.py check` — код выхода 0
+- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+
+## Риски
+
+- Прод: страницы каталога живые, переключение меняет расчёт для клиентов. Подтверждение — одно на пакет, после зелёной предполётной регрессии и дрейфа. Откат формы — `read_file` = 0, сброс кэша; плагин — zip предыдущего коммита плагина; GET — из бэкапа `wp db export`.
+- Дрейф: пока копии ждали, в админке ezFC могли править боевые формы (цены в опциях, список материалов). Шаг 2 обязателен.
+- Цены: JSON не менять. Чужой `price` на проде не выравнивать правкой прайса.
+- Формы: только формы «Состава пакета». Id элементов боевых форм сохраняются. Снимок — история, не источник заливки.
+
+## Режим
+
+прод
+
+## Результат
+
+- Ветка, PR или коммит:
+- Сделано:
+- Чем проверено:
+- Не сделано и почему:
+- Требуется решение:
+- Как откатить:

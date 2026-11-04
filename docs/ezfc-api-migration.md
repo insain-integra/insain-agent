@@ -57,7 +57,10 @@ insaincalc.calcApi('SLUG', {
 
 ## GET и share-URL
 
-У каждого шарингового поля: `ADVANCED → GET` (имя в URL).
+У каждого шарингового поля: `ADVANCED → GET` (имя в URL). Соглашение: GET = имя элемента формы
+(`numN`, `dpdFormat`, `dpdMaterial`, `dpdApplication`, `rdoModeProduction`). Тот же набор имён и
+`GET_check` прописывается и на копии, и на боевой форме перед её переключением. `insaincalc.syncUrl`
+в `forms/<slug>.js` обязателен — это проверяет `calc_service/tests/test_wp_plugin_forms.py`.
 
 - Dropdown с кодом в `data-value`: `GET_check=index`, в URL пишем индекс, в API — `get_value_from(..., true)[0]`.
 - Radio со значениями `1`/`2`: `GET_check=value`, в URL и в API одно и то же число.
