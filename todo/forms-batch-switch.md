@@ -18,6 +18,7 @@ Reviewer: Grok 4.7
 | Форма | Slug API | Страница | Копия (форма / товар) | Задача на перевод |
 | --- | --- | --- | --- | --- |
 | 69 CalcPlaque | `plaque` | `/catalog/kalkulyator-nagradnyh-plaketok/` | 86 / 2586879 (draft) | пилот закрыт |
+| 26 CalcUVPrint | `uv_print` | `/catalog/uf-pechat-na-suveniry/` | 87 / 2586881 (draft) | todo/form-uv-print.md |
 
 ## Контекст и ссылки
 

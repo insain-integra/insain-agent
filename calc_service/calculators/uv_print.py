@@ -149,6 +149,9 @@ class UVPrintCalculator(BaseCalculator):
                     "surface": {"type": "string", "enum": ["plain", "round"], "default": "plain", "description": "Вид: plain=плоская, round=круговая"},
                     "double_application": {"type": "boolean", "default": False, "description": "Двойное нанесение"},
                     "is_customer_material": {"type": "boolean", "default": False, "description": "Материал заказчика (наценка 25%)"},
+                    "is_number": {"type": "boolean", "default": False, "description": "Нумерация (JS option isNumber)"},
+                    "is_barcode": {"type": "boolean", "default": False, "description": "Штрихкод (JS option isBarcode)"},
+                    "is_variables": {"type": "boolean", "default": False, "description": "Переменные данные (JS option isVariables)"},
                     "printer_code": {"type": "string"},
                     "mode": {"type": "integer", "enum": [0, 1, 2], "default": 1},
                 },
@@ -189,7 +192,11 @@ class UVPrintCalculator(BaseCalculator):
         color = str(params.get("color", "4+0") or "4+0").strip()
         surface = str(params.get("surface", "plain") or "plain").strip()
         double_app = 2 if params.get("double_application") else 1
+        # Material (JS options.get('Material') == 'isMaterialCustomer') → is_customer_material
         is_customer_material = bool(params.get("is_customer_material", False))
+        is_number = bool(params.get("is_number", False))
+        is_barcode = bool(params.get("is_barcode", False))
+        is_variables = bool(params.get("is_variables", False))
         printer_code = str(params.get("printer_code", "") or DEFAULT_PRINTER).strip() or DEFAULT_PRINTER
         mode = ProductionMode(int(params.get("mode", 1)))
 
@@ -286,13 +293,30 @@ class UVPrintCalculator(BaseCalculator):
         cost_print = printer.depreciation_per_hour * time_print + cost_per_m2 * (1 - discount) * vol_print
         cost_operator = time_operator * printer.operator_cost_per_hour
 
+        # Доп. опции — как в calcUVPrint.js (price опций вне наценки на cost)
+        opt_cost = 0.0
+        opt_price = 0.0
+        opt_time = 0.0
+        if is_number:
+            opt_cost += 0.75 * n
+            opt_price += 1.0 * n
+            opt_time += 0.05
+        if is_barcode:
+            opt_cost += 1.0 * n
+            opt_price += 2.0 * n
+            opt_time += 0.1
+        if is_variables:
+            opt_cost += 3.0 * n
+            opt_price += 5.0 * n
+            opt_time += 0.1
+
         coeff_customer = 1.25 if is_customer_material else 1.0
-        cost = math.ceil(cost_print + cost_operator) * coeff_customer
+        cost = math.ceil(cost_print + cost_operator + opt_cost) * coeff_customer
 
         margin_uv = get_margin("marginUVPrint")
-        price = math.ceil(cost * (1 + MARGIN_OPERATION + margin_uv))
+        price = math.ceil(cost * (1 + MARGIN_OPERATION + margin_uv) + opt_price)
 
-        time_hours = math.ceil(time_print * 100) / 100.0
+        time_hours = math.ceil((time_print + opt_time) * 100) / 100.0
         time_ready = time_hours + base_ready
 
         return {

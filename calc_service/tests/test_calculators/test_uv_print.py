@@ -1,5 +1,9 @@
 """
 Тесты калькулятора УФ-печати (uv_print).
+
+Эталон JS, 04.11.2026:
+node scripts/run_js_calc.mjs calcUVPrint --data current --args
+'[50,[100,150],[100,150],null,{"isUVPrint":{"printerID":"RimalSuvUV","resolution":0,"color":"4+0","surface":"isPlain"}},1]'
 """
 
 from __future__ import annotations
@@ -81,14 +85,20 @@ def test_get_tool_schema(calc):
     schema = calc.get_tool_schema()
     assert schema.get("name") == "calc_uv_print"
     assert "parameters" in schema
+    props = schema["parameters"]["properties"]
+    for key in ("is_number", "is_barcode", "is_variables", "is_customer_material"):
+        assert key in props
 
 
 # ── Эталонный тест ───────────────────────────────────────────────────
 
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
+def _cmp(a: float, b: float, rel: float = 0.001) -> bool:
     return abs(a - b) <= rel * max(abs(b), 1e-9)
 
 
+# JS, 04.11.2026 — 50 шт., 100×150, resolution 0, 4+0, plain, mode 1
+# node scripts/run_js_calc.mjs calcUVPrint --data current --args
+# '[50,[100,150],[100,150],null,{"isUVPrint":{"printerID":"RimalSuvUV","resolution":0,"color":"4+0","surface":"isPlain"}},1]'
 REF_PARAMS = {
     "quantity": 50,
     "width": 100,
@@ -99,8 +109,8 @@ REF_PARAMS = {
     "mode": 1,
 }
 EXPECTED_REF = {
-    "cost": 2430,
-    "price": 3888,
+    "cost": 2430.0,
+    "price": 3888.0,
     "time_hours": 1.05,
     "time_ready": 33.05,
     "weight_kg": 0.0,
@@ -116,11 +126,12 @@ def ref_result(calc):
 
 
 def test_expected_values_uv_print(ref_result):
+    """JS, 04.11.2026: УФ 100×150, тираж 50, 4+0, plain, mode 1."""
     if ref_result is None:
         pytest.skip("расчёт эталонного кейса не выполнен")
     r = ref_result
     e = EXPECTED_REF
-    rel = 0.03
+    rel = 0.001
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
     ok_price = _cmp(r["price"], e["price"], rel)
@@ -148,3 +159,18 @@ def test_expected_values_uv_print(ref_result):
     assert ok_ready, f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
     assert ok_weight, f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
     assert len(materials) == 0, f"ожидается пустой список материалов, получено {len(materials)}"
+
+
+def test_options_raise_price(calc):
+    """Нумерация / штрихкод / переменные / материал заказчика поднимают price относительно эталона."""
+    base = calc.execute(REF_PARAMS)["price"]
+    with_number = calc.execute({**REF_PARAMS, "is_number": True})["price"]
+    with_barcode = calc.execute({**REF_PARAMS, "is_barcode": True})["price"]
+    with_variables = calc.execute({**REF_PARAMS, "is_variables": True})["price"]
+    with_customer = calc.execute({**REF_PARAMS, "is_customer_material": True})["price"]
+    assert with_number > base
+    assert with_barcode > base
+    assert with_variables > base
+    assert with_customer > base
+    # JS: price = ceil(cost * margin) + opt_price; barcode даёт +2*n к price
+    assert with_barcode - base >= 2 * REF_PARAMS["quantity"] - 1
