@@ -10,8 +10,9 @@ var isDifferent = ezfc_functions.get_value_from(1599, true) == 'true';
 insaincalc.syncUrl({
     numN: qty,
     dpdTypeMug: mugIndex,
-    ckbPacking: isPacking ? 1 : 0,
-    ckbDifferent: isDifferent ? 1 : 0,
+    // Чекбокс: GET_check=index; включён → индекс единственной опции 0; выключен → '' (удалить).
+    ckbPacking: isPacking ? 0 : '',
+    ckbDifferent: isDifferent ? 0 : '',
     rdoModeProduction: mode
 });
 
