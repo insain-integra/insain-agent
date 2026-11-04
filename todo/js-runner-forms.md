@@ -121,10 +121,11 @@ print("ok", js, api, abs_d, rel)
 
 ## Результат
 
-- Ветка, PR или коммит: `task/js-runner-forms` (незакоммичено). Push/merge не делались.
+- Ветка, PR или коммит: `task/js-runner-forms` @ `23854d1` (поверх `main` @ `5f9dfd0`). Push/merge не делались.
 - Период: 04.11.2026
 - Часы человека: не учтено
 - Работа агентов: Implementer (Opus 5.5), продолжение после эскалации расхождений
+- Решение человека (05.11.2026): порты Python разрешено править, чтобы совпали с JS. Отклонение от «Не-scope» принято; раннер под цену не подгоняли.
 - Было / стало: порты Python расходились с JS; после правок локальный Python = JS на всех шести кейсах (abs=0).
 - Сделано:
   - раннер: шесть функций + зависимости (`calcPrintLaser`/`PrintRoll`/`PrintWide`, `presswall`/`tools`);
@@ -133,7 +134,7 @@ print("ok", js, api, abs_d, rel)
   - `python scripts/dev.py check` зелёный.
 - Чем проверено: JS runner vs локальный Python — все шесть `ok` abs=0; `python scripts/dev.py check` 498+81.
 - Не сделано и почему: боевой API ещё на старом коде — после merge нужен деплой `infra/deploy.sh` с `main`, иначе `Invoke-RestMethod` на prod снова разойдётся.
-- Требуется решение: закоммитить / review / merge / деплой API.
+- Требуется решение: Reviewer (Grok 4.7). После merge — деплой API (`infra/deploy.sh` с `main`), иначе `Invoke-RestMethod` на prod снова разойдётся.
 - Команды и `price` (их копируют задачи форм):
 
 ```powershell
