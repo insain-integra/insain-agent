@@ -9,7 +9,7 @@
 ## Задачи
 
 - `todo/js-runner-forms.md` — `scripts/run_js_calc.mjs` считает шесть функций, цена сходится с API.
-- `todo/form-uv-print.md` — форма 26, slug `uv_print`, цепочка 2. Раннер уже умеет `calcUVPrint`.
+- Форма 26, slug `uv_print`, закрыта 05.11.2026: копия 87 принята, боевая страница ждёт `todo/forms-batch-switch.md`.
 - `todo/form-mug.md` — форма 41, slug `mug`. Путь кружки — сублимация. Раннер уже умеет `calcMug`.
 - `todo/form-embossing.md` — форма 85, slug `embossing`, цепочка 3.
 - `todo/form-acrylic-prizes.md` — форма 78, slug `acrylic_prizes`, цепочка 8.
@@ -21,7 +21,7 @@
 ## Порядок
 
 1. `todo/js-runner-forms.md`
-2. `todo/form-uv-print.md` и `todo/form-mug.md` — параллельно раннеру, друг на друга не завязаны
+2. Форма 26 закрыта. `todo/form-mug.md` — параллельно раннеру, на форму 26 не завязана
 3. `todo/form-embossing.md` — после закрытия раннера
 4. `todo/form-acrylic-prizes.md`
 5. `todo/form-rollup.md`

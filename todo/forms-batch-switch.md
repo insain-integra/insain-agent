@@ -18,7 +18,7 @@ Reviewer: Grok 4.7
 | Форма | Slug API | Страница | Копия (форма / товар) | Задача на перевод |
 | --- | --- | --- | --- | --- |
 | 69 CalcPlaque | `plaque` | `/catalog/kalkulyator-nagradnyh-plaketok/` | 86 / 2586879 (draft) | пилот закрыт |
-| 26 CalcUVPrint | `uv_print` | `/catalog/uf-pechat-na-suveniry/` | 87 / 2586881 (draft) | todo/form-uv-print.md |
+| 26 CalcUVPrint | `uv_print` | `/catalog/uf-pechat-na-suveniry/` | 87 / 2586881 (draft) | копия принята 05.11.2026 |
 
 ## Контекст и ссылки
 
@@ -36,6 +36,17 @@ Reviewer: Grok 4.7
   | материал | dpdMaterial | index |
   | нанесение | dpdApplication | index |
   | режим | rdoModeProduction | **value** |
+
+- GET и `GET_check` формы 26 (копия 87 принята 05.11.2026; id боевой формы снять `SELECT --raw`, не переносить с копии 87):
+
+  | поле | имя элемента → GET | GET_check |
+  | --- | --- | --- |
+  | количество и размеры | numN, numW, numH, numItemW, numItemH | — |
+  | цвет, разрешение, поверхность, материал, пресет | dpdColor, dpdResolution, dpdSurfacePrint, dpdSurfaceMaterial, dpdPreset | index |
+  | режим | rdoModeProduction | **value** |
+  | нумерация, штрихкод, переменные, материал заказчика | ckbNumber, ckbBarcode, ckbVariables, ckbMaterialCustomer | — |
+
+  На форме нет значения разрешения 0: индекс 0 у `dpdResolution` даёт value 1. Эталон с разрешением 0 проверен раннером и API, не страницей.
 
 - Остальное не открывать.
 

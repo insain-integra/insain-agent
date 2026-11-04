@@ -17,7 +17,7 @@ Reviewer: Grok 4.7
 - `docs/ezfc-api-migration.md` — шаблон `cjsCalc`, GET = имя элемента, `GET_check`: dropdown с кодом — `index`, radio `1`/`2` — `value`.
 - `docs/site/forms.md` — строка формы 41, только читать.
 - `todo/forms-batch-switch.md` — в конце одна строка в «Состав пакета».
-- `todo/EPIC-forms-to-api.md` — очередь, параллельно `todo/js-runner-forms.md`. Раннер для `calcMug` уже есть. На `todo/form-uv-print.md` не завязана.
+- `todo/EPIC-forms-to-api.md` — очередь, параллельно `todo/js-runner-forms.md`. Раннер для `calcMug` уже есть. На форму 26 не завязана.
 - Эталон: `REF_PARAMS_10` в `calc_service/tests/test_calculators/test_mug.py`, пометка «JS, 01.11.2026». Вызов `calcMug(10, 'MugStandartWhite', {}, 1)`. Порог `price` — прогон JS против API. Файл `js_legacy/calc/calcMug.js` уже в `scripts/run_js_calc.mjs`.
 - Кружка зовёт термопресс с `transfer_type=sublimation`. Строки `calcHeatPress` в `scripts/js_port_gaps_allowed.txt` — плёнка, DTF, сабельный резак.
 - Остальное не открывать.
