@@ -99,9 +99,10 @@ REF_PARAMS = {
     "mode": 1,
 }
 
+# JS, 04.11.2026 — сверка с calcEmbossing --data current (findIndex item[0] > n)
 EXPECTED_REF = {
-    "cost": 9450.0,
-    "price": 15667.0,
+    "cost": 8475.0,
+    "price": 14046.0,
     "time_hours": 0.75,
     "time_ready": 41.0,
     "weight_kg": 0.015,

@@ -31,13 +31,17 @@ def _load_tools_raw() -> Dict[str, Any]:
 
 
 def _find_cost_for_quantity(cost_table: List[List[float]], n: int) -> float:
-    """Найти стоимость за штуку по таблице [[порог, руб/шт], ...]."""
+    """Ставка руб/шт как в JS: idx = findIndex(item => item[0] > n); cost[idx][1].
+
+    На границе порога берётся следующая ступень (n=500 → ставка скобки 1000).
+    """
     if not cost_table:
         return 0.0
-    for threshold, cost_per_unit in sorted(cost_table, key=lambda x: x[0]):
-        if n <= threshold:
-            return float(cost_per_unit)
-    return float(cost_table[-1][1]) if cost_table else 0.0
+    rows = list(cost_table)
+    idx = next((i for i, row in enumerate(rows) if float(row[0]) > n), -1)
+    if idx < 0:
+        idx = len(rows) - 1
+    return float(rows[idx][1])
 
 
 def _calc_cliche(size: List[float], mode: int) -> Dict[str, Any]:
@@ -296,8 +300,8 @@ class EmbossingCalculator(BaseCalculator):
 
         return {
             "cost": float(cost_total),
-            "price": math.ceil(price_total),
-            "unit_price": math.ceil(price_total) / max(1, quantity),
+            "price": float(price_total),
+            "unit_price": float(price_total) / max(1, quantity),
             "time_hours": round(time_total, 2),
             "time_ready": time_ready,
             "weight_kg": weight_kg,
