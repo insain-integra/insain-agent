@@ -133,7 +133,8 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
   - прогон под админом: эталон → API 200, price 3723.25, на странице 3800 (showResult/round); смена типа кружки меняет цену; ссылка с GET и перезагрузка сохраняют режим/срок
 - Чем проверено: критерии приёмки + Browser MCP на `?p=2586882&preview=true`; `python scripts/dev.py check` → 499 passed, 2 skipped; bot 81 passed
 - Не сделано и почему: строка в `forms-batch-switch.md` — после принятия копии; `read_file`/выкатка плагина/боевая 41 — вне scope. На форме нет `.data-material-table` и `<a>` в `htmTime` (как на боевой 41) — таблица материалов и подсказка дат в DOM не появляются
-- Требуется решение: принять копию **88** / товар **2586882**?
+- Требуется решение: —
+- Копия **88** / **2586882** принята 05.11.2026; строка в `forms-batch-switch.md` добавлена. Дальше Reviewer (Grok 4.7), затем merge в `main`.
 - GET на копии 88:
 
 | поле | имя элемента | GET | GET_check |
@@ -144,6 +145,4 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 | разные макеты | ckbDifferent | ckbDifferent | index (вкл. → 0) |
 | режим | rdoModeProduction | rdoModeProduction | value |
 
-- Строка в «Состав пакета» `todo/forms-batch-switch.md` (после принятия):
-
-| 41 CalcMug | `mug` | /catalog/kalkulyator-sublimaczionnoj-pechati-na-kruzhki/ | 88 / 2586882 (draft) | todo/form-mug.md |
+- Строка в «Состав пакета» `todo/forms-batch-switch.md`: добавлена (88 / 2586882).
