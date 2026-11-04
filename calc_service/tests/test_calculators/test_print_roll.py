@@ -134,12 +134,13 @@ REF_PARAMS = {
     "printer_code": "Technojet160ECO",
     "mode": 1,
 }
+# JS, 04.11.2026 — wide из layout_on_roll
 EXPECTED_REF = {
-    "cost": 1153,
-    "price": 1859,
-    "unit_price": 1820.0,
-    "time_hours": 0.33,
-    "time_ready": 16.66,
+    "cost": 1127,
+    "price": 1817,
+    "unit_price": 1817.0,
+    "time_hours": 0.32,
+    "time_ready": 16.64,
     "weight_kg": 0.6,
 }
 EXPECTED_MATERIAL = {
@@ -159,12 +160,13 @@ REF_PARAMS_2 = {
     "is_eyelet": [300, 300, 300, 300],
     "mode": 1,
 }
+# JS, 04.11.2026 — wide из layout_on_roll
 EXPECTED_REF_2 = {
-    "cost": 9023,
-    "price": 14493,
-    "unit_price": 2800.4,
-    "time_hours": 3.5,
-    "time_ready": 20.49,
+    "cost": 8897,
+    "price": 14291,
+    "unit_price": 2858.2,
+    "time_hours": 3.47,
+    "time_ready": 20.43,
     "weight_kg": 3.0,
 }
 EXPECTED_MATERIAL_2 = {
@@ -183,12 +185,13 @@ REF_PARAMS_3 = {
     "is_gluing": [1, 1, 1, 1],
     "mode": 1,
 }
+# JS, 04.11.2026 — wide из layout_on_roll
 EXPECTED_REF_3 = {
-    "cost": 11696,
-    "price": 18824,
-    "unit_price": 1844.6,
-    "time_hours": 3.21,
-    "time_ready": 21.03,
+    "cost": 9347,
+    "price": 15066,
+    "unit_price": 1506.6,
+    "time_hours": 2.61,
+    "time_ready": 19.83,
     "weight_kg": 4.0,
 }
 EXPECTED_MATERIAL_3 = {

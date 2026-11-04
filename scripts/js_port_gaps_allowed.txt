@@ -30,7 +30,6 @@ calcMetalPins option isPacking
 calcMilling option isCutMilling
 calcPadPrint option Material
 calcPrintOffsetPromo module
-calcPrintRoll option isJoing
 calcPrintRoll call calcLaminationWide
 calcPrintSheet call calcCutRoller
 calcPrintSheet call calcPrintLaser

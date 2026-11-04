@@ -231,12 +231,14 @@ class PrintLaserCalculator(BaseCalculator):
         defects = printer.get_defect_rate(float(num_sheet))
         if mode.value >= 2:
             defects += defects * (mode.value - 1)
-        num_with_defects = math.ceil(num_sheet * (1 + defects))
+        # JS: time — Math.ceil(numSheet*(1+defects))/sheetsPerHour; cost — numSheet*(1+defects) без ceil.
+        sheets_with_defects = num_sheet * (1 + defects)
+        sheets_for_time = math.ceil(sheets_with_defects)
 
         double_side = 2 if color in ("1+1", "4+1", "4+4") else 1
         time_prepare = (printer.time_prepare or 0.1) * max(1, mode.value)
         time_print = (
-            num_with_defects / sheets_per_hour * coeff_size * double_side + time_prepare
+            sheets_for_time / sheets_per_hour * coeff_size * double_side + time_prepare
         )
         time_operator = time_print * 0.5 * (1 + defects) + time_prepare
 
@@ -244,17 +246,16 @@ class PrintLaserCalculator(BaseCalculator):
         cost_per_sheet_val = _cost_per_sheet(color, cost_print_sheet_list)
 
         cost_depreciation = printer.depreciation_per_hour * time_print
-        cost_consumables = cost_per_sheet_val * coeff_size * num_with_defects
+        cost_consumables = cost_per_sheet_val * coeff_size * sheets_with_defects
         cost_print = cost_depreciation + cost_consumables
         cost_operator = time_operator * printer.operator_cost_per_hour
 
         cost = cost_print + cost_operator
         margin_extra = get_margin("marginPrintLaser")
-        effective_margin = max(MARGIN_OPERATION + margin_extra, MARGIN_MIN)
-        # JS: result.price = costPrint * (1 + marginMaterial + marginPrintLaser) + costOperator * (1 + marginOperation + marginPrintLaser)
+        # JS: result.price без Math.ceil
         price_print = cost_print * (1 + MARGIN_MATERIAL + margin_extra)
         price_operator = cost_operator * (1 + MARGIN_OPERATION + margin_extra)
-        price = math.ceil(price_print + price_operator)
+        price = price_print + price_operator
 
         time_hours = round(time_print * 100) / 100.0
         base_ready = printer.base_time_ready or [16, 8, 1]

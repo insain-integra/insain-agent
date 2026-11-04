@@ -564,11 +564,13 @@ class PrintSheetCalculator(BaseCalculator):
             print_time_ready = float(inkjet_result.get("time_ready", 0.0))
             print_weight_kg = float(inkjet_result.get("weight_kg", 0.0))
         else:
-            # Печать (лазерная логика как в calcPrintLaser) — ветка не меняется.
+            # Печать (лазерная логика как в calcPrintLaser).
             defects_printer = printer.get_defect_rate(float(num_sheet_to_print))
             if mode.value >= 2:
                 defects_printer += defects_printer * (mode.value - 1)
-            num_with_defects = math.ceil(num_sheet_to_print * (1 + defects_printer))
+            # JS: time — ceil(n*(1+d)); cost расходников — n*(1+d) без ceil.
+            sheets_with_defects = num_sheet_to_print * (1 + defects_printer)
+            sheets_for_time = math.ceil(sheets_with_defects)
 
             coeff_size = 1.0
             half_sheet = [max_printer[0], max_printer[1] / 2.0]
@@ -580,13 +582,13 @@ class PrintSheetCalculator(BaseCalculator):
                 sheets_per_hour = 250.0
             double_side = 2 if color in ("1+1", "4+1", "4+4") else 1
             time_prepare = (printer.time_prepare or 0.1) * max(1, mode.value)
-            time_print = num_with_defects / sheets_per_hour * coeff_size * double_side + time_prepare
+            time_print = sheets_for_time / sheets_per_hour * coeff_size * double_side + time_prepare
             time_operator = time_print * 0.5 * (1 + defects_printer) + time_prepare
 
             cost_print_sheet_list = getattr(printer, "cost_print_sheet", None) or [4.0, 12.0]
             cost_per_sheet_val = _cost_per_sheet_laser(color, cost_print_sheet_list)
             cost_depreciation = printer.depreciation_per_hour * time_print
-            cost_consumables = cost_per_sheet_val * coeff_size * num_with_defects
+            cost_consumables = cost_per_sheet_val * coeff_size * sheets_with_defects
             cost_print = cost_depreciation + cost_consumables
             cost_operator = time_operator * printer.operator_cost_per_hour
             cost_print_total = cost_print + cost_operator
@@ -691,6 +693,7 @@ class PrintSheetCalculator(BaseCalculator):
         # price_print уже посчитан выше (лазер / inkjet).
         price_material = cost_material * (1 + MARGIN_MATERIAL)
         margin_print_sheet = get_margin("marginPrintSheet")
+        # JS calcPrintSheet: без Math.ceil на price (лазер и струйная).
         price = (
             price_material
             + price_print
@@ -698,9 +701,6 @@ class PrintSheetCalculator(BaseCalculator):
             + price_lamination
             + opt_price
         ) * (1 + margin_print_sheet)
-        # Лазерная ветка: округление вверх до рубля сохраняем. Струйная — как JS, без ceil.
-        if not is_inkjet:
-            price = math.ceil(price)
 
         time_total = time_print + time_cut + time_lamination + time_cut_guillotine + opt_time
         # В JS: result.time = Math.ceil((costCut.time+costPrint.time+…)*100)/100
@@ -750,11 +750,10 @@ class PrintSheetCalculator(BaseCalculator):
             for m in lamination_result.get("materials") or []:
                 materials_out.append(m)
 
-        # Струй: price в копейках (float); лазер: int после ceil — как было.
-        price_out: Any = float(price) if is_inkjet else int(price)
+        # JS: price без округления до рубля (и лазер, и струйная).
         return {
             "cost": float(cost),
-            "price": price_out,
+            "price": float(price),
             "unit_price": float(price) / max(1, quantity),
             "time_hours": time_hours,
             "time_ready": time_ready,

@@ -103,7 +103,7 @@ def layout_on_roll(
     gap: float = 0.0,
 ) -> Dict[str, float]:
     """
-    Оптимальная раскладка изделий на рулоне.
+    Оптимальная раскладка изделий на рулоне (как JS calcLayoutOnRoll).
 
     quantity: нужное количество изделий.
     item_size: [width, height] изделия в мм.
@@ -111,52 +111,57 @@ def layout_on_roll(
     gap: расстояние между изделиями в мм.
 
     Если изделие не помещается по ширине — пробует повернуть на 90°.
-    Возвращает: {"num": фактическое количество, "length": длина отреза в мм}.
+    Возвращает: num, length (мм отреза), wide (занятая ширина на рулоне, мм).
     """
     if len(item_size) != 2 or len(roll_size) != 2:
         raise ValueError("item_size и roll_size должны быть списками [width, height]")
 
+    empty = {"num": 0, "length": 0.0, "wide": 0.0}
     if quantity <= 0:
-        return {"num": 0, "length": 0.0}
+        return empty
 
     item_w, item_h = map(float, item_size)
     roll_w = float(roll_size[0])
     gap = float(gap)
+    min_size = min(item_w, item_h)
+    max_size = max(item_w, item_h)
 
-    if roll_w <= 0:
-        return {"num": 0, "length": 0.0}
+    if roll_w <= 0 or min_size > roll_w:
+        return empty
 
-    def _variant(width_item: float, height_item: float) -> float | None:
-        # Если вообще не помещается по ширине
-        if width_item > roll_w:
+    def _pack(across: float, along: float) -> tuple[int, int, float, float] | None:
+        step = across + gap
+        if across > roll_w or step <= 0:
             return None
-        step_w = width_item + gap
-        if step_w <= 0:
+        num_wide = int((roll_w + gap) // step)
+        if num_wide <= 0:
             return None
-        cols = int((roll_w + gap) // step_w)
-        if cols <= 0:
-            return None
-        rows = int(math.ceil(quantity / cols))
-        length = rows * height_item + max(0, rows - 1) * gap
-        return length
+        num_far = int(math.ceil(quantity / num_wide))
+        length = num_far * along + max(0, num_far - 1) * gap
+        wide = num_wide * (across + gap) - gap
+        return num_wide, num_far, wide, length
 
-    # Вариант 1: без поворота
-    length1 = _variant(item_w, item_h)
-    # Вариант 2: с поворотом
-    length2 = _variant(item_h, item_w)
-
-    best_length: float | None
-
-    if length1 is None and length2 is None:
-        return {"num": 0, "length": 0.0}
-    elif length1 is None:
-        best_length = length2
-    elif length2 is None:
-        best_length = length1
+    # Как в JS: обе ориентации, если max тоже влазит в ширину рулона.
+    if max_size < roll_w:
+        pack_min = _pack(min_size, max_size)  # короткой по ширине
+        pack_max = _pack(max_size, min_size)  # длинной по ширине
+        if pack_min is None and pack_max is None:
+            return empty
+        if pack_min is None:
+            chosen = pack_max
+        elif pack_max is None:
+            chosen = pack_min
+        elif pack_min[3] < pack_max[3]:
+            chosen = pack_min
+        else:
+            chosen = pack_max
     else:
-        best_length = min(length1, length2)
+        chosen = _pack(min_size, max_size)
+        if chosen is None:
+            return empty
 
-    return {"num": int(quantity), "length": float(best_length)}
+    _num_wide, _num_far, wide, length = chosen
+    return {"num": int(quantity), "length": float(length), "wide": float(wide)}
 
 
 def layout_on_roll_with_orientation(

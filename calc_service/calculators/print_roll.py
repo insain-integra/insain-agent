@@ -167,6 +167,8 @@ class PrintRollCalculator(BaseCalculator):
         best_size_material = all_sizes[0]
         best_len_material = 0.0
         best_size_print = [0.0, 0.0]
+        best_edge_joining = [0, 0, 0, 0]
+        best_len_joining = 0.0
 
         for sz in all_sizes:
             sz_w = float(sz[0]) if len(sz) > 0 else 0
@@ -186,13 +188,32 @@ class PrintRollCalculator(BaseCalculator):
                 continue
 
             roll = layout_on_roll(n, size, [usable_w, 0])
-            len_mat = roll["length"]
+            len_mat = float(roll["length"])
+            wide = float(roll.get("wide") or usable_w)
+            edge_joining = [0, 0, 0, 0]
+            len_joining = 0.0
 
-            if is_joining and len_mat == 0:
+            # Как в JS calcPrintRoll: при isJoing всегда делим на полосы, даже если влезло.
+            # Желаемое поведение (BACKLOG): стыковать только если не влезает; включать
+            # автоматически и предупреждать «печать со стыковкой». Пока порт = JS.
+            if is_joining:
                 max_side = max(size[0], size[1])
                 min_side = min(size[0], size[1])
-                num_bonds = math.ceil(max_side / usable_w)
+                num_bonds = math.ceil(max_side / usable_w) if usable_w > 0 else 1
+                if len_mat == 0:
+                    len_joining = n * (num_bonds - 1) * max_side
+                    if size[0] > size[1]:
+                        edge_joining = [num_bonds - 1, 0, 0, 0]
+                    else:
+                        edge_joining = [0, num_bonds - 1, 0, 0]
+                else:
+                    len_joining = n * (num_bonds - 1) * min_side
+                    if size[0] < size[1]:
+                        edge_joining = [num_bonds - 1, 0, 0, 0]
+                    else:
+                        edge_joining = [0, num_bonds - 1, 0, 0]
                 len_mat = n * num_bonds * min_side
+                wide = usable_w
 
             if len_mat > 0:
                 vol = (len_mat + margins[0] + margins[2]) * sz_w / 1_000_000
@@ -200,7 +221,9 @@ class PrintRollCalculator(BaseCalculator):
                     best_vol = vol
                     best_size_material = [sz_w, sz_h]
                     best_len_material = len_mat
-                    best_size_print = [usable_w, len_mat]
+                    best_size_print = [wide, len_mat]
+                    best_edge_joining = list(edge_joining)
+                    best_len_joining = len_joining
 
         if best_len_material <= 0:
             raise ValueError("Изделие не помещается на материал")
@@ -238,11 +261,16 @@ class PrintRollCalculator(BaseCalculator):
         weight_opt = 0.0
         materials_extra: List[Dict[str, Any]] = []
 
-        if is_cutting and any(v > 0 for v in is_cutting):
-            r = calc_cutting_edge(n, size, is_cutting, mode.value)
-            cost_opt += r.cost
-            price_opt += r.price
-            time_opt += r.time_hours
+        # JS: isCutting || isJoing → подрезка; при стыковке edge += edgeJoing*2
+        cut_edge = list(is_cutting) if is_cutting else [0, 0, 0, 0]
+        if is_joining and best_len_joining > 0:
+            cut_edge = [cut_edge[i] + best_edge_joining[i] * 2 for i in range(4)]
+        if (is_cutting and any(v > 0 for v in is_cutting)) or (is_joining and best_len_joining > 0):
+            if any(v > 0 for v in cut_edge):
+                r = calc_cutting_edge(n, size, cut_edge, mode.value)
+                cost_opt += r.cost
+                price_opt += r.price
+                time_opt += r.time_hours
 
         if is_pocket and any(v > 0 for v in is_pocket):
             r = calc_gluing_banner(n, size, is_pocket, mode.value)
@@ -251,12 +279,17 @@ class PrintRollCalculator(BaseCalculator):
             time_opt += r.time_hours
             materials_extra.extend(r.materials)
 
-        if is_gluing and any(v > 0 for v in is_gluing):
-            r = calc_gluing_banner(n, size, is_gluing, mode.value)
-            cost_opt += r.cost
-            price_opt += r.price
-            time_opt += r.time_hours
-            materials_extra.extend(r.materials)
+        # JS: isGluing || isJoing → проклейка; при стыковке edge += edgeJoing
+        glue_edge = list(is_gluing) if is_gluing else [0, 0, 0, 0]
+        if is_joining and best_len_joining > 0:
+            glue_edge = [glue_edge[i] + best_edge_joining[i] for i in range(4)]
+        if (is_gluing and any(v > 0 for v in is_gluing)) or (is_joining and best_len_joining > 0):
+            if any(v > 0 for v in glue_edge):
+                r = calc_gluing_banner(n, size, glue_edge, mode.value)
+                cost_opt += r.cost
+                price_opt += r.price
+                time_opt += r.time_hours
+                materials_extra.extend(r.materials)
 
         if is_eyelet and any(v > 0 for v in is_eyelet):
             r = calc_eyelet(n, size, is_eyelet, mode.value)
@@ -265,8 +298,8 @@ class PrintRollCalculator(BaseCalculator):
             time_opt += r.time_hours
             materials_extra.extend(r.materials)
             # Автоматическая проклейка по краям с люверсами
-            glue_edge = [1 if v > 0 else 0 for v in is_eyelet]
-            rg = calc_gluing_banner(n, size, glue_edge, mode.value)
+            eyelet_glue = [1 if v > 0 else 0 for v in is_eyelet]
+            rg = calc_gluing_banner(n, size, eyelet_glue, mode.value)
             cost_opt += rg.cost
             price_opt += rg.price
             time_opt += rg.time_hours
