@@ -14,10 +14,11 @@ var materialIndex = ezfc_functions.get_value_from(896, true, false, { return_val
 var presetRaw = ezfc_functions.get_value_from(933, true)[0];
 var presetIndex = ezfc_functions.get_value_from(933, true, false, { return_value: 'index' })[0];
 var mode = Number(ezfc_functions.get_value_from(2866, true)[0]) || 1;
-var isNumber = ezfc_functions.get_value_from(901, true)[0] == 'true';
-var isBarcode = ezfc_functions.get_value_from(902, true)[0] == 'true';
-var isVariables = ezfc_functions.get_value_from(903, true)[0] == 'true';
-var isCustomerMaterial = ezfc_functions.get_value_from(3009, true)[0] == 'true';
+// Чекбокс: get_value_from → [true]/0/'true'; без [0], как в старом calcUVPrint cjsCalc
+var isNumber = ezfc_functions.get_value_from(901, true) == 'true';
+var isBarcode = ezfc_functions.get_value_from(902, true) == 'true';
+var isVariables = ezfc_functions.get_value_from(903, true) == 'true';
+var isCustomerMaterial = ezfc_functions.get_value_from(3009, true) == 'true';
 
 var presetParts = String(presetRaw == null ? '0' : presetRaw).split(',');
 if (presetRaw && String(presetRaw) !== '0' && presetParts.length >= 5) {
