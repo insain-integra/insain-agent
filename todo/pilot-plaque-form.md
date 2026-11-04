@@ -1,6 +1,6 @@
 # pilot-plaque-form
 
-Статус: в работе
+Статус: ревью
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -184,9 +184,9 @@ curl.exe -sS -o NUL -w "%{http_code}" "https://insain.ru/catalog/kalkulyator-nag
 
 ## Результат
 
-- Ветка / коммит: `task/plaque-sync-url` @ `e4b9afa` (поверх `main` @ `52676c2`). На проде плагин **0.2.6** (выкатка с ветки, без merge в `main`). Форма 69 — `calcPlaque`; копия 86 — `calcApi` + `syncUrl` inline.
-- Решение человека (04.11.2026): копия принята; **боевую 69 пока не переключаем**. Подтверждение (04.11.2026): GET на 86 + деплой 0.2.6 + проверка URL — **да**.
-- **GET share-URL (пилот, копия 86):** имена = имена элементов. Запись через `wp eval-file` (Browser MCP был недоступен); бэкап `/tmp/insain-db-before-plaque-get.sql`.
+- Ветка / коммит: `task/plaque-sync-url` (поверх `main` @ `52676c2`). На проде плагин **0.2.6** (выкатка с ветки, без merge в `main`). Форма 69 — `calcPlaque`; копия 86 — `calcApi` + `syncUrl` inline.
+- Решение человека (04.11.2026): копия принята; **боевую 69 пока не переключаем**. Подтверждение: GET на 86 + деплой 0.2.6 + проверка URL — **да**.
+- **GET share-URL (пилот, копия 86):** имена = имена элементов. Запись через `wp eval-file`; бэкап `/tmp/insain-db-before-plaque-get.sql`.
 
   | поле | id 86 | имя элемента → GET | GET_check (GET_check_option_value) |
   | --- | --- | --- | --- |
@@ -233,11 +233,18 @@ curl.exe -sS -o NUL -w "%{http_code}" "https://insain.ru/catalog/kalkulyator-nag
   - После UI-теста человека: stale «со скидкой» в `showResult` (refresh `populate_html_placeholders`) и `size_mm` у плакетки/tablets в materials — пофикшено и выкачено (`52676c2`, плагин 0.2.5).
   - `plaque.js`: `insaincalc.syncUrl` с GET-именами выше перед `calcApi`. Плагин **0.2.6** на проде (`ACTIVE`).
   - Тест `test_wp_plugin_forms.py`; критерий GET/URL в `todo/_template.md`.
-  - Форма 86: GET прописаны; 3321 — inline JS с `syncUrl` (id 3317/3318/3319/3334). `do_shortcode('[ezfc id="86"]')` → `syncUrl=yes`, `calcApi=yes`.
-  - UI share-URL на копии под админом — **в процессе**: нужен логин (Browser MCP недоступен; IDE browser на wp-login).
-- Чем проверено: `python scripts/dev.py check` — 498+81 passed; wp-cli SELECT GET; `wp plugin get` → `0.2.6` ACTIVE; `forms/plaque.js` на сервере содержит `syncUrl`; shortcode 86 содержит `syncUrl_call`; `wp cache flush` Success (litespeed-purge → 400, шум); API calculators `200`.
+  - Форма 86: GET прописаны; 3321 — inline JS с `syncUrl` (id 3317/3318/3319/3334).
+  - **Share-URL UI (копия 86, admin preview):** кейс 2 шт / Plaque2330 / AcrylWhite3 / isUVPrint / mode 1.
+
+    | прогон | URL (GET) | поля | цена на странице | срок / режим |
+    | --- | --- | --- | --- | --- |
+    | 1 — выбор на форме | `…&numN=2&dpdFormat=0&dpdMaterial=1&dpdApplication=1&rdoModeProduction=1` | те же | **6620** (API 6618.96) | 4 дня / стандарт |
+    | 2 — открытие того же URL | тот же | qty2, Plaque2330, AcrylWhite3, УФ, mode1 checked | **6620** | 4 дня / стандарт |
+    | 3 — reload того же URL | тот же | без изменений | **6620** | 4 дня / стандарт (не сменились) |
+
+    Скрин: preview с 6620 / «Срок 4 дня» / «стандарт»; bridge `insain-calc-bridge.js?ver=0.2.6`.
+- Чем проверено: `python scripts/dev.py check` — 498+81 passed; wp-cli SELECT GET; плагин `0.2.6` ACTIVE; shortcode 86 `syncUrl`; IDE browser admin preview (два прогона + reload); API `price` 6618.96.
 - Не сделано и почему:
-  - Скрин/URL+цена двух прогонов share-URL на preview 2586879 — ждёт админ-сессии в браузере.
-  - Шаги 8–12 (read_file на 69 …) — **отложено** до пакетного переключения.
-- Требуется решение: войти в админку в браузере Cursor (логин уже открыт) и написать «готово» — добьём проверку URL. Переключение 69 — только «да» пакетом + те же GET на 69.
+  - Шаги 8–12 (read_file на 69, снимок, forms.md, AGENTS.md, приписка 5.5) — **отложено** до пакетного переключения.
+- Требуется решение: Reviewer (Grok 4.7) по ветке `task/plaque-sync-url`. Merge/push — по просьбе. Переключение 69 — только «да» пакетом + те же GET на 69.
 - Как откатить: плагин — `git archive … 52676c2:wp-plugin` (0.2.5); элементы 86 — из `/tmp/insain-db-before-plaque-get.sql`; форма 69 не менялась.
