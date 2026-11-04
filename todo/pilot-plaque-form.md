@@ -184,19 +184,19 @@ curl.exe -sS -o NUL -w "%{http_code}" "https://insain.ru/catalog/kalkulyator-nag
 
 ## Результат
 
-- Ветка / коммит: `task/plaque-sync-url` (поверх `main` @ `52676c2`). На проде ещё плагин **0.2.5**; форма 69 — `calcPlaque`; копия 86 — `calcApi` inline без `syncUrl`.
-- Решение человека (04.11.2026): копия принята; **боевую 69 пока не переключаем** — сначала ещё несколько форм на API, тесты, затем пакетное переключение.
-- **GET share-URL (пилот, копия 86):** имена = имена элементов формы. Снято read-only с прод (wp-cli). Поле в БД — `GET` / `GET_check_option_value` (в UI ezFC — GET / GET_check).
+- Ветка / коммит: `task/plaque-sync-url` @ `e4b9afa` (поверх `main` @ `52676c2`). На проде плагин **0.2.6** (выкатка с ветки, без merge в `main`). Форма 69 — `calcPlaque`; копия 86 — `calcApi` + `syncUrl` inline.
+- Решение человека (04.11.2026): копия принята; **боевую 69 пока не переключаем**. Подтверждение (04.11.2026): GET на 86 + деплой 0.2.6 + проверка URL — **да**.
+- **GET share-URL (пилот, копия 86):** имена = имена элементов. Запись через `wp eval-file` (Browser MCP был недоступен); бэкап `/tmp/insain-db-before-plaque-get.sql`.
 
-  | поле | id 86 | имя элемента | GET сейчас | GET_check сейчас | GET целевой | GET_check целевой |
-  | --- | --- | --- | --- | --- | --- | --- |
-  | количество | 3316 | numN | `""` | — | numN | — |
-  | плакетка | 3317 | dpdFormat | `""` | index | dpdFormat | index |
-  | материал | 3318 | dpdMaterial | `""` | index | dpdMaterial | index |
-  | нанесение | 3319 | dpdApplication | `""` | index | dpdApplication | index |
-  | режим | 3334 | rdoModeProduction | `""` | **index** | rdoModeProduction | **value** |
+  | поле | id 86 | имя элемента → GET | GET_check (GET_check_option_value) |
+  | --- | --- | --- | --- |
+  | количество | 3316 | numN | — |
+  | плакетка | 3317 | dpdFormat | index |
+  | материал | 3318 | dpdMaterial | index |
+  | нанесение | 3319 | dpdApplication | index |
+  | режим | 3334 | rdoModeProduction | **value** |
 
-  Условие переключения боевой 69: те же GET (numN, dpdFormat, dpdMaterial, dpdApplication, rdoModeProduction) и GET_check (dropdown=index, radio=value) прописать и на форме 69 (сейчас GET пустые, у режима тоже index).
+  Условие переключения боевой 69: те же GET/GET_check прописать и на форме 69 (сейчас GET пустые, у режима index).
 - Сделано:
   - Ворота прод-API УФ: stdout `6205.71`, код 0.
   - Локальный JS эталон: `price` 6205.71. `pytest test_plaque.py` — 22 passed.
@@ -231,16 +231,13 @@ curl.exe -sS -o NUL -w "%{http_code}" "https://insain.ru/catalog/kalkulyator-nag
 
   - Известное расхождение (не чинить): JS `AcrylWhite3`+`isSublimation` → NaN; Python → 3605.49. Форма штатно пару не даёт (`hide_option` сублимации без `AluminiumSU055`).
   - После UI-теста человека: stale «со скидкой» в `showResult` (refresh `populate_html_placeholders`) и `size_mm` у плакетки/tablets в materials — пофикшено и выкачено (`52676c2`, плагин 0.2.5).
-  - `plaque.js`: `insaincalc.syncUrl` с GET-именами выше (индексы dropdown, value режима) перед `calcApi`. Плагин версия **0.2.6**.
-  - Тест `calc_service/tests/test_wp_plugin_forms.py`: в каждом `wp-plugin/forms/*.js` есть `insaincalc.calcApi(` и `insaincalc.syncUrl(` (на `main` plaque.js без syncUrl — упал бы).
-  - В `todo/_template.md` — критерий перевода формы про GET/URL.
-- Чем проверено: ворота one-liner; `run_js_calc.mjs` + prod API; `pytest` / `python scripts/dev.py check` — **498 passed, 2 skipped** (calc) + **81 passed** (bot), код 0; `git show main:…/plaque.js` — syncUrl нет; Browser MCP Network на копии (ранее); `curl` guest 404 / витрина 200; плагин на проде ещё 0.2.5.
+  - `plaque.js`: `insaincalc.syncUrl` с GET-именами выше перед `calcApi`. Плагин **0.2.6** на проде (`ACTIVE`).
+  - Тест `test_wp_plugin_forms.py`; критерий GET/URL в `todo/_template.md`.
+  - Форма 86: GET прописаны; 3321 — inline JS с `syncUrl` (id 3317/3318/3319/3334). `do_shortcode('[ezfc id="86"]')` → `syncUrl=yes`, `calcApi=yes`.
+  - UI share-URL на копии под админом — **в процессе**: нужен логин (Browser MCP недоступен; IDE browser на wp-login).
+- Чем проверено: `python scripts/dev.py check` — 498+81 passed; wp-cli SELECT GET; `wp plugin get` → `0.2.6` ACTIVE; `forms/plaque.js` на сервере содержит `syncUrl`; shortcode 86 содержит `syncUrl_call`; `wp cache flush` Success (litespeed-purge → 400, шум); API calculators `200`.
 - Не сделано и почему:
-  - GET на копии 86 в админке ezFC — ждёт подтверждения человека (правка структуры формы).
-  - Обновление inline JS элемента 3321 (syncUrl + id копии) и деплой плагина 0.2.6 / проверка URL на копии — ждёт подтверждения.
-  - Шаги 8–12 (read_file на 69, снимок, forms.md, AGENTS.md, приписка 5.5) — **отложено** до пакетного переключения.
-- Требуется решение:
-  1. Прописать GET на копии 86 по таблице выше (и сменить GET_check режима на value)?
-  2. Вставить в 3321 тот же JS, что в `plaque.js`, с id 3317/3318/3319/3334; выкатить плагин 0.2.6; проверить share-URL под админом?
-  Переключение 69 — только явным «да» пакетом; при нём — те же GET на 69.
-- Как откатить: форма 69 ещё на старом JS. После переключения — выключить `read_file` у элемента расчёта 69, сохранить, `wp litespeed-purge all`. Копия 86 / 2586879 — только с подтверждения. API — образ `insain-agent-calc-api:rollback`; плагин — zip предыдущей версии (0.2.5).
+  - Скрин/URL+цена двух прогонов share-URL на preview 2586879 — ждёт админ-сессии в браузере.
+  - Шаги 8–12 (read_file на 69 …) — **отложено** до пакетного переключения.
+- Требуется решение: войти в админку в браузере Cursor (логин уже открыт) и написать «готово» — добьём проверку URL. Переключение 69 — только «да» пакетом + те же GET на 69.
+- Как откатить: плагин — `git archive … 52676c2:wp-plugin` (0.2.5); элементы 86 — из `/tmp/insain-db-before-plaque-get.sql`; форма 69 не менялась.
