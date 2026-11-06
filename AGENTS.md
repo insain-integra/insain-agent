@@ -31,7 +31,10 @@
   задачи) → `make check` → self-review → Reviewer (другая модель) → ревью человека → merge.
   При распухшем контексте — новая сессия на этап.
 - **Прод** — VDS, WordPress, данные на сервере. [Site ops](docs/agents/roles/site-ops.md) по
-  `.cursor/rules/insain-site-autonomous.mdc`, опасные шаги — с подтверждения человека.
+ `.cursor/rules/insain-site-autonomous.mdc`, опасные шаги — с подтверждения человека.
+
+Кому передать задачу (блокер, замечания ревью, находка вне scope, новая идея, параллельные ветки) —
+[docs/agents/workflow.md](docs/agents/workflow.md). Задачу между ролями передаёт человек.
 
 ## Команды
 
@@ -76,6 +79,7 @@ Git на VDS: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent …`
 - Обычный и прод — ветка `task/<имя>` от `main`; после ревью merge в `main`
   (fast-forward, PR на GitHub не обязателен). Быстрый — сразу в `main`.
   Прод деплоится только с `main`.
+- Параллельные задачи — каждая в своём `git worktree`; слияние по одной ветке (workflow.md, «Параллельные задачи»).
 - `git push` (в любую ветку) — только с подтверждения человека. Коммит — когда человек попросил.
 - Изменения малыми порциями, не пакетом: один коммит — одна осмысленная правка.
 
