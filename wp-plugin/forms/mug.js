@@ -2,7 +2,10 @@
 var qty = {{numN}};
 var mugId = ezfc_functions.get_value_from(1597, true)[0];
 var mugIndex = ezfc_functions.get_value_from(1597, true, false, { return_value: 'index' })[0];
-var mode = Number(ezfc_functions.get_value_from(1617, true)[0]) || 1;
+// 0 — «дешевле». Пустое поле → 1; ноль нельзя отбрасывать через ||.
+var modeRaw = ezfc_functions.get_value_from(1617, true)[0];
+var modeNum = Number(modeRaw);
+var mode = (modeRaw === '' || modeRaw == null || isNaN(modeNum)) ? 1 : modeNum;
 // Чекбокс: get_value_from → [true]/0/'true'; без [0], как в старом CalcMug cjsCalc
 var isPacking = ezfc_functions.get_value_from(1601, true) == 'true';
 var isDifferent = ezfc_functions.get_value_from(1599, true) == 'true';
