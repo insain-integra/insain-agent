@@ -159,6 +159,7 @@ print("ok")
 
 - Ветка, PR или коммит:
 - Сделано:
+  - Блок результата копий по разделу «Блок результата» `docs/ezfc-api-migration.md` (07.11.2026, снимок `wp_insain_ezfc_forms_elements` только чтение): 86 и 87 — как у 79 элемент в элемент, правка не нужна. 88 — на предполётной проверке убрать скрытые `grpPriceCustomer` / `sbtPrice` / `sbtPriceTotal` и `hdgPrice` «Цена», обернуть `htmMaterial` в `grpMaterial`; группа скидки названа `grpCost`, не `grpPriceDiscount`.
 - Чем проверено:
 - Не сделано и почему:
 - Требуется решение:
