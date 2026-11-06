@@ -65,7 +65,7 @@ Git на VDS: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent …`
 - Плагин: `git archive HEAD:wp-plugin` → `scp` в `/tmp` → `sudo -u www-data wp plugin install <zip> --force --activate --path=/var/www/insain.ru`.
 - Любой wp-cli: `sudo -u www-data wp … --path=/var/www/insain.ru`. Warning `Wt::__wakeup()` — шум.
 - Каналы доступа к WP (wp-cli, REST, Browser MCP) и ограничения по объектам — `docs/site/access-tools.md`.
-- **Формы ezFC:** структуру форм правят в админке ezFC; после правки агент снимает форму в репозиторий
+- **Формы ezFC:** блок результата переведённой формы (цена, срок, материалы) — как у формы 79, см. `docs/ezfc-api-migration.md`. Структуру форм правят в админке ezFC; после правки агент снимает форму в репозиторий
   (история и diff, не источник для заливки — обратный импорт ломает id элементов). Custom JS переведённых
   на API форм — источник правды в git, в составе плагина. Детали — `docs/site/access-tools.md`,
   раздел «Принятый режим». Реестр форм — `docs/site/forms.md`.

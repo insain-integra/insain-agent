@@ -132,7 +132,7 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
   - GET на копии (см. таблицу ниже); custom JS копии с id 88 без `read_file`
   - прогон под админом: эталон → API 200, price 3723.25, на странице 3800 (showResult/round); смена типа кружки меняет цену; ссылка с GET и перезагрузка сохраняют режим/срок
 - Чем проверено: критерии приёмки + Browser MCP на `?p=2586882&preview=true`; `python scripts/dev.py check` → 499 passed, 2 skipped; bot 81 passed
-- Не сделано и почему: строка в `forms-batch-switch.md` — после принятия копии; `read_file`/выкатка плагина/боевая 41 — вне scope. На форме нет `.data-material-table` и `<a>` в `htmTime` (как на боевой 41) — таблица материалов и подсказка дат в DOM не появляются
+- Не сделано и почему: строка в `forms-batch-switch.md` — после принятия копии; `read_file`/выкатка плагина/боевая 41 — вне scope. На форме нет `.data-material-table` и `<a>` в `htmTime` (как на боевой 41) — таблица материалов и подсказка дат в DOM не появляются. Закрыто 07.11.2026, см. блок ниже.
 - Требуется решение: —
 - Копия **88** / **2586882** принята 05.11.2026; строка в `forms-batch-switch.md` добавлена. Дальше Reviewer (Grok 4.7), затем merge в `main`.
 - GET на копии 88:
@@ -146,3 +146,29 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 | режим | rdoModeProduction | rdoModeProduction | value |
 
 - Строка в «Состав пакета» `todo/forms-batch-switch.md`: добавлена (88 / 2586882).
+
+### Вывод результата копии 88 (07.11.2026)
+
+Боевая 41 не менялась. Custom JS копии, id ввода и `read_file` не менялись. Правка в админке ezFC, форма не импортировалась.
+
+Элементы копии:
+
+| id | было | стало |
+| --- | --- | --- |
+| 3401 | — | добавлен `htmMaterial`, группа 3382, `[access read_material]` и `.data-material-table` |
+| 3394 | `htmTime`, пустая обёртка `wrapper_class=htmTime` | та же `htmTime`, разметка как у 3120: `div.porto-tooltip.inline.htmTime`, внутри `div` и `a` с `data-toggle="tooltip"` и `data-bs-original-title` |
+| 3398 | `htmCost`, «Себестоимость», `edit_posts`, `{{sbtCostTotal}}` | тот же `htmCost`, «со скидкой», `read_maxdiscount`, `{{sbtPriceTotalDiscount}}` и `{{sbtPriceDiscount}}` |
+| 3397 | `sbtCostTotal` | переименован в `sbtPriceTotalDiscount` (скрыт) |
+| 3399 | `sbtCost` | переименован в `sbtPriceDiscount` (скрыт) |
+| 3389 | `grpPriceCustomer` | скрыт |
+| 3390 | `hdgDiscont` | скрыт |
+| 3391 | `sbtPriceTotal` | скрыт |
+| 3392 | `sbtPrice` | скрыт |
+
+Без переименования: `3400 sbtWeightTotal` «Вес тиража», `3387 sbtPriceTotalManager`, `3388 sbtPriceManager`. Ввод: `3375 numN`, `3376 dpdTypeMug`, `3378 ckbDifferent`, `3379 ckbPacking`, `3395 rdoModeProduction`, `3381 cjsCalc`.
+
+Проверка под админом `?post_type=product&p=2586882&preview=true`, эталон 10 шт., MugStandartWhite, режим 1: POST `/api/v1/calc/mug` 200, тело `{"quantity":10,"mug_id":"MugStandartWhite","is_packing":false,"is_different":false,"mode":1}`. На странице 3 800 руб. (showResult/round от 3723.25), вес 4.15 кг, «Срок 2 дня», подсказка дат на `<a>`. Таблица «Расход материалов»: название, размер, количество, внутренних code нет. Смена типа → mug_id `MugColorBorderHandle`, цена 6200, строка кружки в таблице другая. Блок «со скидкой» 2 974 руб. (не себестоимость 2288). Перезагрузка и GET сохраняют тираж 10, тип 0, режим 1 и цену 3800. Каталог: в HTML остаётся `insaincalc.calcMug`. `wp litespeed-purge all` вернул 400; превью админа читает форму из БД, кэш витрины черновика не отдаёт.
+
+Откат: в админке формы 88 удалить 3401, вернуть имена 3397/3399 и HTML 3394/3398, снять скрытие 3389–3392. Код, `forms/mug.js`, `calc_service/` и боевая 41 не менялись.
+
+Раскладка как у формы 79 (07.11.2026, повторная правка): `3396 grpCost` перенесён в ценовой блок `3383` (колонка 3, `width: auto`), скидка справа от менеджерской цены. У `3383` padding `0.0em`, как у 3110, иначе две колонки не вставали в ряд. Режим `3395` перенесён в группу срока `3393`: под «Срок …» сразу «дешевле / стандарт / быстрее». Заголовок `3386` — «цена», лишний `3384` «Цена» скрыт. Проверка превью: одна строка «цена 3 800 / со скидкой 2 974», ниже срок и режим, вес 4.15 кг, таблица материалов на месте, GET и режим 1 после перезагрузки те же.

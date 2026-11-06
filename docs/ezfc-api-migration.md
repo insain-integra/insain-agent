@@ -23,7 +23,9 @@
 var qty = {{numN}};
 var materialId = ezfc_functions.get_value_from(NNNN, true)[0];
 var fmtIndex = ezfc_functions.get_value_from(NNNN, true, false, { return_value: 'index' })[0];
-var mode = Number(ezfc_functions.get_value_from(MMMM, true)[0]) || 1;
+var modeRaw = ezfc_functions.get_value_from(MMMM, true)[0];
+var modeNum = Number(modeRaw);
+var mode = (modeRaw === '' || modeRaw == null || isNaN(modeNum)) ? 1 : modeNum;
 
 insaincalc.syncUrl({ numN: qty, dpdformat: fmtIndex, rdoModeProduction: mode });
 
@@ -49,7 +51,7 @@ insaincalc.calcApi('SLUG', {
 | Число (`numN`, размеры) | плейсхолдер `{{numN}}` по **имени** элемента |
 | Текстовый код dropdown (`Puzzle300420`, `PVC3`) | `ezfc_functions.get_value_from(id, true)[0]` |
 | Индекс option для URL | `get_value_from(id, true, false, { return_value: 'index' })[0]` |
-| Значение radio (`1` / `2`) | `get_value_from(id, true)[0]` и `GET_check_option_value=value` |
+| Режим `rdoModeProduction` (`0` / `1` / `2`) | `get_value_from(id, true)[0]` и `GET_check=value`. Ноль не заменять на 1 |
 
 `{{dpdFormat}}` для текстового dropdown нельзя: плагин делает `parseFloat("Puzzle300420")` → `0`.
 
@@ -63,28 +65,58 @@ insaincalc.calcApi('SLUG', {
 в `forms/<slug>.js` обязателен — это проверяет `calc_service/tests/test_wp_plugin_forms.py`.
 
 - Dropdown с кодом в `data-value`: `GET_check=index`, в URL пишем индекс, в API — `get_value_from(..., true)[0]`.
-- Radio со значениями `1`/`2`: `GET_check=value`, в URL и в API одно и то же число.
+- Режим `rdoModeProduction` при каждом переводе формы на API: `GET_check=value`, в том числе если среди значений есть `0`. В URL и в API одно и то же число. Пустое поле заменяется на `1`, ноль остаётся нулём.
 
-Иначе режим «стандарт / быстрее» начнёт меняться местами при перезагрузке (как было у пазлов).
+Иначе режим «дешевле / стандарт / быстрее» начнёт меняться местами при перезагрузке (как было у пазлов).
 
 Файлы в URL не кладём.
 
-## Имена полей вывода (не трогать в форме)
+## Блок результата
 
-Почти на всех калькуляторах уже так:
+Эталон раскладки — форма 79 (CalcPuzzle), не старый блок боевой формы. `showResult` пишет числа по **имени** элемента и в разметку ниже. Свой вывод в `forms/<slug>.js` не добавлять. Id полей ввода не менять. Группы и HTML правят в админке ezFC и на копии, и на боевой форме перед её переключением.
 
-- `sbtPriceTotalManager` / `sbtPriceManager`
-- `sbtPriceTotalDiscount` / `sbtPriceDiscount` (если есть)
-- `sbtWeightTotal`
-- блок `.htmTime` (текст «Срок …» + `data-bs-original-title` на `<a>`)
-- `.data-material-table`
+Сверху вниз внутри группы расчёта:
 
-`showResult` ищет их по имени через `get_element_id_by_name`. Новые id выдумывать не нужно.
+1. **Цена** — одна группа `grpPrice`, колонки 6, стиль обёртки `border: 1px solid #3dcc5c; border-radius: 5px; padding: 0.0em;`. Ненулевой padding сдвигает две колонки на две строки.
+   - Слева `grpPriceManager`, колонки 3. Заголовок с текстом «цена» (не «Цена» и не «через менеджера»). Под ним видимые `sbtPriceTotalManager` (`  руб.`) и `sbtPriceManager` (` руб./шт`).
+   - Справа `grpPriceDiscount`, колонки 3, стиль `padding-bottom: 0em;width: auto;`. Внутри скрытые `sbtPriceTotalDiscount` и `sbtPriceDiscount` и видимый `htmCost`.
+2. **Срок** — группа `grpTime`. Внутри сначала `htmTime`, сразу под ним `rdoModeProduction`. Режим — ребёнок группы срока, не сосед группы расчёта.
+3. **Вес** — `sbtWeightTotal`, подпись «Вес тиража», после ` кг.`
+4. **Материалы** — группа `grpMaterial` и в ней `htmMaterial`.
 
-Цена со скидкой: `cost * (1 + marginMin)`, как в calcUVPrint, не сырая себестоимость.
-Менеджерская и скидочная цена пишутся только в `insaincalc.showResult` (в т.ч. HTML
-`{{sbtPriceTotalDiscount}}` в `htmCost` через `populate_html_placeholders` после async API).
-В `forms/<slug>.js` своего вывода цен нет.
+`htmTime`, класс `htmTime` только на внутреннем `div`, не в `wrapper_class`. Иначе `showResult` затирает внутренний `<a>` и подсказка дат пропадает:
+
+```html
+<div class="porto-tooltip inline htmTime">
+<div class="inline">Срок</div>
+<a class="inline ezfc-element-description" style="white-space: pre-line;" title="" data-html="true" data-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Готовность">&nbsp;</a>
+</div>
+```
+
+`htmCost`, доступ через шорткод, не сырая себестоимость. Стиль обёртки `margin: 0em;padding:0em;`, `do_shortcode` = 1:
+
+```html
+[access capability="read_maxdiscount"]
+<p style="font-size: 0.7em; margin: 0em; padding-bottom: 0.7em;">со скидкой&nbsp;</p>
+<p style="font-size: 1.12em; margin: 0em;">{{sbtPriceTotalDiscount}}</p>
+<p style="font-size: 0.84em; margin: 0em; color: gray; padding: 0.5em;">{{sbtPriceDiscount}}</p>
+[/access]
+```
+
+`htmMaterial`, `do_shortcode` = 1:
+
+```html
+[access capability="read_material"]
+<div class="data-material">
+<h3>Расход материалов</h3>
+<div class="data-material-table">&nbsp;</div>
+</div>
+[/access]
+```
+
+Скидка в `showResult`: `cost * (1 + marginMin)`, не себестоимость. Старый видимый блок себестоимости (`htmCost` с `{{sbtCostTotal}}`, подпись «Себестоимость», доступ `edit_posts`) и клиентские `sbtPrice` / `sbtPriceTotal` на результате не оставлять: `showResult` не заполняет их как скидку. Бывшие `sbtCostTotal` / `sbtCost` переименовать в `sbtPriceTotalDiscount` / `sbtPriceDiscount` и скрыть. Отдельный заголовок «Цена» над колонками убрать: он занимает всю строку.
+
+Проверка на странице: менеджерская цена и «со скидкой» в одной строке; под «Срок …» сразу режим; у `<a>` есть `data-bs-original-title` с датами; в таблице материалов название, размер и количество, внутренних `code` нет.
 
 ## Чеклист перевода
 
@@ -97,6 +129,7 @@ insaincalc.calcApi('SLUG', {
    - в Network есть `POST /api/v1/calc/{slug}` и в теле верные коды, не `0`;
    - смена dropdown меняет цену и материалы;
    - перезагрузка не меняет режим и срок;
+   - блок результата как у формы 79: цена и «со скидкой» в одной строке, режим внутри группы срока, таблица материалов (раздел «Блок результата»);
    - у срока есть подсказка с датами;
    - URL обновляется GET-именами формы.
 
