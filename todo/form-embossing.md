@@ -4,6 +4,7 @@
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
+Site ops: Opus 5.5
 Почему: режим прод и два контура — `wp-plugin/forms/embossing.js` в git и WordPress (дубль, GET на копии, прогон под админом).
 Чат: человек открывает новый чат с моделью из поля Implementer.
 
@@ -31,6 +32,15 @@ Reviewer: Grok 4.7
 - GET на копии: имя параметра = имя элемента. Боевую форму не размечать.
 - Прогон копии под админом: эталон, смена полей, ссылка с GET.
 - После принятия копии человеком — одна строка в таблицу «Состав пакета» `todo/forms-batch-switch.md`. Ветка `task/form-embossing` от `main`.
+
+Распределение: сверку эталона, `test_embossing.py`, `wp-plugin/forms/embossing.js` и строку в `todo/forms-batch-switch.md` делает Implementer. Дубль и черновик товара, JS и GET на копии, прогон под админом — Site ops; расхождение на копии возвращается Implementer.
+
+## Файлы
+
+- `wp-plugin/forms/embossing.js`
+- `calc_service/tests/test_calculators/test_embossing.py`
+- `todo/forms-batch-switch.md` — общий для задач эпика: одна строка в «Состав пакета»
+- WordPress: только копия формы и черновик товара
 
 ## Не-scope
 
@@ -116,6 +126,14 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 ## Режим
 
 прод
+
+## Журнал передач
+
+Строка на сессию: `<дата> — <роль>, <модель> — <итог> — дальше <роль>`. Блокер — по формату [docs/agents/workflow.md](../docs/agents/workflow.md).
+
+## Найдено вне scope
+
+- —
 
 ## Результат
 
