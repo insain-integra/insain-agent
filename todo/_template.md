@@ -3,7 +3,7 @@
 Статус: черновик
 Сложность: обычная | высокая
 Implementer: Grok 4.7 | Opus 5.5
-Reviewer: <не та модель, что у Implementer>
+Reviewer: <не та модель, что у Implementer; прод без git — модель или не нужен>
 Site ops: Grok 4.7 | Opus 5.5 | не нужен
 Почему: <одна строка>
 
