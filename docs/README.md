@@ -7,6 +7,7 @@
 | Файл | Назначение | Статус |
 | --- | --- | --- |
 | [agent-autonomous-environment.md](agent-autonomous-environment.md) | Runbook: Cursor, SSH, браузер, деплой плагина на insain.ru | живой |
+| [vision.md](vision.md) | Видение и цели G1–G6 до 31.05.2027: метрики, сроки, что не делаем | живой |
 | [agents/workflow.md](agents/workflow.md) | Маршруты между ролями: статусы задач, блокеры, ревью, находки вне scope, параллельные ветки | живой |
 | [architecture.md](architecture.md) | Черновик схемы контейнеров, потоков и списка API. Схема контейнеров (порт 8001, PostgreSQL, бот в compose) расходится с продом | архив |
 | [common-json-reference.md](common-json-reference.md) | Справочник полей `common.json`: наценки, курсы, сроки | живой |
