@@ -1,5 +1,9 @@
 """
 Тесты калькулятора акриловых призов (acrylic_prizes).
+
+Эталон JS, 07.11.2026:
+node scripts/run_js_calc.mjs calcAcrilycPrizes --data current --args
+'[10,[{"materialID":"PVC3","size":[100,100],"isTop":false,"options":{}},{"materialID":"PVC3","size":[100,100],"isTop":true,"options":{"isCutLaser":{"lenCut":0,"sizeItem":0,"density":0,"difficulty":1},"isUVPrint":{"size":[80,80]}}}],{},1]'
 """
 
 from __future__ import annotations
@@ -18,7 +22,7 @@ from calculators.acrylic_prizes import AcrylicPrizesCalculator
 JS_REL_TOL = 0.001  # 0.1%
 
 
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
+def _cmp(a: float, b: float, rel: float = 0.001) -> bool:
     return abs(a - b) <= rel * max(abs(b), 1e-9)
 
 
@@ -125,7 +129,9 @@ REF_PARAMS = {
     "mode": 1,
 }
 
-# JS, 04.11.2026 — сверка с calcAcrilycPrizes --data current
+# JS, 07.11.2026 — calcAcrilycPrizes --data current; price раннера 3353.7200000000003
+# node scripts/run_js_calc.mjs calcAcrilycPrizes --data current --args
+# '[10,[{"materialID":"PVC3","size":[100,100],"isTop":false,"options":{}},{"materialID":"PVC3","size":[100,100],"isTop":true,"options":{"isCutLaser":{"lenCut":0,"sizeItem":0,"density":0,"difficulty":1},"isUVPrint":{"size":[80,80]}}}],{},1]'
 EXPECTED_REF = {
     "cost": 2092.45,
     "price": 3353.72,
@@ -144,11 +150,12 @@ def ref_result(calc):
 
 
 def test_expected_values_acrylic_prizes(ref_result):
+    """JS, 07.11.2026: 10 шт., два слоя PVC3 100×100, верхний рез+УФ 80×80, mode 1."""
     if ref_result is None:
         pytest.skip("расчёт эталонного кейса не выполнен")
     r = ref_result
     e = EXPECTED_REF
-    rel = 0.03
+    rel = 0.001
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
     ok_price = _cmp(r["price"], e["price"], rel)
