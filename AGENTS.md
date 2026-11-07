@@ -42,7 +42,7 @@ Windows/PowerShell: `&&` не работает, разделитель `;`. Ес
 
 | Что | Команда |
 | --- | --- |
-| Проверка перед сдачей | `make check` (или `python scripts/dev.py check`): pytest `calc_service/tests`, затем `bot_service/tests`, ~2–4 мин |
+| Проверка перед сдачей | `make check` (или `python scripts/dev.py check`): пересборка `docs/dashboard.md`, pytest `calc_service/tests`, затем `bot_service/tests`, ~2–4 мин |
 | Закрыть задачу | `python scripts/dev.py close <имя>`: журнал, дашборд, снять «ждёт», удалить `todo/<имя>.md` |
 | Быстрая петля | `python -m pytest calc_service/tests` |
 | Локальный API | `make calc-up` → http://127.0.0.1:8001, `make calc-down`, `make status` |

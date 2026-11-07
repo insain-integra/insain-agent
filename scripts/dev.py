@@ -211,7 +211,16 @@ def cmd_stop_bot() -> None:
 
 
 def cmd_check() -> None:
-    """pytest calc_service и bot_service. Ненулевой код, если упала любая сюита."""
+    """pytest calc_service и bot_service. Ненулевой код, если упала любая сюита.
+
+    Локально сначала пересобирает docs/dashboard.md (он меняется от любой смены статуса задачи).
+    В CI (переменная CI) не пересобирает: там тест сверяет закоммиченный файл.
+    """
+    if not os.environ.get("CI"):
+        sys.path.insert(0, str(Path(__file__).parent))
+        from dashboard import write as dash_write
+
+        dash_write()
     suites = ("calc_service/tests", "bot_service/tests")
     for suite in suites:
         rc = subprocess.call([sys.executable, "-m", "pytest", suite], cwd=ROOT)

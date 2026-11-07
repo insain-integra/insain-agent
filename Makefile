@@ -10,7 +10,7 @@
 #   make up          — API + бот
 #   make down        — остановить оба
 #   make status
-#   make check       — pytest calc_service/tests и bot_service/tests
+#   make check       — пересборка docs/dashboard.md (не в CI), pytest calc_service и bot_service
 #   make calc-up | calc-down | bot-up | bot-down
 
 PYTHON ?= python
@@ -35,8 +35,7 @@ status:
 	$(DEV) status
 
 check:
-	$(PYTHON) -m pytest calc_service/tests
-	$(PYTHON) -m pytest bot_service/tests
+	$(DEV) check
 
 calc-up:
 	$(DEV) start calc
