@@ -1,6 +1,6 @@
 # uv-print-prepare
 
-Статус: черновик
+Статус: выкатка
 Сложность: обычная
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -52,13 +52,13 @@ Site ops: Opus 5.5
 
 Скрипт через `@'…'@ | python -` в PowerShell 5.1 — первой строкой `$OutputEncoding = New-Object System.Text.UTF8Encoding $false`.
 
-- [ ] Раннер `calcUVPrint` на обоих эталонах печатает `cost` и `price`; на 100 шт. 20×20 `plain` mode 0 — `price` ≈ 1095, mode 1 — ≈ 1677. Команды — из `docs/js-runner-cases.md`.
+- [x] Раннер `calcUVPrint` на обоих эталонах печатает `cost` и `price`; на 100 шт. 20×20 `plain` mode 0 — `price` ≈ 1095, mode 1 — ≈ 1677. Команды — из `docs/js-runner-cases.md`.
 
 ```powershell
 node scripts/run_js_calc.mjs calcUVPrint --data current --args '<args из docs/js-runner-cases.md>'
 ```
 
-- [ ] Загрузчик видит поле. Stdout: `0.5 0.05`.
+- [x] Загрузчик видит поле. Stdout: `0.5 0.05`.
 
 ```powershell
 $OutputEncoding = New-Object System.Text.UTF8Encoding $false
@@ -70,13 +70,13 @@ print(printer.get("RimalSuvUV").time_prepare_around, printer.get("PrintUV").time
 '@ | python -
 ```
 
-- [ ] Новые тесты УФ. Stdout: `passed`, `failed` нет. На `git stash` правки `uv_print.py` оба новых теста падают (проверка «тест падал бы без правки»).
+- [x] Новые тесты УФ. Stdout: `passed`, `failed` нет. На `git stash` правки `uv_print.py` оба новых теста падают (проверка «тест падал бы без правки»).
 
 ```powershell
 python -m pytest calc_service/tests/test_calculators/test_uv_print.py -q
 ```
 
-- [ ] Вызывающие калькуляторы не сдвинулись. Stdout: `passed`, `failed` нет.
+- [x] Вызывающие калькуляторы не сдвинулись. Stdout: `passed`, `failed` нет.
 
 ```powershell
 python -m pytest calc_service/tests/test_calculators/test_tablets.py calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_calculators/test_badge.py calc_service/tests/test_calculators/test_uv_badge.py calc_service/tests/test_calculators/test_shild.py calc_service/tests/test_calculators/test_acrylic_prizes.py -q
@@ -91,8 +91,8 @@ $api | Select-Object price
 
 ## Проверки
 
-- [ ] `python scripts/dev.py check` — код выхода 0
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `python scripts/dev.py check` — код выхода 0
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 - [ ] Деплой: `bash infra/deploy.sh` с `main`, smoke зелёный; откат — автооткат скрипта или образ `insain-agent-calc-api:rollback`.
 
 ## Риски
@@ -111,17 +111,58 @@ $api | Select-Object price
 [docs/agents/workflow.md](../docs/agents/workflow.md). Замечания ревью — ниже, в «Ревью N».
 
 - 2026-11-07 — Analyst, Opus 5.5 — задача-предпосылка для `form-acrylic-prizes` (блокер mode 0) + `timePrepareAround` круговой печати по решению человека — дальше Implementer
+- 2026-11-08 — Implementer, Opus 5.5 — подготовка УФ как в JS (mode 0 / timePrepareAround); эталоны раннера; callers зелёные; `dev.py check` зелёный; деплой не делал — дальше Reviewer (Grok 4.7)
+- 2026-11-08 — Reviewer, Grok 4.7 — принято — дальше человек: коммит и слияние
+- 2026-11-08 — человек — слито в main — дальше Site ops
+
+## Ревью 1
+
+принято
+
+- Diff против `main`: код и тесты только в файлах из «Файлы» (`uv_print.py`, `equipment/base.py`, `equipment/loader.py`, `test_uv_print.py`, `docs/js-runner-cases.md`). Ещё `todo/uv-print-prepare.md` (статус, журнал, отчёт) и `docs/dashboard.md` (статус `ревью`). Эталоны `tablets`, `plaque`, `badge`, `uv_badge`, `shild`, `acrylic_prizes` и `calc_service/data/` не менялись (`git diff main --stat` по ним пустой).
+- Формулы: plain `time_prepare * mode.value`, круговая `time_prepare_around * mode.value` — как `calcUVPrint.js` строки 96 и 101 (`timePrepare` / `timePrepareAround` × `modeProduction`). `max(1, …)` и дефолты `or 0.2` / `0.05` сняты. Объёмы в строках 94–95 и 97–100 не трогались.
+- Раннер: plain mode 0 `684/1095`, mode 1 `1048/1677`, around mode 1 `10894/17431`.
+- Загрузчик: `0.5 0.05`.
+- `pytest test_uv_print.py`: 10 passed. `git stash` только `uv_print.py`: оба новых теста FAIL (`1048` vs `684`, `10347` vs `10894`); stash возвращён.
+- Callers: 61 passed.
+- Деплой и боевой POST не проверялись: критерий Site ops, в diff его нет.
 
 ## Найдено вне scope
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Период:
+- Ветка, PR или коммит: `task/uv-print-prepare`, слито в `main`
+- Период: 2026-11-08
 - Часы человека:
-- Работа агентов:
-- Было / стало:
+- Работа агентов: Implementer, одна сессия
+- Было / стало: plain mode 0 готовил как mode 1 (`max(1, …)`); круговая брала `time_prepare` 0.2 вместо `timePrepareAround` 0.5. Стало: `time_prepare * mode` / `time_prepare_around * mode`.
 - Сделано:
+  - `EquipmentSpec.time_prepare_around` + загрузка `timePrepareAround`
+  - `uv_print.py`: plain/around без `max(1, …)` и без локальных дефолтов `or 0.2`/`0.05`
+  - два эталона в `test_uv_print.py` (JS, 08.11.2026; res=2, color=4+1 — как вызов из acrylic_prizes)
+  - команды раннера в `docs/js-runner-cases.md`
 - Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+  - раннер: plain mode0 `684/1095`, mode1 `1048/1677`; around mode1 `10894/17431`
+  - загрузчик: `0.5 0.05`
+  - `pytest test_uv_print.py` — 10 passed; на `git stash` `uv_print.py` оба новых — FAIL (`1048` vs `684`, `10347` vs `10894`)
+  - callers (tablets/plaque/badge/uv_badge/shild/acrylic_prizes) — 61 passed
+  - `python scripts/dev.py check` — 513 passed + 2 skipped (calc), 81 passed (bot), exit 0
+  - локально дефолт формы 78: JS и Python `cost/price` = `5599.45/8977.92`
+- Не сделано и почему: деплой API и проверка боевого POST — Site ops после merge
+- Требуется решение: деплой API — Site ops
+
+Тело для Site ops (дефолт формы 78, совпадает с раннером `8977.92`):
+
+```json
+{"quantity":100,"layers":[{"materialID":"AcrylTrans3","size":[20,20],"isTop":true,"options":{"isCutLaser":{"sizeItem":0,"density":0,"difficulty":1.3,"lenCut":0},"isUVPrint":{"size":[20,20]}},{"materialID":"AcrylTrans3","size":[20,20],"isTop":false,"options":{"isCutLaser":{"sizeItem":0,"density":0,"difficulty":1.3,"lenCut":0},"isUVPrint":{"size":[20,20]}}}],"mode":1}
+```
+
+## Self-review
+
+1. Diff только scope (+ `todo/uv-print-prepare.md`, `docs/dashboard.md` от статуса).
+2. Цены/наценки не хардкод; `timePrepareAround` из JSON.
+3. Контракт ответа УФ не менялся; `code` материалов не трогали.
+4. Новые тесты падали на старом `uv_print.py` (показано stash).
+5. Комментарии по-русски.
+6. Доки: `js-runner-cases.md` обновлён; деплой не делался.
+7. Прод: не выкатывал.

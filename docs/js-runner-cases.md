@@ -14,6 +14,8 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | `calcPresswall` | `presswall` | 11453.624 |
 | `calcEmbossing` | `embossing` | 14046 |
 | `calcAcrilycPrizes` | `acrylic_prizes` | 3353.72 |
+| `calcUVPrint` plain mode 0 | `uv_print` | 1095 |
+| `calcUVPrint` around mode 1 | `uv_print` | 17431 |
 
 ```powershell
 node scripts/run_js_calc.mjs calcFlagPaper --data current --args '[100,[100,150],\"4+0\",\"PaperCoated115M\",{},1]'
@@ -27,6 +29,10 @@ node scripts/run_js_calc.mjs calcPresswall --data current --args '[1,\"Joker30_2
 node scripts/run_js_calc.mjs calcEmbossing --data current --args '[500,[50,30],\"\",\"foil\",\"diary\",[],{\"isCliche\":true},1]'
 
 node scripts/run_js_calc.mjs calcAcrilycPrizes --data current --args '[10,[{\"materialID\":\"PVC3\",\"size\":[100,100],\"isTop\":false,\"options\":{}},{\"materialID\":\"PVC3\",\"size\":[100,100],\"isTop\":true,\"options\":{\"isCutLaser\":{\"lenCut\":0,\"sizeItem\":0,\"density\":0,\"difficulty\":1},\"isUVPrint\":{\"size\":[80,80]}}}],{},1]'
+
+node scripts/run_js_calc.mjs calcUVPrint --data current --args '[100,[20,20],[20,20],null,{\"isUVPrint\":{\"printerID\":\"RimalSuvUV\",\"resolution\":2,\"color\":\"4+1\",\"surface\":\"isPlain\"}},0]'
+
+node scripts/run_js_calc.mjs calcUVPrint --data current --args '[100,[20,20],[20,20],null,{\"isUVPrint\":{\"printerID\":\"RimalSuvUV\",\"resolution\":2,\"color\":\"4+1\",\"surface\":\"isAround\"}},1]'
 ```
 
 Известные расхождения Python с JS вне этих кейсов: бейдж (JS 4708, Python ~6509) и стикер 50×50 VHI80 (JS 1308, Python ~1107) — отдельные задачи `badge-vs-js` и `sticker-vs-js`.

@@ -232,13 +232,14 @@ class UVPrintCalculator(BaseCalculator):
             num_loads = math.ceil(n / plain["num"])
             vol_print = plain["vol_print"] / 1_000_000  # м²
             vol_material = size[0] * size[1] * n * (1 + defects) / 1_000_000
-            time_prepare = (printer.time_prepare or 0.2) * max(1, mode.value)
+            # JS: timePrepare * modeProduction (при mode=0 → 0; без max(1, …))
+            time_prepare = float(printer.time_prepare) * float(mode.value)
         else:
             num_loads = math.ceil(n * (1 + defects))
             vol_material = size[0] * size[1] * num_loads / 1_000_000
             vol_print = vol_material
-            time_load_each = getattr(printer, "time_prepare", 0.05)
-            time_prepare = time_load_each * max(1, mode.value)
+            # JS: timePrepareAround * modeProduction
+            time_prepare = float(printer.time_prepare_around) * float(mode.value)
 
         vol_print *= double_app
         num_loads *= double_app

@@ -174,3 +174,61 @@ def test_options_raise_price(calc):
     assert with_customer > base
     # JS: price = ceil(cost * margin) + opt_price; barcode даёт +2*n к price
     assert with_barcode - base >= 2 * REF_PARAMS["quantity"] - 1
+
+
+# JS, 08.11.2026 — 100 шт., 20×20, resolution 2, 4+1, plain, mode 0
+# node scripts/run_js_calc.mjs calcUVPrint --data current --args
+# '[100,[20,20],[20,20],null,{"isUVPrint":{"printerID":"RimalSuvUV","resolution":2,"color":"4+1","surface":"isPlain"}},0]'
+REF_PARAMS_MODE0 = {
+    "quantity": 100,
+    "width": 20,
+    "height": 20,
+    "resolution": 2,
+    "color": "4+1",
+    "surface": "plain",
+    "mode": 0,
+}
+EXPECTED_MODE0 = {"cost": 684.0, "price": 1095.0}
+
+
+def test_mode0_plain_matches_js_and_cheaper_than_mode1(calc):
+    """JS, 08.11.2026: plain mode 0 = JS; дешевле того же входа с mode 1."""
+    r0 = calc.execute(REF_PARAMS_MODE0)
+    r1 = calc.execute({**REF_PARAMS_MODE0, "mode": 1})
+    rel = 0.001
+    assert _cmp(r0["cost"], EXPECTED_MODE0["cost"], rel), (
+        f"cost mode0: got {r0['cost']}, expected ~{EXPECTED_MODE0['cost']}"
+    )
+    assert _cmp(r0["price"], EXPECTED_MODE0["price"], rel), (
+        f"price mode0: got {r0['price']}, expected ~{EXPECTED_MODE0['price']}"
+    )
+    assert r0["price"] < r1["price"], (
+        f"mode0 price {r0['price']} должна быть меньше mode1 {r1['price']}"
+    )
+
+
+# JS, 08.11.2026 — 100 шт., 20×20, resolution 2, 4+1, isAround, mode 1
+# node scripts/run_js_calc.mjs calcUVPrint --data current --args
+# '[100,[20,20],[20,20],null,{"isUVPrint":{"printerID":"RimalSuvUV","resolution":2,"color":"4+1","surface":"isAround"}},1]'
+REF_PARAMS_AROUND = {
+    "quantity": 100,
+    "width": 20,
+    "height": 20,
+    "resolution": 2,
+    "color": "4+1",
+    "surface": "round",
+    "mode": 1,
+}
+EXPECTED_AROUND = {"cost": 10894.0, "price": 17431.0}
+
+
+def test_around_mode1_matches_js(calc):
+    """JS, 08.11.2026: круговая УФ mode 1 — timePrepareAround."""
+    r = calc.execute(REF_PARAMS_AROUND)
+    rel = 0.001
+    assert _cmp(r["cost"], EXPECTED_AROUND["cost"], rel), (
+        f"cost around: got {r['cost']}, expected ~{EXPECTED_AROUND['cost']}"
+    )
+    assert _cmp(r["price"], EXPECTED_AROUND["price"], rel), (
+        f"price around: got {r['price']}, expected ~{EXPECTED_AROUND['price']}"
+    )

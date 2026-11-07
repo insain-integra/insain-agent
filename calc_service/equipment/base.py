@@ -55,6 +55,7 @@ class EquipmentSpec(BaseModel):
     cost_operator: float = 0.0  # 0 = брать из common
 
     time_prepare: float = 0.0  # часов
+    time_prepare_around: float = 0.0  # часов, круговая УФ (timePrepareAround)
     time_load: float = 0.0  # часов
     time_load_sheet: float = 0.0  # плоттер: загрузка листа, час
     time_find_mark: float = 0.0  # плоттер: поиск меток, час

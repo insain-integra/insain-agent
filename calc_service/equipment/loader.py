@@ -226,6 +226,7 @@ def load_generic_catalog(filename: str) -> EquipmentCatalog:
             hours_per_day=raw.get("hoursDay", 4.0),
             cost_operator=raw.get("costOperator", 0.0),
             time_prepare=raw.get("timePrepare", 0.0),
+            time_prepare_around=_to_float(raw.get("timePrepareAround")),
             time_load=_parse_time_load(raw.get("timeLoad")),
             time_load_sheet=_to_float(raw.get("timeLoadSheet")),
             time_find_mark=_to_float(raw.get("timeFindMark")),
