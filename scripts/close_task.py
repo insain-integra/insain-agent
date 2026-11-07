@@ -112,10 +112,26 @@ def _walk_jsonl(path: Path) -> str:
         return ""
 
 
+IDLE_CAP = timedelta(minutes=30)
+
+
+def active_time(stamps: list[datetime], cap: timedelta = IDLE_CAP) -> timedelta:
+    """Сумма пауз между сообщениями; пауза длиннее cap — перерыв, не считается."""
+    total = timedelta()
+    ordered = sorted(stamps)
+    for a, b in zip(ordered, ordered[1:]):
+        if b - a <= cap:
+            total += b - a
+    return total
+
+
 def hours_from_chats(task_name: str) -> tuple[int, int, float, str]:
-    """Сессии, сообщений человека, часы по длительности чатов, пояснение."""
-    needle = f"todo/{task_name}.md"
-    alt = f"todo/{task_name}"
+    """Сессии задачи, сообщений человека, активные часы, пояснение.
+
+    Сессия задачи — чат, в первом сообщении которого есть todo/<имя>; чаты, где задачу
+    только упоминают (оркестрация, соседние задачи), не считаются.
+    """
+    needles = (f"todo/{task_name}.md", f"todo/{task_name}")
     files: list[Path] = []
     for d in _transcript_dirs():
         files.extend(d.rglob("*.jsonl"))
@@ -124,28 +140,31 @@ def hours_from_chats(task_name: str) -> tuple[int, int, float, str]:
     total = timedelta()
     for path in files:
         raw = _walk_jsonl(path)
-        if needle not in raw and alt not in raw:
+        if not any(n in raw for n in needles):
             continue
-        sessions += 1
-        stamps: list[datetime] = []
+        user_blobs: list[str] = []
         for line in raw.splitlines():
             try:
                 obj = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            blob = json.dumps(obj, ensure_ascii=False)
             if obj.get("role") == "user":
-                user_msgs += blob.count("<user_query>") or (1 if "<timestamp>" in blob else 0)
+                user_blobs.append(json.dumps(obj, ensure_ascii=False))
+        if not user_blobs or not any(n in user_blobs[0] for n in needles):
+            continue
+        sessions += 1
+        stamps: list[datetime] = []
+        for blob in user_blobs:
+            user_msgs += blob.count("<user_query>") or 1
             for m in re.finditer(r"<timestamp>(.*?)</timestamp>", blob):
                 ts = _parse_cursor_ts(m.group(1))
                 if ts:
                     stamps.append(ts)
-        if stamps:
-            total += max(stamps) - min(stamps)
+        total += active_time(stamps)
     hours = round(total.total_seconds() / 3600, 1)
     if sessions == 0:
         return 0, 0, 0.0, "чаты Cursor не найдены"
-    return sessions, user_msgs, hours, f"{sessions} чатов Cursor, {user_msgs} сообщ. человека, {hours} ч по меткам"
+    return sessions, user_msgs, hours, f"{sessions} чатов Cursor, {user_msgs} сообщ. человека, {hours} ч активных"
 
 
 def git_period(task_name: str) -> str:
@@ -167,6 +186,23 @@ def git_commits(task_name: str) -> str:
     out = _git("log", "--oneline", "--", f"todo/{task_name}.md")
     hashes = " ".join(ln.split()[0] for ln in out.splitlines()[:8] if ln)
     return hashes or "—"
+
+
+def _mark_closed_links(closed_file: str, day: str) -> list[str]:
+    """Ссылки `todo/<имя>.md` в оставшихся задачах и эпиках → закрыто, запись в журнале."""
+    changed: list[str] = []
+    stem = closed_file[:-3]
+    link = re.compile(rf"`?todo/{re.escape(closed_file)}`?")
+    repl = f"`{stem}` (закрыто {day}, `docs/history/log.md`)"
+    for path in TODO.glob("*.md"):
+        if path.name in SKIP_TODO:
+            continue
+        text = path.read_text(encoding="utf-8")
+        new = link.sub(repl, text)
+        if new != text:
+            path.write_text(new, encoding="utf-8", newline="\n")
+            changed.append(path.name)
+    return changed
 
 
 def _unlock(closed_file: str) -> list[str]:
@@ -247,7 +283,7 @@ def close(name: str) -> None:
             f"## {heading} — {title}",
             "",
             f"- Период: {git_period(name)}",
-            f"- Часы человека: {user_msgs} сообщ. в чатах Cursor; длительность чатов {hours} ч"
+            f"- Часы человека: {user_msgs} сообщ. в чатах Cursor; активно {hours} ч (паузы > 30 мин не в счёт)"
             + (f" ({chat_note})" if sessions == 0 else ""),
             f"- Работа агентов: {chat_note}; {'; '.join(models) or 'модели — из шапки'}",
             f"- Было / стало: {bylo_stalo}",
@@ -259,12 +295,15 @@ def close(name: str) -> None:
     unlocked = _unlock(path.name)
     _backlog_findings(name, findings)
     path.unlink()
+    relinked = _mark_closed_links(path.name, heading)
     from dashboard import write as dash_write
 
     dash_write()
     print(f"закрыто: {name}.md")
     if unlocked:
         print("снят «ждёт»:", ", ".join(unlocked))
+    if relinked:
+        print("ссылки помечены закрытыми:", ", ".join(relinked))
     print("журнал и дашборд обновлены; коммит отдельно")
 
 

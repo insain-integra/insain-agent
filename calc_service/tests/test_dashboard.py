@@ -45,6 +45,30 @@ def test_dashboard_render_ignores_today_and_git(monkeypatch):
     assert dash.render() == base, "render() зависит от текущей даты"
 
 
+def test_active_time_skips_long_pauses():
+    from datetime import datetime, timedelta
+
+    close = _load("close_task")
+    t0 = datetime(2026, 11, 5, 10, 0)
+    stamps = [t0, t0 + timedelta(minutes=10), t0 + timedelta(minutes=25), t0 + timedelta(days=2)]
+    assert close.active_time(stamps) == timedelta(minutes=25)
+    assert close.active_time([t0]) == timedelta()
+
+
+def test_close_marks_links_to_closed_task(tmp_path, monkeypatch):
+    close = _load("close_task")
+    todo = tmp_path / "todo"
+    todo.mkdir()
+    epic = todo / "EPIC-x.md"
+    epic.write_text("- `todo/form-a.md` — копия\n1. Довести todo/form-a.md\n- `todo/form-ab.md`\n", encoding="utf-8")
+    monkeypatch.setattr(close, "TODO", todo)
+    assert close._mark_closed_links("form-a.md", "2026-11-07") == ["EPIC-x.md"]
+    text = epic.read_text(encoding="utf-8")
+    assert "todo/form-a.md" not in text
+    assert text.count("`form-a` (закрыто 2026-11-07") == 2
+    assert "`todo/form-ab.md`" in text
+
+
 def test_close_requires_result(tmp_path, monkeypatch):
     close = _load("close_task")
     todo = tmp_path / "todo"
