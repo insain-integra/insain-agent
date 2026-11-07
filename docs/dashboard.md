@@ -35,12 +35,12 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **15**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **16**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `form-acrylic-prizes.md`, `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `dashboard-harness.md` | ревью |
-| `form-acrylic-prizes.md` | черновик |
+| `form-acrylic-prizes.md` | заблокировано: ждёт todo/uv-print-prepare.md |
 | `form-button-pins.md` | черновик |
 | `form-flag.md` | черновик |
 | `form-pennant.md` | черновик |
@@ -54,6 +54,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `supplier-catalog-load.md` | заблокировано: ждёт todo/supplier-parser.md |
 | `supplier-old-cleanup.md` | черновик |
 | `supplier-parser.md` | черновик |
+| `uv-print-prepare.md` | черновик |
 
 ## Репозиторий
 
