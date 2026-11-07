@@ -35,14 +35,13 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **16**. В работе/ревью: `dashboard-harness.md`, `form-embossing.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **15**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `dashboard-harness.md` | ревью |
 | `form-acrylic-prizes.md` | черновик |
 | `form-button-pins.md` | черновик |
-| `form-embossing.md` | ревью |
 | `form-flag.md` | черновик |
 | `form-pennant.md` | черновик |
 | `form-presswall.md` | черновик |
@@ -64,8 +63,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-07 — form-embossing
 - 2026-11-07 — form-mug
 - 2026-11-05 — Копия формы УФ-печати на API
 - 2026-11-04 — Пилот перевода формы плакеток на API
 - 2026-11-02 — Структура калькуляторов (эпик 5.7)
-- 2026-10-30 — Конвейер агентов и сверка JS ↔ API (фаза 5)

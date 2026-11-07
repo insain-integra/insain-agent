@@ -18,7 +18,7 @@ Site ops: Opus 5.5
 - `docs/ezfc-api-migration.md` — шаблон `cjsCalc`, GET = имя элемента, `GET_check`: dropdown с кодом — `index`, radio `1`/`2` — `value`.
 - `docs/site/forms.md` — строка формы 78, только читать.
 - `todo/forms-batch-switch.md` — в конце одна строка в «Состав пакета».
-- `todo/EPIC-forms-to-api.md` — очередь, после `todo/form-embossing.md`.
+- `todo/EPIC-forms-to-api.md` — очередь, после `form-embossing` (закрыто 2026-11-07, `docs/history/log.md`).
 - `docs/js-runner-cases.md` — команда раннера и `price` для `calcAcrilycPrizes`.
 - Эталон: `REF_PARAMS` в `calc_service/tests/test_calculators/test_acrylic_prizes.py` — 10 шт., два слоя PVC3 100×100, у верхнего рез лазером и УФ 80×80, mode 1. Порог `price` — прогон JS против API, не число из файла. JS: `js_legacy/calc/calcAcrilycPrizes.js`, сигнатура `calcAcrilycPrizes(n, layers, options, modeProduction)`.
 - В вызов УФ у эталона не входят штрихкод, переменные данные и материал заказчика.

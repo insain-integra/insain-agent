@@ -12,7 +12,7 @@
 ## Задачи в файлах
 
 - `form-mug` (закрыто 2026-11-07, `docs/history/log.md`) — копия 41 (88 / 2586882) принята
-- `todo/form-embossing.md` — копия 85
+- `form-embossing` (закрыто 2026-11-07, `docs/history/log.md`) — копия 85
 - `todo/form-acrylic-prizes.md` — копия 78
 - `todo/form-rollup.md` — копия 49
 - `todo/form-presswall.md` — копия 46
