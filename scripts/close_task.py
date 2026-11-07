@@ -7,7 +7,7 @@ import os
 import re
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -125,8 +125,19 @@ def active_time(stamps: list[datetime], cap: timedelta = IDLE_CAP) -> timedelta:
     return total
 
 
-def hours_from_chats(task_name: str) -> tuple[int, int, float, str]:
-    """Сессии задачи, сообщений человека, активные часы, пояснение.
+def _period(first: datetime | date, last: datetime | date) -> str:
+    a, b = first.strftime("%Y-%m-%d"), last.strftime("%Y-%m-%d")
+    days = (datetime.strptime(b, "%Y-%m-%d") - datetime.strptime(a, "%Y-%m-%d")).days + 1
+    return f"{a} — {b} ({days} дн.)"
+
+
+def chat_period(stamps: list[datetime]) -> str:
+    """Период работы — от первого до последнего сообщения в чатах задачи."""
+    return _period(min(stamps), max(stamps)) if stamps else ""
+
+
+def hours_from_chats(task_name: str) -> tuple[int, int, float, str, str]:
+    """Сессии задачи, сообщений человека, активные часы, пояснение, период по чатам.
 
     Сессия задачи — чат, в первом сообщении которого есть todo/<имя>; чаты, где задачу
     только упоминают (оркестрация, соседние задачи), не считаются.
@@ -138,6 +149,7 @@ def hours_from_chats(task_name: str) -> tuple[int, int, float, str]:
     sessions = 0
     user_msgs = 0
     total = timedelta()
+    all_stamps: list[datetime] = []
     for path in files:
         raw = _walk_jsonl(path)
         if not any(n in raw for n in needles):
@@ -161,10 +173,12 @@ def hours_from_chats(task_name: str) -> tuple[int, int, float, str]:
                 if ts:
                     stamps.append(ts)
         total += active_time(stamps)
+        all_stamps.extend(stamps)
     hours = round(total.total_seconds() / 3600, 1)
     if sessions == 0:
-        return 0, 0, 0.0, "чаты Cursor не найдены"
-    return sessions, user_msgs, hours, f"{sessions} чатов Cursor, {user_msgs} сообщ. человека, {hours} ч активных"
+        return 0, 0, 0.0, "чаты Cursor не найдены", ""
+    note = f"{sessions} чатов Cursor, {user_msgs} сообщ. человека, {hours} ч активных"
+    return sessions, user_msgs, hours, note, chat_period(all_stamps)
 
 
 def git_period(task_name: str) -> str:
@@ -174,10 +188,7 @@ def git_period(task_name: str) -> str:
     lines = [ln for ln in dates.splitlines() if ln]
     first, last = lines[-1], lines[0]
     try:
-        a = datetime.strptime(first, "%Y-%m-%d")
-        b = datetime.strptime(last, "%Y-%m-%d")
-        days = (b - a).days + 1
-        return f"{first} — {last} ({days} дн.)"
+        return _period(datetime.strptime(first, "%Y-%m-%d"), datetime.strptime(last, "%Y-%m-%d"))
     except ValueError:
         return f"{first} — {last}"
 
@@ -271,7 +282,7 @@ def close(name: str) -> None:
     title_m = re.search(r"^#\s+(.+)$", text, re.M)
     title = title_m.group(1).strip() if title_m else name
     heading = datetime.now().strftime("%Y-%m-%d")
-    sessions, user_msgs, hours, chat_note = hours_from_chats(name)
+    sessions, user_msgs, hours, chat_note, period = hours_from_chats(name)
     models = []
     for key in ("Implementer", "Reviewer", "Site ops"):
         m = re.search(rf"^{key}:\s*(.+)$", text, re.M)
@@ -282,7 +293,7 @@ def close(name: str) -> None:
         [
             f"## {heading} — {title}",
             "",
-            f"- Период: {git_period(name)}",
+            f"- Период: {period or git_period(name)}",
             f"- Часы человека: {user_msgs} сообщ. в чатах Cursor; активно {hours} ч (паузы > 30 мин не в счёт)"
             + (f" ({chat_note})" if sessions == 0 else ""),
             f"- Работа агентов: {chat_note}; {'; '.join(models) or 'модели — из шапки'}",

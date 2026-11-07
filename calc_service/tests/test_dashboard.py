@@ -55,6 +55,15 @@ def test_active_time_skips_long_pauses():
     assert close.active_time([t0]) == timedelta()
 
 
+def test_chat_period_uses_chat_dates_not_task_file():
+    from datetime import datetime
+
+    close = _load("close_task")
+    stamps = [datetime(2026, 11, 7, 19, 11), datetime(2026, 11, 7, 20, 5)]
+    assert close.chat_period(stamps) == "2026-11-07 — 2026-11-07 (1 дн.)"
+    assert close.chat_period([]) == ""
+
+
 def test_close_marks_links_to_closed_task(tmp_path, monkeypatch):
     close = _load("close_task")
     todo = tmp_path / "todo"
