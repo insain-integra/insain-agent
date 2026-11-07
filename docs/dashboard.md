@@ -2,7 +2,7 @@
 
 # Дашборд insain.ru
 
-Состояние на последнюю запись журнала: **07.11.2026**.
+Состояние на последнюю запись журнала: **08.11.2026**.
 
 Собрано из `docs/vision.md`, `todo/`, `docs/site/forms.md`, `docs/history/log.md`. Обновляет
 `python scripts/dev.py dashboard` и `python scripts/dev.py close <задача>`.
@@ -35,12 +35,12 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **16**. В работе/ревью: `dashboard-harness.md`, `uv-print-prepare.md`. Заблокировано: `form-acrylic-prizes.md`, `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **15**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `dashboard-harness.md` | ревью |
-| `form-acrylic-prizes.md` | заблокировано: ждёт todo/uv-print-prepare.md |
+| `form-acrylic-prizes.md` | черновик |
 | `form-button-pins.md` | черновик |
 | `form-flag.md` | черновик |
 | `form-pennant.md` | черновик |
@@ -54,7 +54,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `supplier-catalog-load.md` | заблокировано: ждёт todo/supplier-parser.md |
 | `supplier-old-cleanup.md` | черновик |
 | `supplier-parser.md` | черновик |
-| `uv-print-prepare.md` | закрытие |
 
 ## Репозиторий
 
@@ -64,8 +63,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-08 — uv-print-prepare
 - 2026-11-07 — form-embossing
 - 2026-11-07 — form-mug
 - 2026-11-05 — Копия формы УФ-печати на API
 - 2026-11-04 — Пилот перевода формы плакеток на API
-- 2026-11-02 — Структура калькуляторов (эпик 5.7)
