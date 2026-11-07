@@ -11,19 +11,19 @@
 
 ## Задачи в файлах
 
-- `todo/form-mug.md` — копия 41, ревью
+- `form-mug` (закрыто 2026-11-07, `docs/history/log.md`) — копия 41 (88 / 2586882) принята
 - `todo/form-embossing.md` — копия 85
 - `todo/form-acrylic-prizes.md` — копия 78
 - `todo/form-rollup.md` — копия 49
 - `todo/form-presswall.md` — копия 46
 - `todo/form-pennant.md` — копия 73
 - `todo/form-flag.md` — копия 55
-- `todo/forms-batch-switch.md` — пачка 1 на боевые: 69, 26, 41 (после принятия кружки)
+- `todo/forms-batch-switch.md` — пачка 1 на боевые: 69, 26, 41
 - `todo/form-button-pins.md` — калькулятор `button_pins` + копия формы 12
 
 ## Порядок
 
-1. Довести `todo/form-mug.md` до закрытия копии.
+1. ~~Довести копию кружки до принятия~~ — `form-mug` закрыта 07.11.2026.
 2. `todo/forms-batch-switch.md` — пачка 1 (69 + 26 + 41). Параллельно копии пачки 2 (embossing … flag): «Файлы» `forms/<slug>.js` не пересекаются; общий `todo/forms-batch-switch.md` дописывает строку только после принятия копии и не во время выкатки пачки 1.
 3. `todo/form-button-pins.md` — можно параллельно пачке 2.
 4. Дальше Analyst заводит файлы следующей пачки копий, когда предыдущая копия принята хотя бы выборочно. Переключение — новая задача `forms-batch-N`, не расширение пачки 1 без решения человека.

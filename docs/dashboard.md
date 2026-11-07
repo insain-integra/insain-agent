@@ -2,7 +2,7 @@
 
 # Дашборд insain.ru
 
-Состояние на последнюю запись журнала: **05.11.2026**.
+Состояние на последнюю запись журнала: **07.11.2026**.
 
 Собрано из `docs/vision.md`, `todo/`, `docs/site/forms.md`, `docs/history/log.md`. Обновляет
 `python scripts/dev.py dashboard` и `python scripts/dev.py close <задача>`.
@@ -35,7 +35,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **17**. В работе/ревью: `dashboard-harness.md`, `form-mug.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **16**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -44,7 +44,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-button-pins.md` | черновик |
 | `form-embossing.md` | черновик |
 | `form-flag.md` | черновик |
-| `form-mug.md` | ревью |
 | `form-pennant.md` | черновик |
 | `form-presswall.md` | черновик |
 | `form-rollup.md` | черновик |
@@ -65,8 +64,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-07 — form-mug
 - 2026-11-05 — Копия формы УФ-печати на API
 - 2026-11-04 — Пилот перевода формы плакеток на API
 - 2026-11-02 — Структура калькуляторов (эпик 5.7)
 - 2026-10-30 — Конвейер агентов и сверка JS ↔ API (фаза 5)
-- 2026-10-26 — Аудит и наведение порядка (фазы 0–4)
