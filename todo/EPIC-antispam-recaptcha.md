@@ -1,6 +1,7 @@
 # EPIC-antispam-recaptcha
 
 Статус: черновик
+Цель: отложено (`docs/vision.md`)
 
 ## Цель
 

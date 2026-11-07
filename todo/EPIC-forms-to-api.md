@@ -1,32 +1,45 @@
 # EPIC-forms-to-api
 
-Статус: черновик
+Статус: в работе
+Цель: G1
 
 ## Цель
 
-Восемь форм ezFC посчитаны через `insaincalc.calcApi` на принятой человеком копии (черновик товара, GET = имя элемента, та же цена по ссылке). Шесть функций, которых не было в раннере, добавила `js-runner-forms` (закрыта 05.11.2026, команды — `docs/js-runner-cases.md`). Боевые формы этой пачки ещё на старом JS. Переключение, снимки `site/forms/<id>.json` и реестр `docs/site/forms.md` делает `todo/forms-batch-switch.md`, когда строка формы есть в его «Составе пакета».
+К 30.11.2026 все 45 боевых форм-калькуляторов на https://insain.ru считают через `insaincalc.calcApi`. Переключение пачками по 5–10 форм, копии принимаются выборочно. Форма 10 `_ExternalTest` и не-калькуляторы 71/72/77 в G1 не входят.
 
-## Задачи
+Сверка 07.11.2026: публичный slug в `calc_service/calculators/__init__.py` есть у **44 из 45** боевых форм. Нет slug у формы **12** (`calcButtonPins`: логика в `calc_button_pins`, в реестр API не входит) — сначала обёртка-калькулятор.
 
-- `js-runner-forms` — закрыта 05.11.2026: `scripts/run_js_calc.mjs` считает шесть функций, команды — `docs/js-runner-cases.md`.
-- Форма 26, slug `uv_print`, закрыта 05.11.2026: копия 87 принята, боевая страница ждёт `todo/forms-batch-switch.md`.
-- `todo/form-mug.md` — форма 41, slug `mug`. Путь кружки — сублимация. Раннер уже умеет `calcMug`.
-- `todo/form-embossing.md` — форма 85, slug `embossing`, цепочка 3.
-- `todo/form-acrylic-prizes.md` — форма 78, slug `acrylic_prizes`, цепочка 8.
-- `todo/form-rollup.md` — форма 49, slug `rollup`, цепочка 10.
-- `todo/form-presswall.md` — форма 46, slug `presswall`, цепочка 11.
-- `todo/form-pennant.md` — форма 73, slug `pennant`, цепочка 14.
-- `todo/form-flag.md` — форма 55, slug `flag`, цепочка 15.
+## Задачи в файлах
+
+- `todo/form-mug.md` — копия 41, ревью
+- `todo/form-embossing.md` — копия 85
+- `todo/form-acrylic-prizes.md` — копия 78
+- `todo/form-rollup.md` — копия 49
+- `todo/form-presswall.md` — копия 46
+- `todo/form-pennant.md` — копия 73
+- `todo/form-flag.md` — копия 55
+- `todo/forms-batch-switch.md` — пачка 1 на боевые: 69, 26, 41 (после принятия кружки)
+- `todo/form-button-pins.md` — калькулятор `button_pins` + копия формы 12
 
 ## Порядок
 
-1. `js-runner-forms` — закрыта 05.11.2026
-2. Форма 26 закрыта. `todo/form-mug.md` — параллельно раннеру, на форму 26 не завязана
-3. `todo/form-embossing.md` — после закрытия раннера
-4. `todo/form-acrylic-prizes.md`
-5. `todo/form-rollup.md`
-6. `todo/form-presswall.md`
-7. `todo/form-pennant.md`
-8. `todo/form-flag.md`
+1. Довести `todo/form-mug.md` до закрытия копии.
+2. `todo/forms-batch-switch.md` — пачка 1 (69 + 26 + 41). Параллельно копии пачки 2 (embossing … flag): «Файлы» `forms/<slug>.js` не пересекаются; общий `todo/forms-batch-switch.md` дописывает строку только после принятия копии и не во время выкатки пачки 1.
+3. `todo/form-button-pins.md` — можно параллельно пачке 2.
+4. Дальше Analyst заводит файлы следующей пачки копий, когда предыдущая копия принята хотя бы выборочно. Переключение — новая задача `forms-batch-N`, не расширение пачки 1 без решения человека.
 
-Модель чата — поле `Implementer` в шапке задачи. Одна задача — одна сессия.
+## Пачки (ещё без файлов)
+
+Боевая на API: **79 puzzle**. Копии приняты / в ревью: **69 plaque, 26 uv_print, 41 mug**.
+
+| Пачка | Формы (id, slug) | Заметка |
+| --- | --- | --- |
+| 1 бой | 69 `plaque`, 26 `uv_print`, 41 `mug` | `forms-batch-switch` |
+| 2 копии | 85 `embossing`, 78 `acrylic_prizes`, 49 `rollup`, 46 `presswall`, 73 `pennant`, 55 `flag` | файлы есть |
+| 3 копии | 6 и 19 `print_sheet`, 82 и 83 `print_offset`, 23 `print_roll`, 28 `laser`, 22 и 29 `sticker` | 8 форм, 5 slug |
+| 4 копии | 30 `poly_sticker`, 70 `poly_sticker_pack`, 35 `milling`, 38 `pad_print`, 40 `heat_press`, 45 `notebook`, 80 `canvas` | 7 |
+| 5 копии | 31 60 61 64 84 `badge`, 34 `metal_pins`, 12 `button_pins` | 12 после обёртки |
+| 6 копии | 36 48 51 76 `tablets`, 68 `shild`, 50 52 66 `calendar` | 8 |
+| 7 копии | 54 57 `magnet_laminated`, 56 `cards`, 74 `keychain`, 75 `magnet_acrylic` | 5 |
+
+C1–C11 из `BACKLOG.md` — новых форм в реестре нет, в эти пачки не входят.

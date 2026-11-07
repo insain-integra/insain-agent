@@ -1,6 +1,7 @@
 # EPIC-spam-users-cleanup
 
 Статус: черновик
+Цель: отложено (`docs/vision.md`)
 
 ## Цель
 

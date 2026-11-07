@@ -16,10 +16,13 @@
 
 ## После закрытия
 
-Задача закрыта: обычная — после merge, смешанная и прод — когда человек принял статус `закрытие` после выкатки Site ops. Тогда файл удаляется.
-Перед удалением человек ставит `Статус: черновик` задачам с `заблокировано: ждёт todo/<имя>.md` на эту задачу
-(не снятый статус ловит `make check`) и разбирает «Найдено вне scope» (строка в `BACKLOG.md`, задача через Analyst или отказ),
-устойчивое знание переносится в `docs/`, запись о задаче или эпике — в [docs/history/log.md](../docs/history/log.md)
-по формату из её README. В `todo/` не остаются решения и регламенты.
+Человек говорит «закрой задачу» (или сам запускает команду). Дальше одно:
+
+`python scripts/dev.py close <имя>`
+
+Команда пишет запись в [docs/history/log.md](../docs/history/log.md), ставит `черновик` задачам
+с `ждёт todo/<имя>.md`, переносит «Найдено вне scope» в `BACKLOG.md`, пересобирает
+[docs/dashboard.md](../docs/dashboard.md), при необходимости дописывает срез в `snapshots.md`
+и удаляет файл задачи. Коммит — отдельно, когда человек попросил. В `todo/` не остаются решения и регламенты.
 
 Роли: [Analyst](../docs/agents/roles/analyst.md), [Implementer](../docs/agents/roles/implementer.md), [Reviewer](../docs/agents/roles/reviewer.md), [Site ops](../docs/agents/roles/site-ops.md).

@@ -63,7 +63,7 @@ Site ops: Opus 5.5
 5. Снимок каждой боевой формы в `site/forms/<id>.json` (`SELECT … --raw`, файл проходит `json.loads`, в нём есть `forms/<slug>.js` и `custom_calculation_function_read_file`). Снимок обратно не импортировать.
 6. `docs/site/forms.md`: у каждой формы пакета слот «API через `insaincalc.calcApi`», сводка (непереведённых форм, число на опубликованных товарах, привязанные slug) пересчитана по факту. Другие строки не переписывать.
 7. Одна строка в `wp-plugin/AGENTS.md`: custom JS переведённых форм лежит в `forms/<slug>.js`.
-8. В пункте 5.5 `docs/refactoring-plan.md` дописать, не ставя чекбокс: `прогнаны на форме 69: ezfc-form-to-api, deploy-wp-plugin. new-calculator и json-price-rollout не прогонялись — чекбокс открыт.` Если к этому моменту `new-calculator` или `json-price-rollout` прогонялись — поправить фразу по факту.
+8. Если к этому пакету прогнали skill `new-calculator` или `json-price-rollout` — убрать его из «Skills без прогона» в `BACKLOG.md`.
 9. Копии (86 и остальные) оставить на черновике. Удаление — отдельным решением человека.
 
 Git-файлы пишет Implementer. Дубль, `read_file`, GET на проде, сброс кэша и проверка страниц — Site ops.
@@ -71,7 +71,7 @@ Git-файлы пишет Implementer. Дубль, `read_file`, GET на про�
 ## Файлы
 
 - `site/forms/<id>.json` — снимки боевых форм пакета
-- `docs/site/forms.md`, `wp-plugin/AGENTS.md`, `docs/refactoring-plan.md` (пункт 5.5)
+- `docs/site/forms.md`, `wp-plugin/AGENTS.md`
 - `todo/forms-batch-switch.md` — «Состав пакета» дописывают задачи на перевод; пока идёт эта задача, параллельно не дописывать
 - WordPress: боевые формы «Состава пакета» и их копии
 
@@ -128,7 +128,7 @@ print("ok")
 curl.exe -sS -o NUL -w "%{http_code}" "СТРАНИЦА_ФОРМЫ"
 ```
 
-- [ ] Реестр, правило плагина, приписка 5.5. Stdout `ok`. Перед запуском в `SLUGS` подставить slug форм пакета; число непереведённых форм Implementer пересчитывает по реестру и сверяет с текстом «Непереведённых форм: **N**» в `docs/site/forms.md` (в проверку подставляет фактическое N).
+- [ ] Реестр и правило плагина. Stdout `ok`. Перед запуском в `SLUGS` подставить slug форм пакета; число непереведённых форм Implementer пересчитывает по реестру и сверяет с текстом «Непереведённых форм: **N**» в `docs/site/forms.md`.
 
 ```powershell
 @'
@@ -140,9 +140,6 @@ for slug in SLUGS:
     assert "calcApi" in row and "старый JS" not in row, slug
 plugin = Path("wp-plugin/AGENTS.md").read_text(encoding="utf-8")
 assert "forms/<slug>.js" in plugin
-plan = Path("docs/refactoring-plan.md").read_text(encoding="utf-8")
-assert "- [ ] **5.5." in plan
-assert "прогнаны на форме 69: ezfc-form-to-api, deploy-wp-plugin." in plan
 print("ok")
 '@ | python -
 ```

@@ -1,7 +1,7 @@
 # EPIC-supplier-catalog
 
 Статус: черновик
-Цель: G7 (`docs/vision.md`), срок 28.02.2027
+Цель: G7
 
 ## Цель
 

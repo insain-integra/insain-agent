@@ -242,15 +242,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Запуск/остановка calc_service и бота")
     parser.add_argument(
         "action",
-        choices=("start", "stop", "restart", "status", "check"),
+        choices=("start", "stop", "restart", "status", "check", "close", "dashboard"),
         help="действие",
     )
     parser.add_argument(
         "service",
         nargs="?",
-        default="all",
-        choices=("calc", "bot", "all"),
-        help="какой сервис (по умолчанию all)",
+        default=None,
+        help="сервис (calc|bot|all) или имя задачи для close",
     )
     args = parser.parse_args()
 
@@ -258,12 +257,32 @@ def main() -> None:
         cmd_check()
         return
 
+    if args.action == "dashboard":
+        sys.path.insert(0, str(Path(__file__).parent))
+        from dashboard import write as dash_write
+
+        print(dash_write())
+        return
+
+    if args.action == "close":
+        if not args.service:
+            sys.exit("нужно имя задачи: python scripts/dev.py close <имя>")
+        sys.path.insert(0, str(Path(__file__).parent))
+        from close_task import close as close_task
+
+        close_task(args.service)
+        return
+
     if args.action == "status":
         cmd_status()
         return
 
+    svc = args.service or "all"
+    if svc not in ("calc", "bot", "all"):
+        sys.exit("сервис: calc, bot или all")
+
     if args.action == "restart":
-        order = ["calc", "bot"] if args.service == "all" else [args.service]
+        order = ["calc", "bot"] if svc == "all" else [svc]
         for s in order:
             if s == "calc":
                 cmd_stop_calc()
@@ -277,16 +296,16 @@ def main() -> None:
         return
 
     if args.action == "start":
-        if args.service in ("calc", "all"):
+        if svc in ("calc", "all"):
             cmd_start_calc()
-        if args.service in ("bot", "all"):
+        if svc in ("bot", "all"):
             cmd_start_bot()
         return
 
     if args.action == "stop":
-        if args.service in ("bot", "all"):
+        if svc in ("bot", "all"):
             cmd_stop_bot()
-        if args.service in ("calc", "all"):
+        if svc in ("calc", "all"):
             cmd_stop_calc()
         return
 

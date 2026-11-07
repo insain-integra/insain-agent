@@ -6,11 +6,11 @@
 1. **Сайт insain.ru** — WordPress на VDS: формы ezFC, страницы, WooCommerce, SEO, меню, медиа,
    плагин-мост `wp-plugin/` (insain-calc-bridge). Главный продуктовый контур.
 2. **Расчётное ядро** — `calc_service/` (FastAPI): калькуляторы и справочники цен. Единый источник цен.
-3. **ИИ-консультант** — `bot_service/`: консервация (тесты зелёные, не развивается, на VDS не разворачивается).
+3. **ИИ-консультант** — `bot_service/`: цель G5; тесты в `make check`; на VDS пока не разворачивается.
 4. **Harness** — этот файл, `make check`, правила в `.cursor/rules/`. Средство, не продукт.
 
-Текущее состояние прода (адреса, порты, контейнеры, версии плагинов) — `STATUS.md`.
-План работ — `docs/refactoring-plan.md` (целиком не читать, только раздел «Протокол выполнения» и свою задачу).
+Цели — [docs/vision.md](docs/vision.md). Очередь — `todo/`. Сводка — [docs/dashboard.md](docs/dashboard.md).
+Состояние прода — `STATUS.md`.
 
 ## Приоритет правил при конфликте
 
@@ -43,6 +43,7 @@ Windows/PowerShell: `&&` не работает, разделитель `;`. Ес
 | Что | Команда |
 | --- | --- |
 | Проверка перед сдачей | `make check` (или `python scripts/dev.py check`): pytest `calc_service/tests`, затем `bot_service/tests`, ~2–4 мин |
+| Закрыть задачу | `python scripts/dev.py close <имя>`: журнал, дашборд, снять «ждёт», удалить `todo/<имя>.md` |
 | Быстрая петля | `python -m pytest calc_service/tests` |
 | Локальный API | `make calc-up` → http://127.0.0.1:8001, `make calc-down`, `make status` |
 | Сверка реестра калькуляторов с API | `python bot_service/check_calc_registry.py` (нужен запущенный API) |
@@ -128,8 +129,8 @@ Self-review по своему diff:
 ## Сессии
 
 - Одна задача — одна сессия с чистым контекстом. Читать только нужное: блок задачи и файлы из её «Контекста».
-- Целиком не открывать: `docs/refactoring-plan.md`, `CLAUDE.md`, `docs/archive/`,
-  `bot_service/agent.py` — только grep по месту. `ROADMAP.md` удалён, идеи — в `BACKLOG.md`.
+- Целиком не открывать: `CLAUDE.md`, `docs/archive/`, `bot_service/agent.py` — только grep по месту.
+  Идеи без задачи — `BACKLOG.md`.
 - Контекст распух или задача сменила этап — закончить отчётом и начать новую сессию.
 
 ## Ретроспектива
