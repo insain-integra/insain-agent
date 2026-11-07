@@ -22,6 +22,7 @@ Site ops: Opus 5.5
 | 26 CalcUVPrint | `uv_print` | `/catalog/uf-pechat-na-suveniry/` | 87 / 2586881 (draft) | копия принята 05.11.2026 |
 | 41 CalcMug | `mug` | `/catalog/kalkulyator-sublimaczionnoj-pechati-na-kruzhki/` | 88 / 2586882 (draft) | `form-mug` (закрыто 2026-11-07, `docs/history/log.md`) |
 | 85 CalcEmbossing | `embossing` | `/catalog/kalkulyator-tisneniya/` | 89 / 2586883 (draft) | копия принята 07.11.2026, `form-embossing` (закрыто 2026-11-07, `docs/history/log.md`) |
+| 78 CalcAcrilycPrizes | `acrylic_prizes` | `/catalog/kalkulyator-akrilovyh-prizov/` | 91 / 2586884 (draft) | копия принята 08.11.2026, `form-acrylic-prizes` |
 
 ## Контекст и ссылки
 

@@ -1,6 +1,6 @@
 # form-acrylic-prizes
 
-Статус: черновик
+Статус: закрытие
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -92,7 +92,7 @@ print("ok", js, api, abs_d, rel)
 python -m pytest calc_service/tests/test_calculators/test_acrylic_prizes.py -q
 ```
 
-- [ ] Дефолт формы 78 (УФ на двух слоях): `price` раннера `calcAcrilycPrizes` и боевого `POST /api/v1/calc/acrylic_prizes` — разница ≤ 0.02 и `rel ≤ 0.001` (тот же скрипт, что выше). Кейс дефолта в `test_acrylic_prizes.py`, stdout `passed`. Выкатка `uv-print-prepare` закрыта 2026-11-08 (`docs/history/log.md`); до неё было JS 8977.92 / API 9559.92. Приёмка копии 91 — после этого пункта.
+- [x] Дефолт формы 78 (УФ на двух слоях): `price` раннера `calcAcrilycPrizes` и боевого `POST /api/v1/calc/acrylic_prizes` — разница ≤ 0.02 и `rel ≤ 0.001` (тот же скрипт, что выше). Кейс дефолта в `test_acrylic_prizes.py`, stdout `passed`. Выкатка `uv-print-prepare` закрыта 2026-11-08 (`docs/history/log.md`); до неё было JS 8977.92 / API 9559.92. Приёмка копии 91 — после этого пункта.
 
 - [x] Файл формы. В выводе есть `insaincalc.calcApi('acrylic_prizes'`, `insaincalc.syncUrl(` и `insaincalc.showResult(`.
 
@@ -155,22 +155,28 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=258
 ```
 
 - 2026-11-07 — Analyst, Opus 5.5 — блокер разобран: предпосылка uv-print-prepare (закрыто 2026-11-08, docs/history/log.md; mode 0 и timePrepareAround в uv_print, деплой API); здесь разрешён кейс дефолта формы и добавлен критерий JS = API на нём; статус был «заблокировано: ждёт uv-print-prepare» — дальше Implementer uv-print-prepare; после её закрытия — Implementer этой задачи (кейс дефолта), затем Site ops (перепрогон копии 91)
+- 2026-11-08 — Implementer, Opus 5.5 — кейс дефолта формы 78 в тестах (через `acrylic-prizes-port-fix`); `forms/acrylic_prizes.js` на ветке — дальше Site ops
+- 2026-11-08 — Site ops, Opus 5.5 — перепрогон копии **91** / 2586884 после uv-print-prepare: дефолт API `price=8977.92` / страница `9000` = боевая 78; GET работает; draft/гость 404; боевую 78 не трогал — дальше человек
+- 2026-11-08 — человек — принято — закрытие
 
 ## Найдено вне scope
 
 - `calc_service/calculators/uv_print.py`: `time_prepare *= max(1, mode.value)` (plain и non-plain) — при `mode=0` готовит как mode=1; JS `calcUVPrint` умножает на `modeProduction` (0 → 0). Ломает второй УФ в `acrylic_prizes` после сброса `mode_uv`. Вынесено в `uv-print-prepare` (закрыто 2026-11-08, `docs/history/log.md`).
-- В `acrylic_prizes.py` при гравировке читается `is_grave_fill`, а боевой cjsCalc/JS кладут `isGraveFill` — через API площадь заливки гравировки может не доходить до лазера. В эту задачу калькулятор не править.
+- В `acrylic_prizes.py` при гравировке читается `is_grave_fill`, а боевой cjsCalc/JS кладут `isGraveFill` — вынесено в `acrylic-prizes-port-fix` (закрыто 2026-11-08, `docs/history/log.md`).
 - В dropdown формы 77 `dpdMaterial` нет кода `PVC3` (эталон git/API); на странице для проверки брать материал из списка формы и сверять цену с `POST` на тех же слоях.
 - При дубле формы 78 создались две копии **90** и **91**; рабочая — **91**. Форма **90** лишняя, удаление — только с подтверждения человека.
 
 ## Результат
 
-- Ветка: `task/form-acrylic-prizes` (калькулятор/`data`/копию 91 в этой сессии не менял)
-- Сделано (Implementer, сверка блокера Site ops):
-  - Подтверждены числа человека/Site ops: JS `8977.92`, API `9559.92` на дефолте (оба УФ)
-  - Локализовано: не `isTop` и не маппинг `acrylic_prizes.js`; второй вызов УФ после `mode_uv=0` — JS `+684/+1095`, Python `+1048/+1677`
-  - Корень: `uv_print.py` `max(1, mode.value)` vs JS `* modeProduction`
-- Чем проверено: `run_js_calc.mjs calcAcrilycPrizes` / `calcUVPrint`; local `AcrylicPrizesCalculator` + `UVPrintCalculator`; `POST https://insain.ru/api/v1/calc/acrylic_prizes`
-- Не сделано: правка `uv_print`/`acrylic_prizes` — Не-scope; приёмка копии 91 — пока JS≠API на дефолте; строка в `forms-batch-switch` — после принятия
-- Решение Analyst (07.11.2026): отдельная задача uv-print-prepare. Закрыта 2026-11-08 (`docs/history/log.md`); ожидание снято, статус `черновик`.
-- Предыдущий отчёт Site ops (копия 91 / 2586884) без изменений
+- Ветка, PR или коммит: `task/form-acrylic-prizes` (JS `0d31dbf`; калькулятор срока — `main` `511c660`)
+- Период: 2026-11-07 — 2026-11-08
+- Часы человека:
+- Работа агентов: Implementer + Site ops; предпосылки uv-print-prepare и acrylic-prizes-port-fix
+- Было / стало: копия формы 78 (**91** / товар **2586884**, draft) считает API; дефолт `price` 9559.92→8977.92 (страница 9000 = боевая 78), `time_ready` 58.97→35.17. Боевая 78 на витрине по-прежнему старый JS.
+- Сделано:
+  - `wp-plugin/forms/acrylic_prizes.js` — `calcApi('acrylic_prizes')`, `syncUrl`, `showResult`
+  - эталоны в `test_acrylic_prizes.py` (JS 07.11 и дефолт формы 08.11)
+  - копия 91 на черновике, GET, прогон под админом
+- Чем проверено: раннер JS = боевой API на эталоне и дефолте; Site ops под админом на `?p=2586884`; гость 404
+- Не сделано и почему: боевая 78 — Не-scope, в `forms-batch-switch`; форма 90 лишняя — удаление только с «да»
+- Требуется решение: нет
