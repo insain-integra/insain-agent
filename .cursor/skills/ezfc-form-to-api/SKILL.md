@@ -21,6 +21,13 @@ ssh insain-prod "sudo -u www-data wp db query --skip-column-names --path=/var/ww
 
 Ниже «SQL через файл» — эти три команды с нужным `<SQL>`. Только `SELECT`. Запись в таблицы `wp_insain_ezfc_*` идёт через админку ezFC (Browser MCP), не SQL.
 
+## Роли и цепочка
+
+- Implementer, git: шаги 0–5б, текст `wp-plugin/forms/<slug>.js` (шаг 10), эталон в тесте, `make check`. Статус остаётся `в работе`, промпт Site ops.
+- Site ops, прод (лучше отдельный чат): шаги 6–16 после «да» человека, затем статус `ревью`. Расхождение на копии — обратно Implementer (шаг 15).
+- Человек принимает копию → Reviewer (diff и настройки копии чтением с прода) → человек: skill `finish-task`.
+- Каждый отчёт заканчивается готовым промптом следующей сессии (`docs/agents/workflow.md`, «Итоги»).
+
 ## Сверка до перевода
 
 Сверка скриптом scripts/run_js_calc.mjs и эталонами в calc_service/tests/test_calculators/ делается до перевода и не заменяет дубль, отладку на боевом API и переключение боевой формы.
@@ -68,11 +75,21 @@ ssh insain-prod "sudo -u www-data wp db query --skip-column-names --path=/var/ww
 
    Ожидается: строки `id  e_id  position  name`. Выписать id и имена полей ввода и элемент расчёта (`cjsCalc`, тип custom calculation). Id не выдумывать.
 
+5а. Поля формы и схема API. Сопоставить имена из шага 5 с параметрами шага 4.
+   - Поле есть, параметра в API нет (материал заказчика, упаковка, поверхность и т. п.) — в `syncUrl` пишется, в `calcApi` не уходит. Список таких полей — в «Результат».
+   - Параметр API обязателен, а поля нет — стоп: форма и калькулятор не сходятся, `заблокировано: аналитик`.
+
+5б. Старый JS боевой формы. Выписать все `get_value_from(N)` из `cjsCalc` и сверить N с таблицей шага 5.
+   - Id не того поля (пример: форма 85 читала «материал заказчика» из `ckbCliche` 3291 вместо 3311) — это баг боевого JS, запись в «Найдено вне scope».
+   - Поле влияет на цену (уходит в `calcApi`) — стоп, `заблокировано: человек`: исправление меняет цену для клиентов. Не влияет — в `forms/<slug>.js` правильный id и строка «для Reviewer» в «Результат».
+
 ## Дубль формы
 
 Спросить человека: дубль формы `<id>` и черновик товара для него. Без ответа «да» дальше не идти.
 
-6. В админке ezFC (Browser MCP) у формы `<id>` — «Duplicate». Id копии, SQL через файл:
+Доступ к админке (Browser MCP): открыть `https://insain.ru/wp-admin/admin.php?page=ezfc` (не `page=ezfc-forms`). Открылась `wp-login.php` или ошибка доступа — стоп, попросить человека войти в этом браузере. Логин и пароль не вводить, автозаполнение браузера не использовать. wp-cli дубль формы ezFC не делает — не искать.
+
+6. В админке ezFC у формы `<id>` — «Duplicate». Id копии, SQL через файл:
 
    ```sql
    SELECT id, name FROM wp_insain_ezfc_forms ORDER BY id DESC LIMIT 1;
@@ -97,9 +114,15 @@ ssh insain-prod "sudo -u www-data wp db query --skip-column-names --path=/var/ww
 
    Ожидается: `404`. `200` — товар открыт гостям, стоп, вернуть статус шага 7.
 
-9. Id копии. Шаг 5 с `f_id = <copy>`.
+9. Id копии — одной таблицей с боевой, SQL через файл:
 
-   У копии свои id элементов. Ссылки `get_value_from(N)` в старом JS копии указывают на элементы боевой формы — этот JS в копии не отлаживать. Сопоставить id боевой формы и копии по `name`.
+   ```sql
+   SELECT JSON_UNQUOTE(JSON_EXTRACT(b.data, '$.name')) AS name, b.id AS id_live, c.id AS id_copy FROM wp_insain_ezfc_forms_elements b LEFT JOIN wp_insain_ezfc_forms_elements c ON c.f_id = <copy> AND JSON_EXTRACT(c.data, '$.name') = JSON_EXTRACT(b.data, '$.name') WHERE b.f_id = <id> ORDER BY b.position;
+   ```
+
+   Ожидается: у каждой строки `id_copy` заполнен и отличается от `id_live`. Пустой `id_copy` или `id_copy = id_live` — в запросе не тот `<copy>` или дубль не создался: повторить шаг 6, не подставлять id боевой формы. Эта таблица — источник id для JS копии в шаге 10.
+
+   Ссылки `get_value_from(N)` в старом JS копии указывают на элементы боевой формы — этот JS в копии не отлаживать.
 
 10. JS формы по шаблону `cjsCalc` из `docs/ezfc-api-migration.md`: чтение полей (`{{numN}}`, `ezfc_functions.get_value_from`), `insaincalc.syncUrl`, затем `insaincalc.calcApi('<slug>', {…})`, в `.then` — `insaincalc.showResult(calcCost, qty, __form_id__)`, в `.catch` — `insaincalc.showError`. Формул цены, чтения через DOM и своего вывода цены в JS нет.
 
