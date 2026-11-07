@@ -64,3 +64,4 @@
 - Из `form-embossing`: Старый cjsCalc формы 85 читает `ckbMaterialCustomer` с id 3291 (`ckbCliche`), а не 3311 — баг боевого JS; в `embossing.js` исправлено на 3311.
 - Из `form-embossing`: `dpdSurfaceMaterial`, `ckbPacking`, `ckbMaterialCustomer` есть на форме, в API `embossing` не входят (как `materialID` в старом `calcEmbossing` не используется); в `syncUrl` пишутся, в `calcApi` не уходят.
 - Из `form-embossing`: У `rdoModeProduction` формы 85 только значения `1`/`2` (опции «дешевле»/0 нет).
+- Из `acrylic-prizes-port-fix`: На ветке `task/form-acrylic-prizes` эталон `REF_FORM_DEFAULT` был только в рабочем дереве (не в коммите); сняли заново раннером `calcAcrilycPrizes` 08.11.2026 — числа совпали с задачей.

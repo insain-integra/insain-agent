@@ -35,11 +35,10 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **16**. В работе/ревью: `acrylic-prizes-port-fix.md`, `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **15**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
-| `acrylic-prizes-port-fix.md` | выкатка |
 | `dashboard-harness.md` | ревью |
 | `form-acrylic-prizes.md` | черновик |
 | `form-button-pins.md` | черновик |
@@ -64,8 +63,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-08 — acrylic-prizes-port-fix
 - 2026-11-08 — uv-print-prepare
 - 2026-11-07 — form-embossing
 - 2026-11-07 — form-mug
 - 2026-11-05 — Копия формы УФ-печати на API
-- 2026-11-04 — Пилот перевода формы плакеток на API
