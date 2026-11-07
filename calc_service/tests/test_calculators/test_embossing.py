@@ -1,5 +1,9 @@
 """
 Тесты калькулятора тиснения (embossing).
+
+Эталон JS, 07.11.2026:
+node scripts/run_js_calc.mjs calcEmbossing --data current --args
+'[500,[50,30],"","foil","diary",[],{"isCliche":true},1]'
 """
 
 from __future__ import annotations
@@ -16,7 +20,7 @@ if _calc_service.name == "calc_service" and str(_calc_service) not in sys.path:
 from calculators.embossing import EmbossingCalculator
 
 
-def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
+def _cmp(a: float, b: float, rel: float = 0.001) -> bool:
     return abs(a - b) <= rel * max(abs(b), 1e-9)
 
 
@@ -99,7 +103,9 @@ REF_PARAMS = {
     "mode": 1,
 }
 
-# JS, 04.11.2026 — сверка с calcEmbossing --data current (findIndex item[0] > n)
+# JS, 07.11.2026 — calcEmbossing --data current; price раннера 14046.000000000002
+# node scripts/run_js_calc.mjs calcEmbossing --data current --args
+# '[500,[50,30],"","foil","diary",[],{"isCliche":true},1]'
 EXPECTED_REF = {
     "cost": 8475.0,
     "price": 14046.0,
@@ -124,12 +130,13 @@ def ref_result(calc):
 
 
 def test_expected_values_embossing(ref_result):
+    """JS, 07.11.2026: 500 шт., клише 50×30, foil, diary, is_cliche, mode 1."""
     if ref_result is None:
         pytest.skip("расчёт эталонного кейса не выполнен")
     r = ref_result
     e = EXPECTED_REF
     em = EXPECTED_MATERIAL
-    rel = 0.03
+    rel = 0.001
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
     ok_price = _cmp(r["price"], e["price"], rel)
