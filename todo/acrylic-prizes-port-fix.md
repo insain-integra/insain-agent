@@ -1,6 +1,6 @@
 # acrylic-prizes-port-fix
 
-Статус: выкатка
+Статус: закрытие
 Сложность: обычная
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -65,7 +65,7 @@ python -m pytest calc_service/tests/test_calculators/test_acrylic_prizes.py -q
 
 - [x] Эталон старого кейса (`REF_PARAMS`, один УФ) не менялся и зелёный — входит в прогон выше; если упал — стоп и эскалация Analyst.
 
-- [ ] После деплоя (Site ops): дефолт формы 78 на боевом API. `price` 8977.92 (разница ≤ 0.02), `time_ready` ≈ 35.17 (`rel ≤ 0.001`); до правки — 58.97. Тело — `REF_FORM_DEFAULT` из теста в JSON. Кейс гравировки: `price` = раннеру, `rel ≤ 0.001`.
+- [x] После деплоя (Site ops): дефолт формы 78 на боевом API. `price` 8977.92 (разница ≤ 0.02), `time_ready` ≈ 35.17 (`rel ≤ 0.001`); до правки — 58.97. Тело — `REF_FORM_DEFAULT` из теста в JSON. Кейс гравировки: `price` = раннеру, `rel ≤ 0.001`.
 
 ```powershell
 $api = Invoke-RestMethod -Method Post -Uri https://insain.ru/api/v1/calc/acrylic_prizes -ContentType 'application/json' -Body '<REF_FORM_DEFAULT в JSON>'
@@ -76,7 +76,7 @@ $api | Select-Object price, time_ready
 
 - [x] `python scripts/dev.py check` — код выхода 0
 - [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
-- [ ] Деплой: `bash infra/deploy.sh` с `main`, smoke зелёный; откат — автооткат скрипта или образ `insain-agent-calc-api:rollback`.
+- [x] Деплой: `bash infra/deploy.sh` с `main`, smoke зелёный; откат — автооткат скрипта или образ `insain-agent-calc-api:rollback`.
 
 ## Риски
 
@@ -98,6 +98,8 @@ $api | Select-Object price, time_ready
 - 2026-11-08 — Implementer, Opus 5.5 — `time_ready` внутри `mode_*>0`, `isGraveFill`/`isGraveContur` в лазер; 3 эталона с раннера; stash-proof; `make check` зелёный — дальше Reviewer (Grok 4.7)
 - 2026-11-08 — Reviewer, Grok 4.7 — принято — дальше человек: слияние
 - 2026-11-08 — человек — слито в main — дальше Site ops
+- 2026-11-08 — Site ops, Opus 5.5 — CI check#40 зелёный; `deploy.sh` 511c660, smoke OK; прод дефолт `price` 8977.92 / `time_ready` ≈35.17, гравировка `price` 10241.92 (rel 0) — дальше человек: закрытие
+- 2026-11-08 — человек — принято — закрытие
 
 ## Ревью 1
 
@@ -116,17 +118,18 @@ $api | Select-Object price, time_ready
 
 ## Результат
 
-- Ветка, PR или коммит: `task/acrylic-prizes-port-fix`, fast-forward в `main`
+- Ветка, PR или коммит: `main` `511c660`
 - Период: 2026-11-08
 - Часы человека:
-- Работа агентов: Implementer, одна сессия
-- Было / стало: `time_ready` дефолта формы 58.97 → 35.17; гравировка с `isGraveFill` cost 4915.45 → 6389.45 (как JS)
-- Сделано:
-  - `acrylic_prizes.py`: `max(time_ready…)` для лазера/УФ/склейки только внутри `if mode_* > 0`; `isGraveFill`/`isGraveContur` (+ snake_case) в лазер; схема tool/param
-  - три эталона в `test_acrylic_prizes.py` + команды в `docs/js-runner-cases.md`
+- Работа агентов: Implementer + Site ops
+- Было / стало: на проде дефолт формы 78 `time_ready` 58.97 → ≈35.17; гравировка с `isGraveFill` `price` до 10241.92 (как JS)
+- Сделано (Site ops):
+  - дождался зелёного CI check#40 на `511c660`
+  - `ssh insain-prod` → `bash infra/deploy.sh`: e3ee707 → 511c660, smoke GET `/calculators` + POST `/calc/puzzle` 200, контейнер healthy
 - Чем проверено:
-  - раннер: mode1 `price` 8977.92 `time_ready` ≈35.17; mode0 `price` 7794.4 `time_ready` 2.02; grave `cost` 6389.45 `price` 10241.92 `time_ready` 36.36
-  - `git stash` только `acrylic_prizes.py`: 3 новых FAIL (58.97 / 58.51 / cost 4915.45), `REF_PARAMS` PASS; после pop — 9 passed
-  - `python scripts/dev.py check` — exit 0 (516+81 passed)
-- Не сделано и почему: деплой API — Site ops после merge
-- Требуется решение: нет
+  - `POST https://insain.ru/api/v1/calc/acrylic_prizes` дефолт формы 78: `price` 8977.92 (abs diff 0), `time_ready` 35.17 (rel ≈0), `cost` 5599.45
+  - тот же endpoint, гравировка `isGrave`+`isGraveFill:[20,20]`: `price` 10241.92, `cost` 6389.45, `time_ready` 36.36 (все rel 0 к раннеру)
+  - `GET https://insain.ru/api/v1/calculators` — 200
+- Не сделано и почему: нет
+- Как откатить: образ `insain-agent-calc-api:rollback` (тег после деплоя: `1b58f3fa956d`) или повторный `deploy.sh` с предыдущим коммитом на `main`
+- Требуется решение: нет; человек может `python scripts/dev.py close acrylic-prizes-port-fix`
