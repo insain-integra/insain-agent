@@ -27,6 +27,24 @@ def test_dashboard_file_matches_render():
     assert got == exp, "docs/dashboard.md устарел: python scripts/dev.py dashboard"
 
 
+def test_dashboard_render_ignores_today_and_git(monkeypatch):
+    dash = _load("dashboard")
+    base = dash.render()
+
+    class FutureDate(dash.date):
+        @classmethod
+        def today(cls):
+            return cls(2099, 1, 1)
+
+    def no_git(*args, **kwargs):
+        raise AssertionError("дашборд не должен вызывать git: в CI клон с fetch-depth 1")
+
+    monkeypatch.setattr(dash, "date", FutureDate)
+    monkeypatch.setattr("subprocess.check_output", no_git)
+    monkeypatch.setattr("subprocess.run", no_git)
+    assert dash.render() == base, "render() зависит от текущей даты"
+
+
 def test_close_requires_result(tmp_path, monkeypatch):
     close = _load("close_task")
     todo = tmp_path / "todo"
