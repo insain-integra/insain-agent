@@ -18,7 +18,7 @@ Site ops: Opus 5.5
 - `docs/ezfc-api-migration.md` — шаблон `cjsCalc`, GET = имя элемента, `GET_check`: dropdown с кодом — `index`, radio `1`/`2` — `value`.
 - `docs/site/forms.md` — строка формы 49, только читать.
 - `todo/forms-batch-switch.md` — в конце одна строка в «Состав пакета».
-- `todo/EPIC-forms-to-api.md` — очередь, после `todo/form-acrylic-prizes.md`.
+- `todo/EPIC-forms-to-api.md` — очередь, после `form-acrylic-prizes` (закрыто 2026-11-08, `docs/history/log.md`).
 - `docs/js-runner-cases.md` — команда раннера и `price` для `calcRollup`.
 - Эталон: `REF_PARAMS` в `calc_service/tests/test_calculators/test_rollup.py` — тираж 1, `Rollup_econom_85`, `BannerFronlitCoat400`, mode 1. Порог `price` — прогон JS против API, не число из файла. Другого эталона в файле нет, тираж ≥ 2 не добавлять. JS: `js_legacy/calc/calcRollup.js`, сигнатура `calcRollup(n, rollupID, materialID, options, modeProduction)`.
 - Остальное не открывать.

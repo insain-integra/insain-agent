@@ -13,7 +13,7 @@
 
 - `form-mug` (закрыто 2026-11-07, `docs/history/log.md`) — копия 41 (88 / 2586882) принята
 - `form-embossing` (закрыто 2026-11-07, `docs/history/log.md`) — копия 85
-- `todo/form-acrylic-prizes.md` — копия 78
+- `form-acrylic-prizes` (закрыто 2026-11-08, `docs/history/log.md`) — копия 78
 - `todo/form-rollup.md` — копия 49
 - `todo/form-presswall.md` — копия 46
 - `todo/form-pennant.md` — копия 73
@@ -30,12 +30,12 @@
 
 ## Пачки (ещё без файлов)
 
-Боевая на API: **79 puzzle**. Копии приняты / в ревью: **69 plaque, 26 uv_print, 41 mug**.
+Боевая на API: **79 puzzle**. Копии приняты / в ревью: **69 plaque, 26 uv_print, 41 mug, 85 embossing, 78 acrylic_prizes**.
 
 | Пачка | Формы (id, slug) | Заметка |
 | --- | --- | --- |
 | 1 бой | 69 `plaque`, 26 `uv_print`, 41 `mug` | `forms-batch-switch` |
-| 2 копии | 85 `embossing`, 78 `acrylic_prizes`, 49 `rollup`, 46 `presswall`, 73 `pennant`, 55 `flag` | файлы есть |
+| 2 копии | 85 `embossing`, 78 `acrylic_prizes`, 49 `rollup`, 46 `presswall`, 73 `pennant`, 55 `flag` | embossing и acrylic_prizes приняты |
 | 3 копии | 6 и 19 `print_sheet`, 82 и 83 `print_offset`, 23 `print_roll`, 28 `laser`, 22 и 29 `sticker` | 8 форм, 5 slug |
 | 4 копии | 30 `poly_sticker`, 70 `poly_sticker_pack`, 35 `milling`, 38 `pad_print`, 40 `heat_press`, 45 `notebook`, 80 `canvas` | 7 |
 | 5 копии | 31 60 61 64 84 `badge`, 34 `metal_pins`, 12 `button_pins` | 12 после обёртки |

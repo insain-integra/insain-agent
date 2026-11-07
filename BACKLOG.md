@@ -65,3 +65,7 @@
 - Из `form-embossing`: `dpdSurfaceMaterial`, `ckbPacking`, `ckbMaterialCustomer` есть на форме, в API `embossing` не входят (как `materialID` в старом `calcEmbossing` не используется); в `syncUrl` пишутся, в `calcApi` не уходят.
 - Из `form-embossing`: У `rdoModeProduction` формы 85 только значения `1`/`2` (опции «дешевле»/0 нет).
 - Из `acrylic-prizes-port-fix`: На ветке `task/form-acrylic-prizes` эталон `REF_FORM_DEFAULT` был только в рабочем дереве (не в коммите); сняли заново раннером `calcAcrilycPrizes` 08.11.2026 — числа совпали с задачей.
+- Из `form-acrylic-prizes`: `calc_service/calculators/uv_print.py`: `time_prepare *= max(1, mode.value)` (plain и non-plain) — при `mode=0` готовит как mode=1; JS `calcUVPrint` умножает на `modeProduction` (0 → 0). Ломает второй УФ в `acrylic_prizes` после сброса `mode_uv`. Вынесено в `uv-print-prepare` (закрыто 2026-11-08, `docs/history/log.md`).
+- Из `form-acrylic-prizes`: В `acrylic_prizes.py` при гравировке читается `is_grave_fill`, а боевой cjsCalc/JS кладут `isGraveFill` — вынесено в `acrylic-prizes-port-fix` (закрыто 2026-11-08, `docs/history/log.md`).
+- Из `form-acrylic-prizes`: В dropdown формы 77 `dpdMaterial` нет кода `PVC3` (эталон git/API); на странице для проверки брать материал из списка формы и сверять цену с `POST` на тех же слоях.
+- Из `form-acrylic-prizes`: При дубле формы 78 создались две копии **90** и **91**; рабочая — **91**. Форма **90** лишняя, удаление — только с подтверждения человека.
