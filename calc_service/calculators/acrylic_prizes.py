@@ -54,7 +54,7 @@ class AcrylicPrizesCalculator(BaseCalculator):
                     "type": "array",
                     "required": True,
                     "title": "Слои",
-                    "description": "Список слоёв: [{materialID, size: [w,h], isTop, options: {isGrave, isCutLaser, isUVPrint}}]",
+                    "description": "Список слоёв: [{materialID, size: [w,h], isTop, options: {isGrave, isGraveFill, isGraveContur, isCutLaser, isUVPrint}}]",
                 },
                 {
                     "name": "mode",
@@ -96,6 +96,16 @@ class AcrylicPrizesCalculator(BaseCalculator):
                                     "type": "object",
                                     "properties": {
                                         "isGrave": {"type": "integer"},
+                                        "isGraveFill": {
+                                            "type": "array",
+                                            "items": {"type": "number"},
+                                            "description": "Заливка гравировки [w,h] мм",
+                                        },
+                                        "isGraveContur": {
+                                            "type": "array",
+                                            "items": {"type": "number"},
+                                            "description": "Контур гравировки [w,l] мм",
+                                        },
                                         "isCutLaser": {"type": "object"},
                                         "isUVPrint": {"type": "object", "description": "Область печати {size: [w,h]}"},
                                     },
@@ -172,10 +182,13 @@ class AcrylicPrizesCalculator(BaseCalculator):
                 }
                 if has_grave:
                     laser_params["is_grave"] = options["isGrave"]
-                    if "is_grave_fill" in options:
-                        laser_params["is_grave_fill"] = options["is_grave_fill"]
-                    if "is_grave_contur" in options:
-                        laser_params["is_grave_contur"] = options["is_grave_contur"]
+                    # Форма/JS шлют isGraveFill; старый snake_case тоже читаем.
+                    grave_fill = options.get("isGraveFill", options.get("is_grave_fill"))
+                    if grave_fill is not None:
+                        laser_params["is_grave_fill"] = grave_fill
+                    grave_contur = options.get("isGraveContur", options.get("is_grave_contur"))
+                    if grave_contur is not None:
+                        laser_params["is_grave_contur"] = grave_contur
                 if has_cut_laser:
                     cut_raw = options.get("isCutLaser")
                     laser_params["is_cut_laser"] = cut_raw if isinstance(cut_raw, dict) else {}
@@ -185,10 +198,11 @@ class AcrylicPrizesCalculator(BaseCalculator):
                     price_layer += laser_result["price"]
                     time_layer += laser_result["time_hours"]
                     weight_layer += laser_result.get("weight_kg", 0)
-                    time_ready_layer = max(time_ready_layer, laser_result.get("time_ready", 0))
                     materials_layer = _merge_materials(materials_layer, laser_result.get("materials", []))
+                    # Как в JS: timeReady операции только с первого вызова (mode > 0).
                     if mode_laser > 0:
                         mode_laser = 0
+                        time_ready_layer = max(time_ready_layer, laser_result.get("time_ready", 0))
                 except Exception:
                     pass
 
@@ -219,10 +233,10 @@ class AcrylicPrizesCalculator(BaseCalculator):
                     price_layer += uv_result["price"]
                     time_layer += uv_result["time_hours"]
                     weight_layer += uv_result.get("weight_kg", 0)
-                    time_ready_layer = max(time_ready_layer, uv_result.get("time_ready", 0))
                     materials_layer = _merge_materials(materials_layer, uv_result.get("materials", []))
                     if mode_uv > 0:
                         mode_uv = 0
+                        time_ready_layer = max(time_ready_layer, uv_result.get("time_ready", 0))
                 except Exception:
                     pass
 
@@ -233,10 +247,10 @@ class AcrylicPrizesCalculator(BaseCalculator):
                     price_layer += gluing_result.price
                     time_layer += gluing_result.time_hours
                     weight_layer += gluing_result.weight_kg
-                    time_ready_layer = max(time_ready_layer, gluing_result.time_ready)
                     materials_layer = _merge_materials(materials_layer, gluing_result.materials)
                     if mode_gluing > 0:
                         mode_gluing = 0
+                        time_ready_layer = max(time_ready_layer, gluing_result.time_ready)
                 except Exception:
                     pass
 

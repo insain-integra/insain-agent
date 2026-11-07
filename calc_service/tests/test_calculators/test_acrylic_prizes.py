@@ -15,6 +15,8 @@ if _calc_service.name == "calc_service" and str(_calc_service) not in sys.path:
 
 from calculators.acrylic_prizes import AcrylicPrizesCalculator
 
+JS_REL_TOL = 0.001  # 0.1%
+
 
 def _cmp(a: float, b: float, rel: float = 0.03) -> bool:
     return abs(a - b) <= rel * max(abs(b), 1e-9)
@@ -168,3 +170,117 @@ def test_expected_values_acrylic_prizes(ref_result):
     assert ok_time, f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
     assert ok_ready, f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
     assert ok_weight, f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
+
+
+# JS, 08.11.2026 — дефолт формы 78: 100 шт., 2× AcrylTrans3 20×20, рез+УФ оба слоя, mode 1
+# (ловит time_ready только при mode>0; эталон с одним УФ этого не ловит)
+# node scripts/run_js_calc.mjs calcAcrilycPrizes --data current --args
+# '[100,[{"materialID":"AcrylTrans3","size":[20,20],"isTop":true,"options":{"isCutLaser":{"lenCut":0,"sizeItem":0,"density":0,"difficulty":1.3},"isUVPrint":{"size":[20,20]}}},{"materialID":"AcrylTrans3","size":[20,20],"isTop":false,"options":{"isCutLaser":{"lenCut":0,"sizeItem":0,"density":0,"difficulty":1.3},"isUVPrint":{"size":[20,20]}}}],{},1]'
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "layers": [
+        {
+            "materialID": "AcrylTrans3",
+            "size": [20, 20],
+            "isTop": True,
+            "options": {
+                "isCutLaser": {"lenCut": 0, "sizeItem": 0, "density": 0, "difficulty": 1.3},
+                "isUVPrint": {"size": [20, 20]},
+            },
+        },
+        {
+            "materialID": "AcrylTrans3",
+            "size": [20, 20],
+            "isTop": False,
+            "options": {
+                "isCutLaser": {"lenCut": 0, "sizeItem": 0, "density": 0, "difficulty": 1.3},
+                "isUVPrint": {"size": [20, 20]},
+            },
+        },
+    ],
+    "mode": 1,
+}
+
+# JS, 08.11.2026 — weight JS 0.2856, API round 0.29 — в assert не входит
+EXPECTED_FORM_DEFAULT = {
+    "cost": 5599.45,
+    "price": 8977.92,
+    "time_hours": 2.48,
+    "time_ready": 35.17,
+}
+
+
+def test_expected_form_default(calc):
+    """JS, 08.11.2026: дефолт формы 78 — два слоя AcrylTrans3 с УФ, mode 1."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+
+
+# JS, 08.11.2026 — тот же дефолт формы 78, mode 0 (сроки операций не входят)
+# node scripts/run_js_calc.mjs calcAcrilycPrizes --data current --args
+# '[100,[{"materialID":"AcrylTrans3","size":[20,20],"isTop":true,"options":{"isCutLaser":{"lenCut":0,"sizeItem":0,"density":0,"difficulty":1.3},"isUVPrint":{"size":[20,20]}}},{"materialID":"AcrylTrans3","size":[20,20],"isTop":false,"options":{"isCutLaser":{"lenCut":0,"sizeItem":0,"density":0,"difficulty":1.3},"isUVPrint":{"size":[20,20]}}}],{},0]'
+REF_FORM_DEFAULT_MODE0 = {**REF_FORM_DEFAULT, "mode": 0}
+
+# JS, 08.11.2026
+EXPECTED_FORM_DEFAULT_MODE0 = {
+    "price": 7794.4,
+    "time_ready": 2.02,
+}
+
+
+def test_expected_form_default_mode0(calc):
+    """JS, 08.11.2026: дефолт формы 78, mode 0 — time_ready = time_hours."""
+    r = calc.execute(REF_FORM_DEFAULT_MODE0)
+    e = EXPECTED_FORM_DEFAULT_MODE0
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+
+
+# JS, 08.11.2026 — дефолт формы 78, на верхнем слое вместо УФ гравировка с заливкой
+# node scripts/run_js_calc.mjs calcAcrilycPrizes --data current --args
+# '[100,[{"materialID":"AcrylTrans3","size":[20,20],"isTop":true,"options":{"isCutLaser":{"lenCut":0,"sizeItem":0,"density":0,"difficulty":1.3},"isGrave":1,"isGraveFill":[20,20]}},{"materialID":"AcrylTrans3","size":[20,20],"isTop":false,"options":{"isCutLaser":{"lenCut":0,"sizeItem":0,"density":0,"difficulty":1.3},"isUVPrint":{"size":[20,20]}}}],{},1]'
+REF_FORM_GRAVE_FILL = {
+    "quantity": 100,
+    "layers": [
+        {
+            "materialID": "AcrylTrans3",
+            "size": [20, 20],
+            "isTop": True,
+            "options": {
+                "isCutLaser": {"lenCut": 0, "sizeItem": 0, "density": 0, "difficulty": 1.3},
+                "isGrave": 1,
+                "isGraveFill": [20, 20],
+            },
+        },
+        {
+            "materialID": "AcrylTrans3",
+            "size": [20, 20],
+            "isTop": False,
+            "options": {
+                "isCutLaser": {"lenCut": 0, "sizeItem": 0, "density": 0, "difficulty": 1.3},
+                "isUVPrint": {"size": [20, 20]},
+            },
+        },
+    ],
+    "mode": 1,
+}
+
+# JS, 08.11.2026
+EXPECTED_FORM_GRAVE_FILL = {
+    "cost": 6389.45,
+    "price": 10241.92,
+    "time_ready": 36.36,
+}
+
+
+def test_expected_form_grave_fill(calc):
+    """JS, 08.11.2026: дефолт формы 78, верхний слой isGrave+isGraveFill вместо УФ."""
+    r = calc.execute(REF_FORM_GRAVE_FILL)
+    e = EXPECTED_FORM_GRAVE_FILL
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
