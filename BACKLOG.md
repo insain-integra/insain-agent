@@ -38,7 +38,7 @@
 
 ## Skills без прогона
 
-- **new-calculator** и **json-price-rollout** ещё не прогнаны на реальной задаче. `ezfc-form-to-api` и `deploy-wp-plugin` прогнаны на форме 69. Чекбокс бывшего 5.5 не закрыт.
+- **new-calculator**, **json-price-rollout** и **finish-task** ещё не прогнаны на реальной задаче. `ezfc-form-to-api` и `deploy-wp-plugin` прогнаны на форме 69. Чекбокс бывшего 5.5 не закрыт.
 
 ## Каталог поставщиков
 
