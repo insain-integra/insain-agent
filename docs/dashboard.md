@@ -54,7 +54,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `supplier-catalog-load.md` | заблокировано: ждёт todo/supplier-parser.md |
 | `supplier-old-cleanup.md` | черновик |
 | `supplier-parser.md` | черновик |
-| `uv-print-prepare.md` | выкатка |
+| `uv-print-prepare.md` | закрытие |
 
 ## Репозиторий
 

@@ -1,6 +1,6 @@
 # uv-print-prepare
 
-Статус: выкатка
+Статус: закрытие
 Сложность: обычная
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -82,7 +82,7 @@ python -m pytest calc_service/tests/test_calculators/test_uv_print.py -q
 python -m pytest calc_service/tests/test_calculators/test_tablets.py calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_calculators/test_badge.py calc_service/tests/test_calculators/test_uv_badge.py calc_service/tests/test_calculators/test_shild.py calc_service/tests/test_calculators/test_acrylic_prizes.py -q
 ```
 
-- [ ] После деплоя (Site ops): дефолт формы 78 на боевом API равен JS. Тело — дефолт формы из блокера `form-acrylic-prizes` (100 шт., 2× AcrylTrans3 20×20, рез лазером и УФ на обоих слоях, mode 1); Implementer сверяет тело с раннером `calcAcrilycPrizes` и вписывает в отчёт. `price` = цене раннера (≈ 8977.92), разница ≤ 0.02 и `rel ≤ 0.001`; до правки было 9559.92.
+- [x] После деплоя (Site ops): дефолт формы 78 на боевом API равен JS. Тело — дефолт формы из блокера `form-acrylic-prizes` (100 шт., 2× AcrylTrans3 20×20, рез лазером и УФ на обоих слоях, mode 1); Implementer сверяет тело с раннером `calcAcrilycPrizes` и вписывает в отчёт. `price` = цене раннера (≈ 8977.92), разница ≤ 0.02 и `rel ≤ 0.001`; до правки было 9559.92.
 
 ```powershell
 $api = Invoke-RestMethod -Method Post -Uri https://insain.ru/api/v1/calc/acrylic_prizes -ContentType 'application/json' -Body '<тело дефолта формы 78>'
@@ -93,7 +93,7 @@ $api | Select-Object price
 
 - [x] `python scripts/dev.py check` — код выхода 0
 - [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
-- [ ] Деплой: `bash infra/deploy.sh` с `main`, smoke зелёный; откат — автооткат скрипта или образ `insain-agent-calc-api:rollback`.
+- [x] Деплой: `bash infra/deploy.sh` с `main`, smoke зелёный; откат — автооткат скрипта или образ `insain-agent-calc-api:rollback`.
 
 ## Риски
 
@@ -114,6 +114,8 @@ $api | Select-Object price
 - 2026-11-08 — Implementer, Opus 5.5 — подготовка УФ как в JS (mode 0 / timePrepareAround); эталоны раннера; callers зелёные; `dev.py check` зелёный; деплой не делал — дальше Reviewer (Grok 4.7)
 - 2026-11-08 — Reviewer, Grok 4.7 — принято — дальше человек: коммит и слияние
 - 2026-11-08 — человек — слито в main — дальше Site ops
+- 2026-11-08 — Site ops, Grok 4.7 — выкачен `e3ee707` (было `40113ff`), smoke зелёный, дефолт формы 78 `price=8977.92` (abs 0, rel 0); WordPress и копии не трогал — дальше человек: закрытие
+- 2026-11-08 — человек — принято — закрытие
 
 ## Ревью 1
 
@@ -148,14 +150,25 @@ $api | Select-Object price
   - callers (tablets/plaque/badge/uv_badge/shild/acrylic_prizes) — 61 passed
   - `python scripts/dev.py check` — 513 passed + 2 skipped (calc), 81 passed (bot), exit 0
   - локально дефолт формы 78: JS и Python `cost/price` = `5599.45/8977.92`
-- Не сделано и почему: деплой API и проверка боевого POST — Site ops после merge
-- Требуется решение: деплой API — Site ops
+- Не сделано и почему: нет. WordPress, плагин и копии форм не трогал — вне scope.
+- Требуется решение: человеку закрыть задачу.
 
-Тело для Site ops (дефолт формы 78, совпадает с раннером `8977.92`):
+Тело дефолта формы 78 (раннер `8977.92`). В черновике отчёта не хватало `}` у первого слоя; на прод ушло тело ниже:
 
 ```json
-{"quantity":100,"layers":[{"materialID":"AcrylTrans3","size":[20,20],"isTop":true,"options":{"isCutLaser":{"sizeItem":0,"density":0,"difficulty":1.3,"lenCut":0},"isUVPrint":{"size":[20,20]}},{"materialID":"AcrylTrans3","size":[20,20],"isTop":false,"options":{"isCutLaser":{"sizeItem":0,"density":0,"difficulty":1.3,"lenCut":0},"isUVPrint":{"size":[20,20]}}}],"mode":1}
+{"quantity":100,"layers":[{"materialID":"AcrylTrans3","size":[20,20],"isTop":true,"options":{"isCutLaser":{"sizeItem":0,"density":0,"difficulty":1.3,"lenCut":0},"isUVPrint":{"size":[20,20]}}},{"materialID":"AcrylTrans3","size":[20,20],"isTop":false,"options":{"isCutLaser":{"sizeItem":0,"density":0,"difficulty":1.3,"lenCut":0},"isUVPrint":{"size":[20,20]}}}],"mode":1}
 ```
+
+### Site ops, 2026-11-08
+
+- Выкачено: `bash infra/deploy.sh` на `insain-prod`, fast-forward `40113ff` → `e3ee707` (`Match UV prepare time to JS mode and timePrepareAround.`). Образ `insain-agent-calc-api:latest`, контейнер `insain-calc-api` healthy, `127.0.0.1:8002→8001`. В расчёте изменились `uv_print.py` и загрузка `timePrepareAround`; `calc_service/data/` не менялся. `wp-plugin/forms/embossing.js` попал в git на VDS вместе с более ранними коммитами `main`, в WordPress не ставился.
+- Чем проверено:
+  - smoke скрипта: `GET /api/v1/calculators` → 200, `POST /api/v1/calc/puzzle` → 200
+  - снаружи: `curl -fsS https://insain.ru/api/v1/calculators` — список, в нём `acrylic_prizes`
+  - `POST https://insain.ru/api/v1/calc/acrylic_prizes` телом выше: `cost=5599.45`, `price=8977.92`; к раннеру abs 0, rel 0 (порог ≤ 0.02 и ≤ 0.001). До правки было 9559.92
+- Откат: на VDS код `git reset --hard 40113ff`, образ `docker tag insain-agent-calc-api:rollback insain-agent-calc-api:latest` (id `0cf9855d94ea`), затем `docker compose -f docker-compose.calc-only.yml up -d --no-build --force-recreate`. Автооткат скрипта не срабатывал: smoke прошёл.
+
+Примите выкатку и закройте задачу («принято, закрывай»).
 
 ## Self-review
 
