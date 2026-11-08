@@ -43,7 +43,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-button-pins.md` | черновик |
 | `form-flag.md` | черновик |
 | `form-pennant.md` | черновик |
-| `form-rollup.md` | выкатка |
+| `form-rollup.md` | закрытие |
 | `forms-batch-switch.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |

@@ -1,6 +1,6 @@
 # form-rollup
 
-Статус: выкатка
+Статус: закрытие
 Сложность: средняя
 Implementer: Grok 4.7
 Reviewer: Auto
@@ -97,7 +97,7 @@ Select-String -Path wp-plugin\forms\rollup.js -Pattern "calcApi\('rollup'|syncUr
 python -m pytest calc_service/tests/test_wp_plugin_forms.py -q
 ```
 
-- [ ] Копия не на витрине. Одна строка со статусом `draft` или `private`. HTTP без cookies — `404`.
+- [x] Копия не на витрине. Одна строка со статусом `draft` или `private`. HTTP без cookies — `404`. Товар `2586886`: `draft`, код `404`.
 
 ```powershell
 ssh insain-prod "sudo -u www-data wp post get PRODUCT --field=post_status --path=/var/www/insain.ru"
@@ -106,9 +106,9 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 
 ### Критерии перевода формы ezFC на API
 
-- [ ] На копии под админом (`https://insain.ru/?post_type=product&p=PRODUCT&preview=true`) эталон даёт `POST /api/v1/calc/rollup` → 200, в теле коды материалов, не `0`. Цена на странице равна `price` API с округлением `showResult`. В «Результат» — код ответа и обе цены.
-- [ ] Смена каждого dropdown меняет цену и таблицу материалов. В таблице нет внутренних `code`. Есть вес и срок с подсказкой дат. Перезагрузка не меняет режим и срок.
-- [ ] URL обновляется GET-именами формы (имя параметра = имя элемента). Ссылка с этими GET открывает копию с теми же значениями и той же ценой. У dropdown с кодом в `data-value` — `GET_check=index`. У radio со значениями `1`/`2` — `GET_check=value`.
+- [x] На копии под админом (`https://insain.ru/?post_type=product&p=2586886&preview=true`) эталон даёт `POST /api/v1/calc/rollup` → 200, в теле коды материалов, не `0`. Цена на странице равна `price` API с округлением `showResult`. В «Результат» — код ответа и обе цены.
+- [x] Смена каждого dropdown меняет цену и таблицу материалов. В таблице нет внутренних `code`. Есть вес и срок с подсказкой дат. Перезагрузка не меняет режим и срок.
+- [x] URL обновляется GET-именами формы (имя параметра = имя элемента). Ссылка с этими GET открывает копию с теми же значениями и той же ценой. У dropdown с кодом в `data-value` — `GET_check=index`. У radio со значениями `1`/`2` — `GET_check=value`.
 
 ## Проверки
 
@@ -143,6 +143,14 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 
 2026-11-09 — Reviewer, Auto — принято по diff (rollup.py, test_rollup.py, rollup.js, js-runner-cases); копия и прод вне круга — дальше человек
 
+2026-11-09 — Site ops, Grok 4.7 — API `297c7fb` выкачен, копия формы 93 на черновике товара 2586886 считает `rollup`, эталон и GET сходятся — дальше человек (приёмка копии), затем Reviewer
+
+2026-11-09 — Implementer, Grok 4.7 — копия 93 на черновике 2586886 принята человеком 09.11.2026, строка в «Состав пакета» `todo/forms-batch-switch.md`; критерии по выводам Site ops закрыты — дальше Reviewer
+
+2026-11-09 — Reviewer, Auto — принято по отчёту Site ops и строке «Состав пакета» (git — «Ревью 1») — дальше человек
+
+- 09.11.2026 — человек — принято — закрытие
+
 ## Ревью 1
 
 - Вердикт: принято (git-часть; копия формы и прод в этот круг не входят).
@@ -152,22 +160,37 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 - желательно: включить в коммит неотслеживаемый `wp-plugin/forms/rollup.js`.
 - Чем проверено: `python scripts/js_port_gaps.py calcRollup` — «нет в Python» пусто; раннер эталона и дефолта совпал с `EXPECTED_*`; pytest `test_rollup.py` и `test_wp_plugin_forms.py` — 10 passed.
 
+## Ревью 2
+
+- Вердикт: принято (копия 93 / черновик 2586886, строка пакета; git-часть не пересматривалась — «Ревью 1»).
+- Копия: форма `93`, товар `2586886`, `draft`, без cookies `404`; `ezfc_form_id` `93`; расчёт `POST /api/v1/calc/rollup` — эталон и дефолт с `showResult` (4 500 / 8 000 руб.) по «Результат» Site ops.
+- GET: `numN`, `dpdRollup` / `dpdSize` / `dpdPoster` — `index`, `rdoModeProduction` — `value`; share-URL с эталоном — те же поля и 8 000 руб.; смена dropdown и перезагрузка в режиме 2 — по отчёту.
+- Ограничения scope соблюдены: боевая 49 на `calcRollup`, плагин не выкладывался, копия не удалялась. Режим 2 vs старый JS — решение человека 09.11.2026.
+- Строка пакета в `todo/forms-batch-switch.md`: `49 CalcRollup` | `rollup` | `/catalog/kalkulyator-rollapov/` | `93 / 2586886 (draft)` | `todo/form-rollup.md` — совпадает с заданием и diff.
+- желательно: при закрытии закоммитить незакоммиченные правки `todo/form-rollup.md`, `todo/forms-batch-switch.md` (и пересборку `docs/dashboard.md` из `make check` или вместе с ними).
+- Чем проверено: сверка критериев приёмки (копия, ezFC, GET) с разделом «Результат» и «Прогон копии»; `git diff -- todo/ docs/dashboard.md`; построчное сравнение строки 27 `todo/forms-batch-switch.md` с соседними формами пакета.
+
 ## Найдено вне scope
 
 - В списках формы есть сочетания, которых нет в `calc_service/data/materials/presswall.json`: `Rollup_econom_150`, `Rollup_econom_200`, `Rollup_standart_200`. На цену эталона и дефолта не влияет.
 - У элемента 2024 `options_source` — URL `http://vm-57d1b2fc.na4u.ru/calc/js/paper_test.json`. На странице в селекте значения `econom` / `standart` / `premium` из `data.options`.
+- В консоли админки и превью — `TypeError` из `insainParse` (`scrtp.js`), не из `insaincalc` и не из ezFC. Расчёт копии от этого не ломается.
 
 ## Результат
 
-- Ветка, PR или коммит: `task/form-rollup` от `main`, коммита нет.
+- Ветка, PR или коммит: `main`, HEAD `297c7fb` (fast-forward `task/form-rollup`), запушен в `origin/main`.
 - Период: 2026-11-09
 - Часы человека: не учтено
-- Работа агентов: Implementer, Grok 4.7 — правка `rollup.py`, эталон, `forms/rollup.js`
-- Было / стало: форма 49 на странице по-прежнему на `insaincalc.calcRollup`. Локальный расчёт: полчаса установки только при непустом постере; в печать уходит `mode.value`. Эталон — тираж 1, `Rollup_econom_85`, `ScrollPaper200`, mode 1, `price` 7910.
-- Сделано: порт `calcRollup` без пропусков. Временная сверка печати mode 1 (как JS) против раннера: mode 1 и 2, с `ScrollPaper200` и без постера, `price` и `time_ready` rel 0. Затем в печать возвращён `mode.value`. `test_rollup.py` и `wp-plugin/forms/rollup.js` (id боевой формы 49: 2019, 2024, 2020, 2043, 2039, расчёт 2026). GET на копии, когда до неё дойдёт Site ops: `dpdRollup`, `dpdSize`, `dpdPoster` — index; `rdoModeProduction` — value.
-- Чем проверено: раннер `--data current` — эталон `price` 7910, `time_ready` 24.95; дефолт без постера `price` 4482, `time_hours` 0, `time_ready` 24. Временная печать mode 1 против этого раннера (mode 1 и 2, с постером и без): `price` и `time_ready` rel 0. После возврата `mode.value` эталон mode 1 и дефолт без постера те же. `python scripts/js_port_gaps.py calcRollup` — в блоке `calcRollup` строка «нет в Python» пустая. `Select-String` по `rollup.js` — `calcApi`, `syncUrl`, `showResult`. `python -m pytest calc_service/tests/test_calculators/test_rollup.py calc_service/tests/test_wp_plugin_forms.py -q` — 10 passed. `python scripts/dev.py check` — код выхода 0 (539 passed, 81 passed).
-- Не сделано и почему: строка в `todo/forms-batch-switch.md` — после принятия копии. Дубль формы, GET и прогон — Site ops, и только после выкатки API. Боевой API до выкатки на дефолте без постера ещё отдаёт старый срок (`time_hours` 0.5, `time_ready` 24.5). Эталон с постером и mode 1 этой правкой не сдвигается, но skill запрещает дубль, пока дефолт не сойдётся. Выкатка API — не этот шаг: нужен merge в `main` и skill `deploy-api`.
-- Требуется решение: нет.
-- Строка в «Состав пакета» `todo/forms-batch-switch.md` (id копии и товар — после принятия копии):
+- Работа агентов: Implementer, Grok 4.7 — правка `rollup.py`, эталон, `forms/rollup.js`. Site ops, Grok 4.7 — выкатка API и копия формы.
+- Копия формы: `93` (`CalcRollup duplicate`). Черновик товара: `2586886`, «Калькулятор роллапов (Копировать)», `post_status` `draft`, `ezfc_form_id` `93`. Боевой товар `2586691` по-прежнему `publish` и форма `49`.
+- Было / стало: боевая страница https://insain.ru/catalog/kalkulyator-rollapov/ по-прежнему на `insaincalc.calcRollup`. Боевой API `297c7fb`: дефолт без постера `price` 4482, `time_hours` 0, `time_ready` 24; эталон `price` 7910, `time_ready` 24.95. Копия 93 на черновике считает `POST /api/v1/calc/rollup`.
+- Сделано: деплой API с `7799935` на `297c7fb`. Дубль формы 49 → 93, один раз. Черновик товара с боевого `2586691`. JS копии из `wp-plugin/forms/rollup.js` с id копии, `read_file` = 0. GET: `numN`; `dpdRollup`, `dpdSize`, `dpdPoster` — `index`; `rdoModeProduction` — `value`. Прогон под админом.
+- Чем проверено: GitHub Actions job `check` на `297c7fb` — `conclusion: success`, шаг `Run make check` success (run 42516836998). `bash infra/deploy.sh` на VDS: `7799935 → 297c7fb`, smoke `GET /api/v1/calculators` 200, `POST /api/v1/calc/puzzle` 200, контейнер `insain-calc-api` healthy, «297c7fb выкачен, smoke пройден». `POST https://insain.ru/api/v1/calc/rollup` дефолт `{"quantity":1,"rollup_id":"Rollup_econom_85","material_id":"","mode":1}` — HTTP 200, `price` 4482, `time_hours` 0, `time_ready` 24. Эталон `material_id` `ScrollPaper200` — HTTP 200, `price` 7910, `time_hours` 0.95, `time_ready` 24.95. SQL `ORDER BY id DESC LIMIT 3`: одна новая строка `93 CalcRollup duplicate`. `wp post get 2586886 --field=post_status` — `draft`. `wp post meta update 2586886 ezfc_form_id 93` — `Success: Updated custom field 'ezfc_form_id'.` `curl.exe` без cookies на `/?post_type=product&p=2586886` — `404`. `ezfc_copy_apply.php` без `apply`: `calcApi=0 → calcApi=1`, `rdoModeProduction` `index → value`, dropdown `index` без смены, `стоп` нет. С `apply`: бэкап `/tmp/ezfc-copy-93-20261108-200029.json`, шесть строк `записано`. Повторный SQL: у 2026 `calcApi` нет и `calcRollup` на месте; у 3520 `calcApi` есть, `read_file` 0. `wp litespeed-purge all` — `Got 400`; `wp cache flush` — `Success`. Превью отдало новый JS.
+- Прогон копии: дефолт POST 200, тело `Rollup_econom_85`, `material_id` пустой, mode 1, ответ `price` 4482; на странице 4 500 руб. (`insaincalc.round` до 4500). Эталон POST 200, тело `Rollup_econom_85` + `ScrollPaper200`, mode 1; на странице 8 000 руб. при `price` API 7910, вес 2.87 кг, в таблице имя стенда и скроллерной бумаги, количества 1 и 2.15, внутренних `code` нет. Смена типа 8 000 → 10 400 и имя «СТАНДАРТ»; смена размера 10 400 → 12 000, поле «100 х 200», вес 3.83. Режим «быстрее»: URL `rdoModeProduction=2`, срок «1 день»; после перезагрузки тот же режим и срок, подсказка `data-bs-original-title` с датами. Ссылка `?p=2586886&preview=true&numN=1&dpdRollup=0&dpdSize=0&dpdPoster=1&rdoModeProduction=1` открывает эконом / 85 / постер и 8 000 руб. Боевая форма на тех же значениях: тоже 8 000 руб., вес 2.87, «Срок 3 дня». Цена менеджера и «со скидкой» в одной строке (y=555), режим внутри `ezfc_element-3531`. Ошибок `insaincalc` и ezFC в консоли нет.
+- Как откатить: API — на VDS код на `7799935` и образ `insain-agent-calc-api:rollback` (`15e911504102`), как ветка отката в `infra/deploy.sh`. JS копии — строки из `/tmp/ezfc-copy-93-20261108-200029.json`. Копию 93 и черновик 2586886 не удалял.
+- Приёмка копии: человек 09.11.2026 написал «принято» — копия формы 93 на черновике товара 2586886. Критерии приёмки по выводам Site ops закрыты (копия не на витрине, прогон под админом, GET).
+- Не сделано и почему: боевая форма 49 не переключалась, плагин не выкладывался, копия и черновик не удалялись — так задано. `wp litespeed-purge all` вернул 400; превью после `wp cache flush` уже было на новом JS, отдельный `purge url` не понадобился.
+- Требуется решение: нет. Дальше человек: закрытие (`python scripts/dev.py close form-rollup` после коммита правок `todo/`).
+- Строка в «Состав пакета» `todo/forms-batch-switch.md` записана после приёмки:
 
-| 49 CalcRollup | `rollup` | /catalog/kalkulyator-rollapov/ | COPY / PRODUCT (draft) | todo/form-rollup.md |
+| 49 CalcRollup | `rollup` | /catalog/kalkulyator-rollapov/ | 93 / 2586886 (draft) | todo/form-rollup.md |
