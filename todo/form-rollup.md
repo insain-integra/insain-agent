@@ -1,6 +1,6 @@
 # form-rollup
 
-Статус: ревью
+Статус: выкатка
 Сложность: средняя
 Implementer: Grok 4.7
 Reviewer: Auto
