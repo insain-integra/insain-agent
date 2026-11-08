@@ -1,6 +1,6 @@
 # form-presswall
 
-Статус: заблокировано: ждёт todo/presswall-banner-options.md
+Статус: черновик
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -20,7 +20,7 @@ Site ops: Opus 5.5
 - `todo/forms-batch-switch.md` — в конце одна строка в «Состав пакета».
 - `todo/EPIC-forms-to-api.md` — очередь, после `todo/form-rollup.md`.
 - `docs/js-runner-cases.md` — команда раннера и `price` для `calcPresswall`.
-- Эталон: кейсы с креплением в `calc_service/tests/test_calculators/test_presswall.py` от `todo/presswall-banner-options.md` — тираж 1, `Joker30_20_eyelet`, `BannerFronlitCoat400`, каркас да, аренда 0; люверсы `is_eyelet [300,300,300,300]` (mode 1 и 2), карман `is_pocket [1,0,1,0]` + `is_cutting [0,1,0,1]`, люверсы с чехлом `bag160`. `REF_PARAMS` без крепления на форме недостижим (dpdAttachment всегда даёт одну из опций) — для сверки формы не годится. Порог `price` — прогон JS против API, не число из файла. Тираж ≥ 2 не добавлять. JS: `js_legacy/calc/calcPresswall.js`, сигнатура `calcPresswall(n, presswallID, materialID, options, modeProduction)`.
+- Эталон: кейсы с креплением в `calc_service/tests/test_calculators/test_presswall.py` от `presswall-banner-options` (закрыто 2026-11-09, `docs/history/log.md`) — тираж 1, `Joker30_20_eyelet`, `BannerFronlitCoat400`, каркас да, аренда 0; люверсы `is_eyelet [300,300,300,300]` (mode 1 и 2), карман `is_pocket [1,0,1,0]` + `is_cutting [0,1,0,1]`, люверсы с чехлом `bag160`. `REF_PARAMS` без крепления на форме недостижим (dpdAttachment всегда даёт одну из опций) — для сверки формы не годится. Порог `price` — прогон JS против API, не число из файла. Тираж ≥ 2 не добавлять. JS: `js_legacy/calc/calcPresswall.js`, сигнатура `calcPresswall(n, presswallID, materialID, options, modeProduction)`.
 - Форма 46, cjsCalc 1862: dpdAttachment = люверсы — `options.isEyelet = [300,300,300,300]`; карман — `isPocket = [1,0,1,0]` и `isCutting = [0,1,0,1]`.
 - Остальное не открывать.
 
@@ -144,7 +144,7 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 Следующая сессия: Analyst, модель Opus 5.5
 ```
 
-08.11.2026 — Analyst, Opus 5.5 — задача-предпосылка `todo/presswall-banner-options.md` (крепление, плюс найденные раннером люверсы `calc_eyelet`, режим баннера, чехол); эталон — кейс с креплением, `forms/presswall.js` передаёт крепление и чехол, допуск веса `abs=0.02` — дальше человек: после закрытия предпосылки `черновик`, Implementer — `git rebase main`
+08.11.2026 — Analyst, Opus 5.5 — задача-предпосылка `presswall-banner-options` (закрыто 2026-11-09, `docs/history/log.md`) (крепление, плюс найденные раннером люверсы `calc_eyelet`, режим баннера, чехол); эталон — кейс с креплением, `forms/presswall.js` передаёт крепление и чехол, допуск веса `abs=0.02` — дальше человек: после закрытия предпосылки `черновик`, Implementer — `git rebase main`
 
 ## Найдено вне scope
 
@@ -159,7 +159,7 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 - Сделано:
 - Чем проверено:
 - Не сделано и почему: эталон в `test_presswall.py` и `wp-plugin/forms/presswall.js` — стоп на сверке, блокер в «Журнал передач». Поля формы 46 для будущего `forms/presswall.js`: numN 1843, dpdPresswall 1844, dpdAttachment 1845, dpdBanner 1879, dpdBag 1880, numDays 1882, rdoPresswal 1883 (isPresswall / isRent / noPresswall — «свой прессвол» в API: is_presswall=false, is_rent=0), rdoModeProduction 1875, cjsCalc 1862.
-- Требуется решение: нет — ждёт `todo/presswall-banner-options.md`.
+- Требуется решение: нет — ждёт `presswall-banner-options` (закрыто 2026-11-09, `docs/history/log.md`).
 - Строка в «Состав пакета» `todo/forms-batch-switch.md` (id копии и товар — после принятия копии):
 
 | 46 CalcPresswall | `presswall` | /catalog/kalkulyator-pressvolov/ | COPY / PRODUCT (draft) | todo/form-presswall.md |

@@ -69,3 +69,4 @@
 - Из `form-acrylic-prizes`: В `acrylic_prizes.py` при гравировке читается `is_grave_fill`, а боевой cjsCalc/JS кладут `isGraveFill` — вынесено в `acrylic-prizes-port-fix` (закрыто 2026-11-08, `docs/history/log.md`).
 - Из `form-acrylic-prizes`: В dropdown формы 77 `dpdMaterial` нет кода `PVC3` (эталон git/API); на странице для проверки брать материал из списка формы и сверять цену с `POST` на тех же слоях.
 - Из `form-acrylic-prizes`: При дубле формы 78 создались две копии **90** и **91**; рабочая — **91**. Форма **90** лишняя, удаление — только с подтверждения человека.
+- Из `presswall-banner-options`: `STATUS.md`, раздел Git: снимок всё ещё `e52e947` (25–28.10.2026). На VDS до этой выкатки был `511c660`. Файл не правил.

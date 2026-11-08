@@ -15,8 +15,8 @@
 - `form-embossing` (закрыто 2026-11-07, `docs/history/log.md`) — копия 85
 - `form-acrylic-prizes` (закрыто 2026-11-08, `docs/history/log.md`) — копия 78
 - `todo/form-rollup.md` — копия 49
-- `todo/presswall-banner-options.md` — предпосылка формы 46: крепление, люверсы, режим баннера и чехол в `presswall` API
-- `todo/form-presswall.md` — копия 46, после `todo/presswall-banner-options.md`
+- `presswall-banner-options` (закрыто 2026-11-09, `docs/history/log.md`) — предпосылка формы 46: крепление, люверсы, режим баннера и чехол в `presswall` API
+- `todo/form-presswall.md` — копия 46
 - `todo/form-pennant.md` — копия 73
 - `todo/form-flag.md` — копия 55
 - `todo/forms-batch-switch.md` — пачка 1 на боевые: 69, 26, 41
