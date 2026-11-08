@@ -35,7 +35,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **14**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **15**. В работе/ревью: `dashboard-harness.md`, `presswall-banner-options.md`. Заблокировано: `form-presswall.md`, `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -43,10 +43,11 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-button-pins.md` | черновик |
 | `form-flag.md` | черновик |
 | `form-pennant.md` | черновик |
-| `form-presswall.md` | черновик |
+| `form-presswall.md` | заблокировано: ждёт todo/presswall-banner-options.md |
 | `form-rollup.md` | черновик |
 | `forms-batch-switch.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
+| `presswall-banner-options.md` | выкатка |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
 | `smartcaptcha-replace.md` | черновик |
 | `spam-users-cleanup.md` | заблокировано: ждёт todo/registration-harden.md |
