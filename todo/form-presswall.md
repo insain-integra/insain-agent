@@ -183,7 +183,7 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 - Раннер `calcPresswall` с баннером `BannerFronlitLamin440` (ламинированный 440) падает «Поле weight_kg не число (NaN)» — старый JS не считает вес этого баннера; API отдаёт цену (каркас 2,5×2,5 + карман: 12790.624). Сверку JS и API на ламинированном баннере сделать нечем.
 ## Результат
 
-- Ветка, PR или коммит: `task/form-presswall` от `main` f0d1f4b; коммит — после шага 5 finish-task.
+- Ветка, PR или коммит: `task/form-presswall` `94f1838`
 - Период: 08.11.2026 – 09.11.2026
 - Часы человека: не учтено
 - Работа агентов:
