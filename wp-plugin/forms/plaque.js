@@ -6,7 +6,9 @@ var materialId = ezfc_functions.get_value_from(2776, true)[0];
 var materialIndex = ezfc_functions.get_value_from(2776, true, false, { return_value: 'index' })[0];
 var applicationId = ezfc_functions.get_value_from(2779, true)[0];
 var applicationIndex = ezfc_functions.get_value_from(2779, true, false, { return_value: 'index' })[0];
-var mode = Number(ezfc_functions.get_value_from(2796, true)[0]) || 1;
+var modeRaw = ezfc_functions.get_value_from(2796, true)[0];
+var modeNum = Number(modeRaw);
+var mode = (modeRaw === '' || modeRaw == null || isNaN(modeNum)) ? 1 : modeNum;
 
 insaincalc.syncUrl({
     numN: qty,

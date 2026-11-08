@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 FORMS = Path(__file__).resolve().parents[2] / "wp-plugin" / "forms"
@@ -40,9 +41,15 @@ def test_form_js_has_form_default_reference():
     assert not missing, "\n".join(missing)
 
 
-def test_mug_keeps_mode_zero():
-    """Режим 0 («дешевле») не должен превращаться в 1 через ||."""
-    text = (FORMS / "mug.js").read_text(encoding="utf-8")
-    assert "get_value_from(1617, true)[0]) || 1" not in text
-    assert "modeRaw == null || isNaN(modeNum)" in text
-    assert "rdoModeProduction: mode" in text
+def test_forms_keep_mode_zero():
+    """Режим 0 («дешевле») не превращается в 1 через ||, даже если сейчас в форме его нет."""
+    bad = []
+    for path in sorted(FORMS.glob("*.js")):
+        text = path.read_text(encoding="utf-8")
+        if "rdoModeProduction" not in text:
+            continue
+        if re.search(r"get_value_from\(\d+, true\)\[0\]\)\s*\|\|\s*1", text):
+            bad.append(f"{path.name}: режим через || 1")
+        elif "modeRaw == null || isNaN(modeNum)" not in text:
+            bad.append(f"{path.name}: нет проверки пустого режима, как в mug.js")
+    assert not bad, "\n".join(bad)

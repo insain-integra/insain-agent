@@ -13,7 +13,9 @@ var surfaceIndex = ezfc_functions.get_value_from(891, true, false, { return_valu
 var materialIndex = ezfc_functions.get_value_from(896, true, false, { return_value: 'index' })[0];
 var presetRaw = ezfc_functions.get_value_from(933, true)[0];
 var presetIndex = ezfc_functions.get_value_from(933, true, false, { return_value: 'index' })[0];
-var mode = Number(ezfc_functions.get_value_from(2866, true)[0]) || 1;
+var modeRaw = ezfc_functions.get_value_from(2866, true)[0];
+var modeNum = Number(modeRaw);
+var mode = (modeRaw === '' || modeRaw == null || isNaN(modeNum)) ? 1 : modeNum;
 // Чекбокс: get_value_from → [true]/0/'true'; без [0], как в старом calcUVPrint cjsCalc
 var isNumber = ezfc_functions.get_value_from(901, true) == 'true';
 var isBarcode = ezfc_functions.get_value_from(902, true) == 'true';
