@@ -1,11 +1,11 @@
 # form-pennant
 
 Статус: черновик
-Сложность: высокая
-Implementer: Opus 5.5
-Reviewer: Grok 4.7
-Site ops: Opus 5.5
-Почему: режим прод и два контура — `wp-plugin/forms/pennant.js` в git и WordPress (дубль, GET на копии, прогон под админом).
+Сложность: средняя
+Implementer: Grok 4.7
+Reviewer: Auto
+Site ops: Grok 4.7
+Почему: типовая форма серии по skill `ezfc-form-to-api`, калькулятор уже на API; прод — только копия формы по шагам skill.
 Чат: человек открывает новый чат с моделью из поля Implementer.
 
 ## Цель

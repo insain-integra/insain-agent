@@ -1,11 +1,11 @@
 # form-button-pins
 
 Статус: черновик
-Сложность: высокая
-Implementer: Opus 5.5
-Reviewer: Grok 4.7
-Site ops: Opus 5.5
-Почему: новый публичный slug и форма на проде, два контура.
+Сложность: средняя
+Implementer: Grok 4.7
+Reviewer: Auto
+Site ops: Grok 4.7
+Почему: калькулятор-обёртка над готовой `calc_button_pins` по skill `new-calculator`; прод — выкатка по `deploy-api` и копия формы по `ezfc-form-to-api`.
 Чат: сначала Implementer (калькулятор), затем копия формы — Site ops по skill `ezfc-form-to-api`.
 
 ## Цель
