@@ -8,6 +8,7 @@
   python scripts/dev.py status
   python scripts/dev.py restart bot
   python scripts/dev.py check
+  python scripts/dev.py usage <выгрузка Usage из Cursor.csv>
 
 Переменные окружения (опционально):
   CALC_HOST   — по умолчанию 127.0.0.1
@@ -253,16 +254,25 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Запуск/остановка calc_service и бота")
     parser.add_argument(
         "action",
-        choices=("start", "stop", "restart", "status", "check", "close", "dashboard"),
+        choices=("start", "stop", "restart", "status", "check", "close", "dashboard", "usage"),
         help="действие",
     )
     parser.add_argument(
         "service",
         nargs="?",
         default=None,
-        help="сервис (calc|bot|all) или имя задачи для close",
+        help="сервис (calc|bot|all), имя задачи для close или CSV для usage",
     )
     args = parser.parse_args()
+
+    if args.action == "usage":
+        if not args.service:
+            sys.exit("нужен CSV из кабинета Cursor: python scripts/dev.py usage <файл.csv>")
+        sys.path.insert(0, str(Path(__file__).parent))
+        from usage_report import main as usage_main
+
+        usage_main(args.service)
+        return
 
     if args.action == "check":
         cmd_check()

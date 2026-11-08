@@ -8,6 +8,7 @@
 | [passport.md](passport.md) | Дата старта, цель, исходное состояние | один раз; правка — только уточнение фактов |
 | [log.md](log.md) | Журнал крупных задач и этапов | команда `python scripts/dev.py close <имя>` |
 | [snapshots.md](snapshots.md) | Срезы состояния с одинаковым набором метрик | та же команда, если в месяце ещё нет среза |
+| [usage.md](usage.md) | Расход ИИ-агентов: доля Opus, Grok, Auto, кэш | раз в неделю, `python scripts/dev.py usage <csv>` |
 
 ## Правила
 
