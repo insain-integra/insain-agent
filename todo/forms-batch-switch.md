@@ -24,7 +24,7 @@ Site ops: Opus 5.5
 | 85 CalcEmbossing | `embossing` | `/catalog/kalkulyator-tisneniya/` | 89 / 2586883 (draft) | копия принята 07.11.2026, `form-embossing` (закрыто 2026-11-07, `docs/history/log.md`) |
 | 78 CalcAcrilycPrizes | `acrylic_prizes` | `/catalog/kalkulyator-akrilovyh-prizov/` | 91 / 2586884 (draft) | копия принята 08.11.2026, `form-acrylic-prizes` (закрыто 2026-11-08, `docs/history/log.md`) |
 | 46 CalcPresswall | `presswall` | `/catalog/kalkulyator-pressvolov/` | 92 / 2586885 (draft) | копия принята 09.11.2026, `form-presswall` |
-| 49 CalcRollup | `rollup` | `/catalog/kalkulyator-rollapov/` | 93 / 2586886 (draft) | todo/form-rollup.md |
+| 49 CalcRollup | `rollup` | `/catalog/kalkulyator-rollapov/` | 93 / 2586886 (draft) | копия принята 09.11.2026, `form-rollup` (закрыто 2026-11-09, `docs/history/log.md`) |
 
 ## Контекст и ссылки
 

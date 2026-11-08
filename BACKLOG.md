@@ -73,3 +73,6 @@
 - Из `form-presswall`: `weight_kg` presswall на эталоне: раннер 9.79, Python и боевой API 9.78 (rel 0.00102) — presswall.py суммирует вес баннера, уже округлённый print_roll до 0.01. Учтено: допуск `abs=0.02` в assert веса.
 - Из `form-presswall`: skill `ezfc-form-to-api` (verify.md, шаг 1а) требует строку раннера дефолта в `docs/js-runner-cases.md`; файла нет в «Файлы» задачи — команда только в комментарии `REF_FORM_DEFAULT`.
 - Из `form-presswall`: Раннер `calcPresswall` с баннером `BannerFronlitLamin440` (ламинированный 440) падает «Поле weight_kg не число (NaN)» — старый JS не считает вес этого баннера; API отдаёт цену (каркас 2,5×2,5 + карман: 12790.624). Сверку JS и API на ламинированном баннере сделать нечем.
+- Из `form-rollup`: В списках формы есть сочетания, которых нет в `calc_service/data/materials/presswall.json`: `Rollup_econom_150`, `Rollup_econom_200`, `Rollup_standart_200`. На цену эталона и дефолта не влияет.
+- Из `form-rollup`: У элемента 2024 `options_source` — URL `http://vm-57d1b2fc.na4u.ru/calc/js/paper_test.json`. На странице в селекте значения `econom` / `standart` / `premium` из `data.options`.
+- Из `form-rollup`: В консоли админки и превью — `TypeError` из `insainParse` (`scrtp.js`), не из `insaincalc` и не из ezFC. Расчёт копии от этого не ломается.
