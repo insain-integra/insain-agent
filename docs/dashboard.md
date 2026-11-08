@@ -35,7 +35,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **14**. В работе/ревью: `dashboard-harness.md`, `form-presswall.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **13**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -43,7 +43,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-button-pins.md` | черновик |
 | `form-flag.md` | черновик |
 | `form-pennant.md` | черновик |
-| `form-presswall.md` | ревью |
 | `form-rollup.md` | черновик |
 | `forms-batch-switch.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
@@ -62,8 +61,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-09 — form-presswall
 - 2026-11-09 — presswall-banner-options
 - 2026-11-08 — form-acrylic-prizes
 - 2026-11-08 — acrylic-prizes-port-fix
 - 2026-11-08 — uv-print-prepare
-- 2026-11-07 — form-embossing
