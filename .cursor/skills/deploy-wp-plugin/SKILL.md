@@ -9,7 +9,7 @@ description: Выкладка плагина insain-calc-bridge из wp-plugin/ 
 
 Деплой плагина входит в «Делай самостоятельно» в `.cursor/rules/insain-site-autonomous.mdc`. Плагин на прод попадает только архивом через `wp plugin install` от `www-data`: `rsync` и `cp` от root недоступны, отдельные файлы в `wp-content` не подкладывать.
 
-API этой командой не деплоить. Выкатка `calc_service` — `bash infra/deploy.sh` с `main` (skill `json-price-rollout`, раздел «Деплой API» в `AGENTS.md`).
+API этой командой не деплоить. Выкатка `calc_service` — `bash infra/deploy.sh` с `main` (skill `deploy-api`; цены — skill `json-price-rollout`).
 
 Правки форм ezFC в админке (дубль, `read_file`, снимки) в этот skill не входят — это skill `ezfc-form-to-api`.
 

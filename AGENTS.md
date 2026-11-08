@@ -48,31 +48,14 @@ Windows/PowerShell: `&&` не работает, разделитель `;`. Ес
 | Локальный API | `make calc-up` → http://127.0.0.1:8001, `make calc-down`, `make status` |
 | Сверка реестра калькуляторов с API | `python bot_service/check_calc_registry.py` (нужен запущенный API) |
 
-### Деплой API (только с `main`)
+### Прод
 
-Деплоить только коммит с зелёным CI (GitHub Actions, `make check`).
-
-```bash
-ssh insain-prod            # с первого раза может отвалиться по таймауту — повторить
-cd /opt/insain-agent
-bash infra/deploy.sh       # main + чистое дерево → tag rollback → pull → build → smoke → автооткат
-curl -fsS https://insain.ru/api/v1/calculators | head -c 200
-```
-
-Smoke в скрипте: `GET /api/v1/calculators` и `POST /api/v1/calc/puzzle`. Упал — скрипт сам откатывает код
-и образ на `insain-agent-calc-api:rollback` и выходит с ненулевым кодом. Проверка отката без поломки прода:
-`SMOKE_EXTRA_PATH=/api/v1/nonexistent bash infra/deploy.sh`. Затем smoke на странице калькулятора.
-Git на VDS: `git -c safe.directory=/opt/insain-agent -C /opt/insain-agent …`.
-
-### Деплой плагина и WordPress
-
-- Плагин: `git archive HEAD:wp-plugin` → `scp` в `/tmp` → `sudo -u www-data wp plugin install <zip> --force --activate --path=/var/www/insain.ru`.
+- Деплой API — только с `main` и зелёным CI, `bash infra/deploy.sh` на VDS: skill `deploy-api`.
+  Плагин — skill `deploy-wp-plugin`; цена в JSON — `json-price-rollout`; форма ezFC на API — `ezfc-form-to-api`.
 - Любой wp-cli: `sudo -u www-data wp … --path=/var/www/insain.ru`. Warning `Wt::__wakeup()` — шум.
-- Каналы доступа к WP (wp-cli, REST, Browser MCP) и ограничения по объектам — `docs/site/access-tools.md`.
-- **Формы ezFC:** блок результата переведённой формы (цена, срок, материалы) — как у формы 79, см. `docs/ezfc-api-migration.md`. Структуру форм правят в админке ezFC; после правки агент снимает форму в репозиторий
-  (история и diff, не источник для заливки — обратный импорт ломает id элементов). Custom JS переведённых
-  на API форм — источник правды в git, в составе плагина. Детали — `docs/site/access-tools.md`,
-  раздел «Принятый режим». Реестр форм — `docs/site/forms.md`.
+  Каналы доступа к WP и ограничения по объектам — `docs/site/access-tools.md`.
+- **Формы ezFC:** структуру правят в админке ezFC, снимок в git — для истории и diff; обратный импорт
+  ломает id элементов. Custom JS форм на API — источник правды в git, в плагине. Реестр — `docs/site/forms.md`.
 - Товары WooCommerce и каталог поставщиков — перед любой правкой прочитать `docs/site/content-inventory.md`.
 
 ## Git

@@ -129,4 +129,4 @@ description: Заведение нового калькулятора в calc_se
 
     Ожидается: `calc_service/calculators/<slug>.py`, `calc_service/calculators/__init__.py`, `calc_service/tests/test_calculators/test_<slug>.py`, при необходимости JSON в `calc_service/data/` и файл задачи. Других файлов нет, отладочных `print` нет.
 
-14. Self-review — чеклист «Перед сдачей» в `AGENTS.md`, коммит в ветку задачи по просьбе человека. Выкатка API после merge в `main` — `bash infra/deploy.sh` (раздел «Деплой API» в `AGENTS.md`). Подключение калькулятора к форме сайта — skill `ezfc-form-to-api`, отдельной задачей.
+14. Self-review — чеклист «Перед сдачей» в `AGENTS.md`, коммит в ветку задачи по просьбе человека. Выкатка API после merge в `main` — `bash infra/deploy.sh` (skill `deploy-api`). Подключение калькулятора к форме сайта — skill `ezfc-form-to-api`, отдельной задачей.

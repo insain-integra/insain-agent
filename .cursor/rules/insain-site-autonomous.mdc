@@ -5,7 +5,7 @@ alwaysApply: false
 
 # Сайт insain.ru — режим автономной работы
 
-Прод-операции. Запреты, git, цены и процедура деплоя API — в [AGENTS.md](../../AGENTS.md), здесь не дублируются.
+Прод-операции. Запреты, git и цены — в [AGENTS.md](../../AGENTS.md), процедура деплоя API — skill `deploy-api`; здесь не дублируются.
 
 ## Контекст
 - Прод: https://insain.ru
@@ -25,7 +25,7 @@ alwaysApply: false
 
 ## Делай самостоятельно
 - Правки wp-plugin/, calc_service/, infra/; pytest перед деплоем
-- Деплой API — только раздел «Деплой API» в AGENTS.md: ветка main, bash infra/deploy.sh
+- Деплой API — только по skill deploy-api: ветка main, bash infra/deploy.sh
   (ворота и автооткат внутри). Ручной git pull и docker compose для выкатки API не использовать
 - Деплой плагина через wp plugin install (см. выше)
 - Проверка страниц через Browser MCP; Network: /api/v1/

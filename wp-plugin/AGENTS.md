@@ -10,7 +10,7 @@
 
 ## Деплой плагина
 
-На прод плагин попадает архивом через `wp plugin install <zip> --force --activate` от пользователя `www-data`. Цепочка архивации и `scp` — в корневом `AGENTS.md`. Отдельные файлы в `wp-content` не подкладывать.
+На прод плагин попадает архивом через `wp plugin install <zip> --force --activate` от пользователя `www-data`. Цепочка архивации и `scp` — skill `deploy-wp-plugin`. Отдельные файлы в `wp-content` не подкладывать.
 
 ## Формы ezFC
 
