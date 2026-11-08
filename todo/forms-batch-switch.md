@@ -23,6 +23,7 @@ Site ops: Opus 5.5
 | 41 CalcMug | `mug` | `/catalog/kalkulyator-sublimaczionnoj-pechati-na-kruzhki/` | 88 / 2586882 (draft) | `form-mug` (закрыто 2026-11-07, `docs/history/log.md`) |
 | 85 CalcEmbossing | `embossing` | `/catalog/kalkulyator-tisneniya/` | 89 / 2586883 (draft) | копия принята 07.11.2026, `form-embossing` (закрыто 2026-11-07, `docs/history/log.md`) |
 | 78 CalcAcrilycPrizes | `acrylic_prizes` | `/catalog/kalkulyator-akrilovyh-prizov/` | 91 / 2586884 (draft) | копия принята 08.11.2026, `form-acrylic-prizes` (закрыто 2026-11-08, `docs/history/log.md`) |
+| 46 CalcPresswall | `presswall` | `/catalog/kalkulyator-pressvolov/` | 92 / 2586885 (draft) | копия принята 09.11.2026, `form-presswall` |
 
 ## Контекст и ссылки
 

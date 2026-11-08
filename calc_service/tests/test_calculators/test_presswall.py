@@ -273,3 +273,28 @@ EXPECTED_EYELET_BAG160 = {
 def test_js_ref_eyelet_bag160(calc):
     """JS, 08.11.2026: люверсы + bag160, mode 1."""
     _assert_js_ref(calc.execute(REF_EYELET_BAG160), EXPECTED_EYELET_BAG160)
+
+
+# JS, 09.11.2026 — дефолт боевой формы 46: без баннера, люверсы, без чехла, изготовить, mode 1
+# node scripts/run_js_calc.mjs calcPresswall --data current --args
+# '[1,"Joker30_20_eyelet","",{"isPresswall":true,"isEyelet":[300,300,300,300]},1]'
+REF_FORM_DEFAULT = {
+    "quantity": 1,
+    "presswall_id": "Joker30_20_eyelet",
+    "material_id": "",
+    "is_presswall": True,
+    "is_rent": 0,
+    "is_eyelet": [300, 300, 300, 300],
+    "mode": 1,
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 4270,
+    "price": 7006.624,
+    "time_ready": 17.72,
+    "weight_kg": 7.38,
+}
+
+
+def test_js_ref_form_default(calc):
+    """JS, 09.11.2026: дефолт формы 46 (без баннера)."""
+    _assert_js_ref(calc.execute(REF_FORM_DEFAULT), EXPECTED_FORM_DEFAULT)

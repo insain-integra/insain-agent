@@ -1,6 +1,6 @@
 # form-presswall
 
-Статус: черновик
+Статус: закрытие
 Сложность: высокая
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -56,20 +56,20 @@ Site ops: Opus 5.5
 
 Каждый пункт — команда и ожидаемый результат. `COPY` и `PRODUCT` — id копии и черновика из отчёта. В PowerShell 5.1 кавычки JSON внутри аргумента экранируются `\"`, как в skill.
 
-- [ ] Порт. В блоке `calcPresswall` строка `нет в Python:` пустая или каждая позиция уже есть в `scripts/js_port_gaps_allowed.txt`.
+- [x] Порт. В блоке `calcPresswall` строка `нет в Python:` пустая или каждая позиция уже есть в `scripts/js_port_gaps_allowed.txt`.
 
 ```powershell
 python scripts/js_port_gaps.py calcPresswall
 ```
 
-- [ ] Раннер на кейсе дефолта формы 46 (тираж 1, с креплением) печатает `price`. Ниже — образец на люверсах, mode 1 (08.11.2026: 13914.624); поля подставить из дефолта формы, команды других кейсов — `docs/js-runner-cases.md`. 404 API, API без `is_eyelet` в `tool_schema` или расхождение — стоп, форму не дублировать. Калькулятор и `calc_service/data/` не править.
+- [x] Раннер на кейсе дефолта формы 46 (тираж 1, с креплением) печатает `price`. Ниже — образец на люверсах, mode 1 (08.11.2026: 13914.624); поля подставить из дефолта формы, команды других кейсов — `docs/js-runner-cases.md`. 404 API, API без `is_eyelet` в `tool_schema` или расхождение — стоп, форму не дублировать. Калькулятор и `calc_service/data/` не править.
 
 ```powershell
 node scripts/run_js_calc.mjs calcPresswall --data current --args '[1,\"Joker30_20_eyelet\",\"BannerFronlitCoat400\",{\"isPresswall\":true,\"isRent\":0,\"isEyelet\":[300,300,300,300]},1]'
 Invoke-RestMethod -Method Post -Uri https://insain.ru/api/v1/calc/presswall -ContentType 'application/json' -Body '{"quantity":1,"presswall_id":"Joker30_20_eyelet","material_id":"BannerFronlitCoat400","is_presswall":true,"is_rent":0,"is_eyelet":[300,300,300,300],"mode":1}' | Select-Object price, time_ready
 ```
 
-- [ ] `price` раннера и API: абсолютная разница ≤ 0.02 и относительная ≤ 0.001. Подставить оба числа. Stdout начинается с `ok`.
+- [x] `price` раннера и API: абсолютная разница ≤ 0.02 и относительная ≤ 0.001. Подставить оба числа. Stdout начинается с `ok`.
 
 ```powershell
 $OutputEncoding = New-Object System.Text.UTF8Encoding $false
@@ -83,25 +83,25 @@ print("ok", js, api, abs_d, rel)
 '@ | python -
 ```
 
-- [ ] Эталон дефолта формы в `test_presswall.py` — кейс с креплением: уже есть от `presswall-banner-options` или добавлен с этого прогона (комментарий `# JS, ДД.ММ.ГГГГ` и вызов раннера рядом, `price` равен цене раннера). Допуск assert: `cost`, `price`, `time_ready` — `rel=0.001`, `weight_kg` — `abs=0.02`. Stdout: `passed`, `failed` нет. Расхождение JS и Python — стоп, файл не менять.
+- [x] Эталон дефолта формы в `test_presswall.py` — кейс с креплением: уже есть от `presswall-banner-options` или добавлен с этого прогона (комментарий `# JS, ДД.ММ.ГГГГ` и вызов раннера рядом, `price` равен цене раннера). Допуск assert: `cost`, `price`, `time_ready` — `rel=0.001`, `weight_kg` — `abs=0.02`. Stdout: `passed`, `failed` нет. Расхождение JS и Python — стоп, файл не менять.
 
 ```powershell
 python -m pytest calc_service/tests/test_calculators/test_presswall.py -q
 ```
 
-- [ ] Файл формы. В выводе есть `insaincalc.calcApi('presswall'`, `insaincalc.syncUrl(` и `insaincalc.showResult(`, а также `is_eyelet`, `is_pocket`, `is_cutting` и `is_bag` — крепление и чехол уходят в `calcApi`.
+- [x] Файл формы. В выводе есть `insaincalc.calcApi('presswall'`, `insaincalc.syncUrl(` и `insaincalc.showResult(`, а также `is_eyelet`, `is_pocket`, `is_cutting` и `is_bag` — крепление и чехол уходят в `calcApi`.
 
 ```powershell
 Select-String -Path wp-plugin\forms\presswall.js -Pattern "calcApi\('presswall'|syncUrl\(|showResult\(|is_eyelet|is_pocket|is_cutting|is_bag"
 ```
 
-- [ ] Контракт всех `forms/*.js`. Stdout: `passed`.
+- [x] Контракт всех `forms/*.js`. Stdout: `passed`.
 
 ```powershell
 python -m pytest calc_service/tests/test_wp_plugin_forms.py -q
 ```
 
-- [ ] Копия не на витрине. Одна строка со статусом `draft` или `private`. HTTP без cookies — `404`.
+- [x] Копия не на витрине. Одна строка со статусом `draft` или `private`. HTTP без cookies — `404`.
 
 ```powershell
 ssh insain-prod "sudo -u www-data wp post get PRODUCT --field=post_status --path=/var/www/insain.ru"
@@ -110,15 +110,15 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 
 ### Критерии перевода формы ezFC на API
 
-- [ ] На копии под админом (`https://insain.ru/?post_type=product&p=PRODUCT&preview=true`) эталон даёт `POST /api/v1/calc/presswall` → 200, в теле коды материалов, не `0`. Цена на странице равна `price` API с округлением `showResult`. В «Результат» — код ответа и обе цены.
-- [ ] Люверсы и карман в dpdAttachment дают разные `price`, каждая равна раннеру на том же входе (rel ≤ 0.001).
-- [ ] Смена каждого dropdown меняет цену и таблицу материалов. В таблице нет внутренних `code`. Есть вес и срок с подсказкой дат. Перезагрузка не меняет режим и срок.
-- [ ] URL обновляется GET-именами формы (имя параметра = имя элемента). Ссылка с этими GET открывает копию с теми же значениями и той же ценой. У dropdown с кодом в `data-value` — `GET_check=index`. У radio со значениями `1`/`2` — `GET_check=value`.
+- [x] На копии под админом (`https://insain.ru/?post_type=product&p=PRODUCT&preview=true`) эталон даёт `POST /api/v1/calc/presswall` → 200, в теле коды материалов, не `0`. Цена на странице равна `price` API с округлением `showResult`. В «Результат» — код ответа и обе цены.
+- [x] Люверсы и карман в dpdAttachment дают разные `price`, каждая равна раннеру на том же входе (rel ≤ 0.001).
+- [x] Смена каждого dropdown меняет цену и таблицу материалов. В таблице нет внутренних `code`. Есть вес и срок с подсказкой дат. Перезагрузка не меняет режим и срок.
+- [x] URL обновляется GET-именами формы (имя параметра = имя элемента). Ссылка с этими GET открывает копию с теми же значениями и той же ценой. У dropdown с кодом в `data-value` — `GET_check=index`. У radio со значениями `1`/`2` — `GET_check=value`.
 
 ## Проверки
 
-- [ ] `python scripts/dev.py check` — код выхода 0
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `python scripts/dev.py check` — код выхода 0
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
 ## Риски
 
@@ -146,20 +146,89 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 
 08.11.2026 — Analyst, Opus 5.5 — задача-предпосылка `presswall-banner-options` (закрыто 2026-11-09, `docs/history/log.md`) (крепление, плюс найденные раннером люверсы `calc_eyelet`, режим баннера, чехол); эталон — кейс с креплением, `forms/presswall.js` передаёт крепление и чехол, допуск веса `abs=0.02` — дальше человек: после закрытия предпосылки `черновик`, Implementer — `git rebase main`
 
+09.11.2026 — Implementer, Opus 5.5 — git-часть готова: дефолт формы 46 (без баннера) раннер = боевой API 7006.624, кейс `REF_FORM_DEFAULT` в `test_presswall.py`, `wp-plugin/forms/presswall.js`; `make check` зелёный — дальше человек («да» на дубль), затем Site ops
+
+```
+Блокер: следующий шаг — дубль формы 46 и черновик товара на проде (skill ezfc-form-to-api, copy.md, шаги 6–16) — только после «да» человека.
+Пробовал: шаги 0–5б пройдены, критерии Implementer — в «Результат».
+Гипотеза: —
+Вопрос: дублировать форму 46 CalcPresswall на черновик товара для копии на API?
+Следующая сессия: Site ops, модель Opus 5.5
+```
+
+09.11.2026 — человек — «да» на дубль формы 46 CalcPresswall и черновик товара (в чате Orchestrator) — дальше Site ops
+
+09.11.2026 — Site ops, Opus 5.5 — копия 92 на черновике 2586885 (draft, гость 404), JS и GET из `forms/presswall.js` через `ezfc_copy_apply.php`, прогон под админом: дефолт 7006.624, люверсы 13914.624, карман 12659.624, аренда, чехол, режим, перезагрузка и ссылка с GET сходятся с раннером и боевым API; форма 46 не тронута — дальше человек принимает копию, затем Reviewer
+
+09.11.2026 — человек — «принято» на копию 92 на черновике 2586885 (в чате Orchestrator) — дальше Implementer
+
+09.11.2026 — Implementer, Opus 5.5 — строка формы 46 в «Состав пакета» `todo/forms-batch-switch.md` (92 / 2586885 (draft), копия принята 09.11.2026); `make check` зелёный, коммитов нет — дальше Reviewer
+
+09.11.2026 — Reviewer, Grok 4.7 — принято — дальше человек: finish-task
+
+09.11.2026 — человек — принято — закрытие
+
+## Ревью 1
+
+Вердикт: `принято`. Замечаний нет.
+
+- Diff `task/form-presswall` (HEAD `f0d1f4b`, коммитов нет): `test_presswall.py` — только `REF_FORM_DEFAULT` (`# JS, 09.11.2026`, вызов раннера рядом, `price` 7006.624); допуск прежний (`rel=0.001`, вес `abs=0.02`). `wp-plugin/forms/presswall.js` — id боевой формы 46, `calcApi('presswall'`, `syncUrl`, `showResult`, `is_eyelet` / `is_pocket` / `is_cutting` / `is_bag`. `todo/forms-batch-switch.md` — одна строка 46 / 92 / 2586885 (draft). Калькулятор, `calc_service/data/`, `docs/site/forms.md` не менялись. `docs/dashboard.md` — пересборка `make check`.
+- Раннер дефолта формы: `price` 7006.624, `cost` 4270, `time_ready` 17.72 — как в эталоне. `pytest test_presswall.py test_wp_plugin_forms.py -q` — `14 passed`.
+- Прод, чтение: cjsCalc 3497 (форма 92) совпадает с `forms/presswall.js` после подстановки id копии (3491, 3492, 3494, 3495, 3496, 3510); `read_file` = `0`. GET: 3490 `numN`, 3493 `numDays` (без `GET_check`); 3491 `dpdPresswall`, 3492 `rdoPresswal`, 3494 `dpdBanner`, 3495 `dpdAttachment`, 3496 `dpdBag` — `index`; 3510 `rdoModeProduction` — `value`. Форма 46: 26 элементов, пустой GET, нет `calcApi`, `read_file` ≠ 1; cjsCalc 1862 — `calcPresswall`, `read_file` = `0`. Товар 2586885 — `draft`, `ezfc_form_id` 92, гость 404. Товар 2586683 — `publish`, форма 46, страница каталога 200.
+
 ## Найдено вне scope
 
 - `weight_kg` presswall на эталоне: раннер 9.79, Python и боевой API 9.78 (rel 0.00102) — presswall.py суммирует вес баннера, уже округлённый print_roll до 0.01. Учтено: допуск `abs=0.02` в assert веса.
+- skill `ezfc-form-to-api` (verify.md, шаг 1а) требует строку раннера дефолта в `docs/js-runner-cases.md`; файла нет в «Файлы» задачи — команда только в комментарии `REF_FORM_DEFAULT`.
+- Раннер `calcPresswall` с баннером `BannerFronlitLamin440` (ламинированный 440) падает «Поле weight_kg не число (NaN)» — старый JS не считает вес этого баннера; API отдаёт цену (каркас 2,5×2,5 + карман: 12790.624). Сверку JS и API на ламинированном баннере сделать нечем.
 ## Результат
 
-- Ветка, PR или коммит: `task/form-presswall` (от `main` 56a618e), без коммитов; изменён только этот файл
-- Период: 08.11.2026
+- Ветка, PR или коммит: `task/form-presswall` от `main` f0d1f4b; коммит — после шага 5 finish-task.
+- Период: 08.11.2026 – 09.11.2026
 - Часы человека: не учтено
 - Работа агентов:
-- Было / стало:
+- Было / стало: у формы 46 нет JS на API → `forms/presswall.js` с креплением и чехлом в `calcApi`, эталон дефолта формы в тесте
 - Сделано:
+  - Дефолт боевой формы 46 (HTML страницы, `selected`/`checked`): numN 1, dpdPresswall `Joker30_20_eyelet`, dpdBanner «без баннера» (`""`), dpdAttachment люверсы, dpdBag «не нужна», rdoPresswal «изготовить», режим 1. Дефолт без баннера, поэтому кейсы `presswall-banner-options` (все с баннером) с ним не совпали — добавлен `REF_FORM_DEFAULT` (`# JS, 09.11.2026`, вызов раннера рядом).
+  - `wp-plugin/forms/presswall.js`: id боевой формы 46 (numN 1843, dpdPresswall 1844, dpdAttachment 1845, dpdBanner 1879, dpdBag 1880, numDays 1882, rdoPresswal 1883, rdoModeProduction 1875; cjsCalc 1862). rdoPresswal: isPresswall → `is_presswall: true, is_rent: 0`; isRent → `is_presswall: false, is_rent: numDays`; noPresswall → `false, 0` (как `options` в cjsCalc 1862). Крепление и чехол — как cjsCalc 1862.
 - Чем проверено:
-- Не сделано и почему: эталон в `test_presswall.py` и `wp-plugin/forms/presswall.js` — стоп на сверке, блокер в «Журнал передач». Поля формы 46 для будущего `forms/presswall.js`: numN 1843, dpdPresswall 1844, dpdAttachment 1845, dpdBanner 1879, dpdBag 1880, numDays 1882, rdoPresswal 1883 (isPresswall / isRent / noPresswall — «свой прессвол» в API: is_presswall=false, is_rent=0), rdoModeProduction 1875, cjsCalc 1862.
-- Требуется решение: нет — ждёт `presswall-banner-options` (закрыто 2026-11-09, `docs/history/log.md`).
-- Строка в «Состав пакета» `todo/forms-batch-switch.md` (id копии и товар — после принятия копии):
+  - `python scripts/js_port_gaps.py calcPresswall` — блок `calcPresswall`: `нет в Python:` пусто; в цепочке `calcPrintRoll call calcLaminationWide` и `calcLaminationWide module` — оба в `js_port_gaps_allowed.txt`.
+  - Дефолт формы: раннер `[1,"Joker30_20_eyelet","",{"isPresswall":true,"isEyelet":[300,300,300,300]},1]` → cost 4270, price 7006.624, time_ready 17.72, weight 7.38; боевой API на том же входе → 4270 / 7006.624 / 17.72 / 7.38. Проверка abs/rel: `ok 7006.624 7006.624 0.0 0.0`.
+  - Люверсы с баннером, mode 1: раннер 13914.624 / 19.94, боевой API 13914.624 / 19.94; `ok 13914.624 13914.624 0.0 0.0`.
+  - Дополнительно: аренда 2 дня + карман + bag210, mode 2 — раннер 9116.8925 / 27.39, боевой API 9116.8925 / 27.39 (`is_presswall: false, is_rent: 2`).
+  - `tool_schema/presswall` на проде: есть `is_eyelet`, `is_pocket`, `is_cutting`, `is_bag`, `is_rent`, `is_presswall`, `mode`.
+  - Implementer, 09.11.2026, после принятия копии: `python scripts/dev.py check` — `538 passed`, `81 passed`, код выхода 0; `js_port_gaps.py calcPresswall` — `нет в Python:` пусто; `pytest test_presswall.py test_wp_plugin_forms.py -q` — `14 passed`. Раннер и боевой API не перезапускались (на прод не ходить) — числа выше от 09.11.2026.
+  - `pytest test_presswall.py -q` — `11 passed`; `pytest test_wp_plugin_forms.py -q` — `3 passed`; `Select-String` по `presswall.js` — есть `calcApi('presswall'`, `syncUrl(`, `showResult(`, `is_eyelet`, `is_pocket`, `is_cutting`, `is_bag`.
+- Site ops, 09.11.2026 (копия, skill `ezfc-form-to-api`, шаги 6–16):
+  - Копия формы `COPY` = **92** («CalcPresswall duplicate», одна новая строка в `wp_insain_ezfc_forms`). Черновик товара `PRODUCT` = **2586885** («Калькулятор прессволов (Копировать)», WooCommerce «Дублировать» от 2586683). Превью: https://insain.ru/?post_type=product&p=2586885&preview=true
+  - `wp post meta update 2586885 ezfc_form_id 92` → `Success: Updated custom field 'ezfc_form_id'.`; `post_status` → `draft`; гость `curl` → `404`.
+  - Карта id (шаг 9): все 26 элементов с `id_copy` ≠ `id_live`; поля копии: numN 3490, dpdPresswall 3491, rdoPresswal 3492, numDays 3493, dpdBanner 3494, dpdAttachment 3495, dpdBag 3496, cjsCalc 3497, rdoModeProduction 3510.
+  - `ezfc_copy.py … --get numN --get numDays --get rdoModeProduction:value --get dpdPresswall:index --get dpdAttachment:index --get dpdBanner:index --get dpdBag:index --get rdoPresswal:index`; `ezfc_copy_apply.php` показ — без `стоп`, cjsCalc `calcApi=0 → calcApi=1`, `read_file` `'0' = '0'`, rdoModeProduction `GET_check 'index' → 'value'`; `apply` — `бэкап: /tmp/ezfc-copy-92-20261108-163736.json`, `записано` у 9 элементов. Затем `wp litespeed-purge all` и `wp cache flush`.
+  - Блок результата копии сверен с формой 79 по `data` элементов (группы, колонки, стили, HTML `htmTime`/`htmCost`/`htmMaterial`, порядок): отличий нет, кроме `sbtWeightTotal.show_in_email_cond` (на вид не влияет). Правка в админке не понадобилась.
+  - Прогон под админом (Browser MCP, перехват `fetch` к `/calc/`), все запросы `POST https://insain.ru/api/v1/calc/presswall` → 200, коды в теле, не `0`:
 
-| 46 CalcPresswall | `presswall` | /catalog/kalkulyator-pressvolov/ | COPY / PRODUCT (draft) | todo/form-presswall.md |
+    | Вход на копии | `price` API | Раннер JS | На странице |
+    | --- | --- | --- | --- |
+    | Дефолт (без баннера, люверсы) | 7006.624 | 7006.624 | 7 100 руб. |
+    | Литой 400 + люверсы, режим 1 | 13914.624 | 13914.624 | 14 000 |
+    | Литой 400 + карман, режим 1 | 12659.624 | 12659.624 | 12 700 |
+    | Каркас 2,5×2,5, литой, карман | 13015.624 | 13015.624 | 13 100 |
+    | То же, ламинированный 440 | 12790.624 | падает (вес NaN, «Найдено вне scope») | 12 800 |
+    | + чехол bag210 | 14926.5165 | — | 15 000 |
+    | Аренда 3 дня, литой, карман, bag210, режим 2 | 10136.8925 | 10136.8925 | 10 200 |
+    | Литой + люверсы, режим 2 (ссылка с GET) | — | 14040.704 | 14 100 |
+    | Свой прессвол, литой, люверсы, bag160 (ссылка с GET) | 8925.6175 | 8925.6175 | 9 000 |
+
+    Цена на странице — `insaincalc.round` вверх до 100 руб. (проверено в консоли: 7006.624 → 7100, 13914.624 → 14000, 12659.624 → 12700). Таблица материалов — только названия (люверсы пропадают при кармане, каркас — при аренде и «своём»), вес и «Срок N дней» с подсказкой дат (`data-bs-original-title`: «Готовность заказа: …»).
+  - Аренда: копия шлёт `is_presswall: false, is_rent: N`. Старый JS смотрит наличие ключа (`options.has('isPresswall')`), а cjsCalc 1862 при аренде ключ не ставит, поэтому раннер — без `isPresswall`; с `"isPresswall": false` раннер ошибочно добавляет каркас (16249.60 против 9116.89). Для Reviewer: на копии всё верно.
+  - Перезагрузка с `rdoPresswal=1&numDays=3&rdoModeProduction=2`: режим «быстрее», аренда, 3 дня, все dropdown и цена 10 200 те же. Ссылка в новой вкладке — те же значения и цена.
+  - Консоль: ошибки только из стороннего `insainParse/…/scrtp.js` (есть и в админке); ошибок `insaincalc`/`ezfc` нет.
+  - Боевая форма 46 не тронута (SQL): cjsCalc 1862 — `calcPresswall` есть, `calcApi` нет; GET у полей 1843–1883 пустые. Товар 2586683 — `ezfc_form_id` 46, https://insain.ru/catalog/kalkulyator-pressvolov/ → 200. `curl /api/v1/calculators` — отвечает.
+  - Откат копии JS/GET: строки из `/tmp/ezfc-copy-92-20261108-163736.json` на VDS. Копия 92 и черновик 2586885 не удалялись (не-scope).
+- Принятие: человек 09.11.2026 принял копию 92 на черновике 2586885; строка формы 46 добавлена в «Состав пакета» `todo/forms-batch-switch.md`.
+- Не сделано и почему: боевая форма 46 — не-scope (переключение в `forms-batch-switch`).
+- Для Site ops: GET на копии — `numN`, `dpdPresswall`, `dpdAttachment`, `dpdBanner`, `dpdBag` (dropdown с кодом, `GET_check=index`), `rdoPresswal` (radio с кодами isPresswall/isRent/noPresswall, не `1`/`2` — `GET_check=index`, в `syncUrl` уходит индекс), `numDays`, `rdoModeProduction` (`GET_check=value`). Дефолт копии — без баннера: для проверки крепления на копии выбрать баннер, иначе люверсы и карман дают одну цену 7006.624.
+- Требуется решение: нет.
+- Строка в «Состав пакета» `todo/forms-batch-switch.md` (формат по соседним строкам):
+
+| 46 CalcPresswall | `presswall` | `/catalog/kalkulyator-pressvolov/` | 92 / 2586885 (draft) | копия принята 09.11.2026, `form-presswall` |
