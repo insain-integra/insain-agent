@@ -223,7 +223,9 @@ def cmd_check() -> None:
         dash_write()
     suites = ("calc_service/tests", "bot_service/tests")
     for suite in suites:
-        rc = subprocess.call([sys.executable, "-m", "pytest", suite], cwd=ROOT)
+        rc = subprocess.call(
+            [sys.executable, "-m", "pytest", suite, "-q", "--tb=short", "--disable-warnings"], cwd=ROOT
+        )
         if rc != 0:
             sys.exit(rc)
 
