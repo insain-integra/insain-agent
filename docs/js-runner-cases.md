@@ -12,6 +12,10 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | `calcPennantPaper` | `pennant` | 2181.133696 |
 | `calcRollup` | `rollup` | 8321 |
 | `calcPresswall` | `presswall` | 11453.624 |
+| `calcPresswall` eyelet mode 1 | `presswall` | 13914.624 |
+| `calcPresswall` pocket mode 1 | `presswall` | 12659.624 |
+| `calcPresswall` eyelet mode 2 | `presswall` | 14040.704 |
+| `calcPresswall` eyelet + bag160 | `presswall` | 15932.2415 |
 | `calcEmbossing` | `embossing` | 14046 |
 | `calcAcrilycPrizes` | `acrylic_prizes` | 3353.72 |
 | `calcAcrilycPrizes` form 78 default | `acrylic_prizes` | 8977.92 |
@@ -28,6 +32,14 @@ node scripts/run_js_calc.mjs calcPennantPaper --data current --args '[50,[80,120
 node scripts/run_js_calc.mjs calcRollup --data current --args '[1,\"Rollup_econom_85\",\"BannerFronlitCoat400\",{},1]'
 
 node scripts/run_js_calc.mjs calcPresswall --data current --args '[1,\"Joker30_20_eyelet\",\"BannerFronlitCoat400\",{\"isPresswall\":true,\"isRent\":0},1]'
+
+node scripts/run_js_calc.mjs calcPresswall --data current --args '[1,\"Joker30_20_eyelet\",\"BannerFronlitCoat400\",{\"isPresswall\":true,\"isRent\":0,\"isEyelet\":[300,300,300,300]},1]'
+
+node scripts/run_js_calc.mjs calcPresswall --data current --args '[1,\"Joker30_20_eyelet\",\"BannerFronlitCoat400\",{\"isPresswall\":true,\"isRent\":0,\"isPocket\":[1,0,1,0],\"isCutting\":[0,1,0,1]},1]'
+
+node scripts/run_js_calc.mjs calcPresswall --data current --args '[1,\"Joker30_20_eyelet\",\"BannerFronlitCoat400\",{\"isPresswall\":true,\"isRent\":0,\"isEyelet\":[300,300,300,300]},2]'
+
+node scripts/run_js_calc.mjs calcPresswall --data current --args '[1,\"Joker30_20_eyelet\",\"BannerFronlitCoat400\",{\"isPresswall\":true,\"isRent\":0,\"isEyelet\":[300,300,300,300],\"isBag\":\"bag160\"},1]'
 
 node scripts/run_js_calc.mjs calcEmbossing --data current --args '[500,[50,30],\"\",\"foil\",\"diary\",[],{\"isCliche\":true},1]'
 

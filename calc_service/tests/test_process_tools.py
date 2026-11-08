@@ -173,6 +173,15 @@ class TestEyelet:
         r = calc_eyelet(10, [2000, 1000], [0, 0, 0, 0], mode=1)
         assert r.cost == 0
 
+    def test_js_ref_3000x2000(self):
+        # JS, 08.11.2026 — Math.round: (2000-50)/300 = 6.5 → 7, всего 34 люверса
+        # node scripts/run_js_calc.mjs calcEyelet --data current --args '[1,[3000,2000],[300,300,300,300],1]'
+        r = calc_eyelet(1, [3000, 2000], [300, 300, 300, 300], mode=1)
+        assert r.materials[0]["quantity"] == 34
+        assert r.cost == pytest.approx(713.0888888888888, rel=0.001)
+        assert r.price == pytest.approx(1140.9422222222222, rel=0.001)
+        assert r.time_hours == pytest.approx(0.43, rel=0.001)
+
 
 class TestEyeletSheet:
     def test_basic(self):

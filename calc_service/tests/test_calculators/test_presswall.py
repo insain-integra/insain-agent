@@ -171,3 +171,105 @@ def test_expected_values_presswall(ref_result):
     assert ok_mat_code, f"material code: expected {em['code']} в materials"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+JS_REL_TOL = 0.001
+JS_WEIGHT_ABS = 0.02
+
+
+def _assert_js_ref(r: dict, e: dict) -> None:
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], abs=JS_WEIGHT_ABS)
+
+
+# JS, 08.11.2026 — люверсы, mode 1
+# node scripts/run_js_calc.mjs calcPresswall --data current --args
+# '[1,"Joker30_20_eyelet","BannerFronlitCoat400",{"isPresswall":true,"isRent":0,"isEyelet":[300,300,300,300]},1]'
+REF_EYELET_MODE1 = {
+    "quantity": 1,
+    "presswall_id": "Joker30_20_eyelet",
+    "material_id": "BannerFronlitCoat400",
+    "is_presswall": True,
+    "is_rent": 0,
+    "is_eyelet": [300, 300, 300, 300],
+    "mode": 1,
+}
+EXPECTED_EYELET_MODE1 = {
+    "cost": 8556,
+    "price": 13914.624,
+    "time_ready": 19.94,
+    "weight_kg": 9.79,
+}
+
+
+def test_js_ref_eyelet_mode1(calc):
+    """JS, 08.11.2026: люверсы 300, mode 1."""
+    _assert_js_ref(calc.execute(REF_EYELET_MODE1), EXPECTED_EYELET_MODE1)
+
+
+# JS, 08.11.2026 — карман + резка, mode 1
+# node scripts/run_js_calc.mjs calcPresswall --data current --args
+# '[1,"Joker30_20_eyelet","BannerFronlitCoat400",{"isPresswall":true,"isRent":0,"isPocket":[1,0,1,0],"isCutting":[0,1,0,1]},1]'
+REF_POCKET_MODE1 = {
+    "quantity": 1,
+    "presswall_id": "Joker30_20_eyelet",
+    "material_id": "BannerFronlitCoat400",
+    "is_presswall": True,
+    "is_rent": 0,
+    "is_pocket": [1, 0, 1, 0],
+    "is_cutting": [0, 1, 0, 1],
+    "mode": 1,
+}
+EXPECTED_POCKET_MODE1 = {
+    "cost": 7772,
+    "price": 12659.624,
+    "time_ready": 19.12,
+    "weight_kg": 9.79,
+}
+
+
+def test_js_ref_pocket_mode1(calc):
+    """JS, 08.11.2026: карман + резка, mode 1."""
+    _assert_js_ref(calc.execute(REF_POCKET_MODE1), EXPECTED_POCKET_MODE1)
+
+
+# JS, 08.11.2026 — люверсы, mode 2 (баннер всё равно mode 1; каркас — mode 2)
+# node scripts/run_js_calc.mjs calcPresswall --data current --args
+# '[1,"Joker30_20_eyelet","BannerFronlitCoat400",{"isPresswall":true,"isRent":0,"isEyelet":[300,300,300,300]},2]'
+REF_EYELET_MODE2 = {
+    **REF_EYELET_MODE1,
+    "mode": 2,
+}
+EXPECTED_EYELET_MODE2 = {
+    "cost": 8634.8,
+    "price": 14040.704,
+    "time_ready": 19.99,
+    "weight_kg": 9.79,
+}
+
+
+def test_js_ref_eyelet_mode2(calc):
+    """JS, 08.11.2026: люверсы, mode 2 формы (баннер mode 1)."""
+    _assert_js_ref(calc.execute(REF_EYELET_MODE2), EXPECTED_EYELET_MODE2)
+
+
+# JS, 08.11.2026 — люверсы + чехол bag160, mode 1
+# node scripts/run_js_calc.mjs calcPresswall --data current --args
+# '[1,"Joker30_20_eyelet","BannerFronlitCoat400",{"isPresswall":true,"isRent":0,"isEyelet":[300,300,300,300],"isBag":"bag160"},1]'
+REF_EYELET_BAG160 = {
+    **REF_EYELET_MODE1,
+    "is_bag": "bag160",
+}
+EXPECTED_EYELET_BAG160 = {
+    "cost": 9807.125,
+    "price": 15932.2415,
+    "time_ready": 28.66,
+    "weight_kg": 10.03,
+}
+
+
+def test_js_ref_eyelet_bag160(calc):
+    """JS, 08.11.2026: люверсы + bag160, mode 1."""
+    _assert_js_ref(calc.execute(REF_EYELET_BAG160), EXPECTED_EYELET_BAG160)

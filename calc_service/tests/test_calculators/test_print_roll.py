@@ -327,7 +327,7 @@ def test_expected_values_print_roll_cutting_eyelet(ref_result_2):
         print("  material    (нет в результате)  FAIL")
 
     # Проверяем наличие люверсов в материалах
-    eyelet_mat = next((m for m in materials if m.get("code") == "Люверсы"), None)
+    eyelet_mat = next((m for m in materials if m.get("code") == "Eyelet"), None)
     print("  люверсы     %s" % ("есть" if eyelet_mat else "НЕТ"))
 
     assert ok_cost, f"cost: got {r['cost']}, expected ~{e['cost']}"
@@ -433,7 +433,8 @@ EXPECTED_MATERIAL_JS = {
     "quantity_approx": 5.6175,
 }
 EXPECTED_EYELET_JS = {
-    "code": "Люверсы",
+    "code": "Eyelet",
+    "name": "Люверсы",
     "quantity": 80,
 }
 
@@ -517,6 +518,44 @@ def test_expected_values_print_roll_js(ref_result_js):
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
     assert eyelet_mat, "ожидаются люверсы в materials"
     assert ok_eyelet, f"eyelets quantity: got {eyelet_mat.get('quantity') if eyelet_mat else None}, expected {ey['quantity']}"
+
+
+# Эталон 5: 1 шт, 3000x2000, TechnojetXR720, люверсы 300 — Math.round 6.5→7
+# JS, 08.11.2026
+# node scripts/run_js_calc.mjs calcPrintRoll --data current --args
+# '[1,[3000,2000],"BannerFronlitCoat400","TechnojetXR720",{"isEyelet":[300,300,300,300]},1]'
+REF_PARAMS_EYELET_3000 = {
+    "quantity": 1,
+    "width": 3000,
+    "height": 2000,
+    "material_id": "BannerFronlitCoat400",
+    "printer_code": "TechnojetXR720",
+    "is_eyelet": [300, 300, 300, 300],
+    "mode": 1,
+}
+EXPECTED_REF_EYELET_3000 = {
+    "cost": 4286,
+    "price": 6908,
+    "time_hours": 1.3,
+    "time_ready": 17.78,
+    "weight_kg": 2.41,
+}
+
+
+def test_expected_values_print_roll_eyelet_3000x2000(calc):
+    """JS, 08.11.2026: 3000×2000, люверсы 300 — 34 люверса (Math.round)."""
+    r = calc.execute(REF_PARAMS_EYELET_3000)
+    e = EXPECTED_REF_EYELET_3000
+    rel = 0.001
+    assert r["cost"] == pytest.approx(e["cost"], rel=rel)
+    assert r["price"] == pytest.approx(e["price"], rel=rel)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=rel)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=rel)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], abs=0.02)
+    eyelet_mat = next((m for m in (r.get("materials") or []) if m.get("code") == "Eyelet"), None)
+    assert eyelet_mat is not None
+    assert eyelet_mat.get("name") == "Люверсы" and eyelet_mat.get("title") == "Люверсы"
+    assert eyelet_mat.get("quantity") == 34
 
 
 def test_modes_cost_and_time(calc):

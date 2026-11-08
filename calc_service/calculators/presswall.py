@@ -3,6 +3,13 @@
 
 Мигрировано из js_legacy/calc/calcPresswall.js.
 Широкоформатные баннеры на стендах: печать + каркас (профили) + опции (аренда, чехол).
+
+Режим производства (как calcPresswall.js):
+- каркас (`calcCutProfile`) — режим формы (`mode`);
+- печать баннера — всегда mode 1 (присваивание `modeProduction = 1` в вызове
+  `calcPrintRoll`, строка 50 JS); вместе с options крепления (люверсы / карман);
+- чехол после печати баннера — тоже mode 1 (тот же `modeProduction` уже = 1);
+  без баннера (`material_id` пуст) — режим формы.
 """
 
 from __future__ import annotations
@@ -125,6 +132,18 @@ class PresswallCalculator(BaseCalculator):
                     "is_presswall": {"type": "boolean", "default": True, "description": "Включить каркас"},
                     "is_rent": {"type": "integer", "description": "Дней аренды (0 = нет)"},
                     "is_bag": {"type": "string", "description": "Код чехла (bag160, bag210) или пусто"},
+                    "is_cutting": {
+                        "type": "array", "items": {"type": "integer"},
+                        "description": "Резка в край [top, right, bottom, left]: 0/1",
+                    },
+                    "is_pocket": {
+                        "type": "array", "items": {"type": "integer"},
+                        "description": "Карман [top, right, bottom, left]: 0/1",
+                    },
+                    "is_eyelet": {
+                        "type": "array", "items": {"type": "number"},
+                        "description": "Люверсовка: шаг в мм по каждой стороне [top, right, bottom, left]. 0 = нет.",
+                    },
                     "mode": {"type": "integer", "enum": [0, 1, 2], "default": 1},
                 },
                 "required": ["quantity", "presswall_id"],
@@ -142,10 +161,18 @@ class PresswallCalculator(BaseCalculator):
                 {"name": "is_presswall", "type": "boolean", "required": False, "default": True, "title": "Каркас"},
                 {"name": "is_rent", "type": "integer", "required": False, "default": 0, "title": "Дней аренды"},
                 {"name": "is_bag", "type": "string", "required": False, "title": "Чехол"},
+                {"name": "is_cutting", "type": "string", "required": False, "title": "Резка в край"},
+                {"name": "is_pocket", "type": "string", "required": False, "title": "Карман"},
+                {"name": "is_eyelet", "type": "string", "required": False, "title": "Люверсовка"},
                 {"name": "mode", "type": "enum", "required": False, "default": 1, "title": "Режим",
                  "choices": {"inline": [{"id": 0, "title": "Эконом"}, {"id": 1, "title": "Стандарт"}, {"id": 2, "title": "Экспресс"}]}},
             ],
-            "param_groups": {"main": ["quantity", "presswall_id"], "material": ["material_id"], "options": ["is_presswall", "is_rent", "is_bag"], "mode": ["mode"]},
+            "param_groups": {
+                "main": ["quantity", "presswall_id"],
+                "material": ["material_id"],
+                "options": ["is_presswall", "is_rent", "is_bag", "is_cutting", "is_pocket", "is_eyelet"],
+                "mode": ["mode"],
+            },
         }
 
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
@@ -155,7 +182,12 @@ class PresswallCalculator(BaseCalculator):
         is_presswall = bool(params.get("is_presswall", True))
         is_rent_days = int(params.get("is_rent", 0) or 0)
         is_bag_id = str(params.get("is_bag", "") or "").strip()
+        is_cutting = params.get("is_cutting")
+        is_pocket = params.get("is_pocket")
+        is_eyelet = params.get("is_eyelet")
         mode = ProductionMode(int(params.get("mode", 1)))
+        # После печати баннера JS оставляет modeProduction = 1 (calcPresswall.js:50)
+        banner_bag_mode = 1 if material_id else mode.value
 
         if not presswall_id:
             raise ValueError("Не указан тип прессвола (presswall_id)")
@@ -221,14 +253,21 @@ class PresswallCalculator(BaseCalculator):
             except KeyError:
                 material_id = "BannerFronlitCoat400"
             print_calc = PrintRollCalculator()
-            banner_result = print_calc.calculate({
+            banner_params: Dict[str, Any] = {
                 "quantity": n,
                 "width": size_banner[0],
                 "height": size_banner[1],
                 "material_id": material_id,
                 "printer_code": PRINTER_DEFAULT,
-                "mode": mode.value,
-            })
+                "mode": banner_bag_mode,
+            }
+            if is_cutting is not None:
+                banner_params["is_cutting"] = is_cutting
+            if is_pocket is not None:
+                banner_params["is_pocket"] = is_pocket
+            if is_eyelet is not None:
+                banner_params["is_eyelet"] = is_eyelet
+            banner_result = print_calc.calculate(banner_params)
             cost_banner = float(banner_result.get("cost", 0))
             price_banner = float(banner_result.get("price", 0))
             time_banner = float(banner_result.get("time_hours", 0))
@@ -236,7 +275,7 @@ class PresswallCalculator(BaseCalculator):
             weight_banner = float(banner_result.get("weight_kg", 0))
             materials_out.extend(banner_result.get("materials", []))
 
-        # Чехол
+        # Чехол (bag160 / bag210 — верхний уровень presswall.json)
         cost_bag = 0.0
         price_bag = 0.0
         time_bag = 0.0
@@ -244,16 +283,11 @@ class PresswallCalculator(BaseCalculator):
         weight_bag = 0.0
         if is_bag_id:
             try:
-                bag_raw = _load_presswall_data()
-                bag_config = None
-                for group_id, group_data in bag_raw.items():
-                    if is_bag_id in group_data and isinstance(group_data.get(is_bag_id), dict):
-                        bag_config = group_data[is_bag_id]
-                        break
-                if bag_config and "size" in bag_config:
+                bag_config = _load_presswall_data().get(is_bag_id)
+                if isinstance(bag_config, dict) and "size" in bag_config:
                     bag_size = bag_config["size"]
                     if isinstance(bag_size, (list, tuple)) and len(bag_size) >= 2:
-                        r = calc_sewing_covers(n, list(bag_size), COVER_MATERIAL, mode.value)
+                        r = calc_sewing_covers(n, list(bag_size), COVER_MATERIAL, banner_bag_mode)
                         cost_bag = r.cost
                         price_bag = r.price
                         time_bag = r.time_hours

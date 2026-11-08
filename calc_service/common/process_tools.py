@@ -501,7 +501,8 @@ def calc_eyelet(
     num_eyelet = 0
     for i in range(4):
         if step[i] > 0:
-            num_eyelet += round((sides[i] - margin_offset * 2) / step[i])
+            # Как Math.round в JS: до ближайшего, половина вверх (6.5 → 7)
+            num_eyelet += int(math.floor((sides[i] - margin_offset * 2) / step[i] + 0.5))
             next_i = (i + 1) % 4
             if i < 3 and step[i + 1] == 0:
                 num_eyelet += 1
@@ -521,7 +522,8 @@ def calc_eyelet(
     time_hours = math.ceil(time_process * 100) / 100
 
     materials_out = [{
-        "code": "Люверсы", "name": "Люверсы", "title": "Люверсы",
+        # code внутренний (не равен name); клиенту уходят name/title «Люверсы», как в JS
+        "code": "Eyelet", "name": "Люверсы", "title": "Люверсы",
         "quantity": num_eyelet, "unit": "шт",
     }]
     return ProcessResult(cost=cost, price=price, time_hours=time_hours, materials=materials_out)
