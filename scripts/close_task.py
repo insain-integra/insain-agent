@@ -113,15 +113,28 @@ def _walk_jsonl(path: Path) -> str:
 
 
 IDLE_CAP = timedelta(minutes=30)
+AGENT_SHARE = 0.5
 
 
-def active_time(stamps: list[datetime], cap: timedelta = IDLE_CAP) -> timedelta:
-    """Сумма пауз между сообщениями; пауза длиннее cap — перерыв, не считается."""
-    total = timedelta()
+def active_time(
+    stamps: list[datetime],
+    end: datetime | None = None,
+    cap: timedelta = IDLE_CAP,
+    share: float = AGENT_SHARE,
+) -> timedelta:
+    """Время человека по ходам чата: от его сообщения до следующего или до конца чата `end`.
+
+    Ход не длиннее cap — человек у экрана, ход целиком. Длиннее — работал агент, человек
+    заглядывал: share × ход, но не больше cap (ночь и перерывы часы не раздувают).
+    Ответы агента в истории чата без времени, поэтому конец последнего хода — время файла чата.
+    """
     ordered = sorted(stamps)
+    if end is not None and ordered and end > ordered[-1]:
+        ordered.append(end)
+    total = timedelta()
     for a, b in zip(ordered, ordered[1:]):
-        if b - a <= cap:
-            total += b - a
+        gap = b - a
+        total += gap if gap <= cap else min(gap * share, cap)
     return total
 
 
@@ -172,7 +185,7 @@ def hours_from_chats(task_name: str) -> tuple[int, int, float, str, str]:
                 ts = _parse_cursor_ts(m.group(1))
                 if ts:
                     stamps.append(ts)
-        total += active_time(stamps)
+        total += active_time(stamps, datetime.fromtimestamp(path.stat().st_mtime))
         all_stamps.extend(stamps)
     hours = round(total.total_seconds() / 3600, 1)
     if sessions == 0:
@@ -294,7 +307,7 @@ def close(name: str) -> None:
             f"## {heading} — {title}",
             "",
             f"- Период: {period or git_period(name)}",
-            f"- Часы человека: {user_msgs} сообщ. в чатах Cursor; активно {hours} ч (паузы > 30 мин не в счёт)"
+            f"- Часы человека: {user_msgs} сообщ. в чатах Cursor; активно {hours} ч (ходы агента > 30 мин — с коэфф. 0.5)"
             + (f" ({chat_note})" if sessions == 0 else ""),
             f"- Работа агентов: {chat_note}; {'; '.join(models) or 'модели — из шапки'}",
             f"- Было / стало: {bylo_stalo}",

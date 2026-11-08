@@ -45,14 +45,27 @@ def test_dashboard_render_ignores_today_and_git(monkeypatch):
     assert dash.render() == base, "render() зависит от текущей даты"
 
 
-def test_active_time_skips_long_pauses():
+def test_active_time_halves_long_turns():
     from datetime import datetime, timedelta
 
     close = _load("close_task")
     t0 = datetime(2026, 11, 5, 10, 0)
-    stamps = [t0, t0 + timedelta(minutes=10), t0 + timedelta(minutes=25), t0 + timedelta(days=2)]
-    assert close.active_time(stamps) == timedelta(minutes=25)
+    minutes = [0, 10, 25, 57, 57 + 2 * 24 * 60]
+    stamps = [t0 + timedelta(minutes=n) for n in minutes]
+    # 10 и 15 — целиком; 32 мин — 0.5 × 32 = 16; два дня — не больше 30
+    assert close.active_time(stamps) == timedelta(minutes=10 + 15 + 16 + 30)
     assert close.active_time([t0]) == timedelta()
+
+
+def test_active_time_counts_last_turn_to_chat_end():
+    """Чат с одним промптом: ход до конца чата, а не ноль."""
+    from datetime import datetime, timedelta
+
+    close = _load("close_task")
+    t0 = datetime(2026, 11, 8, 2, 15)
+    assert close.active_time([t0], t0 + timedelta(minutes=9)) == timedelta(minutes=9)
+    assert close.active_time([t0], t0 + timedelta(hours=3)) == timedelta(minutes=30)
+    assert close.active_time([t0], t0 - timedelta(minutes=5)) == timedelta()
 
 
 def test_chat_period_uses_chat_dates_not_task_file():
