@@ -10,7 +10,8 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | --- | --- | --- |
 | `calcFlagPaper` | `flag` | 3934.410784 |
 | `calcPennantPaper` | `pennant` | 2181.133696 |
-| `calcRollup` | `rollup` | 8321 |
+| `calcRollup` | `rollup` | 7910 |
+| `calcRollup` form 49 default | `rollup` | 4482 |
 | `calcPresswall` | `presswall` | 11453.624 |
 | `calcPresswall` eyelet mode 1 | `presswall` | 13914.624 |
 | `calcPresswall` pocket mode 1 | `presswall` | 12659.624 |
@@ -29,7 +30,9 @@ node scripts/run_js_calc.mjs calcFlagPaper --data current --args '[100,[100,150]
 
 node scripts/run_js_calc.mjs calcPennantPaper --data current --args '[50,[80,120],\"4+0\",\"PaperCoated115M\",{},1]'
 
-node scripts/run_js_calc.mjs calcRollup --data current --args '[1,\"Rollup_econom_85\",\"BannerFronlitCoat400\",{},1]'
+node scripts/run_js_calc.mjs calcRollup --data current --args '[1,\"Rollup_econom_85\",\"ScrollPaper200\",{},1]'
+
+node scripts/run_js_calc.mjs calcRollup --data current --args '[1,\"Rollup_econom_85\",\"\",{},1]'
 
 node scripts/run_js_calc.mjs calcPresswall --data current --args '[1,\"Joker30_20_eyelet\",\"BannerFronlitCoat400\",{\"isPresswall\":true,\"isRent\":0},1]'
 

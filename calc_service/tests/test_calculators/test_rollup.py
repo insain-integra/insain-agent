@@ -84,19 +84,22 @@ def test_get_tool_schema(calc):
 
 # ── Эталонные тесты ──────────────────────────────────────────────────
 
+# JS, 09.11.2026 — тираж 1, Rollup_econom_85, ScrollPaper200, mode 1
+# node scripts/run_js_calc.mjs calcRollup --data current --args '[1,"Rollup_econom_85","ScrollPaper200",{},1]'
+# Режим 2 в печать уходит как mode.value и отличается от старого JS (там всегда mode 1) — решение человека 09.11.2026.
 REF_PARAMS = {
     "quantity": 1,
     "rollup_id": "Rollup_econom_85",
-    "material_id": "BannerFronlitCoat400",
+    "material_id": "ScrollPaper200",
     "mode": 1,
 }
-# JS, 04.11.2026 — сверка с calcRollup --data current
+# JS, 09.11.2026
 EXPECTED_REF = {
-    "cost": 5086.0,
-    "price": 8321.0,
-    "time_hours": 0.98,
-    "time_ready": 24.98,
-    "weight_kg": 3.18,
+    "cost": 4832.0,
+    "price": 7910.0,
+    "time_hours": 0.95,
+    "time_ready": 24.95,
+    "weight_kg": 2.87,
 }
 EXPECTED_MATERIAL = {
     "code": "Rollup_econom_85",
@@ -114,23 +117,24 @@ def ref_result(calc):
 
 
 def test_expected_values_rollup(ref_result):
+    """JS, 09.11.2026: ScrollPaper200, mode 1. Режим 2 отличается от старого JS — решение человека 09.11.2026."""
     if ref_result is None:
         pytest.skip("расчёт эталонного кейса не выполнен")
     r = ref_result
     e = EXPECTED_REF
     em = EXPECTED_MATERIAL
 
-    ok_cost = _cmp(r["cost"], e["cost"])
-    ok_price = _cmp(r["price"], e["price"])
-    ok_time = _cmp(r["time_hours"], e["time_hours"])
-    ok_ready = _cmp(r["time_ready"], e["time_ready"])
-    ok_weight = _cmp(r["weight_kg"], e["weight_kg"])
+    ok_cost = _cmp(r["cost"], e["cost"], 0.001)
+    ok_price = _cmp(r["price"], e["price"], 0.001)
+    ok_time = _cmp(r["time_hours"], e["time_hours"], 0.001)
+    ok_ready = _cmp(r["time_ready"], e["time_ready"], 0.001)
+    ok_weight = _cmp(r["weight_kg"], e["weight_kg"], 0.001)
 
     materials = r.get("materials") or []
     mat = next((m for m in materials if m.get("code") == em["code"]), {})
     ok_mat_code = bool(mat)
     ok_mat_name = em["name_substring"] in (mat.get("name") or "")
-    ok_mat_q = _cmp(float(mat.get("quantity") or 0), float(em["quantity_approx"]), 0.15) if mat else False
+    ok_mat_q = _cmp(float(mat.get("quantity") or 0), float(em["quantity_approx"]), 0.001) if mat else False
 
     print("")
     print("  [rollup] Параметры   rollup_id=%s  |  material_id=%s  |  mode=%s"
@@ -167,3 +171,30 @@ def test_expected_values_rollup(ref_result):
     assert ok_mat_code, f"material code: expected {em['code']} в materials"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+# JS, 09.11.2026 — дефолт формы 49: без постера, mode 1 (полчаса установки нет)
+# node scripts/run_js_calc.mjs calcRollup --data current --args '[1,"Rollup_econom_85","",{},1]'
+REF_FORM_DEFAULT = {
+    "quantity": 1,
+    "rollup_id": "Rollup_econom_85",
+    "material_id": "",
+    "mode": 1,
+}
+# JS, 09.11.2026
+EXPECTED_FORM_DEFAULT = {
+    "cost": 2700.0,
+    "price": 4482.0,
+    "time_hours": 0.0,
+    "time_ready": 24.0,
+}
+
+
+def test_form_default_without_poster(calc):
+    """JS, 09.11.2026: дефолт формы 49 без постера — time_hours 0, time_ready 24."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    assert r["cost"] == pytest.approx(e["cost"], rel=0.001)
+    assert r["price"] == pytest.approx(e["price"], rel=0.001)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=0.001)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=0.001)

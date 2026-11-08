@@ -3,6 +3,10 @@
 
 Мигрировано из js_legacy/calc/calcRollup.js.
 Роллап = стенд (presswall Rollup) + печать баннера на рулоне + доставка.
+
+Полчаса установки постера — только при непустом материале, как в JS.
+Печать баннера идёт в режиме роллапа (mode.value). Старый JS всегда
+передавал в calcPrintRoll mode 1; отличие mode 2 — решение 09.11.2026.
 """
 
 from __future__ import annotations
@@ -185,7 +189,7 @@ class RollupCalculator(BaseCalculator):
 
         cost_install = 0.0
         price_install = 0.0
-        time_install = 0.5
+        time_install = 0.0
 
         if material_id:
             print_calc = PrintRollCalculator()
@@ -215,6 +219,7 @@ class RollupCalculator(BaseCalculator):
             except (KeyError, ValueError):
                 pass
 
+            time_install = 0.5
             cost_install = time_install * COST_OPERATOR
             price_install = cost_install * (1 + MARGIN_OPERATION)
 
