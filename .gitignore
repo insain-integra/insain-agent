@@ -7,3 +7,4 @@ logs/
 exports/
 .run/
 data/kb_cache.json
+docs/history/usage-events-*.csv
