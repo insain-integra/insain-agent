@@ -85,8 +85,11 @@ def test_get_tool_schema(calc):
 # ── Эталонный тест ───────────────────────────────────────────────────
 
 REF_PARAMS = {"quantity": 50, "width_mm": 80, "height_mm": 120, "material_id": "PaperCoated115M", "color": "4+0", "mode": 1}
-# JS, 04.11.2026 — сверка цены и срока с calcPennantPaper --data current.
-# weight_kg 0.1052 — вес изделий. JS на этом входе 0.1328 (лист с обрезью). Верный вес — Python, решение 11.11.2026.
+# JS, 11.11.2026 — price раннера 2181.133696 совпал с API.
+# time_ready JS 9.17, Python 9.164 (rel 0.00065).
+# weight_kg 0.1052 — вес изделий. JS 0.1328 (лист с обрезью). Верный вес — Python, решение 11.11.2026.
+# node scripts/run_js_calc.mjs calcPennantPaper --data current --args
+# '[50,[80,120],"4+0","PaperCoated115M",{},1]'
 EXPECTED_REF = {"cost": 1351.9012, "price": 2181.133696, "time_hours": 0.67, "time_ready": 9.164, "weight_kg": 0.1052}
 EXPECTED_MATERIAL = {"code": "PaperCoated115M", "name_substring": "Титан DIGITAL", "quantity_approx": 6}
 
@@ -100,9 +103,10 @@ def ref_result(calc):
 
 
 def test_expected_values_pennant(ref_result):
+    """JS, 11.11.2026: 50 шт., 80×120, PaperCoated115M, 4+0, mode 1. Вес — изделия, не лист JS."""
     if ref_result is None:
         pytest.skip("расчёт эталонного кейса не выполнен")
-    rel = 0.03
+    rel = 0.001
     r, e, em = ref_result, EXPECTED_REF, EXPECTED_MATERIAL
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
@@ -144,9 +148,14 @@ def test_expected_values_pennant(ref_result):
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
 
 
-# 2026-11-11 — дефолт формы 73. size_mm: плёнка из каталога Laminat, бумага листа, шнур.
-# Цена — Python до прокидки size_mm (боевой API на эту дату).
-FORM73_PARAMS = {
+# JS, 11.11.2026 — дефолт боевой формы 73: 100 шт., А5 148×210, 4+0,
+# PaperCoated170M, Laminat32G, mode 1.
+# cost, price, time_hours, time_ready — боевой JS страницы. Раннер ламинацию не считает
+# (нет laminat.json); кейс в docs/js-runner-cases.md не добавлялся.
+# price JS 5976.162177692308, Python 5976.340906666667 (rel 2.99e-5); round обоих 6000.
+# time_ready JS 10.63, Python 10.623333333333333 (rel 0.000628).
+# weight_kg 0.8818 — вес изделий (Python). JS 1.0144 — лист с обрезью. Решение 11.11.2026.
+REF_FORM_DEFAULT = {
     "quantity": 100,
     "width_mm": 148,
     "height_mm": 210,
@@ -155,12 +164,34 @@ FORM73_PARAMS = {
     "lamination_id": "Laminat32G",
     "mode": 1,
 }
+EXPECTED_FORM_DEFAULT = {
+    "cost": 3684.0074923076927,
+    "price": 5976.162177692308,
+    "time_hours": 1.44,
+    "time_ready": 10.63,
+    "weight_kg": 0.8818,
+}
+
+
+def test_form_default_laminat(calc):
+    """JS, 11.11.2026: дефолт формы 73 с ламинацией. Вес — изделие, не лист JS."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    assert r["cost"] == pytest.approx(e["cost"], rel=0.001)
+    assert r["price"] == pytest.approx(e["price"], rel=0.001)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=0.001)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=0.001)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=0.001)
+
+
+# 2026-11-11 — size_mm: плёнка из каталога Laminat, бумага листа, шнур.
+# Цена — Python до прокидки size_mm (боевой API на эту дату).
 FORM73_PRICE = 5976.340906666667
 
 
 def test_form73_materials_size_mm(calc):
     """2026-11-11: дефолт формы 73 — size_mm плёнки, бумаги и шнура; цена не сдвигается."""
-    r = calc.execute(FORM73_PARAMS)
+    r = calc.execute(REF_FORM_DEFAULT)
     mats = r["materials"]
     assert len(mats) >= 3, mats
     by_code = {m["code"]: m for m in mats}

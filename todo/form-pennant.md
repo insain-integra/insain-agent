@@ -1,12 +1,12 @@
 # form-pennant
 
-Статус: заблокировано: ждёт todo/print-sheet-weight-port-fix.md
+Статус: заблокировано: ждёт todo/pennant-materials-size-mm.md
 Сложность: средняя
 Implementer: Grok 4.7
 Reviewer: Auto
 Site ops: Grok 4.7
 Почему: типовая форма серии по skill `ezfc-form-to-api`, калькулятор уже на API; прод — только копия формы по шагам skill.
-Чат: после закрытия `print-sheet-weight-port-fix` человек ставит `черновик` и открывает Implementer (Grok 4.7).
+Чат: после закрытия `pennant-materials-size-mm` — Site ops (перепроверка «Размер» на копии 94), затем приёмка человеком и Reviewer.
 
 ## Цель
 
@@ -21,7 +21,8 @@ Site ops: Grok 4.7
 - `todo/EPIC-forms-to-api.md` — очередь, после `form-presswall` (закрыто 2026-11-09, `docs/history/log.md`).
 - `docs/js-runner-cases.md` — команда раннера и `price` для `calcPennantPaper`.
 - Эталон: `REF_PARAMS` в `calc_service/tests/test_calculators/test_pennant.py` — 50 шт., 80×120, `PaperCoated115M`, `4+0`, mode 1. Порог `price` — прогон JS против API, не число из файла. JS: `js_legacy/calc/calcPennant.js`, сигнатура `calcPennantPaper(n, size, color, materialID, options, modeProduction)`.
-- Предпосылка: `todo/print-sheet-weight-port-fix.md` — вес `print_sheet` с JS; без неё `pennant.js` и дубль не делать. После `close` этой предпосылки — снова сверка эталона (в т.ч. `weight_kg`) и дефолт формы.
+- Предпосылка `print-sheet-weight-port-fix`: решение 11.11.2026 — верный вес Python (изделие), к JS лист с обрезью не выравниваем. Файл `todo/print-sheet-weight-port-fix.md` ещё может лежать как leftover.
+- Предпосылка `todo/pennant-materials-size-mm.md` — `size_mm` в ответе `pennant` (бумага, плёнка, шнур); без неё колонка «Размер» на копии пустая. После её закрытия и деплоя API — Site ops перепроверяет столбец на копии 94, `pennant.js` не переписывать.
 - Остальное не открывать.
 
 ## Scope
@@ -82,25 +83,25 @@ print("ok", js, api, abs_d, rel)
 '@ | python -
 ```
 
-- [x] Эталон в `test_pennant.py` переснят с этого прогона: комментарий `# JS, ДД.ММ.ГГГГ` и вызов раннера рядом с эталоном, в docstring та же пометка, `price` в `EXPECTED_*` равен цене раннера, допуск assert — `rel=0.001`. Stdout: `passed`, `failed` нет. Расхождение JS и Python — стоп, файл не менять. 10.11.2026, `7 passed`.
+- [x] Эталон в `test_pennant.py` переснят с этого прогона: комментарий `# JS, ДД.ММ.ГГГГ` и вызов раннера рядом с эталоном, в docstring та же пометка, `price` в `EXPECTED_*` равен цене раннера, допуск assert — `rel=0.001`. Stdout: `passed`, `failed` нет. Расхождение JS и Python — стоп, файл не менять. 11.11.2026, повтор сверки: price совпал, `weight_kg` оставлен Python.
 
 ```powershell
 python -m pytest calc_service/tests/test_calculators/test_pennant.py -q
 ```
 
-- [ ] Файл формы. В выводе есть `insaincalc.calcApi('pennant'`, `insaincalc.syncUrl(` и `insaincalc.showResult(`.
+- [x] Файл формы. В выводе есть `insaincalc.calcApi('pennant'`, `insaincalc.syncUrl(` и `insaincalc.showResult(`. 11.11.2026: строки 21 `syncUrl(`, 42 `calcApi('pennant'`, 43 `showResult(`.
 
 ```powershell
 Select-String -Path wp-plugin\forms\pennant.js -Pattern "calcApi\('pennant'|syncUrl\(|showResult\("
 ```
 
-- [ ] Контракт всех `forms/*.js`. Stdout: `passed`.
+- [x] Контракт всех `forms/*.js`. Stdout: `passed`. 11.11.2026: вместе с `test_pennant.py` — `11 passed`.
 
 ```powershell
 python -m pytest calc_service/tests/test_wp_plugin_forms.py -q
 ```
 
-- [ ] Копия не на витрине. Одна строка со статусом `draft` или `private`. HTTP без cookies — `404`.
+- [x] Копия не на витрине. 11.11.2026: товар 2586887 — `draft`, без cookies `404`. Форма копии 94.
 
 ```powershell
 ssh insain-prod "sudo -u www-data wp post get PRODUCT --field=post_status --path=/var/www/insain.ru"
@@ -109,14 +110,15 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 
 ### Критерии перевода формы ezFC на API
 
-- [ ] На копии под админом (`https://insain.ru/?post_type=product&p=PRODUCT&preview=true`) эталон даёт `POST /api/v1/calc/pennant` → 200, в теле коды материалов, не `0`. Цена на странице равна `price` API с округлением `showResult`. В «Результат» — код ответа и обе цены.
-- [ ] Смена каждого dropdown меняет цену и таблицу материалов. В таблице нет внутренних `code`. Есть вес и срок с подсказкой дат. Перезагрузка не меняет режим и срок.
-- [ ] URL обновляется GET-именами формы (имя параметра = имя элемента). Ссылка с этими GET открывает копию с теми же значениями и той же ценой. У dropdown с кодом в `data-value` — `GET_check=index`. У radio со значениями `1`/`2` — `GET_check=value`.
+- [x] На копии под админом (`https://insain.ru/?post_type=product&p=2586887&preview=true`) дефолт формы даёт `POST /api/v1/calc/pennant` → 200. Тело: PaperCoated170M, 4+0, Laminat32G, mode 1, не `0`. `price` API 5976.340906666667, на странице `showResult` 6 000 руб.
+- [x] Смена каждого dropdown меняет цену и таблицу материалов. В таблице нет внутренних `code`. Вес 0.88 кг, срок «Срок 1 день», подсказка дат есть. Перезагрузка оставляет режим data-value 1 и тот же срок.
+- [x] URL обновляется GET-именами формы. Ссылка с дефолтными GET открывает копию 94: А5, 4+0, 170гр, глянцевая 32 мкм, режим 1, цена 6 000 руб. У dropdown `GET_check=index`. У radio (data-value 1 и 2) `GET_check=value`: «быстрее» пишет `rdoModeProduction=2`.
+- [ ] После закрытия и деплоя `pennant-materials-size-mm`: на копии 94 / товаре 2586887 под админом в таблице материалов колонка «Размер» — плёнка `330,0`, бумага `320,450`, шнур `4,350` (как на боевой 73). `pennant.js` и bridge не менять. Цена дефолта по-прежнему 6 000 руб.
 
 ## Проверки
 
-- [x] `python scripts/dev.py check` — код выхода 0. calc_service 539 passed, bot_service 81 passed.
-- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md). Diff: эталон `test_pennant.py`, шапка и журнал задачи, пересборка `docs/dashboard.md`.
+- [x] `python scripts/dev.py check` — код выхода 0. 11.11.2026: calc_service 540 passed, bot_service 81 passed.
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md). Diff этой сессии: `wp-plugin/forms/pennant.js`, `REF_FORM_DEFAULT` в `test_pennant.py`, шапка и журнал задачи, пересборка `docs/dashboard.md`. Калькулятор и JSON цен не менялись. В JS нет формул цены и чтения через DOM.
 
 ## Риски
 
@@ -141,23 +143,55 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 Следующая сессия: Analyst
 
 2026-11-10 — Analyst, Grok 4.7 — вес важнее допуска цены: не разрешать `pennant.js`; предпосылка `todo/print-sheet-weight-port-fix.md` (порт веса `print_sheet` с JS). Раннер/laminat — harness вне scope. Abs цены 0.18 при round 6000 — после фикса веса. — дальше Implementer предпосылки, Opus 5.5
+2026-11-11 — человек — предпосылка `print-sheet-weight-port-fix` закрыта (вес Python оставлен); статус `черновик` — дальше Implementer, Grok 4.7
+2026-11-11 — Implementer, Grok 4.7 — эталон без ламинации снова сошёлся (price 2181.133696, срок rel 0.00065); дефолт с ламинацией: price abs 0.1787 > 0.02 при одинаковом cost и round 6000 — дальше Analyst
+
+Блокер: дефолт боевой формы 73 (100 шт., А5 148×210, 4+0, PaperCoated170M, Laminat32G, mode 1) не проходит допуск цены abs ≤ 0.02
+Пробовал: раннер эталона `node scripts/run_js_calc.mjs calcPennantPaper --data current --args '[50,[80,120],"4+0","PaperCoated115M",{},1]'` → price 2181.133696, time_ready 9.17, weight_kg 0.1328. Боевой API и локальный Python: price 2181.133696, time_ready 9.164, weight_kg 0.1052. Сверка price: abs 0, rel 0; срок rel 0.000655. Вес JS 0.1328 против Python 0.1052 — оставлен Python (решение 11.11.2026). Дефолт, боевой JS страницы: cost 3684.0074923076927, price 5976.162177692308, time 1.44, time_ready 10.63, weight 1.0144, round 6000. API и Python: cost тот же, price 5976.340906666667, time_ready 10.623333333333333, weight_kg 0.8818, round 6000. abs цены 0.1787 > 0.02, rel 2.99e-5; срок rel 0.000628. Порт `calcPennantPaper`: строка `нет в Python:` пустая. Поля формы 73: numN=100, dpdSize «148, 210», dpdColor «4+0», dpdMaterial PaperCoated170M, dpdCoverLaminat Laminat32G, rdoModeProduction «1». get_value_from 2938/2939/2940/2941 совпадают с этими элементами.
+Гипотеза: разница цены целиком в `calcPrintSheet` с ламинацией (JS price 4058.562177692308, Python 4058.740906666667) при одинаковом cost 2499.0074923076927 и том же расходе (бумага 29 листов, плёнка 24.675 м). Без ламинации price листа совпадает, шнур совпадает. `marginPrintSheet` и `marginPennantPaper` равны 0. Раннер ламинацию не считает (harness, вне scope). Вес к JS не выравниваем.
+Вопрос: разрешить `pennant.js` и `REF_FORM_DEFAULT` при rel цены < 0.001 и одном round 6000 (числа дефолта — с боевого JS, вес — Python), или предпосылка на price ламинации в `print_sheet` (abs 0.18 при одинаковом cost)?
+Следующая сессия: Analyst
+
+2026-11-11 — человек — допуск цены принят: дефолт формы 73 сверяется по rel ≤ 0.001 при одинаковом round (abs 0.18 при 6000 допустим); `pennant.js` и `REF_FORM_DEFAULT` писать (числа дефолта — с боевого JS, вес — Python) — дальше Implementer, Grok 4.7
+2026-11-11 — Implementer, Grok 4.7 — `pennant.js` и `REF_FORM_DEFAULT`: дефолт формы 73, price rel 2.99e-5, round обоих 6000, вес Python 0.8818 — дальше человек
+
+Блокер: дубль формы 73 и черновик товара — шаг с подтверждением человека
+Пробовал: git-часть готова. `wp-plugin/forms/pennant.js` — id боевой формы 73 (dpdSize 2938, dpdColor 2939, dpdMaterial 2940, dpdCoverLaminat 2941, rdoModeProduction 2955, cjsCalc 2942). `REF_FORM_DEFAULT`: 100 шт., 148×210, PaperCoated170M, 4+0, Laminat32G, mode 1. Локальный Python и `POST /api/v1/calc/pennant`: cost 3684.0074923076927, price 5976.340906666667, time_hours 1.44, time_ready 10.623333333333333, weight_kg 0.8818. Боевой JS страницы: price 5976.162177692308, time_ready 10.63. rel цены 2.99e-5, rel срока 0.000628, round обоих 6000. `pytest` `test_pennant.py` и `test_wp_plugin_forms.py`: `11 passed`.
+Гипотеза: без «да» Site ops копию не создаёт; боевая форма клиентам не меняется.
+Вопрос: дублировать форму 73 CalcPennantPaper на черновик товара?
+Следующая сессия: человек; после «да» — Site ops, модель Grok 4.7
+
+2026-11-11 — Site ops, Grok 4.7 — человек сказал «да» (2026-11-11) на дубль формы 73 и черновик; копия 94, черновик 2586887, POST 200, price 5976.340906666667, на странице 6000, срок как у формы 73 — дальше человек (приёмка копии), затем Reviewer, Auto
+2026-11-11 — Implementer, Grok 4.7 — замечание человека «На форму материалов не передаются размеры»: колонка «Размер» пустая, ответ `pennant` без `size_mm`; `pennant.js` и bridge не виноваты — дальше Analyst, Grok 4.7
+
+Блокер: колонка «Размер» таблицы материалов на копии пустая; чтобы её заполнить, нужна правка калькулятора — это вне scope
+Пробовал: боевая страница, `insaincalc.calcPennantPaper(100,[148,210],"4+0","PaperCoated170M", isLamination Laminat32G, 1)` и `showMaterials` — плёнка `330,0` / 24.68, бумага `320,450` / 29, шнур `4,350` / 100. `POST https://insain.ru/api/v1/calc/pennant` с тем же дефолтом: те же три строки и те же количества (29 / 24.675 / 100), ключа `size_mm` нет ни у одной. Локальный `PrintSheetCalculator` на этих параметрах отдаёт у бумаги `size_mm` `[320, 450]`, у плёнки размера нет. `pennant.py` при сборке `materials_out` копирует `code`/`name`/`title`/`quantity`/`unit` и `size_mm` бумаги выбрасывает. `lamination.py` и `calc_set_rope` (`process_tools.py`) `size_mm` не ставят: в каталоге у плёнки дефолт `[330, 0]`, у шнура `[4, 350]`. `pennant.js` передаёт размер изделия `width_mm` 148 и `height_mm` 210; Site ops уже видел это тело и цену 6 000. `showResult` берёт размер только из `materials[].size_mm` (`materialSize` в `insain-calc-bridge.js`). Превью копии без входа админа — 404. SSH не вызывался. Код не менялся.
+Гипотеза: пустая ячейка на копии — не маппинг полей формы. Bridge уже кладёт `size_mm` во второй столбец; API его не присылает. Подставить размеры в `pennant.js` значило бы захардкодить каталог.
+Вопрос: расширить scope этой задачи на `size_mm` в ответе `pennant` (бумага уже есть в `print_sheet`, плёнка и шнур — в `lamination` и `calc_set_rope`) или завести предпосылку и вернуть форму к Implementer после неё?
+Следующая сессия: Analyst, модель Grok 4.7
+
+2026-11-11 — человек — scope не расширять: завести задачу-предпосылку на `size_mm` в ответе `pennant` (бумага, плёнка, шнур); form-pennant ждёт её закрытия, затем Site ops перепроверяет столбец «Размер» на копии 94 — дальше Analyst (написать предпосылку)
+2026-11-11 — Analyst, Grok 4.7 — заведена `todo/pennant-materials-size-mm.md` (прокидка `size_mm` в `pennant` + общие `lamination` / `calc_set_rope`, деплой API); статус `заблокировано: ждёт todo/pennant-materials-size-mm.md`. После закрытия предпосылки — Site ops перепроверяет столбец «Размер» на копии 94 (`pennant.js` не переписывать), затем приёмка человеком и Reviewer, Auto — дальше Implementer предпосылки, Grok 4.7
 
 ## Найдено вне scope
 
 - Раннер не грузит `laminat.json` / `calcLamination.js` — дефолт формы 73 с ламинацией раннером не считается; правка `scripts/run_js_calc.mjs` не в этой задаче.
-- Abs `price` дефолта с ламинацией ≈ 0.18 при одинаковом `cost` и `round` 6000 — вернуться после закрытия `print-sheet-weight-port-fix`.
+- Колонка «Размер» таблицы материалов закрывается предпосылкой `pennant-materials-size-mm`, не расширением scope этой задачи.
+- `todo/print-sheet-weight-port-fix.md` всё ещё в репозитории со статусом `черновик` при решении «вес Python» — leftover для человека (`close` или удаление).
 
 ## Результат
 
 - Ветка, PR или коммит: `task/form-pennant`, коммита нет
-- Период: 2026-11-10
+- Период: 2026-11-10 — 2026-11-11
 - Часы человека: не учтено
-- Работа агентов: Implementer, Grok 4.7
-- Было / стало: эталон в `test_pennant.py` — пометка `JS, 04.11.2026`, допуск `rel=0.03` → `JS, 10.11.2026`, команда раннера рядом с эталоном, docstring с той же пометкой, `rel=0.001`. Числа `EXPECTED_REF` те же: price раннера 2181.133696.
-- Сделано: порт `calcPennantPaper` пустой; цепочка `calcPrintSheet` — пропуски уже в `scripts/js_port_gaps_allowed.txt`. Эталон без ламинации совпал с боевым API. Допуск эталона переснят.
-- Чем проверено: `python scripts/js_port_gaps.py calcPennantPaper` (у `calcPennantPaper` строка `нет в Python:` пустая). Раннер `{"price":2181.133696,"time_ready":9.17,"weight_kg":0.1328}`. API `price 2181.133696`, `time_ready 9.164`, `weight_kg 0.1052`. Скрипт сверки: `ok 2181.133696 2181.133696 0.0 0.0`. `python -m pytest calc_service/tests/test_calculators/test_pennant.py -q` — `7 passed`.
-- Не сделано и почему: `wp-plugin/forms/pennant.js`, `REF_FORM_DEFAULT`, строка в `todo/forms-batch-switch.md`, дубль и черновик — ждёт `print-sheet-weight-port-fix` (вес). Форму не дублировать.
-- Требуется решение: нет (решено Analyst 2026-11-10).
-- Строка в «Состав пакета» `todo/forms-batch-switch.md` (id копии и товар — после принятия копии): не добавлена, копия не принималась.
+- Работа агентов: Implementer, Grok 4.7; Site ops, Grok 4.7
+- Было / стало: файла `wp-plugin/forms/pennant.js` не было → custom JS боевой формы 73 (`calcApi('pennant')`, `syncUrl`, `showResult`). На проде форма 73 без копии → копия 94 `CalcPennantPaper duplicate` на черновике товара 2586887, JS копии через `calcApi`, GET проставлен. Боевая форма 73 по-прежнему на `calcPennantPaper`.
+- Сделано: человек сказал «да» (2026-11-11) на дубль формы 73 и черновик. Копия 94 (одна новая строка после 93). Черновик 2586887 «Калькулятор вымпелов бумажных (Копировать)», `ezfc_form_id` 94, `post_status` draft. Гость: HTTP 404. JS и GET записаны в копию (бэкап `/tmp/ezfc-copy-94-20261110-175751.json`). Боевая форма не размечалась и не переключалась: у элементов 73 имя GET пустое, у режима `GET_check` по-прежнему `index`, в расчёте есть `calcPennantPaper` и нет `calcApi`. Плагин не выкладывался.
+- Чем проверено: `wp post get 2586887 --field=post_status` → `draft`. `curl` без cookies на `?post_type=product&p=2586887` → `404`. Превью под админом: `POST /api/v1/calc/pennant` 200, тело `quantity 100, 148×210, PaperCoated170M, 4+0, Laminat32G, mode 1`. `price` API 5976.340906666667, на странице 6 000 руб. и 60 руб./шт. Срок «Срок 1 день», подсказка «Готовность заказа: 12.11.26, 15:00 При запуске заказа в работу до: 11.11.26, 11:00» — тот же текст, что на боевой странице. Вес на копии 0.88 кг (Python); на боевой странице старый JS показывает 1.01 кг — так и решено 11.11.2026. Строка «со скидкой» на копии 4 790 руб., на боевой 4 789 руб.; менеджерская цена обоих 6 000. В таблице материалов имена, без `PaperCoated170M` / `Laminat32G` / `RopeForPack`. Смена размера, цветности, бумаги и ламинации меняет цену (6 000 → 4 800 → 5 200 → 5 300 → 4 200) и строки таблицы; «быстрее» даёт 4 900 руб., «Срок 4 часа» и `rdoModeProduction=2`. Ссылка с дефолтными GET возвращает А5, 4+0, 170гр, глянцевую 32 мкм, режим 1 и 6 000 руб. Повторная загрузка режим и срок не меняет. `wp cache flush` — Success. `wp litespeed-purge all` — `Error: Something went wrong! Got 400`; превью всё равно отдало новый JS.
+- Не сделано и почему: строка в `todo/forms-batch-switch.md` — копия человеком не принята. Выкладка плагина и переключение боевой формы 73 — не эта задача. Удаление копии и черновика — не-scope. Кейс дефолта в `docs/js-runner-cases.md` не добавлялся: раннер ламинацию не считает. Колонку «Размер» в этой сессии не заполнял: правка в `pennant.py` / `lamination.py` / `calc_set_rope`, это вне scope; `pennant.js` не менялся.
+- Как откатить: элементы копии — из бэкапа `/tmp/ezfc-copy-94-20261110-175751.json` тем же `ezfc_copy_apply.php`. Черновик 2586887 гостям не виден. Удалять форму 94 и товар только с отдельным «да». Боевую форму откатывать не нужно: она не менялась.
+- Требуется решение: нет по scope. Ждём `pennant-materials-size-mm` (закрытие + деплой API); затем Site ops — столбец «Размер» на копии 94; затем приёмка человеком и Reviewer. Leftover `print-sheet-weight-port-fix.md` — человеку.
+- Строка в «Состав пакета» `todo/forms-batch-switch.md`: не добавлена, копия ещё не принималась.
+- Превью: https://insain.ru/?post_type=product&p=2586887&preview=true&numN=100&dpdSize=1&dpdColor=0&dpdMaterial=0&dpdCoverLaminat=1&rdoModeProduction=1
 
-| 73 CalcPennantPaper | `pennant` | /catalog/kalkulyator-vympelov-bumazhnyh/ | COPY / PRODUCT (draft) | todo/form-pennant.md |
+| 73 CalcPennantPaper | `pennant` | /catalog/kalkulyator-vympelov-bumazhnyh/ | 94 / 2586887 (draft) | todo/form-pennant.md |
