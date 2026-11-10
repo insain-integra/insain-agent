@@ -1,6 +1,6 @@
 # pennant-materials-size-mm
 
-Статус: выкатка
+Статус: закрытие
 Сложность: средняя
 Implementer: Grok 4.7
 Reviewer: Auto
@@ -83,7 +83,7 @@ git stash pop
 python -m pytest calc_service/tests/test_calculators/test_lamination.py calc_service/tests/test_process_tools.py calc_service/tests/test_calculators/test_pennant.py -q
 ```
 
-- [ ] Боевой API после деплоя. На теле дефолта формы 73 те же `size_mm` и `price` с rel ≤ 0.001 к локальному эталону.
+- [x] Боевой API после деплоя. На теле дефолта формы 73 те же `size_mm` и `price` с rel ≤ 0.001 к локальному эталону.
 
 ```powershell
 Invoke-RestMethod -Method Post -Uri https://insain.ru/api/v1/calc/pennant -ContentType 'application/json' -Body '{"quantity":100,"width_mm":148,"height_mm":210,"material_id":"PaperCoated170M","color":"4+0","lamination_id":"Laminat32G","mode":1}' | Select-Object price, @{n='sizes';e={$_.materials | ForEach-Object { '{0}:{1}' -f $_.code, ($_.size_mm -join ',') }}}
@@ -110,6 +110,7 @@ Invoke-RestMethod -Method Post -Uri https://insain.ru/api/v1/calc/pennant -Conte
 2026-11-11 — Implementer, Grok 4.7 — `size_mm` в ответе `pennant` на дефолте формы 73: плёнка `[330, 0]`, бумага `[320, 450]`, шнур `[4, 350]`; price `5976.340906666667` не сдвинулся; эталоны цены `lamination` зелёные без пересъёма — дальше Reviewer, Auto
 2026-11-11 — Reviewer, Auto — принято по незакоммиченному diff; локальные критерии size_mm/price/соседи зелёные; боевой API — Site ops после слияния — дальше человек: коммит и слияние в main
 2026-11-11 — человек — принято — выкатка (коммит и слияние в main; деплой API — Site ops)
+2026-11-11 — Site ops, Grok 4.7 — API `6a9e14b` на проде (`297c7fb` → `6a9e14b`); smoke дефолта формы 73: `size_mm` бумага `[320, 450]`, плёнка `[330, 0]`, шнур `[4, 350]`, price `5976.340906666667` (rel 0) — дальше человек: закрытие
 
 ## Ревью 1
 
@@ -131,12 +132,13 @@ Scope и инварианты: diff только `pennant` / `lamination` / `cal
 
 ## Результат
 
-- Ветка, PR или коммит: `task/pennant-materials-size-mm`, worktree `D:\Projects\insain-agent-pennant-materials-size-mm` от `main` (`5baf7b7`). Коммита нет — человек не просил.
+- Ветка, PR или коммит: `main` `6a9e14b` (код `size_mm` — `4cf89c2`). CI `check` на `6a9e14b` — success. На VDS было `297c7fb`.
 - Период: 2026-11-11
 - Часы человека:
-- Работа агентов: Implementer, Grok 4.7, одна сессия
-- Было / стало: дефолт формы 73 отдавал три строки `materials` без `size_mm` при price `5976.340906666667`. Стало: `PaperCoated170M` `[320, 450]`, `Laminat32G` `[330, 0]`, `RopeForPack` `[4, 350]`; price, cost ламинации и price `calc_set_rope(100, RopeForPack, 1)` = `1917.6000000000004` те же.
-- Сделано: `pennant` не отбрасывает `size_mm` из печати и шнура; `lamination` кладёт размер плёнки из каталога (рулон и пакет); `calc_set_rope` кладёт размер шнура из каталога, если он задан. Тест `test_form73_materials_size_mm` (2026-11-11).
-- Чем проверено: скрипт дефолта формы 73 — `ok` и price `5976.340906666667`. Откат трёх файлов калькулятора: `test_form73_materials_size_mm` `FAILED` (`KeyError: size_mm`), остальные 19 в `test_pennant.py` и `test_lamination.py` `passed`; `git stash pop` вернул правки. Затем `python -m pytest calc_service/tests/test_calculators/test_lamination.py calc_service/tests/test_process_tools.py calc_service/tests/test_calculators/test_pennant.py -q` — `66 passed`. Прямые price до и после: рулонная ламинация `1002.0`, пакетная `2468.0`, шнур `1917.6000000000004`. `python scripts/dev.py check` — код 0: calc_service `540 passed`, bot_service `81 passed`.
-- Не сделано и почему: боевой `POST /api/v1/calc/pennant` — после ревью, слияния в `main` и зелёного CI, skill `deploy-api` (Site ops). `form-pennant` не закрывал.
-- Требуется решение: нет. Дальше Reviewer, Auto, по diff этой ветки. Коммит — когда попросит человек.
+- Работа агентов: Site ops, Grok 4.7, одна сессия (деплой). До этого Implementer и Reviewer — в журнале.
+- Было / стало: прод был на `297c7fb`, в ответе `pennant` не было `size_mm`. Стало: `6a9e14b`, дефолт формы 73 — `PaperCoated170M` `[320, 450]`, `Laminat32G` `[330, 0]`, `RopeForPack` `[4, 350]`, price `5976.340906666667` (rel 0 к эталону).
+- Сделано: `bash infra/deploy.sh` на `insain-prod`. Скрипт: fast-forward `297c7fb` → `6a9e14b`, образ `insain-agent-calc-api:rollback` (`d52bfa699d78`), сборка, контейнер `insain-calc-api` healthy на `127.0.0.1:8002`. В этот же pull вошли коммиты `main` после `297c7fb`, включая вес `print_sheet` (`8960a31`).
+- Чем проверено: smoke скрипта — `GET /api/v1/calculators` 200, `POST /api/v1/calc/puzzle` 200. Снаружи `curl -fsS https://insain.ru/api/v1/calculators` — 200, в списке есть `pennant`. `POST https://insain.ru/api/v1/calc/pennant` на теле дефолта формы 73: price `5976.340906666667`, rel 0; `size_mm` бумага `320,450`, плёнка `330,0`, шнур `4,350`.
+- Не сделано и почему: боевую форму 73 не открывал и не переключал — колонка «Размер» на копии 94 остаётся в `form-pennant`. Плагин не выкладывал.
+- Требуется решение: нет. Дальше человек: закрытие. Коммит отчёта в задаче — когда попросит человек.
+- Откат: на VDS образ `insain-agent-calc-api:rollback` и коммит `297c7fb`. Повтор скрипта с падающим smoke откатывает сам; вручную — `git reset --hard 297c7fb`, `docker tag insain-agent-calc-api:rollback insain-agent-calc-api:latest`, `docker compose -f docker-compose.calc-only.yml up -d --no-build --force-recreate` в `/opt/insain-agent`. Откат снимет и `size_mm`, и всё, что выехало между `297c7fb` и `6a9e14b`.
