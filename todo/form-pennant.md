@@ -1,6 +1,6 @@
 # form-pennant
 
-Статус: заблокировано: ждёт todo/pennant-materials-size-mm.md
+Статус: черновик
 Сложность: средняя
 Implementer: Grok 4.7
 Reviewer: Auto
@@ -172,6 +172,7 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 
 2026-11-11 — человек — scope не расширять: завести задачу-предпосылку на `size_mm` в ответе `pennant` (бумага, плёнка, шнур); form-pennant ждёт её закрытия, затем Site ops перепроверяет столбец «Размер» на копии 94 — дальше Analyst (написать предпосылку)
 2026-11-11 — Analyst, Grok 4.7 — заведена `todo/pennant-materials-size-mm.md` (прокидка `size_mm` в `pennant` + общие `lamination` / `calc_set_rope`, деплой API); статус `заблокировано: ждёт todo/pennant-materials-size-mm.md`. После закрытия предпосылки — Site ops перепроверяет столбец «Размер» на копии 94 (`pennant.js` не переписывать), затем приёмка человеком и Reviewer, Auto — дальше Implementer предпосылки, Grok 4.7
+2026-11-11 — человек — предпосылка `pennant-materials-size-mm` закрыта (API `6a9e14b` на проде, `size_mm` бумаги, плёнки и шнура в ответе); ветка перенесена на `main`; статус `черновик` — дальше Site ops, Grok 4.7: перепроверить столбец «Размер» на копии 94
 
 ## Найдено вне scope
 
