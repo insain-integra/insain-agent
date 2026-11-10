@@ -59,4 +59,4 @@ node scripts/run_js_calc.mjs calcUVPrint --data current --args '[100,[20,20],[20
 node scripts/run_js_calc.mjs calcUVPrint --data current --args '[100,[20,20],[20,20],null,{\"isUVPrint\":{\"printerID\":\"RimalSuvUV\",\"resolution\":2,\"color\":\"4+1\",\"surface\":\"isAround\"}},1]'
 ```
 
-Известные расхождения Python с JS вне этих кейсов: бейдж (JS 4708, Python ~6509) и стикер 50×50 VHI80 (JS 1308, Python ~1107) — отдельные задачи `badge-vs-js` и `sticker-vs-js`.
+Известные расхождения Python с JS вне этих кейсов: бейдж (JS 4708, Python ~6509) и стикер 50×50 VHI80 (JS 1308, Python ~1107) — отдельные задачи `badge-vs-js` и `sticker-vs-js`. Вес лазерной листовой печати к JS не выравнивать: `calcPrintLaser` считает весь лист (`numSheet` × `sizeSheet`, с обрезью), Python — тираж × размер изделия. Верный вес — Python, решение 11.11.2026. Вымпел 50×80×120 `PaperCoated115M` без ламинации: JS `weight_kg` 0.1328, Python 0.1052 (лист того же входа: JS 0.0828, Python 0.0552).

@@ -713,7 +713,10 @@ class PrintSheetCalculator(BaseCalculator):
             print_time_ready = time_print + base_ready
         time_ready = time_hours + max(base_ready, print_time_ready)
 
-        # Лазер: вес по тиражу изделий. Струй: вес из calcPrintInkJet + ламинация (как JS).
+        # Лазер: вес по тиражу и размеру изделия. Решение человека 11.11.2026: это верный вес.
+        # JS calcPrintSheet → calcPrintLaser считает calcWeight(numSheet, sizeSheet) —
+        # весь лист, включая обрезь, поэтому JS тяжелее (вымпел 50×80×120: JS 0.1328, Python 0.1052).
+        # Струй: вес из calcPrintInkJet + ламинация.
         weight_kg = 0.0
         if is_inkjet and print_weight_kg is not None:
             weight_kg = float(print_weight_kg)

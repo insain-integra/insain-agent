@@ -85,7 +85,8 @@ def test_get_tool_schema(calc):
 # ── Эталонный тест ───────────────────────────────────────────────────
 
 REF_PARAMS = {"quantity": 50, "width_mm": 80, "height_mm": 120, "material_id": "PaperCoated115M", "color": "4+0", "mode": 1}
-# JS, 04.11.2026 — сверка с calcPennantPaper --data current
+# JS, 04.11.2026 — сверка цены и срока с calcPennantPaper --data current.
+# weight_kg 0.1052 — вес изделий. JS на этом входе 0.1328 (лист с обрезью). Верный вес — Python, решение 11.11.2026.
 EXPECTED_REF = {"cost": 1351.9012, "price": 2181.133696, "time_hours": 0.67, "time_ready": 9.164, "weight_kg": 0.1052}
 EXPECTED_MATERIAL = {"code": "PaperCoated115M", "name_substring": "Титан DIGITAL", "quantity_approx": 6}
 

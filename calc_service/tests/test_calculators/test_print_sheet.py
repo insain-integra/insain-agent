@@ -131,6 +131,7 @@ REF_PARAMS = {
     "mode": 1,
 }
 # JS, 05.11.2026 — ceil снят, как в JS. calcPrintSheet --data current.
+# weight_kg — вес изделий. JS на этом входе 2.16 (лист). Верный вес — Python, решение 11.11.2026.
 EXPECTED_REF = {
     "cost": 3210.479090909091,
     "price": 5266.918472727273,
