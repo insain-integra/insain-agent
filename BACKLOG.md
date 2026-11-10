@@ -73,3 +73,5 @@
 - Из `form-presswall`: `weight_kg` presswall на эталоне: раннер 9.79, Python и боевой API 9.78 (rel 0.00102) — presswall.py суммирует вес баннера, уже округлённый print_roll до 0.01. Учтено: допуск `abs=0.02` в assert веса.
 - Из `form-presswall`: skill `ezfc-form-to-api` (verify.md, шаг 1а) требует строку раннера дефолта в `docs/js-runner-cases.md`; файла нет в «Файлы» задачи — команда только в комментарии `REF_FORM_DEFAULT`.
 - Из `form-presswall`: Раннер `calcPresswall` с баннером `BannerFronlitLamin440` (ламинированный 440) падает «Поле weight_kg не число (NaN)» — старый JS не считает вес этого баннера; API отдаёт цену (каркас 2,5×2,5 + карман: 12790.624). Сверку JS и API на ламинированном баннере сделать нечем.
+- Из `print-sheet-weight-port-fix`: Раннер не грузит `laminat.json` / `calcLamination.js` — дефолт формы 73 с ламинацией раннером не считается.
+- Из `print-sheet-weight-port-fix`: Струйный вес `print_sheet` по-прежнему берётся из `calcPrintInkJet` (тоже по листу). Решение 11.11.2026 записано для лазерной ветки.
