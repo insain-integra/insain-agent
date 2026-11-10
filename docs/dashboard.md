@@ -47,7 +47,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
-| `pennant-materials-size-mm.md` | ревью |
+| `pennant-materials-size-mm.md` | выкатка |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
 | `smartcaptcha-replace.md` | черновик |
 | `spam-users-cleanup.md` | заблокировано: ждёт todo/registration-harden.md |
