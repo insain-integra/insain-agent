@@ -142,3 +142,29 @@ def test_expected_values_pennant(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+# 2026-11-11 — дефолт формы 73. size_mm: плёнка из каталога Laminat, бумага листа, шнур.
+# Цена — Python до прокидки size_mm (боевой API на эту дату).
+FORM73_PARAMS = {
+    "quantity": 100,
+    "width_mm": 148,
+    "height_mm": 210,
+    "material_id": "PaperCoated170M",
+    "color": "4+0",
+    "lamination_id": "Laminat32G",
+    "mode": 1,
+}
+FORM73_PRICE = 5976.340906666667
+
+
+def test_form73_materials_size_mm(calc):
+    """2026-11-11: дефолт формы 73 — size_mm плёнки, бумаги и шнура; цена не сдвигается."""
+    r = calc.execute(FORM73_PARAMS)
+    mats = r["materials"]
+    assert len(mats) >= 3, mats
+    by_code = {m["code"]: m for m in mats}
+    assert by_code["Laminat32G"]["size_mm"] == [330.0, 0.0], by_code["Laminat32G"]
+    assert by_code["PaperCoated170M"]["size_mm"] == [320.0, 450.0], by_code["PaperCoated170M"]
+    assert by_code["RopeForPack"]["size_mm"] == [4.0, 350.0], by_code["RopeForPack"]
+    assert abs(r["price"] - FORM73_PRICE) / FORM73_PRICE <= 0.001, r["price"]

@@ -184,6 +184,8 @@ class LaminationCalculator(BaseCalculator):
         if len(size_laminat) < 2:
             return self._empty_result(mode)
         laminat_w, laminat_h = size_laminat[0], size_laminat[1]
+        # Размер плёнки из каталога (у рулона вторая координата 0).
+        size_mm = [float(laminat_w), float(laminat_h)]
         density_um = float(laminat.density or 0 or 32)
         cost_per_mp = float(laminat.cost or 0)
 
@@ -227,6 +229,7 @@ class LaminationCalculator(BaseCalculator):
                     "title": laminat.title,
                     "quantity": round(2 * length_m, 4),
                     "unit": "м",
+                    "size_mm": size_mm,
                 }
             ]
         else:
@@ -259,6 +262,7 @@ class LaminationCalculator(BaseCalculator):
                     "title": laminat.title,
                     "quantity": num_with_defects,
                     "unit": "лист",
+                    "size_mm": size_mm,
                 }
             ]
 

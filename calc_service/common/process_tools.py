@@ -1042,6 +1042,10 @@ def calc_set_rope(n: int, rope_id: str, mode: int = 1) -> ProcessResult:
         "quantity": n,
         "unit": "шт",
     }]
+    # Размер шнура из каталога, если он задан.
+    rope_size = rope.sizes[0] if rope.sizes else []
+    if rope_size:
+        materials_out[0]["size_mm"] = [float(x) for x in rope_size]
     return ProcessResult(
         cost=cost, price=price, time_hours=time_hours,
         time_ready=time_hours, weight_kg=weight_kg, materials=materials_out,

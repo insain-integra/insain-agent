@@ -20,6 +20,21 @@ DEFAULT_ROPE_ID = "RopeForPack"
 NUM_HOLES_PER_ITEM = 2  # как в JS: isHole = 2
 
 
+def _material_out(m: Mapping[str, Any], default_unit: str) -> Dict[str, Any]:
+    """Строка materials: code/name/title/quantity/unit и size_mm, если он уже есть."""
+    row: Dict[str, Any] = {
+        "code": m.get("code", ""),
+        "name": m.get("name", ""),
+        "title": m.get("title", ""),
+        "quantity": m.get("quantity", 0),
+        "unit": m.get("unit", default_unit),
+    }
+    size_mm = m.get("size_mm")
+    if isinstance(size_mm, (list, tuple)) and len(size_mm) >= 1:
+        row["size_mm"] = [float(x) for x in size_mm]
+    return row
+
+
 class PennantCalculator(BaseCalculator):
     """Бумажные вымпелы: печать + пробивка отверстий + шнур."""
 
@@ -202,21 +217,9 @@ class PennantCalculator(BaseCalculator):
 
         materials_out: List[Dict[str, Any]] = []
         for m in cost_print.get("materials", []):
-            materials_out.append({
-                "code": m.get("code", ""),
-                "name": m.get("name", ""),
-                "title": m.get("title", ""),
-                "quantity": m.get("quantity", 0),
-                "unit": m.get("unit", "лист"),
-            })
+            materials_out.append(_material_out(m, "лист"))
         for m in cost_rope.materials:
-            materials_out.append({
-                "code": m.get("code", ""),
-                "name": m.get("name", ""),
-                "title": m.get("title", ""),
-                "quantity": m.get("quantity", 0),
-                "unit": m.get("unit", "шт"),
-            })
+            materials_out.append(_material_out(m, "шт"))
 
         return {
             "cost": float(cost),
