@@ -6,6 +6,7 @@
 ## Файл
 
 - Задачу пишет Analyst: `todo/<короткое-имя>.md` по [_template.md](_template.md).
+- Файл задачи коммитится в `main` до начала работы. У задачи с веткой он дальше правится только в её worktree ([workflow.md](../docs/agents/workflow.md), «Ветки и папки»).
 - Эпик, если не влезает в один PR: `todo/EPIC-<имя>.md` по [_template-epic.md](_template-epic.md). Работа идёт по файлам задач, не по эпику.
 
 ## Шапка
