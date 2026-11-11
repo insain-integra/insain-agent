@@ -36,7 +36,7 @@
    Invoke-RestMethod -Method Post -Uri https://insain.ru/api/v1/calc/<slug> -ContentType 'application/json' -Body (Get-Content -Raw $env:TEMP\body.json) | Select-Object cost, price, unit_price, time_ready
    ```
 
-   Ожидается: `price` равна раннеру (допуск шага 2), `time_ready` — `rel ≤ 0.001`, на обоих кейсах. Другое число или 404 — стоп: калькулятор на проде не тот (выкатка — `bash infra/deploy.sh` с `main`) или порт расходится с JS — `заблокировано: аналитик`, задача-предпосылка по skill `port-fix-prerequisite`. Форму не дублировать: дубль до совпадения дефолта даёт лишний круг Site ops и приёмки.
+   Ожидается: `price` равна раннеру (допуск шага 2), `time_ready` — `rel ≤ 0.001`, на обоих кейсах. `weight_kg` в цепочках `calcPrintSheet` с JS не сверяется: JS считает лист с обрезью, Python — изделие; верный вес и вес в эталоне — Python (решение 11.11.2026). Другое число или 404 — стоп: калькулятор на проде не тот (выкатка — `bash infra/deploy.sh` с `main`) или порт расходится с JS — `заблокировано: аналитик`, задача-предпосылка по skill `port-fix-prerequisite`. Форму не дублировать: дубль до совпадения дефолта даёт лишний круг Site ops и приёмки.
 
 4. Параметры API:
 
