@@ -41,7 +41,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | --- | --- |
 | `dashboard-harness.md` | ревью |
 | `ezfc-options-source-reset.md` | черновик |
-| `flag-materials-size-mm.md` | ревью |
+| `flag-materials-size-mm.md` | выкатка |
 | `form-button-pins.md` | черновик |
 | `form-flag.md` | черновик |
 | `forms-batch-switch.md` | черновик |
