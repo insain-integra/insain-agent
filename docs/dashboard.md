@@ -35,12 +35,13 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **13**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **14**. В работе/ревью: `dashboard-harness.md`, `flag-materials-size-mm.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `dashboard-harness.md` | ревью |
 | `ezfc-options-source-reset.md` | черновик |
+| `flag-materials-size-mm.md` | ревью |
 | `form-button-pins.md` | черновик |
 | `form-flag.md` | черновик |
 | `forms-batch-switch.md` | черновик |

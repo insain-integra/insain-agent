@@ -158,6 +158,15 @@ class TestSetStaples:
         assert r.time_hours > 0
         assert len(r.materials) == 1
         assert r.materials[0]["code"] == "Staples26_6"
+        assert r.materials[0]["size_mm"] == [6.0, 0.0]
+
+
+class TestSetShaft:
+    def test_size_mm(self):
+        r = calc_set_shaft(1, "PlasticShaft380", mode=1)
+        assert len(r.materials) == 1
+        assert r.materials[0]["code"] == "PlasticShaft380"
+        assert r.materials[0]["size_mm"] == [5.0, 380.0]
 
 
 # ── Люверсы ───────────────────────────────────────────────────────────

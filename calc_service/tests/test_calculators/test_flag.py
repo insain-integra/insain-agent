@@ -101,7 +101,7 @@ def ref_result(calc):
 def test_expected_values_flag(ref_result):
     if ref_result is None:
         pytest.skip("расчёт эталонного кейса не выполнен")
-    rel = 0.03
+    rel = 0.001
     r, e, em = ref_result, EXPECTED_REF, EXPECTED_MATERIAL
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
@@ -141,3 +141,29 @@ def test_expected_values_flag(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+# 2026-11-11 — дефолт боевой формы 55: 100 шт., 200×99, PaperCoated115M, 4+0, mode 1.
+# price 4052.296608 и time_ready 9.442 — раннер/API до прокидки size_mm (отчёт form-flag).
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "width_mm": 200,
+    "height_mm": 99,
+    "material_id": "PaperCoated115M",
+    "color": "4+0",
+    "mode": 1,
+}
+FORM55_PRICE = 4052.296608
+FORM55_TIME_READY = 9.442
+
+
+def test_form_default_materials_size_mm(calc):
+    """2026-11-11: дефолт формы 55 — size_mm бумаги, скоб и трубочки; цена не сдвигается."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    mats = r["materials"]
+    by_code = {m["code"]: m for m in mats}
+    assert by_code["PaperCoated115M"]["size_mm"] == [320.0, 450.0], by_code["PaperCoated115M"]
+    assert by_code["Staples26_6"]["size_mm"] == [6.0, 0.0], by_code["Staples26_6"]
+    assert by_code["PlasticShaft380"]["size_mm"] == [5.0, 380.0], by_code["PlasticShaft380"]
+    assert abs(r["price"] - FORM55_PRICE) / FORM55_PRICE <= 0.001, r["price"]
+    assert abs(r["time_ready"] - FORM55_TIME_READY) / FORM55_TIME_READY <= 0.001, r["time_ready"]

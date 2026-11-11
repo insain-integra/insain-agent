@@ -471,6 +471,10 @@ def calc_set_staples(n: int, options: Dict[str, Any] | None = None, mode: int = 
         "quantity": n,
         "unit": "шт",
     }]
+    # Размер скоб из каталога, если он задан.
+    staples_size = staples.sizes[0] if staples.sizes else []
+    if staples_size:
+        materials_out[0]["size_mm"] = [float(x) for x in staples_size]
     return ProcessResult(
         cost=cost, price=price, time_hours=time_hours,
         time_ready=time_hours, weight_kg=weight_kg, materials=materials_out,
@@ -995,6 +999,10 @@ def calc_set_shaft(n: int, shaft_id: str, mode: int = 1) -> ProcessResult:
         "quantity": n,
         "unit": "шт",
     }]
+    # Размер палочки из каталога, если он задан.
+    shaft_size = shaft.sizes[0] if shaft.sizes else []
+    if shaft_size:
+        materials_out[0]["size_mm"] = [float(x) for x in shaft_size]
     return ProcessResult(
         cost=cost, price=price, time_hours=time_hours,
         time_ready=time_hours, weight_kg=weight_kg, materials=materials_out,
