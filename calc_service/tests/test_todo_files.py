@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import re
+import subprocess
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 TODO = ROOT / "todo"
@@ -46,6 +49,26 @@ def test_waiting_status_points_to_open_task():
         if m and not (TODO / m.group(1)).is_file():
             bad.append(f"{path.name}: todo/{m.group(1)} закрыта — поставить «Статус: черновик»")
     assert not bad, "\n".join(bad)
+
+
+def test_todo_files_tracked_by_git():
+    """Файл задачи без коммита есть только в одной папке: его копия в worktree расходится с оригиналом."""
+    try:
+        out = subprocess.run(
+            ["git", "-c", "core.quotepath=off", "ls-files", "--others", "--exclude-standard", "--", "todo"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            check=True,
+        ).stdout
+    except (OSError, subprocess.CalledProcessError):
+        pytest.skip("git недоступен или это не репозиторий")
+    bad = [ln for ln in out.splitlines() if ln.endswith(".md")]
+    assert not bad, (
+        "не закоммичены: " + ", ".join(bad) + " — файл задачи коммитится в main до создания worktree "
+        "(docs/agents/workflow.md, «Ветки и папки»)"
+    )
 
 
 def test_epic_has_vision_goal():
