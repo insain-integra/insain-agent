@@ -148,8 +148,12 @@ def test_expected_values_flag(ref_result):
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
 
 
-# 2026-11-11 — дефолт боевой формы 55: 100 шт., 200×99, PaperCoated115M, 4+0, mode 1.
-# price 4052.296608 и time_ready 9.442 — раннер/API до прокидки size_mm (отчёт form-flag).
+# JS, 12.11.2026 — дефолт боевой формы 55: 100 шт., 200×99, PaperCoated115M, 4+0, mode 1.
+# Ламинации нет. price раннера 4052.2966080000006 совпал с боевым API.
+# time_ready JS 9.45, Python 9.442 (rel 0.000847).
+# weight_kg 0.2377 — вес изделий. JS 0.29152 (лист с обрезью). Верный вес — Python, решение 11.11.2026.
+# node scripts/run_js_calc.mjs calcFlagPaper --data current --args
+# '[100,[200,99],"4+0","PaperCoated115M",{},1]'
 REF_FORM_DEFAULT = {
     "quantity": 100,
     "width_mm": 200,
@@ -158,8 +162,26 @@ REF_FORM_DEFAULT = {
     "color": "4+0",
     "mode": 1,
 }
+EXPECTED_FORM_DEFAULT = {
+    "cost": 2508.1588,
+    "price": 4052.2966080000006,
+    "time_hours": 1.03,
+    "time_ready": 9.45,
+    "weight_kg": 0.23770000000000002,
+}
 FORM55_PRICE = 4052.296608
 FORM55_TIME_READY = 9.442
+
+
+def test_form_default_flag(calc):
+    """JS, 12.11.2026: дефолт формы 55, 100 шт., 200×99, без ламинации. Вес — изделие, не лист JS."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    assert r["cost"] == pytest.approx(e["cost"], rel=0.001)
+    assert r["price"] == pytest.approx(e["price"], rel=0.001)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=0.001)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=0.001)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=0.001)
 
 
 def test_form_default_materials_size_mm(calc):

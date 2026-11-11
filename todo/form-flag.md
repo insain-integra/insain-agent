@@ -1,6 +1,6 @@
 # form-flag
 
-Статус: черновик
+Статус: закрытие
 Сложность: средняя
 Implementer: Grok 4.7
 Reviewer: Auto
@@ -88,19 +88,19 @@ print("ok", js, api, abs_d, rel)
 python -m pytest calc_service/tests/test_calculators/test_flag.py -q
 ```
 
-- [ ] Файл формы. В выводе есть `insaincalc.calcApi('flag'`, `insaincalc.syncUrl(` и `insaincalc.showResult(`.
+- [x] Файл формы. В выводе есть `insaincalc.calcApi('flag'`, `insaincalc.syncUrl(` и `insaincalc.showResult(`.
 
 ```powershell
 Select-String -Path wp-plugin\forms\flag.js -Pattern "calcApi\('flag'|syncUrl\(|showResult\("
 ```
 
-- [ ] Контракт всех `forms/*.js`. Stdout: `passed`.
+- [x] Контракт всех `forms/*.js`. Stdout: `passed`.
 
 ```powershell
 python -m pytest calc_service/tests/test_wp_plugin_forms.py -q
 ```
 
-- [ ] Копия не на витрине. Одна строка со статусом `draft` или `private`. HTTP без cookies — `404`.
+- [x] Копия не на витрине. Одна строка со статусом `draft` или `private`. HTTP без cookies — `404`. Товар 2586888: `draft`, `curl` без cookies — `404`.
 
 ```powershell
 ssh insain-prod "sudo -u www-data wp post get PRODUCT --field=post_status --path=/var/www/insain.ru"
@@ -109,13 +109,13 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 
 ### Критерии перевода формы ezFC на API
 
-- [ ] На копии под админом (`https://insain.ru/?post_type=product&p=PRODUCT&preview=true`) эталон даёт `POST /api/v1/calc/flag` → 200, в теле коды материалов, не `0`. Цена на странице равна `price` API с округлением `showResult`. В «Результат» — код ответа и обе цены.
-- [ ] Смена каждого dropdown меняет цену и таблицу материалов. В таблице нет внутренних `code`. Есть вес и срок с подсказкой дат. Перезагрузка не меняет режим и срок.
-- [ ] URL обновляется GET-именами формы (имя параметра = имя элемента). Ссылка с этими GET открывает копию с теми же значениями и той же ценой. У dropdown с кодом в `data-value` — `GET_check=index`. У radio со значениями `1`/`2` — `GET_check=value`.
+- [x] На копии под админом (`https://insain.ru/?post_type=product&p=PRODUCT&preview=true`) эталон даёт `POST /api/v1/calc/flag` → 200, в теле коды материалов, не `0`. Цена на странице равна `price` API с округлением `showResult`. В «Результат» — код ответа и обе цены. Копия 95, товар 2586888: 200, `price` 4052.2966080000006, на странице 4 100 руб.
+- [x] Смена каждого dropdown меняет цену и таблицу материалов. В таблице нет внутренних `code`. Есть вес и срок с подсказкой дат. Перезагрузка не меняет режим и срок. Цветность меняет цену; строки таблицы те же, что отдаёт API.
+- [x] URL обновляется GET-именами формы (имя параметра = имя элемента). Ссылка с этими GET открывает копию с теми же значениями и той же ценой. У dropdown с кодом в `data-value` — `GET_check=index`. У radio со значениями `1`/`2` — `GET_check=value`.
 
 ## Проверки
 
-- [x] `python scripts/dev.py check` — код выхода 0. calc_service: 541 passed. bot_service: 81 passed.
+- [x] `python scripts/dev.py check` — код выхода 0. calc_service: 545 passed. bot_service: 81 passed.
 - [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
 ## Риски
@@ -142,30 +142,81 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 
 2026-11-11 — Analyst, Grok 4.7 — предпосылка `flag-materials-size-mm`, scope формы не расширять — дальше Implementer flag-materials-size-mm
 2026-11-12 — человек — предпосылка `flag-materials-size-mm` закрыта, боевой API отдаёт `size_mm` на дефолте формы 55 — дальше Implementer
+2026-11-12 — Implementer, Grok 4.7 — сверка сошлась, `flag.js` и эталон дефолта готовы, дубль ждёт «да» — дальше человек
+2026-11-12 — человек — «да» на дубль формы 55 и черновик товара — дальше Site ops
+2026-11-12 — человек — «да» на дубль формы 55 и черновик товара — дальше Site ops
+
+Блокер: шаг 6 skill `ezfc-form-to-api`. Дубль формы 55 и черновик товара — только после «да» человека. Боевая форма не менялась, на прод ничего не писалось.
+Пробовал: шаги 0–5б локально и чтением прода. Порт `calcFlagPaper` пустой. Эталон 100×150 и дефолт 200×99: `price` JS = API, `time_ready` rel ≤ 0.001, `size_mm` бумаги, скоб и трубочки совпал со страницей. `wp-plugin/forms/flag.js` написан на id боевой формы 55.
+Гипотеза: это штатные ворота skill перед дублем, не расхождение порта.
+Вопрос: дублировать форму 55 CalcFlagPaper на черновик товара? Боевая страница https://insain.ru/catalog/kalkulyator-flazhkov-bumazhnyh/ не меняется.
+Следующая сессия: человек. После «да» — Site ops, модель Grok 4.7.
+2026-11-12 — Site ops, Grok 4.7 — копия формы 95 на черновике 2586888 считает flag, боевая форма 55 не менялась — дальше человек
+2026-11-12 — человек — копия 95 на черновике 2586888 принята — дальше Reviewer
+2026-11-12 — Reviewer, Auto — принято — дальше человек
+2026-11-12 — человек — принято — закрытие
 
 ## Найдено вне scope
 
 - Подпись опции `dpdSize` «200х90мм», `data-value` «200,99»: страница считает 200×99. Править форму в этой задаче нельзя.
 - Имя `PaperCoated115M`: JS `js_legacy/material/sheet.json` «113г/м», Python `calc_service/data/materials/sheet.json` «115г/м». Код, тираж 18 и цена совпали.
 - Эталон задачи 100×150 нет в `dpdSize` (148×105, 200×99, 210×148). На странице его не ввести.
+- Вес на копии 0.24 кг (API `weight_kg` 0.2377), на боевой форме 55 при тех же полях «Вес тиража 0.29 кг». Цена 4 100 и срок «Срок 1 день» с той же подсказкой дат совпали. Калькулятор в этой задаче не менялся.
 
 ## Результат
 
-- Ветка, PR или коммит: ветка `task/form-flag` от `main` (`6f7d6da`). Коммита нет. Незакоммичено: `calc_service/tests/test_calculators/test_flag.py`, `todo/form-flag.md`, `docs/dashboard.md` (статус задачи в дашборде).
-- Период: 2026-11-11
+- Ветка, PR или коммит: `task/form-flag` → `main` (fast-forward 2026-11-12)
+- Период: 2026-11-12
 - Часы человека: не учтено
-- Работа агентов: Implementer, Grok 4.7, одна сессия
-- Было / стало: эталон `test_flag.py` с пометкой JS 04.11.2026 и допуском `rel=0.03` → пометка JS 11.11.2026, `price` 3934.410784, допуск `rel=0.001`. `wp-plugin/forms/flag.js` нет.
-- Сделано: порт `calcFlagPaper` пустой; пропуски `calcPrintSheet` (`call calcCutRoller`, `call calcPrintLaser`) уже в `scripts/js_port_gaps_allowed.txt`. Цена и срок эталона и дефолта формы сошлись с боевым API. Поля формы 55 сверены с `cjsCalc`: id верные. Эталон в тесте переснят.
+- Работа агентов: Implementer, Grok 4.7; Site ops, Grok 4.7
+- Было / стало: боевая форма 55 по-прежнему на `insaincalc.calcFlagPaper`. Появились копия формы 95 `CalcFlagPaper duplicate` и черновик товара 2586888 «Калькулятор флажков бумажных (Копировать)» с `ezfc_form_id` 95. На копии `cjsCalc` 3568 вызывает `insaincalc.calcApi('flag'`, GET-имена прописаны.
+- Сделано: шаги 6–16 skill. Дубль формы 55 одним кликом — id 95, второй новой формы нет. Черновик товара 2586888, гость получает 404. JS копии собран из `wp-plugin/forms/flag.js` с id копии, без `read_file`. GET: `numN`; `dpdSize`, `dpdColor`, `dpdMaterial`, `dpdCoverLaminat` — `index`; `rdoModeProduction` — `value` (на копии было `index`). Боевая форма 55 и товар 2586729 не менялись. Блок результата на копии уже как у формы 79: цена и «со скидкой» в одной строке, режим внутри группы срока, вес, таблица с размером.
 - Чем проверено:
-  - `python scripts/js_port_gaps.py calcFlagPaper` — у `calcFlagPaper` строка `нет в Python:` пустая.
-  - `node scripts/run_js_calc.mjs calcFlagPaper --data current --args '[100,[100,150],"4+0","PaperCoated115M",{},1]'` — `price` 3934.4107840000006, `time_ready` 9.41.
-  - `POST https://insain.ru/api/v1/calc/flag` тело эталона — `price` 3934.4107840000006, `time_ready` 9.406 (rel 0.000425). Скрипт допуска: `ok 3934.4107840000006 3934.4107840000006 0.0 0.0`.
-  - Дефолт страницы (100, 200×99, `PaperCoated115M`, `4+0`, без ламинации, mode 1): раннер `price` 4052.2966080000006, `time_ready` 9.45; API `price` тот же, `time_ready` 9.442 (rel 0.000847). Количества: бумага 18, скобы 100, трубочка 100.
-  - `python -m pytest calc_service/tests/test_calculators/test_flag.py -q` — `7 passed`.
-  - `python scripts/dev.py check` — код 0. calc_service: 541 passed. bot_service: 81 passed.
-- Не сделано и почему: `wp-plugin/forms/flag.js`, строка в `todo/forms-batch-switch.md`, дубль и черновик. Стоп шага 3а: без `size_mm` копия не покажет размеры. Калькулятор — в `flag-materials-size-mm`. `REF_FORM_DEFAULT` — после предпосылки, вместе с `flag.js`.
-- Поля копии, когда перевод продолжится: `numN` 2256, `dpdSize` 2258 (`GET_check=index`), `dpdColor` 2282 (index), `dpdMaterial` 2263 (index), `dpdCoverLaminat` 2264 (index, пустое значение — не слать `lamination_id`), `rdoModeProduction` 2278 (на копии `GET_check=value`; сейчас на боевой index, значения data-value `1` и `2`), `cjsCalc` 2265. Дефолт: 100 шт., размер index 1 (`200,99`), цвет `4+0`, бумага `PaperCoated115M`, ламинации нет, режим data-value `1`.
-- Строка в «Состав пакета» `todo/forms-batch-switch.md` (id копии и товар — после принятия копии): не добавлена, копии нет.
+  - `python scripts/js_port_gaps.py calcFlagPaper` — у `calcFlagPaper` строка `нет в Python:` пустая. Пропуски `calcPrintSheet` (`call calcCutRoller`, `call calcPrintLaser`) уже в `scripts/js_port_gaps_allowed.txt`.
+  - Раннер эталона — `price` 3934.4107840000006, `time_ready` 9.41. Боевой API — `price` тот же, `time_ready` 9.406 (rel 0.000425). Скрипт допуска: `ok 3934.4107840000006 3934.4107840000006 0.0 0.0`.
+  - Раннер дефолта `[100,[200,99],"4+0","PaperCoated115M",{},1]` — `cost` 2508.1588, `price` 4052.2966080000006, `time_hours` 1.03, `time_ready` 9.45. API — `price` тот же, `time_ready` 9.442 (rel 0.000847). Скрипт: `ok price default` и `ok time_ready default`.
+  - Страница формы 55, дефолт: бумага 320×450 × 18, скобы 6×0 × 100, трубочка 5×380 × 100. API `materials` — те же размеры и количества. Имя бумаги на странице «113г/м», в API «115г/м» — уже в «Найдено вне scope».
+  - `python -m pytest calc_service/tests/test_calculators/test_flag.py -q` — `9 passed`.
+  - `Select-String` по `wp-plugin/forms/flag.js` — есть `syncUrl(`, `calcApi('flag'` и `showResult(`.
+  - `python -m pytest calc_service/tests/test_wp_plugin_forms.py -q` — `3 passed`.
+  - `python scripts/dev.py check` — код выхода 0. calc_service: 545 passed. bot_service: 81 passed.
+  - Формы после дубля: `SELECT id, name … ORDER BY id DESC LIMIT 3` — `95 CalcFlagPaper duplicate`, дальше 94 и 93. Второй новой формы нет.
+  - `wp post meta update 2586888 ezfc_form_id 95` — `Success: Updated custom field 'ezfc_form_id'.` Повторное чтение — `95`.
+  - Статус товара: тот же `wp post get 2586888 --field=post_status` на сервере — `draft`. Прямой однострочный `ssh` с этой командой из PowerShell дважды завершился локально с кодом 1073741845 и пустым выводом; вывод получен тем же wp-cli через `bash` на сервере.
+  - `curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=2586888"` — `404`.
+  - Показ пакета без `apply`: `calcApi=0 → calcApi=1`, GET пустые → имена, `rdoModeProduction` `index → value`, у dropdown `index = index`, `стоп` нет. С `apply`: `бэкап: /tmp/ezfc-copy-95-20261111-180608.json`, `записано` у 3568, 3563, 3581, 3564, 3565, 3566, 3567.
+  - `wp litespeed-purge all` — `Error: Something went wrong! Got 400`. `wp cache flush` — `Success: The cache was flushed.` Страница копии после этого отдала новый JS.
+  - Копия под админом, эталон: `POST /api/v1/calc/flag` 200, тело `{"quantity":100,"width_mm":200,"height_mm":99,"material_id":"PaperCoated115M","color":"4+0","mode":1}`. Ответ `price` 4052.2966080000006. На странице 4 100 руб. и 41 руб./шт (`insaincalc.round`). Консоли `insaincalc` и `ezfc` нет.
+  - Размер index 2: 4 400 руб., бумага × 27. Цветность index 1: 5 100 руб., строки таблицы те же (API для 210×148, `4+0` и `4+4`: бумага × 27, скобы × 100, трубочка × 100, цены 4327.37 и 5025.87). Бумага index 1: 5 400 руб., в таблице «170г/м». Ламинация index 1: 7 300 руб., в таблице плёнка. Внутренних `code` в таблице нет. Вес 0.24 кг. Срок «Срок 1 день», подсказка дат на `<a>`.
+  - Режим «быстрее» (`data-value` 2): URL `rdoModeProduction=2`, подсказка «Готовность заказа: 12.11.26, 15:00…», цена 8 800 руб. Перезагрузка оставила режим, срок, подсказку и цену.
+  - Ссылка `?post_type=product&p=2586888&preview=true&numN=100&dpdSize=1&dpdColor=0&dpdMaterial=0&dpdCoverLaminat=0&rdoModeProduction=1` открыла те же поля и 4 100 руб. Режим `data-value` 1 отмечен.
+  - Боевая страница https://insain.ru/catalog/kalkulyator-flazhkov-bumazhnyh/ : те же 4 100 руб., «Срок 1 день» и та же подсказка «13.11.26, 15:00 / 12.11.26, 11:00». Элемент 2265: `calcApi` не найден, `calcFlagPaper` на месте. Элемент 3568: `calcApi` есть.
+- Не сделано и почему: выкладка плагина и переключение боевой формы 55 — не эта задача. Удаление копии и черновика не делалось.
+- Как откатить: боевую форму 55 и товар 2586729 не трогали, откатывать нечего. JS и GET копии 95 — строки бэкапа `/tmp/ezfc-copy-95-20261111-180608.json`. Черновик 2586888 гостю отдаёт 404; удаление копии и черновика — только с «да» человека.
+- Поля, которые есть в форме и не уходят в `calcApi`: нет. Пустой `dpdCoverLaminat` (значение «») не шлёт `lamination_id`. Обязательные параметры API (`quantity`, `width_mm`, `height_mm`, `material_id`) закрыты полями `numN`, `dpdSize`, `dpdMaterial`.
+- Для Reviewer: id копии 95, товар 2586888, `post_status` draft. Id копии: `numN` 3563, `dpdSize` 3564, `dpdColor` 3565, `dpdMaterial` 3566, `dpdCoverLaminat` 3567, `cjsCalc` 3568, `rdoModeProduction` 3581 (`GET_check=value`, data-value `1` и `2`). Боевые id — в прежнем абзаце, GET-имена боевой пустые, `GET_check` режима на боевой по-прежнему `index`.
+- Строка в «Состав пакета»: `| 55 CalcFlagPaper | flag | /catalog/kalkulyator-flazhkov-bumazhnyh/ | 95 / 2586888 (draft) | копия принята 12.11.2026, form-flag |`
 
-| 55 CalcFlagPaper | `flag` | /catalog/kalkulyator-flazhkov-bumazhnyh/ | COPY / PRODUCT (draft) | todo/form-flag.md |
+## Ревью 1
+
+**Вердикт:** принято.
+
+| Критерий | Результат |
+| --- | --- |
+| Порт `calcFlagPaper` | `python scripts/js_port_gaps.py calcFlagPaper` — `нет в Python:` пусто |
+| `test_flag.py` | `9 passed` (локально с незакоммиченным `test_form_default_flag` — `12 passed` вместе с `test_wp_plugin_forms.py`) |
+| `flag.js` | `calcApi('flag'`, `syncUrl(`, `showResult(`; режим без `\|\| 1` |
+| `docs/js-runner-cases.md` | Кейс дефолта 4052.296608 и команда раннера `[200,99]` |
+| Копия не на витрине | SQL: товар 2586888 `draft`; `curl` без cookies — `404` |
+| Боевой API дефолт | `POST /calc/flag` → `price` 4052.2966080000006 |
+| Копия 95 на проде | SQL `forms_elements`: GET-имена у полей; dropdown `GET_check=index`; `rdoModeProduction` `value`; `cjsCalc` 3568 — `calcApi flag` |
+| Боевая 55 | `cjsCalc` 2265 — `calcFlagPaper`; GET-имена пустые (не размечена, по scope ок) |
+
+**Желательно:** перед слиянием закоммитить на ветке не только `9c5ee35`, но и рабочее дерево: `wp-plugin/forms/flag.js` (untracked), доработки `test_flag.py`, `docs/js-runner-cases.md`, актуальный `todo/form-flag.md`. Строку в `todo/forms-batch-switch.md` — по scope при закрытии, не блокер ревью копии.
+
+## Промпт следующей сессии
+
+```text
+человек. todo/form-flag.md, ветка task/form-flag, папка d:\Projects\insain-agent.
+Ревью принято (Reviewer, Auto, 2026-11-12). Закоммитить оставшиеся файлы scope на ветке, затем «принято, сливай» / skill finish-task: merge в main, close. Боевую форму 55 не переключать. Выкладка плагина с flag.js — отдельно (deploy-wp-plugin), когда решите выкатывать bridge; копия уже считает через JS в БД.
+```

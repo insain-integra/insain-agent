@@ -9,6 +9,7 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | Функция | Slug API | `price` |
 | --- | --- | --- |
 | `calcFlagPaper` | `flag` | 3934.410784 |
+| `calcFlagPaper` form 55 default | `flag` | 4052.296608 |
 | `calcPennantPaper` | `pennant` | 2181.133696 |
 | `calcRollup` | `rollup` | 7910 |
 | `calcRollup` form 49 default | `rollup` | 4482 |
@@ -27,6 +28,8 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 
 ```powershell
 node scripts/run_js_calc.mjs calcFlagPaper --data current --args '[100,[100,150],\"4+0\",\"PaperCoated115M\",{},1]'
+
+node scripts/run_js_calc.mjs calcFlagPaper --data current --args '[100,[200,99],\"4+0\",\"PaperCoated115M\",{},1]'
 
 node scripts/run_js_calc.mjs calcPennantPaper --data current --args '[50,[80,120],\"4+0\",\"PaperCoated115M\",{},1]'
 

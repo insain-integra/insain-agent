@@ -26,6 +26,7 @@ Site ops: Opus 5.5
 | 46 CalcPresswall | `presswall` | `/catalog/kalkulyator-pressvolov/` | 92 / 2586885 (draft) | копия принята 09.11.2026, `form-presswall` |
 | 49 CalcRollup | `rollup` | `/catalog/kalkulyator-rollapov/` | 93 / 2586886 (draft) | копия принята 09.11.2026, `form-rollup` (закрыто 2026-11-09, `docs/history/log.md`) |
 | 73 CalcPennantPaper | `pennant` | `/catalog/kalkulyator-vympelov-bumazhnyh/` | 94 / 2586887 (draft) | копия принята 11.11.2026, `form-pennant` (закрыто 2026-11-11, `docs/history/log.md`) |
+| 55 CalcFlagPaper | `flag` | `/catalog/kalkulyator-flazhkov-bumazhnyh/` | 95 / 2586888 (draft) | копия принята 12.11.2026, `form-flag` |
 
 ## Контекст и ссылки
 
