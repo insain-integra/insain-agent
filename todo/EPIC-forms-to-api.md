@@ -22,6 +22,11 @@
 - `form-flag` (закрыто 2026-11-12, `docs/history/log.md`) — копия 55 (95 / 2586888)
 - `todo/forms-batch-switch.md` — пачка 1 на боевые: 69, 26, 41
 - `todo/form-button-pins.md` — калькулятор `button_pins` + копия формы 12
+- `todo/form-print-sheet.md` — копия формы 6, slug `print_sheet`
+- `todo/form-print-offset.md` — копия формы 82, slug `print_offset` (`calcPrintOffsetPromo`)
+- `todo/form-print-roll.md` — копия формы 23, slug `print_roll` (форма CalcPrintWide)
+- `todo/form-laser.md` — копия формы 28, slug `laser`
+- `todo/form-sticker.md` — копия формы 22, slug `sticker`
 
 ## Порядок
 
@@ -29,17 +34,18 @@
 2. `todo/forms-batch-switch.md` — пачка 1 (69 + 26 + 41). Параллельно копии пачки 2 (embossing … flag): «Файлы» `forms/<slug>.js` не пересекаются; общий `todo/forms-batch-switch.md` дописывает строку только после принятия копии и не во время выкатки пачки 1.
 3. `todo/form-button-pins.md` — можно параллельно пачке 2.
 4. Копия 46 принята (`form-presswall` закрыта 09.11.2026) — Analyst заводит задачу `presswall-banner-mode`: баннер и чехол в `presswall` получают режим формы вместо режима 1 из JS (`calcPresswall.js:50`, решение человека 08.11.2026). Меняет цену на сайте — до или вместе с переключением формы 46 на бой.
-5. Дальше Analyst заводит файлы следующей пачки копий, когда предыдущая копия принята хотя бы выборочно. Переключение — новая задача `forms-batch-N`, не расширение пачки 1 без решения человека.
+5. Пачка 3, файлы 12.11.2026: `form-print-sheet` (6), `form-print-offset` (82), `form-print-roll` (23), `form-laser` (28), `form-sticker` (22). Параллельно: «Файлы» `forms/<slug>.js` не пересекаются. Формы 19, 83 и 29 — задачи после принятия первой копии своего slug. Строка в `todo/forms-batch-switch.md` — в «Результат» задачи, в файл пакета при слиянии и не во время выкатки.
+6. Дальше Analyst заводит файлы следующей пачки копий, когда копия пачки 3 принята хотя бы выборочно. Переключение — новая задача `forms-batch-N`, не расширение пачки 1 без решения человека.
 
-## Пачки (ещё без файлов)
+## Пачки
 
-Боевая на API: **79 puzzle**. Копии приняты / в ревью: **69 plaque, 26 uv_print, 41 mug, 85 embossing, 78 acrylic_prizes, 46 presswall, 49 rollup**.
+Боевая на API: **79 puzzle**. Копии приняты: **69 plaque, 26 uv_print, 41 mug, 85 embossing, 78 acrylic_prizes, 46 presswall, 49 rollup, 73 pennant, 55 flag**.
 
 | Пачка | Формы (id, slug) | Заметка |
 | --- | --- | --- |
 | 1 бой | 69 `plaque`, 26 `uv_print`, 41 `mug` | `forms-batch-switch` |
-| 2 копии | 85 `embossing`, 78 `acrylic_prizes`, 49 `rollup`, 46 `presswall`, 73 `pennant`, 55 `flag` | embossing, acrylic_prizes, presswall и rollup приняты |
-| 3 копии | 6 и 19 `print_sheet`, 82 и 83 `print_offset`, 23 `print_roll`, 28 `laser`, 22 и 29 `sticker` | 8 форм, 5 slug |
+| 2 копии | 85 `embossing`, 78 `acrylic_prizes`, 49 `rollup`, 46 `presswall`, 73 `pennant`, 55 `flag` | копии приняты 07–12.11.2026 |
+| 3 копии | 6 и 19 `print_sheet`, 82 и 83 `print_offset`, 23 `print_roll`, 28 `laser`, 22 и 29 `sticker` | файлы: 6, 82, 23, 28, 22. Формы 19, 83, 29 — после первой копии slug |
 | 4 копии | 30 `poly_sticker`, 70 `poly_sticker_pack`, 35 `milling`, 38 `pad_print`, 40 `heat_press`, 45 `notebook`, 80 `canvas` | 7 |
 | 5 копии | 31 60 61 64 84 `badge`, 34 `metal_pins`, 12 `button_pins` | 12 после обёртки |
 | 6 копии | 36 48 51 76 `tablets`, 68 `shild`, 50 52 66 `calendar` | 8 |
