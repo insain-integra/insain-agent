@@ -85,7 +85,11 @@ def test_get_tool_schema(calc):
 # ── Эталонный тест ───────────────────────────────────────────────────
 
 REF_PARAMS = {"quantity": 100, "width_mm": 100, "height_mm": 150, "material_id": "PaperCoated115M", "color": "4+0", "mode": 1}
-# JS, 04.11.2026 — сверка с calcFlagPaper --data current
+# JS, 11.11.2026 — price раннера 3934.410784 совпал с API.
+# time_ready JS 9.41, Python 9.406 (rel 0.000425).
+# weight_kg 0.1825 — вес изделий. JS 0.22528 (лист с обрезью). Верный вес — Python, решение 11.11.2026.
+# node scripts/run_js_calc.mjs calcFlagPaper --data current --args
+# '[100,[100,150],"4+0","PaperCoated115M",{},1]'
 EXPECTED_REF = {"cost": 2436.8324, "price": 3934.410784, "time_hours": 1.02, "time_ready": 9.406, "weight_kg": 0.1825}
 EXPECTED_MATERIAL = {"code": "PaperCoated115M", "name_substring": "Титан DIGITAL", "quantity_approx": 14}
 
@@ -99,6 +103,7 @@ def ref_result(calc):
 
 
 def test_expected_values_flag(ref_result):
+    """JS, 11.11.2026: 100 шт., 100×150, PaperCoated115M, 4+0, mode 1. Вес — изделия, не лист JS."""
     if ref_result is None:
         pytest.skip("расчёт эталонного кейса не выполнен")
     rel = 0.001

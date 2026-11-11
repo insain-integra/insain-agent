@@ -18,6 +18,7 @@
 - `presswall-banner-options` (закрыто 2026-11-09, `docs/history/log.md`) — предпосылка формы 46: крепление, люверсы, режим баннера и чехол в `presswall` API
 - `form-presswall` (закрыто 2026-11-09, `docs/history/log.md`) — копия 46
 - `form-pennant` (закрыто 2026-11-11, `docs/history/log.md`) — копия 73
+- `flag-materials-size-mm` (закрыто 2026-11-12, `docs/history/log.md`) — предпосылка копии 55: `size_mm` в ответе `flag`
 - `todo/form-flag.md` — копия 55
 - `todo/forms-batch-switch.md` — пачка 1 на боевые: 69, 26, 41
 - `todo/form-button-pins.md` — калькулятор `button_pins` + копия формы 12
@@ -25,8 +26,7 @@
 ## Порядок
 
 1. ~~Довести копию кружки до принятия~~ — `form-mug` закрыта 07.11.2026.
-2. `todo/forms-batch-switch.md` — пачка 1 (69 + 26 + 41). Параллельно копии пачки 2 (embossing … flag): «Файлы» `forms/<slug>.js` не пересекаются; общий `todo/forms-batch-switch.md` дописывает строку только после принятия копии и не во время выкатки пачки 1.
-3. `todo/form-button-pins.md` — можно параллельно пачке 2.
+2. `todo/forms-batch-switch.md` — пачка 1 (69 + 26 + 41). Параллельно копии пачки 2 (embossing … flag): «Файлы» `forms/<slug>.js` не пересекаются; общий `todo/forms-batch-switch.md` дописывает строку только после принятия копии и не во время выкатки пачки 1.3. `todo/form-button-pins.md` — можно параллельно пачке 2.
 4. Копия 46 принята (`form-presswall` закрыта 09.11.2026) — Analyst заводит задачу `presswall-banner-mode`: баннер и чехол в `presswall` получают режим формы вместо режима 1 из JS (`calcPresswall.js:50`, решение человека 08.11.2026). Меняет цену на сайте — до или вместе с переключением формы 46 на бой.
 5. Дальше Analyst заводит файлы следующей пачки копий, когда предыдущая копия принята хотя бы выборочно. Переключение — новая задача `forms-batch-N`, не расширение пачки 1 без решения человека.
 
