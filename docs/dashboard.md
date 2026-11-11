@@ -2,7 +2,7 @@
 
 # Дашборд insain.ru
 
-Состояние на последнюю запись журнала: **11.11.2026**.
+Состояние на последнюю запись журнала: **12.11.2026**.
 
 Собрано из `docs/vision.md`, `todo/`, `docs/site/forms.md`, `docs/history/log.md`. Обновляет
 `python scripts/dev.py dashboard` и `python scripts/dev.py close <задача>`.
@@ -35,13 +35,12 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **14**. В работе/ревью: `dashboard-harness.md`, `flag-materials-size-mm.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **13**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `dashboard-harness.md` | ревью |
 | `ezfc-options-source-reset.md` | черновик |
-| `flag-materials-size-mm.md` | выкатка |
 | `form-button-pins.md` | черновик |
 | `form-flag.md` | черновик |
 | `forms-batch-switch.md` | черновик |
@@ -62,8 +61,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-12 — flag-materials-size-mm
 - 2026-11-11 — form-pennant
 - 2026-11-11 — pennant-materials-size-mm
 - 2026-11-11 — print-sheet-weight-port-fix
 - 2026-11-09 — form-rollup
-- 2026-11-09 — form-presswall
