@@ -1,12 +1,12 @@
 # form-pennant
 
-Статус: ревью
+Статус: закрытие
 Сложность: средняя
 Implementer: Grok 4.7
 Reviewer: Auto
 Site ops: Grok 4.7
 Почему: типовая форма серии по skill `ezfc-form-to-api`, калькулятор уже на API; прод — только копия формы по шагам skill.
-Чат: копия 94 (черновик 2586887) принята, строка в «Состав пакета» добавлена; дальше Reviewer, Auto.
+Чат: Reviewer принято по diff; дальше человек (слияние `task/form-pennant` → `main`, finish-task).
 
 ## Цель
 
@@ -176,17 +176,30 @@ curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=PRO
 2026-11-11 — Site ops, Grok 4.7 — на копии 94 колонка «Размер» заполнена и совпадает с формой 73 (плёнка 330,0; бумага 320,450; шнур 4,350), цена дефолта 6 000 руб.; `pennant.js` не менялся — дальше человек (приёмка копии), затем Reviewer, Auto
 2026-11-11 — человек — копия 94 (черновик 2586887) принята — дальше Implementer, Grok 4.7: строка в «Состав пакета» `todo/forms-batch-switch.md`, затем Reviewer, Auto
 2026-11-11 — Implementer, Grok 4.7 — строка в «Состав пакета»: 73 CalcPennantPaper, копия 94 / черновик 2586887; предпосылки print-sheet-weight-port-fix и pennant-materials-size-mm закрыты — дальше Reviewer, Auto
+2026-11-11 — Reviewer, Auto — принято по diff ветки `task/form-pennant` (5 файлов); `make check` зелёный локально — дальше человек (слияние, finish-task)
+2026-11-11 — человек — принято — закрытие
+
+## Ревью 1
+
+**Вердикт:** принято.
+
+**Diff (main…task/form-pennant):** только `wp-plugin/forms/pennant.js`, `calc_service/tests/test_calculators/test_pennant.py`, `todo/forms-batch-switch.md`, `todo/form-pennant.md`, `docs/dashboard.md`. Калькулятор, `calc_service/data/`, bridge, прод в diff не затронуты — в scope.
+
+**Критерии:** строка «Состав пакета» — формат как у соседей, путь в обратных кавычках, последняя ячейка `todo/form-pennant.md`, 73 / `pennant` / `/catalog/kalkulyator-vympelov-bumazhnyh/` / 94 / 2586887 (draft). `pennant.js` — `syncUrl`, `calcApi('pennant'`, `showResult`, без своих формул цены. Тесты: эталон `# JS, 11.11.2026`, `rel=0.001`, `REF_FORM_DEFAULT` и дефолт с ламинацией по решению человека (цена JS, вес Python); `test_form73_materials_size_mm` на `REF_FORM_DEFAULT`. Критерии приёмки и прод-проверки в задаче отмечены [x], «Результат» согласован с журналом. `docs/dashboard.md` — `form-pennant` в `ревью`.
+
+**Проверено локально (Reviewer):** `python scripts/dev.py check` — exit 0, calc_service 541 passed, bot_service 81 passed; `pytest test_pennant.py` + `test_wp_plugin_forms.py` — 12 passed; `Select-String` по `pennant.js` — три обязательные строки.
+
+**Инварианты AGENTS.md:** внутренние `code` в `pennant.js` на пользователя не выводятся (только в API-тело); цены в Python/JSON не менялись; тестовые эталоны — зафиксированные числа сверки, не хардкод справочника.
+
+**Вне scope (не блокер):** leftover `todo/print-sheet-weight-port-fix.md`; порядок строк материалов на копии vs боевая — уже в «Найдено вне scope».
 
 ## Найдено вне scope
 
 - Раннер не грузит `laminat.json` / `calcLamination.js` — дефолт формы 73 с ламинацией раннером не считается; правка `scripts/run_js_calc.mjs` не в этой задаче.
-- Колонка «Размер» таблицы материалов закрывается предпосылкой `pennant-materials-size-mm`, не расширением scope этой задачи.
 - Порядок строк на копии (бумага, плёнка, шнур) отличается от боевой 73 (плёнка, бумага, шнур). Размеры и количества те же: `showResult` выводит `materials` в порядке ответа API. Боевую форму и JS не менял.
-- `todo/print-sheet-weight-port-fix.md` всё ещё в репозитории со статусом `черновик` при решении «вес Python» — leftover для человека (`close` или удаление).
-
 ## Результат
 
-- Ветка, PR или коммит: `task/form-pennant`, коммиты `a95ece5`, `c14d415`. Эта сессия: строка в `todo/forms-batch-switch.md`, шапка, журнал и «Результат» `todo/form-pennant.md`; `docs/dashboard.md` пересобирает `make check`. Прод и `pennant.js` не менялись. В git не закоммичено.
+- Ветка, PR или коммит: `task/form-pennant` (fast-forward в `main`), коммиты `4da4cfc`, `a95ece5`, `c14d415`, `c0bd9f3` и коммит приёмки.
 - Период: 2026-11-10 — 2026-11-11
 - Часы человека: не учтено
 - Работа агентов: Implementer, Grok 4.7; Site ops, Grok 4.7 (дубль 11.11 и перепроверка «Размер» 11.11). Предпосылки закрыты: `print-sheet-weight-port-fix` (журнал 2026-11-11, вес Python оставлен), `pennant-materials-size-mm` (журнал 2026-11-11, API `6a9e14b`).
