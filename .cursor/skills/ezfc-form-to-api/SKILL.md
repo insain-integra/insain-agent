@@ -38,6 +38,6 @@ ssh insain-prod "sudo -u www-data wp db query --skip-column-names --path=/var/ww
 ## Роли и цепочка
 
 - Implementer, git: шаги 0–5б, текст `wp-plugin/forms/<slug>.js` (шаг 10), эталон в тесте, `make check`. Статус остаётся `в работе`, промпт Site ops.
-- Site ops, прод (лучше отдельный чат): шаги 6–16 после «да» человека, затем статус `ревью`. Расхождение на копии — обратно Implementer (шаг 15).
-- Человек принимает копию → Reviewer (diff и настройки копии чтением с прода) → человек: skill `finish-task`.
+- Site ops, прод: шаги 6–16 после «да» человека (тот же чат Orchestrator), затем статус `ревью`. Расхождение на копии — обратно Implementer (шаг 15).
+- Человек принимает копию → Reviewer только diff (`forms/<slug>.js`, тесты) → человек: skill `finish-task`. Настройки копии на проде Reviewer не перечитывает.
 - Каждый отчёт заканчивается готовым промптом следующей сессии (`docs/agents/workflow.md`, «Итоги»).
