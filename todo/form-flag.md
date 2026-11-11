@@ -18,7 +18,7 @@ Site ops: Grok 4.7
 - `docs/ezfc-api-migration.md` — шаблон `cjsCalc`, GET = имя элемента, `GET_check`: dropdown с кодом — `index`, radio `1`/`2` — `value`.
 - `docs/site/forms.md` — строка формы 55, только читать.
 - `todo/forms-batch-switch.md` — в конце одна строка в «Состав пакета».
-- `todo/EPIC-forms-to-api.md` — очередь, после `todo/form-pennant.md`.
+- `todo/EPIC-forms-to-api.md` — очередь, после `form-pennant` (закрыто 2026-11-11, `docs/history/log.md`).
 - `docs/js-runner-cases.md` — команда раннера и `price` для `calcFlagPaper`.
 - Эталон: `REF_PARAMS` в `calc_service/tests/test_calculators/test_flag.py` — 100 шт., 100×150, `PaperCoated115M`, `4+0`, mode 1. Порог `price` — прогон JS против API, не число из файла. JS: `js_legacy/calc/calcFlag.js`, сигнатура `calcFlagPaper(n, size, color, materialID, options, modeProduction)`.
 - Остальное не открывать.

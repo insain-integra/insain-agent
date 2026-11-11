@@ -17,7 +17,7 @@
 - `form-rollup` (закрыто 2026-11-09, `docs/history/log.md`) — копия 49 (93 / 2586886) принята
 - `presswall-banner-options` (закрыто 2026-11-09, `docs/history/log.md`) — предпосылка формы 46: крепление, люверсы, режим баннера и чехол в `presswall` API
 - `form-presswall` (закрыто 2026-11-09, `docs/history/log.md`) — копия 46
-- `todo/form-pennant.md` — копия 73
+- `form-pennant` (закрыто 2026-11-11, `docs/history/log.md`) — копия 73
 - `todo/form-flag.md` — копия 55
 - `todo/forms-batch-switch.md` — пачка 1 на боевые: 69, 26, 41
 - `todo/form-button-pins.md` — калькулятор `button_pins` + копия формы 12
