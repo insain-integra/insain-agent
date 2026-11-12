@@ -45,7 +45,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-laser.md` | черновик |
 | `form-print-offset.md` | черновик |
 | `form-print-roll.md` | черновик |
-| `form-print-sheet.md` | черновик |
+| `form-print-sheet.md` | заблокировано: ждёт todo/print-sheet-margins-minus-one.md |
 | `form-sticker.md` | черновик |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |

@@ -1,6 +1,6 @@
 # form-print-sheet
 
-Статус: заблокировано: ждёт todo/print-sheet-port-fix.md
+Статус: заблокировано: ждёт todo/print-sheet-margins-minus-one.md
 Сложность: средняя
 Implementer: Grok 4.7
 Reviewer: Auto
@@ -82,19 +82,36 @@ Site ops: Grok 4.7
 
 12.11.2026 — Analyst, Auto — заведена `todo/print-sheet-port-fix.md` на main (оба расхождения одной предпосылкой); статус ждёт её; копию формы не делал — дальше Implementer `print-sheet-port-fix`
 
+13.11.2026 — человек — `print-sheet-port-fix` закрыт и на проде (`e2349a7`), rebase на `main`, статус `черновик` — дальше Implementer (Grok 4.7)
+
+13.11.2026 — Implementer, Grok 4.7 — блокер: «белые поля» (margins -1) не сходятся с JS — дальше Analyst
+
+Блокер: включённый `ckbMargin` формы 6 шлёт `margins = -1`, `interval = 0`. На дефолте А4 297×210, VHI80, 4+0, mode 1 раннер даёт price 1811.964386666667, time_ready 8.4; боевой API и локальный Python — price 3214.3125999999997, time_ready 8.6 (та же цена, что без галки). rel цены 0.774. Форму не дублировал, `print_sheet.js` не писал, `print_sheet.py` не правил.
+Пробовал: эталон mode 1 и mode 0, дефолт формы, нумерация и mode 0 на дефолте — price и time_ready совпали с API (rel 0). Ламинация `Laminat32G` на странице: price 9034.391462564103, time_ready 9.44, бумага 108 листов, плёнка 92.4 м; API price 9035.15392 (abs 0.76, rel 0.000084), time_ready 9.44, те же количества. Пустой `margins: []` локально даёт цену JS 1811.964386666667 — в форму не подставлял.
+Гипотеза: JS прибавляет поля принтера только когда `margins != -1` (`js_legacy/calc/calcPrintSheet.js:48-49`). Python на -1 ставит `[0,0,0,0]` (`calc_service/calculators/print_sheet.py:459-463`), затем `if color != "0+0" and sum_margins` считает список нулей истинным и прибавляет поля принтера (`:503-507`). Изделие 297×210 на лист 297×420 с полями принтера встаёт 1 на лист (105 листов), без них — 2 (цена JS).
+Вопрос: предпосылка на эту строку (при `margins == -1` не прибавлять поля принтера) или расширить scope? Калькулятор в `form-print-sheet` править нельзя.
+Следующая сессия: Analyst. Модели Analyst в шапке нет.
+
+13.11.2026 — Analyst, Grok 4.7 — заведена `todo/print-sheet-margins-minus-one.md` на main; статус ждёт её; копию формы не делал — дальше Implementer `print-sheet-margins-minus-one`
+
 ## Найдено вне scope
 
 - Раннер `calcCutGuillotine` на входе 50 листов, 210×297 на листе 320×450, поля [3,3,3,3], interval 0, mode 1 падает: `time_ready` не число (NaN). На странице time 0.05, Python time_hours 0.05, cost 67, price 108. Сверку листа не держит. `scripts/run_js_calc.mjs` не правил.
+- Раннер `calcPrintSheet` с `isLamination` падает: `Cannot read properties of undefined (reading 'Laminat')`. На странице https://insain.ru/catalog/listovki-pod-zakaz/ тот же вход считается. `scripts/run_js_calc.mjs` не правил.
 
 ## Результат
 
-- Ветка, PR или коммит: `task/form-print-sheet`; WIP-коммит статуса после Analyst.
-- Сделано: сверка до перевода (шаги 0–3 и разложение срока). Порт по пропускам полный. Цена эталона и дефолта с боевым API совпала. Материалы дефолта совпали. Поля формы 6 прочитаны, id в старом `cjsCalc` (элемент 104) на те же поля. `wp-plugin/forms/print_sheet.js` не писал: стоп до совпадения срока. Analyst: предпосылка `todo/print-sheet-port-fix.md` на main.
-- Чем проверено: `python scripts/js_port_gaps.py calcPrintSheet`; раннер `node scripts/run_js_calc.mjs calcPrintSheet --data current --args` на эталоне, дефолте и mode 0; `POST https://insain.ru/api/v1/calc/print_sheet` на тех же трёх телах; разложение `calcPrintLaser` / гильотина в консоли страницы https://insain.ru/catalog/listovki-pod-zakaz/ и раннер `calcPrintLaser`. `python scripts/dev.py check` не запускался: код калькулятора и формы не менялся.
-- Не сделано и почему: `REF_FORM_DEFAULT`, строка в `docs/js-runner-cases.md`, `print_sheet.js`, дубль формы. Критерий срока эталона не выполнен (rel 0.00161). Ждём `print-sheet-port-fix`.
-- Числа блокера: эталон mode 1 — раннер cost 3210.479090909091, price 5266.918472727273, time_hours 1.13, time_ready 10.2; API price та же, time_ready 10.183636363636364. Mode 0 — раннер price 4864.332072727273, time_ready 25.02; API price 5266.918472727273, time_ready 26.183636363636364. Дефолт формы 6 — раннер price 3214.3125999999997, time_ready 8.6; API price та же, time_ready 8.595.
+- Ветка, PR или коммит: `task/form-print-sheet` в worktree `D:\Projects\insain-agent-form-print-sheet`. Коммита этой сессии нет.
+- Сделано: повторная сверка после `print-sheet-port-fix`. Порт по пропускам полный (`calcCutRoller`, `calcPrintLaser` уже в `scripts/js_port_gaps_allowed.txt`). Эталон, mode 0 эталона и дефолт формы 6: price и time_ready раннера совпали с `POST https://insain.ru/api/v1/calc/print_sheet`. Материалы дефолта совпали. Поля формы 6 и `get_value_from` в `cjsCalc` 104 сверены с живой базой и страницей.
+- Чем проверено: `python scripts/js_port_gaps.py calcPrintSheet`; раннер `calcPrintSheet` на эталоне, mode 0 эталона, дефолте, дефолте mode 0, нумерации и `margins -1`; те же тела на боевой API; консоль страницы https://insain.ru/catalog/listovki-pod-zakaz/ — дефолт и ламинация `Laminat32G`. `python scripts/dev.py check` — код выхода 0 (546 + 81 passed). Код калькулятора и формы не менялся; check пересобрал строку статуса в `docs/dashboard.md`.
+- Не сделано и почему: `REF_FORM_DEFAULT`, строка в `docs/js-runner-cases.md`, `print_sheet.js`, дубль формы. Стоп на «белых полях»: галка меняет цену на боевой странице, API — нет. Копию не делать, пока предпосылка не на проде.
+- Числа, которые сошлись 13.11.2026: эталон mode 1 — price 5266.918472727273, time_ready 10.2; эталон mode 0 — price 4864.332072727273, time_ready 25.02; дефолт формы 6 — price 3214.3125999999997, time_hours 0.32, time_ready 8.6, материал «Снегурочка 80гр А3» 297×420, qty 105 (вес JS 0.99792, Python 0.49896 — не сверялся). Дефолт mode 0 — price 2811.7262, time_ready 24.22. Нумерация на дефолте — price 3314.3125999999997, time_ready 8.65.
+- Числа блокера («белые поля» включены): раннер `margins -1`, interval 0 — price 1811.964386666667, time_hours 0.21, time_ready 8.4. API и локальный Python с `margins: -1` — price 3214.3125999999997, time_ready 8.6, qty 105. rel цены 0.774, rel срока 0.0238.
+- Ламинация на дефолте (не стоп: rel цены 0.000084): страница price 9034.391462564103, time_ready 9.44, бумага 108, плёнка 92.4 м 330×0; API price 9035.15392, time_ready 9.44, те же строки. Раннер на этом входе падает — строка в «Найдено вне scope».
 - Команда раннера эталона: `node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[210,297],\"4+4\",[0,0,0,0],0,\"PaperCoated300M\",{},1]'`
 - Команда раннера дефолта формы 6: `node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[297,210],\"4+0\",[2,2,2,2],4,\"VHI80\",{},1]'`
-- Поля формы 6 (после починки): qty `numN` 98 = 100; формат `dpdFormat` 99 индекс 1, значение `297,210` (свой размер — значение `0`, тогда `numW` 100 и `numH` 101); цвет `dpdColor` 102 = `4+0`; материал `dpdMaterial` 103 = `VHI80`; «белые поля» `ckbMargin` 419 снят → margins `[2,2,2,2]`, interval 4, включён → margins `-1`, interval 0; ламинация `rdoLaminat` 401 = 0, при 1 код из `dpdRollLaminat` 400, при 2 из `dpdPackLaminat` 402; чекбоксы опций 661/663/666/667/664/668 сняты, `numCrease` 665 = 1, `numHole` 669 = 1; режим `rdoModeProduction` 519 = 1. Файл `fluAtrwork` 614 в API и в URL не входит. Принтера на форме нет, JS берёт `KMBizhubC220`.
+- Команда раннера «белых полей»: `node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[297,210],\"4+0\",-1,0,\"VHI80\",{},1]'`
+- Поля формы 6: qty `numN` 98 = 100; формат `dpdFormat` 99 индекс 1, значение `297,210` (свой размер — значение `0`, тогда `numW` 100 = 210 и `numH` 101 = 297); цвет `dpdColor` 102 = `4+0`; материал `dpdMaterial` 103 = `VHI80`; «белые поля» `ckbMargin` 419 сняты → margins `[2,2,2,2]`, interval 4, включены → margins `-1`, interval 0; ламинация `rdoLaminat` 401 = 0, при 1 код из `dpdRollLaminat` 400, при 2 из `dpdPackLaminat` 402; чекбоксы 661/663/666/667/664/668 сняты, `numCrease` 665 = 1, `numHole` 669 = 1; режим `rdoModeProduction` 519 = 1. Файл `fluAtrwork` 614 в API и в URL не входит. Принтера на форме нет, JS и Python по умолчанию `KMBizhubC220`.
+- Эталон для шагов 13 и 20, когда блокер снят: дефолт формы (его можно ввести на странице). `REF_PARAMS` 210×297 с полями `[0,0,0,0]` форма не набирает: «белые поля» дают только `[2,2,2,2]`/interval 4 или `-1`/interval 0.
 - Строка в «Состав пакета» (в `todo/forms-batch-switch.md` не писать, пока та задача `в работе`): нет, копия не делалась.
-- После `close` `print-sheet-port-fix`: rebase на `main`, статус `черновик`, продолжить Implementer этой задачи.
+- Требуется решение: предпосылка на поля принтера при `margins == -1`. Калькулятор в этой задаче не править.
