@@ -152,6 +152,44 @@ EXPECTED_REF_MODE0 = {
     "time_hours": 1.02,
     "time_ready": 25.02,
 }
+
+# JS, 13.11.2026 — белые поля: margins -1, поля принтера не прибавляются.
+# node scripts/run_js_calc.mjs calcPrintSheet --data current --args
+# '[100,[297,210],"4+0",-1,0,"VHI80",{},1]'
+REF_PARAMS_MARGINS_MINUS_ONE = {
+    "quantity": 100,
+    "width": 297,
+    "height": 210,
+    "material_id": "VHI80",
+    "color": "4+0",
+    "margins": -1,
+    "interval": 0,
+    "mode": 1,
+}
+EXPECTED_MARGINS_MINUS_ONE = {
+    "cost": 1102.8211666666666,
+    "price": 1811.964386666667,
+    "time_ready": 8.4,
+}
+
+# JS, 13.11.2026 — обычные поля [2,2,2,2], тот же тираж: поля принтера прибавляются.
+# node scripts/run_js_calc.mjs calcPrintSheet --data current --args
+# '[100,[297,210],"4+0",[2,2,2,2],0,"VHI80",{},1]'
+REF_PARAMS_MARGINS_DEFAULT = {
+    "quantity": 100,
+    "width": 297,
+    "height": 210,
+    "material_id": "VHI80",
+    "color": "4+0",
+    "margins": [2, 2, 2, 2],
+    "interval": 0,
+    "mode": 1,
+}
+EXPECTED_MARGINS_DEFAULT = {
+    "cost": 1951.1725,
+    "price": 3214.3125999999997,
+    "time_ready": 8.6,
+}
 EXPECTED_MATERIAL = {
     "code": "PaperCoated300M",
     "name_substring": "Титан DIGITAL мелованная",  # часть названия
@@ -311,6 +349,38 @@ def test_expected_values_print_sheet_mode0(calc):
     r1 = calc.execute(REF_PARAMS)
     assert r["price"] < r1["price"], (
         f"mode0 price {r['price']} должна быть меньше mode1 {r1['price']}"
+    )
+
+
+def test_expected_values_print_sheet_margins_minus_one(calc):
+    """JS, 13.11.2026: 100 шт, 297×210, VHI80, 4+0, margins -1, mode 1."""
+    r = calc.execute(REF_PARAMS_MARGINS_MINUS_ONE)
+    e = EXPECTED_MARGINS_MINUS_ONE
+    rel = REF_REL_TOL
+    assert r["cost"] == pytest.approx(e["cost"], rel=rel), (
+        f"cost: got {r['cost']}, expected ~{e['cost']}"
+    )
+    assert r["price"] == pytest.approx(e["price"], rel=rel), (
+        f"price: got {r['price']}, expected ~{e['price']}"
+    )
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=rel), (
+        f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
+    )
+
+
+def test_expected_values_print_sheet_margins_default(calc):
+    """JS, 13.11.2026: тот же вход, margins [2,2,2,2] — старые числа ветки с полями."""
+    r = calc.execute(REF_PARAMS_MARGINS_DEFAULT)
+    e = EXPECTED_MARGINS_DEFAULT
+    rel = REF_REL_TOL
+    assert r["cost"] == pytest.approx(e["cost"], rel=rel), (
+        f"cost: got {r['cost']}, expected ~{e['cost']}"
+    )
+    assert r["price"] == pytest.approx(e["price"], rel=rel), (
+        f"price: got {r['price']}, expected ~{e['price']}"
+    )
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=rel), (
+        f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
     )
 
 

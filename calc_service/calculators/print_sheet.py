@@ -457,7 +457,9 @@ class PrintSheetCalculator(BaseCalculator):
         size = [width, height]
         color = str(params.get("color", "4+0") or "4+0").strip()
         margins_param = params.get("margins")
-        if margins_param is not None and margins_param != -1:
+        # JS calcPrintSheet.js:48-49: при margins == -1 поля принтера не прибавляются.
+        skip_printer_margins = margins_param == -1
+        if margins_param is not None and not skip_printer_margins:
             sum_margins = list(margins_param) if isinstance(margins_param, (list, tuple)) else [0, 0, 0, 0]
         else:
             sum_margins = [0, 0, 0, 0]
@@ -500,7 +502,7 @@ class PrintSheetCalculator(BaseCalculator):
         printer_margins = list(printer.margins or [3, 3, 3, 3])
         if len(printer_margins) < 4:
             printer_margins = [3, 3, 3, 3]
-        if color != "0+0" and sum_margins:
+        if color != "0+0" and sum_margins and not skip_printer_margins:
             sum_margins = [
                 sum_margins[i] + printer_margins[i]
                 for i in range(min(4, len(sum_margins)))

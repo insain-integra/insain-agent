@@ -1,6 +1,6 @@
 # print-sheet-margins-minus-one
 
-Статус: черновик
+Статус: выкатка
 Сложность: низкая
 Implementer: Grok 4.7
 Reviewer: Auto
@@ -43,16 +43,16 @@ Site ops: Grok 4.7
 
 ## Критерии приёмки
 
-- [ ] Раннер `node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[297,210],\"4+0\",-1,0,\"VHI80\",{},1]'` и локальный `print_sheet` / после деплоя боевой API: `price` abs ≤ 0.02 и rel ≤ 0.001, `time_ready` rel ≤ 0.001 (эталон ~1811.964386666667 / 8.4).
-- [ ] В `test_print_sheet.py` кейс с `margins: -1` и пометка `# JS, ДД.ММ.ГГГГ`; assert `cost`, `price`, `time_ready` с `rel=0.001`. Есть кейс с обычными margins (например дефолт `[2,2,2,2]`), числа старых эталонов не менялись.
-- [ ] `git stash push -- calc_service/calculators/print_sheet.py` → новые кейсы `failed`, старые `passed` → `git stash pop` → все `passed`.
-- [ ] `python -m pytest calc_service/tests/test_calculators/ -q -k "flag or pennant or heat_press or calendar or badge or magnets or notebook or puzzle or print_sheet"` — `failed` нет (соседи вызывают `PrintSheetCalculator`).
+- [x] Раннер `node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[297,210],\"4+0\",-1,0,\"VHI80\",{},1]'` и локальный `print_sheet` / после деплоя боевой API: `price` abs ≤ 0.02 и rel ≤ 0.001, `time_ready` rel ≤ 0.001 (эталон ~1811.964386666667 / 8.4).
+- [x] В `test_print_sheet.py` кейс с `margins: -1` и пометка `# JS, ДД.ММ.ГГГГ`; assert `cost`, `price`, `time_ready` с `rel=0.001`. Есть кейс с обычными margins (например дефолт `[2,2,2,2]`), числа старых эталонов не менялись.
+- [x] `git stash push -- calc_service/calculators/print_sheet.py` → новые кейсы `failed`, старые `passed` → `git stash pop` → все `passed`.
+- [x] `python -m pytest calc_service/tests/test_calculators/ -q -k "flag or pennant or heat_press or calendar or badge or magnets or notebook or puzzle or print_sheet"` — `failed` нет (соседи вызывают `PrintSheetCalculator`).
 - [ ] После `deploy-api`: `POST https://insain.ru/api/v1/calc/print_sheet` телом блокера — `price`/`time_ready` как у раннера.
 
 ## Проверки
 
-- [ ] `python scripts/dev.py check` — код выхода 0
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `python scripts/dev.py check` — код выхода 0
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
 ## Риски
 
@@ -67,6 +67,21 @@ Site ops: Grok 4.7
 ## Журнал передач
 
 13.11.2026 — Analyst, Grok 4.7 — задача-предпосылка по блокеру form-print-sheet (margins -1) — дальше Implementer (Grok 4.7)
+13.11.2026 — Implementer, Grok 4.7 — сдал, make check зелёный — дальше Reviewer (Auto)
+13.11.2026 — Reviewer, Auto — принято — дальше человек: слияние
+13.11.2026 — человек — принято — выкатка
+
+## Ревью 1
+
+принято
+
+Сверка критериев (код, без выкатки):
+- Diff `print_sheet.py`: `skip_printer_margins = margins_param == -1`; при `-1` поля принтера не прибавляются — как JS `calcPrintSheet.js:48-49`.
+- Эталоны: `-1` → price 1811.964386666667 / time_ready 8.4; `[2,2,2,2]` → 3214.3125999999997 / 8.6. Старые `EXPECTED_REF` / `EXPECTED_REF_MODE0` (5266… / 4864…) в diff не менялись — только добавления.
+- Пометка `# JS, 13.11.2026`; assert `cost`/`price`/`time_ready` с `rel=0.001`.
+- Stash только `print_sheet.py`: 1 failed (`margins_minus_one`, cost 1951.1725 vs 1102.82…), 8 passed; после `stash pop` соседи+print_sheet — 115 passed.
+- `docs/js-runner-cases.md` — две строки команд. `docs/dashboard.md` — пересборка от `make check`, не замечание.
+- Выкатка / smoke боевого API — не-scope этого diff; критерий после `deploy-api` остаётся Site ops.
 
 ## Найдено вне scope
 
@@ -74,12 +89,12 @@ Site ops: Grok 4.7
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Период:
-- Часы человека:
-- Работа агентов:
-- Было / стало:
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+- Ветка, PR или коммит: `task/print-sheet-margins-minus-one`, worktree `D:\Projects\insain-agent-print-sheet-margins-minus-one`, от `479f42e`. Коммита нет.
+- Период: 2026-11-13
+- Часы человека: —
+- Работа агентов: Implementer — Grok 4.7
+- Было / стало: при `margins: -1` список `[0,0,0,0]` считался истинным и к нему прибавлялись поля принтера — `price` 3214.3125999999997, `time_ready` 8.6. Стало: поля принтера не прибавляются, как `calcPrintSheet.js:48-49` — `price` 1811.964386666667, `time_ready` 8.4. Вход `[2,2,2,2]` остался 3214.3125999999997 / 8.6.
+- Сделано: флаг `skip_printer_margins` в `print_sheet.py`; эталоны раннера `-1` и `[2,2,2,2]` в `test_print_sheet.py`; строки команд в `docs/js-runner-cases.md`.
+- Чем проверено: раннер `-1` — cost 1102.8211666666666, price 1811.964386666667, time_ready 8.4; раннер `[2,2,2,2]` — cost 1951.1725, price 3214.3125999999997, time_ready 8.6. `pytest test_print_sheet.py -k "margins_minus_one or margins_default or expected_values_print_sheet"` — 9 passed. Stash только `print_sheet.py`: 1 failed (`margins_minus_one`, cost 1951.1725 вместо 1102.8211666666666), 22 passed (старые эталоны и `[2,2,2,2]`); после `stash pop` соседи и `print_sheet` — 115 passed. `python scripts/dev.py check` — код 0 (548 + 81 passed).
+- Не сделано и почему: коммит не делал — не просили. Выкатка и smoke боевого API — Site ops после ревью и слияния.
+- Требуется решение: нет.
