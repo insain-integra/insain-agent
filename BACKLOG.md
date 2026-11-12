@@ -81,3 +81,5 @@
 - Из `form-flag`: Имя `PaperCoated115M`: JS `js_legacy/material/sheet.json` «113г/м», Python `calc_service/data/materials/sheet.json` «115г/м». Код, тираж 18 и цена совпали.
 - Из `form-flag`: Эталон задачи 100×150 нет в `dpdSize` (148×105, 200×99, 210×148). На странице его не ввести.
 - Из `form-flag`: Вес на копии 0.24 кг (API `weight_kg` 0.2377), на боевой форме 55 при тех же полях «Вес тиража 0.29 кг». Цена 4 100 и срок «Срок 1 день» с той же подсказкой дат совпали. Калькулятор в этой задаче не менялся.
+- Из `print-sheet-port-fix`: `print_laser.py:239` / `:260` — тот же `max(1, mode)` и `round` вместо `ceil`; вызывается из `sticker` и `/calc/print_laser`, не из листа. Вынести отдельной задачей после сверки со `calcPrintLaser`.
+- Из `print-sheet-port-fix`: Раннер `calcCutGuillotine` на входе гильотины листа даёт `time_ready` NaN (из блокера `form-print-sheet`); сверку листа не держит.
