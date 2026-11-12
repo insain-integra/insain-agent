@@ -25,6 +25,8 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | `calcAcrilycPrizes` form 78 grave fill | `acrylic_prizes` | 10241.92 |
 | `calcUVPrint` plain mode 0 | `uv_print` | 1095 |
 | `calcUVPrint` around mode 1 | `uv_print` | 17431 |
+| `calcPrintSheet` | `print_sheet` | 5266.918472727273 |
+| `calcPrintSheet` mode 0 | `print_sheet` | 4864.332072727273 |
 
 ```powershell
 node scripts/run_js_calc.mjs calcFlagPaper --data current --args '[100,[100,150],\"4+0\",\"PaperCoated115M\",{},1]'
@@ -60,6 +62,10 @@ node scripts/run_js_calc.mjs calcAcrilycPrizes --data current --args '[100,[{\"m
 node scripts/run_js_calc.mjs calcUVPrint --data current --args '[100,[20,20],[20,20],null,{\"isUVPrint\":{\"printerID\":\"RimalSuvUV\",\"resolution\":2,\"color\":\"4+1\",\"surface\":\"isPlain\"}},0]'
 
 node scripts/run_js_calc.mjs calcUVPrint --data current --args '[100,[20,20],[20,20],null,{\"isUVPrint\":{\"printerID\":\"RimalSuvUV\",\"resolution\":2,\"color\":\"4+1\",\"surface\":\"isAround\"}},1]'
+
+node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[210,297],\"4+4\",[0,0,0,0],0,\"PaperCoated300M\",{},1]'
+
+node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[210,297],\"4+4\",[0,0,0,0],0,\"PaperCoated300M\",{},0]'
 ```
 
 Известные расхождения Python с JS вне этих кейсов: бейдж (JS 4708, Python ~6509) и стикер 50×50 VHI80 (JS 1308, Python ~1107) — отдельные задачи `badge-vs-js` и `sticker-vs-js`. Вес лазерной листовой печати к JS не выравнивать: `calcPrintLaser` считает весь лист (`numSheet` × `sizeSheet`, с обрезью), Python — тираж × размер изделия. Верный вес — Python, решение 11.11.2026. Вымпел 50×80×120 `PaperCoated115M` без ламинации: JS `weight_kg` 0.1328, Python 0.1052 (лист того же входа: JS 0.0828, Python 0.0552).

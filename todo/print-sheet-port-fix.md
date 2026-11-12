@@ -1,6 +1,6 @@
 # print-sheet-port-fix
 
-Статус: черновик
+Статус: выкатка
 Сложность: средняя
 Implementer: Opus 5.5
 Reviewer: Grok 4.7
@@ -53,20 +53,20 @@ Site ops: Grok 4.7
 
 Скрипт через `@'…'@ | python -` в PowerShell 5.1 — первой строкой `$OutputEncoding = New-Object System.Text.UTF8Encoding $false`.
 
-- [ ] Раннер `calcPrintSheet` на обоих кейсах. Mode 1: `price` 5266.918472727273, `timeReady` 10.2. Mode 0: `price` 4864.332072727273, `timeReady` 25.02.
+- [x] Раннер `calcPrintSheet` на обоих кейсах. Mode 1: `price` 5266.918472727273, `timeReady` 10.2. Mode 0: `price` 4864.332072727273, `timeReady` 25.02.
 
 ```powershell
 node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[210,297],"4+4",[0,0,0,0],0,"PaperCoated300M",{},1]'
 node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[210,297],"4+4",[0,0,0,0],0,"PaperCoated300M",{},0]'
 ```
 
-- [ ] Тесты `print_sheet`. Stdout: `passed`, `failed` нет. На `git stash push -- calc_service/calculators/print_sheet.py` новые/обновлённые кейсы падают числами старого кода; после `git stash pop` — снова `passed`.
+- [x] Тесты `print_sheet`. Stdout: `passed`, `failed` нет. На `git stash push -- calc_service/calculators/print_sheet.py` новые/обновлённые кейсы падают числами старого кода; после `git stash pop` — снова `passed`.
 
 ```powershell
 python -m pytest calc_service/tests/test_calculators/test_print_sheet.py -q
 ```
 
-- [ ] Вызывающие не сдвинулись. Stdout: `passed`, `failed` нет. Упал эталон — стоп Analyst, эталоны соседей в этой задаче не переснимать.
+- [x] Вызывающие не сдвинулись. Stdout: `passed`, `failed` нет. Упал эталон — стоп Analyst, эталоны соседей в этой задаче не переснимать.
 
 ```powershell
 python -m pytest calc_service/tests/test_calculators/test_flag.py calc_service/tests/test_calculators/test_pennant.py calc_service/tests/test_calculators/test_calendar.py calc_service/tests/test_calculators/test_heat_press.py calc_service/tests/test_calculators/test_magnets.py calc_service/tests/test_calculators/test_badge.py calc_service/tests/test_calculators/test_notebook.py calc_service/tests/test_calculators/test_puzzle.py -q
@@ -81,8 +81,8 @@ $api | Select-Object price, time_ready
 
 ## Проверки
 
-- [ ] `python scripts/dev.py check` — код выхода 0
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `python scripts/dev.py check` — код выхода 0
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 - [ ] Деплой: skill `deploy-api`, smoke зелёный; откат — автооткат скрипта или образ `insain-agent-calc-api:rollback`.
 
 ## Риски
@@ -102,6 +102,19 @@ $api | Select-Object price, time_ready
 [docs/agents/workflow.md](../docs/agents/workflow.md). Замечания ревью — ниже, в «Ревью N».
 
 - 12.11.2026 — Analyst, Auto — предпосылка `form-print-sheet`: ceil времени печати до суммы и `timePrepare * mode` в `print_sheet.py`; `print_laser.py` в не-scope — дальше Implementer
+- 12.11.2026 — Implementer, Auto — лазерная ветка: `time_prepare * mode`, ceil `time_print`, `print_time_ready` от `baseTimeReady` принтера; эталоны mode 1/0 с раннера; check зелёный — дальше Reviewer (Grok 4.7)
+- 12.11.2026 — Reviewer, Grok 4.7 — принято — дальше человек (слияние)
+- 13.11.2026 — человек — принято, слияние — дальше Site ops
+
+## Ревью 1
+
+принято. Блокеров нет. Деплой не этот круг: боевой API — Site ops после слияния в `main`.
+
+- Раннер `calcPrintSheet --data current`. Mode 1: `cost` 3210.479090909091, `price` 5266.918472727273, `time_hours` 1.13, `time_ready` 10.2. Mode 0: `cost` 2959.689090909091, `price` 4864.332072727273, `time_hours` 1.02, `time_ready` 25.02. `weight_kg` раннера 2.16 в эталон не вписан.
+- `pytest test_print_sheet.py -q`: 21 passed. На `git stash push -- print_sheet.py` оба кейса упали числами старого кода (mode 1 `time_hours` 1.12; mode 0 `cost` 3210.479090909091). После `stash pop` — снова 21 passed.
+- Вызывающие flag…puzzle: 85 passed.
+- `python scripts/dev.py check`: код 0, calc 546 passed, bot 81 passed.
+- Diff: лазерная ветка `print_sheet.py` (`time_prepare * mode` без `max(1, …)`, себестоимость от сырого `time_print`, ceil времени печати, `print_time_ready` от `baseTimeReady` принтера). Эталон mode 1: сдвинуты только `time_hours` / `time_ready`. Mode 0 — новый кейс. Строки в `docs/js-runner-cases.md`. `print_laser.py`, JSON и `wp-plugin/` не тронуты. Струйная ветка не менялась.
 
 ## Найдено вне scope
 
@@ -110,12 +123,12 @@ $api | Select-Object price, time_ready
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Период:
+- Ветка, PR или коммит: `task/print-sheet-port-fix`
+- Период: 12.11.2026
 - Часы человека:
-- Работа агентов:
-- Было / стало:
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+- Работа агентов: Implementer
+- Было / стало: mode 0 готовил как mode 1 (`max(1, …)`), `time_ready` без ceil печати и с `baseTimeReady` листа → mode 1 `time_ready` 10.1836… / mode 0 цена как mode 1. Стало: как JS — mode 1 `time_ready` 10.2, mode 0 `price` 4864.33… / `time_ready` 25.02
+- Сделано: правка лазерной ветки `print_sheet.py`; эталоны mode 1/0; строки в `docs/js-runner-cases.md`
+- Чем проверено: раннер обоих кейсов; `pytest test_print_sheet.py` 21 passed; stash calc → 2 failed (time_hours 1.12; mode0 cost 3210…), pop → 21 passed; соседи 85 passed; `python scripts/dev.py check` 546+81 passed, код 0
+- Не сделано и почему: деплой и smoke боевого API — Site ops после merge
+- Требуется решение: пуш `main`, затем деплой API (Site ops)

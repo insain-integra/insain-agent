@@ -581,13 +581,17 @@ class PrintSheetCalculator(BaseCalculator):
             if sheets_per_hour <= 0:
                 sheets_per_hour = 250.0
             double_side = 2 if color in ("1+1", "4+1", "4+4") else 1
-            time_prepare = (printer.time_prepare or 0.1) * max(1, mode.value)
-            time_print = sheets_for_time / sheets_per_hour * coeff_size * double_side + time_prepare
-            time_operator = time_print * 0.5 * (1 + defects_printer) + time_prepare
+            # JS calcPrintLaser: timePrepare * modeProduction (без max(1, …))
+            time_prepare = (printer.time_prepare or 0.1) * mode.value
+            time_print_raw = (
+                sheets_for_time / sheets_per_hour * coeff_size * double_side + time_prepare
+            )
+            time_operator = time_print_raw * 0.5 * (1 + defects_printer) + time_prepare
 
             cost_print_sheet_list = getattr(printer, "cost_print_sheet", None) or [4.0, 12.0]
             cost_per_sheet_val = _cost_per_sheet_laser(color, cost_print_sheet_list)
-            cost_depreciation = printer.depreciation_per_hour * time_print
+            # JS: себестоимость от сырого timePrint
+            cost_depreciation = printer.depreciation_per_hour * time_print_raw
             cost_consumables = cost_per_sheet_val * coeff_size * sheets_with_defects
             cost_print = cost_depreciation + cost_consumables
             cost_operator = time_operator * printer.operator_cost_per_hour
@@ -596,7 +600,12 @@ class PrintSheetCalculator(BaseCalculator):
             price_print = cost_print * (1 + MARGIN_MATERIAL + margin_print_laser) + cost_operator * (
                 1 + MARGIN_OPERATION + margin_print_laser
             )
-            print_time_ready = None  # задаётся ниже как time_print + base_ready
+            # JS: Math.ceil(timePrint * 100) / 100 до timeReady / вклада в сумму
+            time_print = math.ceil(time_print_raw * 100) / 100.0
+            # JS calcPrintLaser: timeReady = time + baseTimeReady принтера (не листа)
+            printer_base_list = printer.base_time_ready or get_time_ready("baseTimeReady")
+            idx_printer = max(0, min(len(printer_base_list) - 1, int(math.ceil(mode.value))))
+            print_time_ready = time_print + float(printer_base_list[idx_printer])
 
         # Материал: costMaterial = material.cost * ceil(numSheetToPrint*(1+defectsPrinter)) / layoutOnMaterial.num
         layout_num = max(1, layout_on_material.get("num", 1))

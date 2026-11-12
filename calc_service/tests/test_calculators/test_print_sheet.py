@@ -130,14 +130,27 @@ REF_PARAMS = {
     "printer_code": "",
     "mode": 1,
 }
-# JS, 05.11.2026 — ceil снят, как в JS. calcPrintSheet --data current.
+# JS, 12.11.2026 — ceil времени печати и timePrepare * mode.
+# node scripts/run_js_calc.mjs calcPrintSheet --data current --args
+# '[100,[210,297],"4+4",[0,0,0,0],0,"PaperCoated300M",{},1]'
 # weight_kg — вес изделий. JS на этом входе 2.16 (лист). Верный вес — Python, решение 11.11.2026.
 EXPECTED_REF = {
     "cost": 3210.479090909091,
     "price": 5266.918472727273,
-    "time_hours": 1.12,
-    "time_ready": 10.183636363636364,
+    "time_hours": 1.13,
+    "time_ready": 10.2,
     "weight_kg": 1.8711,
+}
+
+# JS, 12.11.2026 — тот же вход, mode 0 (подготовка 0).
+# node scripts/run_js_calc.mjs calcPrintSheet --data current --args
+# '[100,[210,297],"4+4",[0,0,0,0],0,"PaperCoated300M",{},0]'
+REF_PARAMS_MODE0 = {**REF_PARAMS, "mode": 0}
+EXPECTED_REF_MODE0 = {
+    "cost": 2959.689090909091,
+    "price": 4864.332072727273,
+    "time_hours": 1.02,
+    "time_ready": 25.02,
 }
 EXPECTED_MATERIAL = {
     "code": "PaperCoated300M",
@@ -276,6 +289,29 @@ def test_expected_values_print_sheet(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+def test_expected_values_print_sheet_mode0(calc):
+    """JS, 12.11.2026: 100 шт, 210×297, PaperCoated300M, 4+4, mode 0."""
+    r = calc.execute(REF_PARAMS_MODE0)
+    e = EXPECTED_REF_MODE0
+    rel = REF_REL_TOL
+    assert r["cost"] == pytest.approx(e["cost"], rel=rel), (
+        f"cost: got {r['cost']}, expected ~{e['cost']}"
+    )
+    assert r["price"] == pytest.approx(e["price"], rel=rel), (
+        f"price: got {r['price']}, expected ~{e['price']}"
+    )
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=rel), (
+        f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
+    )
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=rel), (
+        f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
+    )
+    r1 = calc.execute(REF_PARAMS)
+    assert r["price"] < r1["price"], (
+        f"mode0 price {r['price']} должна быть меньше mode1 {r1['price']}"
+    )
 
 
 @pytest.fixture(scope="module")
