@@ -25,6 +25,7 @@
 - `print-sheet-port-fix` (закрыто 2026-11-13, `docs/history/log.md`) — предпосылка `form-print-sheet`: ceil времени печати и `timePrepare * mode` в `print_sheet`
 - `print-sheet-margins-minus-one` (закрыто 2026-11-13, `docs/history/log.md`) — предпосылка `form-print-sheet`: при `margins == -1` не прибавлять поля принтера
 - `todo/form-print-sheet.md` — копия формы 6, slug `print_sheet`
+- `todo/print-sheet-copy-result.md` — после `form-print-sheet`: на копии 96 показать за шт со скидкой (`htmCost`)
 - `todo/form-print-offset.md` — копия формы 82, slug `print_offset` (`calcPrintOffsetPromo`)
 - `todo/form-print-roll.md` — копия формы 23, slug `print_roll` (форма CalcPrintWide)
 - `todo/form-laser.md` — копия формы 28, slug `laser`
