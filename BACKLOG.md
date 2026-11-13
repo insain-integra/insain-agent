@@ -83,3 +83,5 @@
 - Из `form-flag`: Вес на копии 0.24 кг (API `weight_kg` 0.2377), на боевой форме 55 при тех же полях «Вес тиража 0.29 кг». Цена 4 100 и срок «Срок 1 день» с той же подсказкой дат совпали. Калькулятор в этой задаче не менялся.
 - Из `print-sheet-port-fix`: `print_laser.py:239` / `:260` — тот же `max(1, mode)` и `round` вместо `ceil`; вызывается из `sticker` и `/calc/print_laser`, не из листа. Вынести отдельной задачей после сверки со `calcPrintLaser`.
 - Из `print-sheet-port-fix`: Раннер `calcCutGuillotine` на входе гильотины листа даёт `time_ready` NaN (из блокера `form-print-sheet`); сверку листа не держит.
+- Из `form-print-sheet`: Раннер `calcCutGuillotine` на входе 50 листов, 210×297 на листе 320×450, поля [3,3,3,3], interval 0, mode 1 падает: `time_ready` не число (NaN). На странице time 0.05, Python time_hours 0.05, cost 67, price 108. Сверку листа не держит. `scripts/run_js_calc.mjs` не правил.
+- Из `form-print-sheet`: Раннер `calcPrintSheet` с `isLamination` падает: `Cannot read properties of undefined (reading 'Laminat')`. На странице https://insain.ru/catalog/listovki-pod-zakaz/ тот же вход считается. `scripts/run_js_calc.mjs` не правил.

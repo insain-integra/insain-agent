@@ -1,6 +1,6 @@
 # print-sheet-copy-result
 
-Статус: заблокировано: ждёт todo/form-print-sheet.md
+Статус: черновик
 Сложность: низкая
 Implementer: не нужен
 Reviewer: Auto
@@ -15,7 +15,7 @@ Site ops: Grok 4.7
 ## Контекст и ссылки
 
 - `docs/ezfc-api-migration.md` — раздел «Блок результата», эталон `htmCost`.
-- `todo/form-print-sheet.md` — копия 96 / черновик 2586890; JS и API не пересматривать.
+- `form-print-sheet` (закрыто 2026-11-14, `docs/history/log.md`) — копия 96 / черновик 2586890; JS и API не пересматривать.
 - Остальное не открывать.
 
 ## Scope
