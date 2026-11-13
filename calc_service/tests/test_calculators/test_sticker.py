@@ -277,3 +277,79 @@ def test_oversize_sheet_http_400():
     response = TestClient(app).post("/api/v1/calc/sticker", json=_raflacoat_oversize(400, 400))
     assert response.status_code == 400, response.text
     assert response.json()["detail"] == OVERSIZE_SHEET_MESSAGE
+
+
+# ── Широкоформатная печать и ламинация (рулон) ──────────────────────
+# JS, 14.11.2026 — calcSticker → calcPrintWide(1, [1520, 0], …) и calcLaminationWide(1, [1520, 0]).
+# Рулон ORAJET3640, 100 шт 50×50, size_item 50, density 0, difficulty 1, mode 1.
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,\"ORAJET3640\",{\"isPrint\":{\"printerID\":\"Technojet160ECO\",\"color\":\"4+0\"}},1]'
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,\"ORAJET3640\",{\"isPrint\":{\"printerID\":\"Technojet160ECO\",\"color\":\"4+0\"},\"isLamination\":\"LaminatDLCLAM\"},1]'
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,\"ORAJET3640\",{\"isPrint\":{\"printerID\":\"HPLatex335\",\"color\":\"4+0\"}},1]'
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,\"ORAJET3640\",{\"isPrint\":{\"printerID\":\"TechnojetXR720\",\"color\":\"4+0\"}},1]'
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,\"ORAJET3640\",{\"isLamination\":\"LaminatDLCLAM\"},1]'
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,\"ORAJET3640\",{},1]'
+# time_ready Python на 0.01 ч ниже: время резки через round, в JS — Math.ceil.
+_ROLL_BASE = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "size_item": 50,
+    "density": 0,
+    "difficulty": 1,
+    "material_id": "ORAJET3640",
+    "mode": 1,
+}
+ROLL_CASES = [
+    ({}, 358.4752, 577.368832, 16.17),
+    ({"printer_code": "Technojet160ECO", "color": "4+0"}, 609.4752, 979.368832, 16.32),
+    (
+        {"printer_code": "Technojet160ECO", "color": "4+0", "lamination_id": "LaminatDLCLAM"},
+        1074.4752,
+        1732.368832,
+        16.33,
+    ),
+    ({"printer_code": "HPLatex335", "color": "4+0"}, 1716.4752, 2750.368832, 16.68),
+    ({"printer_code": "TechnojetXR720", "color": "4+0"}, 624.4752, 1003.368832, 16.32),
+]
+
+
+@pytest.mark.parametrize("extra,cost,price,time_ready", ROLL_CASES)
+def test_roll_wide_print_js(calc, extra, cost, price, time_ready):
+    result = calc.execute({**_ROLL_BASE, **extra})
+    assert result["cost"] == pytest.approx(cost, abs=0.02)
+    assert result["price"] == pytest.approx(price, abs=0.02)
+    assert result["time_ready"] == pytest.approx(time_ready, abs=0.02)
+    assert _cmp(result["time_ready"], time_ready, 0.001), result["time_ready"]
+    assert result["materials"][0]["code"] == "ORAJET3640"
+    for mat in result["materials"]:
+        assert mat.get("code") and mat.get("name") and mat.get("title")
+
+
+def test_roll_lamination_is_wide(calc):
+    """Рулон + ламинация без печати — calcLaminationWide (плёнка LaminatDLCLAM), не листовая."""
+    result = calc.execute({**_ROLL_BASE, "lamination_id": "Laminat32G"})
+    assert result["cost"] == pytest.approx(823.4752, abs=0.02)
+    assert result["price"] == pytest.approx(1330.368832, abs=0.02)
+    codes = [m["code"] for m in result["materials"]]
+    assert "LaminatDLCLAM" in codes
+    assert "Laminat32G" not in codes
+
+
+WIDE_ON_SHEET_MESSAGE = "Широкоформатная печать доступна только на рулонном материале"
+
+
+@pytest.mark.parametrize("printer_code", ["Technojet160ECO", "HPLatex335", "TechnojetXR720"])
+def test_sheet_wide_printer_raises(calc, printer_code):
+    """Лист RAFLACOAT + широкий принтер: в JS calcPrintWide падает, цены резки быть не должно."""
+    with pytest.raises(ValueError, match=f"^{WIDE_ON_SHEET_MESSAGE}$"):
+        calc.execute({**REF_FORM_DEFAULT, "printer_code": printer_code, "color": "4+0"})
+
+
+def test_sheet_wide_printer_http_400():
+    from fastapi.testclient import TestClient
+    from main import app
+
+    body = {**REF_FORM_DEFAULT, "printer_code": "Technojet160ECO", "color": "4+0"}
+    response = TestClient(app).post("/api/v1/calc/sticker", json=body)
+    assert response.status_code == 400, response.text
+    assert response.json()["detail"] == WIDE_ON_SHEET_MESSAGE

@@ -55,6 +55,7 @@ PORTS: Dict[str, str] = {
     "calcAcrylicKeychain": "calculators.keychain",
     "calcLamination": "calculators.lamination",
     "calcLaminationRoll": "common.process_tools:calc_lamination_roll",
+    "calcLaminationWide": "calculators.lamination_wide",
     "calcLaser": "calculators.laser",
     "calcLayoutOnSheet": "common.layout:layout_on_sheet",
     "calcLayoutOnRoll": "common.layout:layout_on_roll",

@@ -379,3 +379,23 @@ def test_oversize_sheet_http_400():
     response = TestClient(app).post("/api/v1/calc/cut_plotter", json=_raflacoat_sheet(400, 400))
     assert response.status_code == 400, response.text
     assert response.json()["detail"] == OVERSIZE_SHEET_MESSAGE
+
+
+def test_roll_length_not_rounded(calc):
+    """Расход рулона ORAJET3640 — 232 мм на ширине 1520, не 0.23 м: от него стоимость плёнки в sticker.
+
+    JS, 14.11.2026: calcSticker без печати costMaterial = 180 × 1520 × 0.232 / 1000 = 63.4752.
+    """
+    result = calc.execute({
+        "quantity": 100,
+        "width": 50,
+        "height": 50,
+        "material_id": "ORAJET3640",
+        "size_item": 50,
+        "difficulty": 1,
+        "mode": 1,
+    })
+    mat = result["materials"][0]
+    assert mat["unit"] == "м"
+    assert mat["size_mm"] == [1520.0, 0.0]
+    assert mat["quantity"] == pytest.approx(0.232, abs=1e-6)

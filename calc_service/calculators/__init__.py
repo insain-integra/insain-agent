@@ -13,6 +13,7 @@ from .cut_guillotine import CutGuillotineCalculator
 from .cut_plotter import CutPlotterCalculator
 from .cut_roller import CutRollerCalculator
 from .lamination import LaminationCalculator
+from .lamination_wide import LaminationWideCalculator
 from .laser import LaserCalculator
 from .milling import MillingCalculator
 from .print_inkjet import PrintInkjetCalculator
@@ -56,6 +57,7 @@ CALCULATORS: Dict[str, BaseCalculator] = {
     "cut_roller": CutRollerCalculator(),
     "milling": MillingCalculator(),
     "lamination": LaminationCalculator(),
+    "lamination_wide": LaminationWideCalculator(),
     "print_sheet": PrintSheetCalculator(),
     "print_laser": PrintLaserCalculator(),
     "print_wide": PrintWideCalculator(),

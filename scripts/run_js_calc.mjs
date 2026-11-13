@@ -35,6 +35,7 @@
  *   js_legacy/calc/calcPresswall.js
  *   js_legacy/calc/calcEmbossing.js
  *   js_legacy/calc/calcAcrilycPrizes.js
+ *   js_legacy/calc/calcLamination.js
  * Прайс legacy:
  *   js_legacy/calc/common.json
  *   js_legacy/material/misc.json
@@ -43,6 +44,7 @@
  *   js_legacy/material/sheet.json
  *   js_legacy/material/roll.json
  *   js_legacy/material/presswall.json
+ *   js_legacy/material/laminat.json
  *   js_legacy/equipment/laser.json
  *   js_legacy/equipment/printer.json
  *   js_legacy/equipment/cutter.json
@@ -53,7 +55,7 @@
  * --data current подменяет числа в памяти из calc_service/data (файлы не пишутся):
  *   common.json, materials/plaque.json, materials/misc.json, materials/mug.json,
  *   materials/hardsheet.json, materials/sheet.json, materials/roll.json,
- *   materials/presswall.json,
+ *   materials/presswall.json, materials/laminat.json,
  *   equipment/laser.json, equipment/printer.json, equipment/cutter.json,
  *   equipment/heatpress.json, equipment/laminator.json, equipment/tools.json,
  *   equipment/plotter.json
@@ -92,6 +94,7 @@ const JS_FILES = [
     'js_legacy/calc/calcPresswall.js',
     'js_legacy/calc/calcEmbossing.js',
     'js_legacy/calc/calcAcrilycPrizes.js',
+    'js_legacy/calc/calcLamination.js',
 ];
 
 const LEGACY_DATA = [
@@ -102,6 +105,7 @@ const LEGACY_DATA = [
     ['sheet', 'js_legacy/material/sheet.json'],
     ['roll', 'js_legacy/material/roll.json'],
     ['presswall', 'js_legacy/material/presswall.json'],
+    ['laminat', 'js_legacy/material/laminat.json'],
     ['laser', 'js_legacy/equipment/laser.json'],
     ['printer', 'js_legacy/equipment/printer.json'],
     ['cutter', 'js_legacy/equipment/cutter.json'],
@@ -282,6 +286,7 @@ const CURRENT_FILES = [
     'calc_service/data/materials/sheet.json',
     'calc_service/data/materials/roll.json',
     'calc_service/data/materials/presswall.json',
+    'calc_service/data/materials/laminat.json',
     'calc_service/data/equipment/laser.json',
     'calc_service/data/equipment/printer.json',
     'calc_service/data/equipment/cutter.json',

@@ -426,7 +426,8 @@ class CutPlotterCalculator(BaseCalculator):
                         code=material.code,
                         name=material.description,
                         title=material.title,
-                        quantity=round(len_material_mm / 1000.0, 2),
+                        # Без округления до 0.01 м: sticker считает по нему стоимость плёнки.
+                        quantity=round(len_material_mm / 1000.0, 6),
                         unit="м",
                         size_mm=roll_size_mm,
                     )

@@ -13,7 +13,9 @@ from typing import Any, Dict, List, Mapping, Optional
 from calculators.base import BaseCalculator, ProductionMode, material_line
 from calculators.cut_plotter import CutPlotterCalculator
 from calculators.lamination import LaminationCalculator
+from calculators.lamination_wide import LaminationWideCalculator
 from calculators.print_laser import PrintLaserCalculator
+from calculators.print_wide import PrintWideCalculator
 from common.helpers import calc_weight
 from common.markups import BASE_TIME_READY, MARGIN_MATERIAL, get_margin
 from common.process_tools import calc_manual_roll
@@ -22,6 +24,7 @@ from materials import get_material
 
 PLOTTER_CODE = "GraphtecCE5000-60"
 PRINTER_CODE = "KMBizhubC220"
+WIDE_PRINTERS = ("Technojet160ECO", "HPLatex335", "TechnojetXR720")
 MOUNTING_FILM_ID = "LGChemLC2000H"
 SHEET_CATEGORIES = ("sheet", "roll")
 
@@ -120,7 +123,11 @@ class StickerCalculator(BaseCalculator):
                     "type": "string",
                     "required": False,
                     "title": "Принтер",
-                    "description": "Код принтера (по умолчанию KMBizhubC220)",
+                    "description": (
+                        "Код принтера (по умолчанию KMBizhubC220). "
+                        "Technojet160ECO, HPLatex335, TechnojetXR720 — широкоформатная печать "
+                        "на рулонном материале, color не нужен"
+                    ),
                 },
                 {
                     "name": "lamination_id",
@@ -195,7 +202,10 @@ class StickerCalculator(BaseCalculator):
                     "difficulty": {"type": "number", "description": "Сложность резки 1..2"},
                     "material_id": {"type": "string", "description": "Код материала"},
                     "color": {"type": "string", "description": "Цветность печати: 4+0, 1+0 и т.д."},
-                    "printer_code": {"type": "string"},
+                    "printer_code": {
+                        "type": "string",
+                        "description": "KMBizhubC220 (лист) или широкоформатный: Technojet160ECO, HPLatex335, TechnojetXR720 (рулон)",
+                    },
                     "lamination_id": {"type": "string"},
                     "is_mounting_film": {"type": "boolean"},
                     "mode": {"type": "integer", "enum": [0, 1, 2]},
@@ -264,10 +274,15 @@ class StickerCalculator(BaseCalculator):
                         size_sheet = (material.sizes[0] if material.sizes else [320, 450])[:2]
                 else:
                     length_m = float(qty)
-                    roll_sizes = material.sizes or [[1000, 0]]
-                    first = roll_sizes[0] if isinstance(roll_sizes[0], list) else roll_sizes
-                    width_mm = float(first[0]) if first else 1000
-                    size_sheet = [width_mm, length_m * 1000] if length_m else [width_mm, 0]
+                    # Ширина рулона — выбранная резкой (у материала может быть несколько).
+                    size_from_cut = m.get("size_mm")
+                    if isinstance(size_from_cut, (list, tuple)) and len(size_from_cut) >= 1:
+                        width_mm = float(size_from_cut[0])
+                    else:
+                        roll_sizes = material.sizes or [[1000, 0]]
+                        first = roll_sizes[0] if isinstance(roll_sizes[0], list) else roll_sizes
+                        width_mm = float(first[0]) if first else 1000
+                    size_sheet = [width_mm, 0.0]
                 break
 
         if num_sheet is None and length_m is None:
@@ -277,9 +292,7 @@ class StickerCalculator(BaseCalculator):
         # 2. Стоимость материала
         cost_material = 0.0
         if is_roll and length_m is not None:
-            roll_sizes = material.sizes or [[1000, 0]]
-            first = roll_sizes[0] if isinstance(roll_sizes[0], list) else roll_sizes
-            width_mm = float(first[0]) if first else 1000
+            width_mm = float(size_sheet[0])
             area_m2 = (width_mm / 1000.0) * length_m
             cost_per_m2 = float(material.get_cost(area_m2 * quantity))
             length_min = getattr(material, "length_min", 0) or 0
@@ -293,14 +306,29 @@ class StickerCalculator(BaseCalculator):
             cost_per_sheet = float(material.get_cost(n))
             cost_material = cost_per_sheet * n
 
-        # 3. Печать (только для листового материала, лазер KMBizhubC220)
+        # 3. Печать: широкоформатная — рулон, n = 1, размер расхода резки; лазер — лист
         cost_print = 0.0
         price_print = 0.0
         time_print = 0.0
         weight_print = 0.0
         print_materials: List[Dict[str, Any]] = []
 
-        if color and not is_roll and num_sheet and size_sheet:
+        if printer_code in WIDE_PRINTERS:
+            if not is_roll:
+                raise ValueError("Широкоформатная печать доступна только на рулонном материале")
+            print_result = PrintWideCalculator().calculate({
+                "quantity": 1,
+                "width": size_sheet[0],
+                "height": size_sheet[1],
+                "material_id": material_id,
+                "printer_code": printer_code,
+                "mode": mode.value,
+            })
+            cost_print = float(print_result.get("cost", 0))
+            price_print = float(print_result.get("price", 0))
+            time_print = float(print_result.get("time_hours", 0))
+            print_materials = print_result.get("materials") or []
+        elif color and not is_roll and num_sheet and size_sheet:
             print_params = {
                 "num_sheet": int(num_sheet),
                 "width": size_sheet[0],
@@ -328,14 +356,23 @@ class StickerCalculator(BaseCalculator):
         weight_lam = 0.0
         lam_materials: List[Dict[str, Any]] = []
 
-        if lamination_id:
+        if lamination_id and is_roll:
+            # Рулон: плёнка широкоформатной ламинации фиксирована, lamination_id её не выбирает.
+            lam_result = LaminationWideCalculator().calculate({
+                "quantity": 1,
+                "width": size_sheet[0],
+                "height": size_sheet[1],
+                "mode": mode.value,
+            })
+            cost_lam = float(lam_result.get("cost", 0))
+            price_lam = float(lam_result.get("price", 0))
+            time_lam = float(lam_result.get("time_hours", 0))
+            weight_lam = float(lam_result.get("weight_kg", 0))
+            lam_materials = lam_result.get("materials") or []
+        elif lamination_id:
             lam_quantity = int(num_sheet) if num_sheet else quantity
             lam_w = size_sheet[0] if size_sheet else w
-            lam_h = size_sheet[1] if size_sheet and not is_roll else h
-            if is_roll and length_m:
-                lam_quantity = 1
-                lam_w = size_sheet[0] if size_sheet else w
-                lam_h = length_m * 1000
+            lam_h = size_sheet[1] if size_sheet else h
             lam_params = {
                 "quantity": lam_quantity,
                 "width": lam_w,
