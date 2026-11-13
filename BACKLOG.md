@@ -85,3 +85,6 @@
 - Из `print-sheet-port-fix`: Раннер `calcCutGuillotine` на входе гильотины листа даёт `time_ready` NaN (из блокера `form-print-sheet`); сверку листа не держит.
 - Из `form-print-sheet`: Раннер `calcCutGuillotine` на входе 50 листов, 210×297 на листе 320×450, поля [3,3,3,3], interval 0, mode 1 падает: `time_ready` не число (NaN). На странице time 0.05, Python time_hours 0.05, cost 67, price 108. Сверку листа не держит. `scripts/run_js_calc.mjs` не правил.
 - Из `form-print-sheet`: Раннер `calcPrintSheet` с `isLamination` падает: `Cannot read properties of undefined (reading 'Laminat')`. На странице https://insain.ru/catalog/listovki-pod-zakaz/ тот же вход считается. `scripts/run_js_calc.mjs` не правил.
+- Из `cut-plotter-sheet-layout`: `print_laser.py`: время `round` вместо JS `Math.ceil` — `poly_sticker` time_hours 0.88 против раннера 0.89, стикерпак 1.79 против 1.8. `price` там ещё `int(...)`, из-за этого стикер VHI80 1307.28 против 1307.5632666666668 (внутри rel 0.001).
+- Из `cut-plotter-sheet-layout`: Вес эпоксидки в `common/process_tools.py` округляется `round`: стикерпак 0.19 кг против раннера 0.2. На цену не влияет.
+- Из `cut-plotter-sheet-layout`: `calcCutPlotter` в JS не заполняет `weight` (раннер 0); Python на RAFLACOAT считает 0.0475 кг. В эталон резки вес не входил.

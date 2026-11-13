@@ -35,11 +35,10 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **18**. В работе/ревью: `cut-plotter-sheet-layout.md`, `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **17**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
-| `cut-plotter-sheet-layout.md` | выкатка |
 | `dashboard-harness.md` | ревью |
 | `ezfc-options-source-reset.md` | черновик |
 | `form-button-pins.md` | черновик |
@@ -66,8 +65,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-14 — cut-plotter-sheet-layout
 - 2026-11-14 — form-print-sheet
 - 2026-11-13 — print-sheet-margins-minus-one
 - 2026-11-13 — print-sheet-port-fix
 - 2026-11-12 — form-flag
-- 2026-11-12 — flag-materials-size-mm
