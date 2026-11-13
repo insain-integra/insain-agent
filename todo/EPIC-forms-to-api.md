@@ -29,6 +29,7 @@
 - `todo/form-print-offset.md` — копия формы 82, slug `print_offset` (`calcPrintOffsetPromo`)
 - `todo/form-print-roll.md` — копия формы 23, slug `print_roll` (форма CalcPrintWide)
 - `todo/form-laser.md` — копия формы 28, slug `laser`
+- `todo/cut-plotter-sheet-layout.md` — предпосылка `form-sticker`: раскладка листа в `cut_plotter.py`, снятие `ceil` цены `sticker` и обновление эталонов `50×50 VHI80` / `poly_sticker`
 - `todo/form-sticker.md` — копия формы 22, slug `sticker`
 
 ## Порядок
