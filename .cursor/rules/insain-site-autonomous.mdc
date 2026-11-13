@@ -28,13 +28,15 @@ alwaysApply: false
 - Деплой API — только по skill deploy-api: ветка main, bash infra/deploy.sh
   (ворота и автооткат внутри). Ручной git pull и docker compose для выкатки API не использовать
 - Деплой плагина через wp plugin install (см. выше)
+- Создание дубля формы ezFC и черновика/приватного товара для отладки копии по skill `ezfc-form-to-api` (если товар закрыт от гостей со статусом `draft`/`private`, а боевая форма не меняется)
 - Проверка страниц через Browser MCP; Network: /api/v1/
 - wp cache flush, wp plugin list/activate (через sudo -u www-data)
 
 ## Перед массовыми правками контента WordPress
 - Бэкап БД: sudo -u www-data wp db export /tmp/insain-db.sql --path=/var/www/insain.ru
 
-## Спроси подтверждение у пользователя
+## Спроси подтверждение у пользователя (через AskQuestion)
+- Переключение живой боевой формы или правка опубликованных товаров/страниц вне списка выше
 - Опасные действия и git push — списки в AGENTS.md, разделы «Запреты» и «Git»
 - Любое изменение прода вне раздела «Делай самостоятельно»
 

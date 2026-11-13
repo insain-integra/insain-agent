@@ -52,7 +52,7 @@ def test_waiting_status_points_to_open_task():
 
 
 def test_todo_files_tracked_by_git():
-    """Файл задачи без коммита есть только в одной папке: его копия в worktree расходится с оригиналом."""
+    """Новый файл задачи в todo/ рекомендуется коммитить до запуска ветки/последовательности."""
     try:
         out = subprocess.run(
             ["git", "-c", "core.quotepath=off", "ls-files", "--others", "--exclude-standard", "--", "todo"],
@@ -66,8 +66,7 @@ def test_todo_files_tracked_by_git():
         pytest.skip("git недоступен или это не репозиторий")
     bad = [ln for ln in out.splitlines() if ln.endswith(".md")]
     assert not bad, (
-        "не закоммичены: " + ", ".join(bad) + " — файл задачи коммитится в main до создания worktree "
-        "(docs/agents/workflow.md, «Ветки и папки»)"
+        "не закоммичены в todo/: " + ", ".join(bad) + " — закоммитьте или добавьте в ветку задачи"
     )
 
 

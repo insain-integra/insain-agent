@@ -16,9 +16,21 @@
 
     Ожидается: файл есть. Боевая форма пока считает старым JS — файл без `read_file` ни на что не влияет.
 
-Спросить человека: переключение боевой формы `<id>` на `forms/<slug>.js`. Без ответа «да» дальше не идти.
+Запросить подтверждение переключения боевой формы `<id>` на `forms/<slug>.js` через `AskQuestion` (готовые варианты: «Переключить форму и проверить (Рекомендуется)» / «Отложить переключение»). Без подтверждения дальше не идти.
 
-18. В админке ezFC (Browser MCP), форма `<id>`. Сначала тот же блок результата, что уже на копии и у формы 79 (раздел «Блок результата» в `docs/ezfc-api-migration.md`): группы цены, срока и материалов. Id полей ввода не менять, форму не импортировать. Затем у элемента расчёта из шага 5 включить `read_file` (`custom_calculation_function_read_file` = 1), путь `custom_calculation_function_filename`:
+18. В админке ezFC (Browser MCP), форма `<id>`. Сначала тот же блок результата, что уже на копии и у формы 79 (раздел «Блок результата» в `docs/ezfc-api-migration.md`): группы цены, срока и материалов. Id полей ввода не менять, форму не импортировать. До `read_file` — флаги цены, SQL через файл, `f_id` = `<id>`:
+
+```sql
+SELECT JSON_UNQUOTE(JSON_EXTRACT(data, '$.name')) AS name,
+  JSON_UNQUOTE(JSON_EXTRACT(data, '$.hidden')) AS hidden,
+  JSON_UNQUOTE(JSON_EXTRACT(data, '$.calculate_when_hidden')) AS calc_hidden
+FROM wp_insain_ezfc_forms_elements
+WHERE f_id = <id>
+  AND JSON_UNQUOTE(JSON_EXTRACT(data, '$.name')) IN
+  ('sbtPriceTotalManager','sbtPriceManager','sbtPriceTotalDiscount','sbtPriceDiscount');
+```
+
+Ожидается: у `sbtPriceTotalDiscount` и `sbtPriceDiscount` `hidden` = 1 и `calc_hidden` = 1; у менеджерских полей `hidden` = 0. У скидки `calc_hidden` не 1 — стоп, включить «считать, когда скрыто». Затем у элемента расчёта из шага 5 включить `read_file` (`custom_calculation_function_read_file` = 1), путь `custom_calculation_function_filename`:
 
     ```text
     {{abspath}}wp-content/plugins/insain-calc-bridge/forms/<slug>.js
