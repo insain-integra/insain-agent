@@ -35,7 +35,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **18**. В работе/ревью: `dashboard-harness.md`, `sticker-print-wide.md`. Заблокировано: `form-sticker.md`, `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **17**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -45,7 +45,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-laser.md` | черновик |
 | `form-print-offset.md` | черновик |
 | `form-print-roll.md` | черновик |
-| `form-sticker.md` | заблокировано: ждёт todo/sticker-print-wide.md |
+| `form-sticker.md` | черновик |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
@@ -53,7 +53,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
 | `smartcaptcha-replace.md` | черновик |
 | `spam-users-cleanup.md` | заблокировано: ждёт todo/registration-harden.md |
-| `sticker-print-wide.md` | выкатка |
 | `supplier-catalog-load.md` | заблокировано: ждёт todo/supplier-parser.md |
 | `supplier-old-cleanup.md` | черновик |
 | `supplier-parser.md` | черновик |
@@ -66,8 +65,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-14 — sticker-print-wide
 - 2026-11-14 — cut-plotter-sheet-layout
 - 2026-11-14 — form-print-sheet
 - 2026-11-13 — print-sheet-margins-minus-one
 - 2026-11-13 — print-sheet-port-fix
-- 2026-11-12 — form-flag

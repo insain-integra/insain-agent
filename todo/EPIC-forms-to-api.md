@@ -30,8 +30,8 @@
 - `todo/form-print-roll.md` — копия формы 23, slug `print_roll` (форма CalcPrintWide)
 - `todo/form-laser.md` — копия формы 28, slug `laser`
 - `cut-plotter-sheet-layout` (закрыто 2026-11-14, `docs/history/log.md`) — предпосылка `form-sticker`: раскладка листа в `cut_plotter.py`, снятие `ceil` цены `sticker` и обновление эталонов `50×50 VHI80` / `poly_sticker`
-- `todo/sticker-print-wide.md` — предпосылка `form-sticker`: порт `calcPrintWide` / `calcLaminationWide` в `sticker.py`, модуль `lamination_wide`
-- `todo/form-sticker.md` — копия формы 22, slug `sticker` (ждёт `sticker-print-wide`)
+- `sticker-print-wide` (закрыто 2026-11-14, `docs/history/log.md`) — предпосылка `form-sticker`: порт `calcPrintWide` / `calcLaminationWide` в `sticker.py`, модуль `lamination_wide`
+- `todo/form-sticker.md` — копия формы 22, slug `sticker`
 
 ## Порядок
 

@@ -88,3 +88,6 @@
 - Из `cut-plotter-sheet-layout`: `print_laser.py`: время `round` вместо JS `Math.ceil` — `poly_sticker` time_hours 0.88 против раннера 0.89, стикерпак 1.79 против 1.8. `price` там ещё `int(...)`, из-за этого стикер VHI80 1307.28 против 1307.5632666666668 (внутри rel 0.001).
 - Из `cut-plotter-sheet-layout`: Вес эпоксидки в `common/process_tools.py` округляется `round`: стикерпак 0.19 кг против раннера 0.2. На цену не влияет.
 - Из `cut-plotter-sheet-layout`: `calcCutPlotter` в JS не заполняет `weight` (раннер 0); Python на RAFLACOAT считает 0.0475 кг. В эталон резки вес не входил.
+- Из `sticker-print-wide`: `sticker.py`, рулон с `length_min > 0`: стоимость плёнки умножается на ширину в метрах, в JS — в мм (Python в 1000 раз ниже). ORAJET3640 не задет (`length_min` 0).
+- Из `sticker-print-wide`: `print_wide.py`: время подготовки `time_prepare * max(1, mode)`, в JS `timePrepare * modeProduction` — расхождение в режиме 0.
+- Из `sticker-print-wide`: JS `calcLaminationWide` не задаёт `timeReady` (0); в `lamination_wide` — `time_hours` + базовый срок, отмечено в docstring.
