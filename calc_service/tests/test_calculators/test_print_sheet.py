@@ -190,6 +190,30 @@ EXPECTED_MARGINS_DEFAULT = {
     "price": 3214.3125999999997,
     "time_ready": 8.6,
 }
+
+# JS, 13.11.2026 — дефолт боевой формы 6: 100 шт, А4 297×210, 4+0, VHI80,
+# поля [2,2,2,2], интервал 4, без ламинации, mode 1.
+# node scripts/run_js_calc.mjs calcPrintSheet --data current --args
+# '[100,[297,210],"4+0",[2,2,2,2],4,"VHI80",{},1]'
+# price и time_ready совпали с боевым API.
+# weight_kg — вес изделий. JS 0.99792 (лист с обрезью). Верный вес — Python, решение 11.11.2026.
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "width": 297,
+    "height": 210,
+    "material_id": "VHI80",
+    "color": "4+0",
+    "margins": [2, 2, 2, 2],
+    "interval": 4,
+    "mode": 1,
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 1951.1725,
+    "price": 3214.3125999999997,
+    "time_hours": 0.32,
+    "time_ready": 8.6,
+    "weight_kg": 0.4989599999999999,
+}
 EXPECTED_MATERIAL = {
     "code": "PaperCoated300M",
     "name_substring": "Титан DIGITAL мелованная",  # часть названия
@@ -382,6 +406,35 @@ def test_expected_values_print_sheet_margins_default(calc):
     assert r["time_ready"] == pytest.approx(e["time_ready"], rel=rel), (
         f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
     )
+
+
+def test_form_default_print_sheet(calc):
+    """JS, 13.11.2026: дефолт формы 6, 100 шт, А4, VHI80, интервал 4. Вес — изделие."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    rel = REF_REL_TOL
+    assert r["cost"] == pytest.approx(e["cost"], rel=rel), (
+        f"cost: got {r['cost']}, expected ~{e['cost']}"
+    )
+    assert r["price"] == pytest.approx(e["price"], rel=rel), (
+        f"price: got {r['price']}, expected ~{e['price']}"
+    )
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=rel), (
+        f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
+    )
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=rel), (
+        f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
+    )
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=rel), (
+        f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
+    )
+    mats = r["materials"]
+    assert mats, "ожидается материал в результате"
+    mat = mats[0]
+    assert mat.get("code") and mat.get("name") and mat.get("title")
+    assert "Снегурочка" in mat["name"], mat["name"]
+    assert mat["size_mm"] == [297.0, 420.0], mat.get("size_mm")
+    assert mat["quantity"] == pytest.approx(105), mat.get("quantity")
 
 
 @pytest.fixture(scope="module")

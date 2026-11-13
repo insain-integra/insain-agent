@@ -1,6 +1,6 @@
 # form-print-sheet
 
-Статус: заблокировано: ждёт todo/print-sheet-margins-minus-one.md
+Статус: закрытие
 Сложность: средняя
 Implementer: Grok 4.7
 Reviewer: Auto
@@ -45,18 +45,18 @@ Site ops: Grok 4.7
 
 ## Критерии приёмки
 
-- [ ] `python scripts/js_port_gaps.py calcPrintSheet` — в блоке `calcPrintSheet` строка `нет в Python:` пустая или каждая позиция уже есть в `scripts/js_port_gaps_allowed.txt`.
-- [ ] Раннер и `POST https://insain.ru/api/v1/calc/print_sheet` на эталоне и на дефолте формы 6: `price` abs ≤ 0.02 и rel ≤ 0.001, `time_ready` rel ≤ 0.001. Иначе стоп, форму не дублировать.
-- [ ] `python -m pytest calc_service/tests/test_calculators/test_print_sheet.py calc_service/tests/test_wp_plugin_forms.py -q` — `passed`, `failed` нет. В тесте есть `REF_FORM_DEFAULT` с пометкой `# JS, ДД.ММ.ГГГГ`.
-- [ ] `Select-String -Path wp-plugin\forms\print_sheet.js -Pattern "calcApi\('print_sheet'|syncUrl\(|showResult\("` — все три вхождения есть.
-- [ ] Копия не на витрине: `wp post get PRODUCT --field=post_status` — `draft` или `private`; `curl.exe` без cookies на `/?post_type=product&p=PRODUCT` — `404`.
-- [ ] На копии под админом эталон даёт `POST /api/v1/calc/print_sheet` → 200. Цена на странице равна `price` API с округлением `showResult`.
-- [ ] URL обновляется GET-именами формы. Ссылка с этими GET открывает копию с теми же значениями и той же ценой.
+- [x] `python scripts/js_port_gaps.py calcPrintSheet` — в блоке `calcPrintSheet` строка `нет в Python:` пустая или каждая позиция уже есть в `scripts/js_port_gaps_allowed.txt`.
+- [x] Раннер и `POST https://insain.ru/api/v1/calc/print_sheet` на эталоне и на дефолте формы 6: `price` abs ≤ 0.02 и rel ≤ 0.001, `time_ready` rel ≤ 0.001. Иначе стоп, форму не дублировать.
+- [x] `python -m pytest calc_service/tests/test_calculators/test_print_sheet.py calc_service/tests/test_wp_plugin_forms.py -q` — `passed`, `failed` нет. В тесте есть `REF_FORM_DEFAULT` с пометкой `# JS, ДД.ММ.ГГГГ`.
+- [x] `Select-String -Path wp-plugin\forms\print_sheet.js -Pattern "calcApi\('print_sheet'|syncUrl\(|showResult\("` — все три вхождения есть.
+- [x] Копия не на витрине: `wp post get PRODUCT --field=post_status` — `draft` или `private`; `curl.exe` без cookies на `/?post_type=product&p=PRODUCT` — `404`.
+- [x] На копии под админом эталон даёт `POST /api/v1/calc/print_sheet` → 200. Цена на странице равна `price` API с округлением `showResult`.
+- [x] URL обновляется GET-именами формы. Ссылка с этими GET открывает копию с теми же значениями и той же ценой.
 
 ## Проверки
 
-- [ ] `python scripts/dev.py check` — код выхода 0
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `python scripts/dev.py check` — код выхода 0
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
 ## Риски
 
@@ -93,6 +93,25 @@ Site ops: Grok 4.7
 Следующая сессия: Analyst. Модели Analyst в шапке нет.
 
 13.11.2026 — Analyst, Grok 4.7 — заведена `todo/print-sheet-margins-minus-one.md` на main; статус ждёт её; копию формы не делал — дальше Implementer `print-sheet-margins-minus-one`
+13.11.2026 — человек — `print-sheet-margins-minus-one` закрыт и на проде (`273902c`), статус `черновик` — дальше Implementer (Grok 4.7)
+13.11.2026 — Implementer, Grok 4.7 — сверка сошлась, `print_sheet.js` и `REF_FORM_DEFAULT`; дубль не делал — дальше человек: «да» на копию, затем Site ops (Grok 4.7)
+13.11.2026 — человек — «да» на дубль формы 6 — дальше Site ops (Grok 4.7)
+13.11.2026 — Site ops, Grok 4.7 — копия 96 на черновике 2586890, дефолт 3300 руб. — дальше человек: приёмка копии, затем Reviewer (Auto)
+13.11.2026 — человек — копия формы 96 на черновике 2586890 принята — дальше Reviewer (Auto)
+13.11.2026 — Reviewer, Auto — принято (diff `print_sheet.js`, `test_print_sheet.py`) — дальше человек: слияние
+14.11.2026 — человек — принято — закрытие
+
+## Ревью 1
+
+принято
+
+Смотрел только diff: `wp-plugin/forms/print_sheet.js` (untracked) и `calc_service/tests/test_calculators/test_print_sheet.py`. Настройки копии на проде не перечитывал; критерии копии закрыты приёмкой человека.
+
+- `print_sheet.js`: есть `syncUrl(`, `calcApi('print_sheet'`, `showResult(`; своих формул цены и DOM-чтения нет; id — боевой формы 6; ключи URL — имена элементов; в API — коды/размеры/`margins`/`interval`/опции; mode 0 не отбрасывается; галка полей → `margins: -1` / `interval: 0`.
+- `test_print_sheet.py`: есть `REF_FORM_DEFAULT` с пометкой `# JS, 13.11.2026`, тело совпадает с дефолтом формы 6 (VHI80, 297×210, interval 4), ожидания price/time_ready/материал; `test_form_default_print_sheet` падал бы без эталона.
+- Проверка: `python -m pytest calc_service/tests/test_calculators/test_print_sheet.py::test_form_default_print_sheet calc_service/tests/test_wp_plugin_forms.py -q` — 4 passed.
+- Желательно (не держит): в «Результат» ещё «копия не принята» и нет строки «Состав пакета» — обновить при слиянии; коммита на ветке пока нет.
+- Замечание Site ops про `numCrease`/`numHole` в URL при галках снятых — цена не меняется, критерий GET закрыт приёмкой; не блокер.
 
 ## Найдено вне scope
 
@@ -101,17 +120,11 @@ Site ops: Grok 4.7
 
 ## Результат
 
-- Ветка, PR или коммит: `task/form-print-sheet` в worktree `D:\Projects\insain-agent-form-print-sheet`. Коммита этой сессии нет.
-- Сделано: повторная сверка после `print-sheet-port-fix`. Порт по пропускам полный (`calcCutRoller`, `calcPrintLaser` уже в `scripts/js_port_gaps_allowed.txt`). Эталон, mode 0 эталона и дефолт формы 6: price и time_ready раннера совпали с `POST https://insain.ru/api/v1/calc/print_sheet`. Материалы дефолта совпали. Поля формы 6 и `get_value_from` в `cjsCalc` 104 сверены с живой базой и страницей.
-- Чем проверено: `python scripts/js_port_gaps.py calcPrintSheet`; раннер `calcPrintSheet` на эталоне, mode 0 эталона, дефолте, дефолте mode 0, нумерации и `margins -1`; те же тела на боевой API; консоль страницы https://insain.ru/catalog/listovki-pod-zakaz/ — дефолт и ламинация `Laminat32G`. `python scripts/dev.py check` — код выхода 0 (546 + 81 passed). Код калькулятора и формы не менялся; check пересобрал строку статуса в `docs/dashboard.md`.
-- Не сделано и почему: `REF_FORM_DEFAULT`, строка в `docs/js-runner-cases.md`, `print_sheet.js`, дубль формы. Стоп на «белых полях»: галка меняет цену на боевой странице, API — нет. Копию не делать, пока предпосылка не на проде.
-- Числа, которые сошлись 13.11.2026: эталон mode 1 — price 5266.918472727273, time_ready 10.2; эталон mode 0 — price 4864.332072727273, time_ready 25.02; дефолт формы 6 — price 3214.3125999999997, time_hours 0.32, time_ready 8.6, материал «Снегурочка 80гр А3» 297×420, qty 105 (вес JS 0.99792, Python 0.49896 — не сверялся). Дефолт mode 0 — price 2811.7262, time_ready 24.22. Нумерация на дефолте — price 3314.3125999999997, time_ready 8.65.
-- Числа блокера («белые поля» включены): раннер `margins -1`, interval 0 — price 1811.964386666667, time_hours 0.21, time_ready 8.4. API и локальный Python с `margins: -1` — price 3214.3125999999997, time_ready 8.6, qty 105. rel цены 0.774, rel срока 0.0238.
-- Ламинация на дефолте (не стоп: rel цены 0.000084): страница price 9034.391462564103, time_ready 9.44, бумага 108, плёнка 92.4 м 330×0; API price 9035.15392, time_ready 9.44, те же строки. Раннер на этом входе падает — строка в «Найдено вне scope».
-- Команда раннера эталона: `node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[210,297],\"4+4\",[0,0,0,0],0,\"PaperCoated300M\",{},1]'`
-- Команда раннера дефолта формы 6: `node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[297,210],\"4+0\",[2,2,2,2],4,\"VHI80\",{},1]'`
-- Команда раннера «белых полей»: `node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[297,210],\"4+0\",-1,0,\"VHI80\",{},1]'`
-- Поля формы 6: qty `numN` 98 = 100; формат `dpdFormat` 99 индекс 1, значение `297,210` (свой размер — значение `0`, тогда `numW` 100 = 210 и `numH` 101 = 297); цвет `dpdColor` 102 = `4+0`; материал `dpdMaterial` 103 = `VHI80`; «белые поля» `ckbMargin` 419 сняты → margins `[2,2,2,2]`, interval 4, включены → margins `-1`, interval 0; ламинация `rdoLaminat` 401 = 0, при 1 код из `dpdRollLaminat` 400, при 2 из `dpdPackLaminat` 402; чекбоксы 661/663/666/667/664/668 сняты, `numCrease` 665 = 1, `numHole` 669 = 1; режим `rdoModeProduction` 519 = 1. Файл `fluAtrwork` 614 в API и в URL не входит. Принтера на форме нет, JS и Python по умолчанию `KMBizhubC220`.
-- Эталон для шагов 13 и 20, когда блокер снят: дефолт формы (его можно ввести на странице). `REF_PARAMS` 210×297 с полями `[0,0,0,0]` форма не набирает: «белые поля» дают только `[2,2,2,2]`/interval 4 или `-1`/interval 0.
-- Строка в «Состав пакета» (в `todo/forms-batch-switch.md` не писать, пока та задача `в работе`): нет, копия не делалась.
-- Требуется решение: предпосылка на поля принтера при `margins == -1`. Калькулятор в этой задаче не править.
+- Было / стало: файла `wp-plugin/forms/print_sheet.js` не было → custom JS боевой формы 6 (`calcApi('print_sheet')`, `syncUrl`, `showResult`). На проде форма 6 без копии → копия 96 `CalcPrint duplicate` на черновике товара 2586890, JS копии через `calcApi`, GET проставлен. Боевая форма 6 по-прежнему на `calcPrintSheet`. Строки пакета для формы 6 не было → строка копии 96 / черновика 2586890 в «Состав пакета».
+- Ветка, PR или коммит: `task/form-print-sheet` в worktree `D:\Projects\insain-agent-form-print-sheet`.
+- Сделано: сверка после `print-sheet-margins-minus-one`. Порт полный. Эталон и дефолт формы 6 совпали с боевым API. `wp-plugin/forms/print_sheet.js` на id боевой формы 6. `REF_FORM_DEFAULT` в тесте. Строка раннера дефолта — в `docs/js-runner-cases.md`. Копия 96 на черновике 2586890 принята.
+- Чем проверено: `python scripts/js_port_gaps.py calcPrintSheet`; раннер и `POST https://insain.ru/api/v1/calc/print_sheet` на эталоне и дефолте (rel 0); pytest `test_print_sheet.py` + `test_wp_plugin_forms.py`; `Select-String` на `syncUrl`/`calcApi`/`showResult`; `python scripts/dev.py check` — 0. На копии: draft 404 без cookies; дефолт 3300 руб.; GET и перезагрузка.
+- Не сделано и почему: выкладка плагина и боевая форма 6 — вне scope. `wp litespeed-purge all` ответил `Got 400`; `wp cache flush` — `Success`.
+- Как откатить: черновик 2586890 и форму 96 удалять только после отдельного «да». Бэкап: `/tmp/ezfc-copy-96-20261112-193949.json` на VDS.
+- Строка в «Состав пакета»: `| 6 CalcPrint | `print_sheet` | `/catalog/listovki-pod-zakaz/` | 96 / 2586890 (draft) | копия принята 13.11.2026, `form-print-sheet` |`
+- Требуется решение: —
