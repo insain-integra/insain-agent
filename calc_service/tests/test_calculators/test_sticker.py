@@ -101,18 +101,21 @@ REF_PARAMS = {
     "color": "4+0",
     "mode": 1,
 }
-# JS, 05.11.2026 — ceil снят, как в JS. Лазерная печать наклеек.
+# JS, 14.11.2026 — 100 шт 50×50 VHI80, 4+0, mode=1. 4 листа [297, 420].
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,"VHI80",{"isPrint":{"printerID":"KMBizhubC220","color":"4+0"}},1]'
+# price раннера 1307.5632666666668; Python 1307.28 — int(price) в print_laser, rel=0.001 проходит.
 EXPECTED_REF = {
-    "cost": 689.89,
-    "price": 1107,
-    "time_hours": 0.34,
-    "time_ready": 16.34,
+    "cost": 814.0516666666667,
+    "price": 1307.5632666666668,
+    "time_hours": 0.39,
+    "time_ready": 16.39,
     "weight_kg": 0.03,
 }
 EXPECTED_MATERIAL = {
     "code": "VHI80",
     "name_substring": "Снегурочка",
-    "quantity_approx": 1,
+    "quantity_approx": 4,
+    "size_mm": [297.0, 420.0],
 }
 
 
@@ -180,3 +183,43 @@ def test_expected_values_sticker(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+    assert mat.get("size_mm") == em["size_mm"], mat.get("size_mm")
+
+
+# JS, 14.11.2026 — дефолт формы 22: 100 шт 50×50 RAFLACOAT, без печати, 3 листа [320, 450].
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,"RAFLACOAT",{},1]'
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "RAFLACOAT",
+    "size_item": 50,
+    "mode": 1,
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 411.9,
+    "price": 662.134,
+    "time_hours": 0.2,
+    "time_ready": 16.2,
+    "weight_kg": 0.05,
+}
+
+
+def test_form_default_raflacoat(calc):
+    """Дефолт формы 22: RAFLACOAT без печати."""
+    result = calc.execute(REF_FORM_DEFAULT)
+    expected = EXPECTED_FORM_DEFAULT
+    rel = 0.001
+    assert _cmp(result["cost"], expected["cost"], rel), result["cost"]
+    assert _cmp(result["price"], expected["price"], rel), result["price"]
+    assert _cmp(result["time_hours"], expected["time_hours"], rel), result["time_hours"]
+    assert _cmp(result["time_ready"], expected["time_ready"], rel), result["time_ready"]
+    assert _cmp(result["weight_kg"], expected["weight_kg"], rel), result["weight_kg"]
+    materials = result["materials"]
+    assert materials, "ожидается материал"
+    mat = materials[0]
+    assert mat["code"] == "RAFLACOAT"
+    assert mat["quantity"] == 3
+    assert mat["unit"] == "лист"
+    assert mat["size_mm"] == [320.0, 450.0]
+    assert "title" in mat

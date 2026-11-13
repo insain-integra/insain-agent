@@ -1,6 +1,6 @@
 # cut-plotter-sheet-layout
 
-Статус: черновик
+Статус: выкатка
 Сложность: низкая
 Implementer: Grok 4.7
 Reviewer: Auto
@@ -61,16 +61,16 @@ Site ops: Grok 4.7
 
 ## Критерии приёмки
 
-- [ ] `node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[100,[50,50],50,0,1,\"RAFLACOAT\",{},1]'` и `node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,\"RAFLACOAT\",{},1]'` — возвращают JSON без ошибок.
-- [ ] `python -m pytest calc_service/tests/test_calculators/test_cut_plotter.py calc_service/tests/test_calculators/test_sticker.py calc_service/tests/test_calculators/test_poly_sticker.py calc_service/tests/test_calculators/test_poly_sticker_pack.py calc_service/tests/test_calculators/test_keychain.py -q` — все `passed`, в `test_sticker.py` есть `REF_FORM_DEFAULT` и обновлённый `VHI80` с `# JS, ДД.ММ.ГГГГ`.
-- [ ] Откат `cut_plotter.py` и `sticker.py` (`git stash push -- calc_service/calculators/cut_plotter.py calc_service/calculators/sticker.py`) роняет новые кейсы `test_cut_plotter.py` / `test_sticker.py`, старые эталоны `Avery500c` проходят; после `git stash pop` всё `passed`.
-- [ ] `python scripts/dev.py check` — код выхода 0.
+- [x] `node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[100,[50,50],50,0,1,\"RAFLACOAT\",{},1]'` и `node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,\"RAFLACOAT\",{},1]'` — возвращают JSON без ошибок.
+- [x] `python -m pytest calc_service/tests/test_calculators/test_cut_plotter.py calc_service/tests/test_calculators/test_sticker.py calc_service/tests/test_calculators/test_poly_sticker.py calc_service/tests/test_calculators/test_poly_sticker_pack.py calc_service/tests/test_calculators/test_keychain.py -q` — все `passed`, в `test_sticker.py` есть `REF_FORM_DEFAULT` и обновлённый `VHI80` с `# JS, ДД.ММ.ГГГГ`.
+- [x] Откат `cut_plotter.py` и `sticker.py` (`git stash push -- calc_service/calculators/cut_plotter.py calc_service/calculators/sticker.py`) роняет новые кейсы `test_cut_plotter.py` / `test_sticker.py`, старые эталоны `Avery500c` проходят; после `git stash pop` всё `passed`.
+- [x] `python scripts/dev.py check` — код выхода 0.
 - [ ] После деплоя на прод (`deploy-api`): `POST https://insain.ru/api/v1/calc/sticker` на `RAFLACOAT` и `VHI80 4+0` совпадает с JS-раннером (`abs <= 0.02`, `rel <= 0.001`), в `materials[0]` есть `size_mm` (`[320, 450]` и `[297, 420]`).
 
 ## Проверки
 
-- [ ] `python scripts/dev.py check` — код выхода 0
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `python scripts/dev.py check` — код выхода 0
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
 ## Риски
 
@@ -85,19 +85,40 @@ Site ops: Grok 4.7
 ## Журнал передач
 
 14.11.2026 — аналитик — оформлена предпосылка по блокеру `form-sticker` — дальше Implementer (Grok 4.7)
+14.11.2026 — Implementer (Grok 4.7) — листовая раскладка, эталоны раннера 14.11.2026, pytest 43 passed, шаг 9: без правки 3 failed / Avery passed — дальше Reviewer (Auto)
+14.11.2026 — Reviewer (Auto) — принято по working tree: локальные критерии закрыты, прод-критерий открыт для Site ops — дальше человек (слияние)
+14.11.2026 — человек — принято, слияние и выкатка — дальше Site ops
+
+## Ревью 1
+
+принято
+
+Сверка с working tree (`git diff`, коммита нет) и разделом «Результат»; модель сессии Auto ≠ Implementer Grok 4.7.
+
+| Критерий | Итог |
+| --- | --- |
+| Раннер `calcCutPlotter` / `calcSticker` RAFLACOAT | OK: JSON без ошибок; cut `cost 357` `price 571` `time_ready 16.2`; sticker `cost 411.9` `price 662.134` `time_ready 16.2` |
+| pytest + эталоны `# JS, 14.11.2026` | OK: 43 passed; `REF_FORM_DEFAULT`, обновлённый VHI80, листовой RAFLACOAT с `size_mm` |
+| Шаг 9 (stash калькуляторов) | OK: без правки упали новые кейсы (sheet/form/VHI80), Avery500c прошли; после `stash pop` снова passed |
+| `python scripts/dev.py check` | OK: код 0 (перепрогон Reviewer) |
+| Прод deploy-api + smoke POST `/api/v1/calc/sticker` | не закрыт — Site ops после слияния в `main` |
+
+Diff в scope: листовой перебор `material.sizes`, перестановка margins `[L,T,R,B]→[T,R,B,L]`, `cost=ceil(raw)`, `price` от raw, `size_mm` через `material_line`, у sticker снят `ceil(price_total)` и берётся `size_mm` из резки, раннер + plotter.json, эталоны соседей, `js-runner-cases.md`. `layout.py` и JSON цен не тронуты. Остатки `print_laser` / вес эпоксидки — в «Найдено вне scope», не блокеры.
 
 ## Найдено вне scope
 
-- <что, где, почему важно — разбирает человек при закрытии>
+- `print_laser.py`: время `round` вместо JS `Math.ceil` — `poly_sticker` time_hours 0.88 против раннера 0.89, стикерпак 1.79 против 1.8. `price` там ещё `int(...)`, из-за этого стикер VHI80 1307.28 против 1307.5632666666668 (внутри rel 0.001).
+- Вес эпоксидки в `common/process_tools.py` округляется `round`: стикерпак 0.19 кг против раннера 0.2. На цену не влияет.
+- `calcCutPlotter` в JS не заполняет `weight` (раннер 0); Python на RAFLACOAT считает 0.0475 кг. В эталон резки вес не входил.
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Период: <ГГГГ-ММ-ДД — ГГГГ-ММ-ДД>
-- Часы человека: <оценка N ч — 1 ч на коммит задачи | N ч факт>
-- Работа агентов: <N сессий; модели>
-- Было / стало: <одна строка с числами — для docs/history/log.md>
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+- Ветка, PR или коммит: ветка `task/cut-plotter-sheet-layout`, коммита нет
+- Период: 2026-11-14 — 2026-11-14
+- Часы человека: оценка 1 ч на коммит задачи
+- Работа агентов: 1 сессия; Grok 4.7
+- Было / стало: листовая резка клала изделия на max_plotter [603, 5000] без size_mm; стало — лист материала, RAFLACOAT 3×[320, 450] price 662.134, VHI80 4+0 4×[297, 420] price 1307.56
+- Сделано: раннер считает calcCutPlotter, calcSticker, calcPolySticker (файл нужен, чтобы снять эталоны соседей) и подмешивает plotter.json; листовая ветка перебирает material.sizes с перестановкой margins, cost = ceil от сырой суммы, price от суммы до ceil; size_mm в materials; у sticker снят ceil цены. time_hours резки оставлен round: на листовых кейсах он совпал с JS (0.2 и 0.39), ceil поднял бы Avery500c 100 шт с 0.22 до 0.23 и уронил эталон 0.21 при допуске 5%.
+- Чем проверено: раннер `--data current` 14.11.2026; pytest четырёх калькуляторов и keychain — 43 passed; шаг 9 — без правки cost резки RAFLACOAT 294.4296, стикер VHI80 689.891, дефолт формы 312.7296, Avery passed (18 passed, 3 failed), после pop снова passed; `python scripts/dev.py check` — код 0.
+- Не сделано и почему: деплой API и smoke на проде — Site ops после ревью и слияния в main. Коммит не делался.
+- Требуется решение: принять diff и слить; прод выкатывает Site ops.

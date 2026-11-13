@@ -25,6 +25,9 @@
  *   js_legacy/calc/calcPrintWide.js
  *   js_legacy/calc/calcCutGuillotine.js
  *   js_legacy/calc/calcCutRoller.js
+ *   js_legacy/calc/calcCutPlotter.js
+ *   js_legacy/calc/calcSticker.js
+ *   js_legacy/calc/calcPolySticker.js
  *   js_legacy/calc/calcProcessTools.js
  *   js_legacy/calc/calcFlag.js
  *   js_legacy/calc/calcPennant.js
@@ -46,12 +49,14 @@
  *   js_legacy/equipment/heatpress.json
  *   js_legacy/equipment/laminator.json
  *   js_legacy/equipment/tools.json
+ *   js_legacy/equipment/plotter.json
  * --data current подменяет числа в памяти из calc_service/data (файлы не пишутся):
  *   common.json, materials/plaque.json, materials/misc.json, materials/mug.json,
  *   materials/hardsheet.json, materials/sheet.json, materials/roll.json,
  *   materials/presswall.json,
  *   equipment/laser.json, equipment/printer.json, equipment/cutter.json,
- *   equipment/heatpress.json, equipment/laminator.json, equipment/tools.json
+ *   equipment/heatpress.json, equipment/laminator.json, equipment/tools.json,
+ *   equipment/plotter.json
  */
 
 import fs from 'node:fs';
@@ -77,6 +82,9 @@ const JS_FILES = [
     'js_legacy/calc/calcPrintWide.js',
     'js_legacy/calc/calcCutGuillotine.js',
     'js_legacy/calc/calcCutRoller.js',
+    'js_legacy/calc/calcCutPlotter.js',
+    'js_legacy/calc/calcSticker.js',
+    'js_legacy/calc/calcPolySticker.js',
     'js_legacy/calc/calcProcessTools.js',
     'js_legacy/calc/calcFlag.js',
     'js_legacy/calc/calcPennant.js',
@@ -100,6 +108,7 @@ const LEGACY_DATA = [
     ['heatpress', 'js_legacy/equipment/heatpress.json'],
     ['laminator', 'js_legacy/equipment/laminator.json'],
     ['tools', 'js_legacy/equipment/tools.json'],
+    ['plotter', 'js_legacy/equipment/plotter.json'],
 ];
 
 // Коды оборудования и бумаги, которые ветка читает напрямую, не из параметров.
@@ -279,6 +288,7 @@ const CURRENT_FILES = [
     'calc_service/data/equipment/heatpress.json',
     'calc_service/data/equipment/laminator.json',
     'calc_service/data/equipment/tools.json',
+    'calc_service/data/equipment/plotter.json',
 ];
 
 function loadLegacyStruct(context, name, rel) {

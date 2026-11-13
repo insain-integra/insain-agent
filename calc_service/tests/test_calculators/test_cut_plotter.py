@@ -286,3 +286,40 @@ def test_get_tool_schema(calc):
     schema = calc.get_tool_schema()
     assert schema.get("name") == "calc_cut_plotter"
     assert "parameters" in schema
+
+
+# JS, 14.11.2026 — листовая ветка, дефолт формы 22 без печати.
+# node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[100,[50,50],50,0,1,"RAFLACOAT",{},1]'
+REF_SHEET_RAFLACOAT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "RAFLACOAT",
+    "size_item": 50,
+    "mode": 1,
+}
+EXPECTED_SHEET_RAFLACOAT = {
+    "cost": 357,
+    "price": 571,
+    "time_hours": 0.2,
+    "time_ready": 16.2,
+}
+
+
+def test_sheet_raflacoat_js(calc):
+    """100 шт 50×50 RAFLACOAT, size_item=50, mode=1: лист [320, 450], 3 шт."""
+    result = calc.execute(REF_SHEET_RAFLACOAT)
+    expected = EXPECTED_SHEET_RAFLACOAT
+    rel = 0.001
+    assert _cmp(result["cost"], expected["cost"], rel), result["cost"]
+    assert _cmp(result["price"], expected["price"], rel), result["price"]
+    assert _cmp(result["time_hours"], expected["time_hours"], rel), result["time_hours"]
+    assert _cmp(result["time_ready"], expected["time_ready"], rel), result["time_ready"]
+    materials = result["materials"]
+    assert materials, "ожидается материал"
+    mat = materials[0]
+    assert mat["code"] == "RAFLACOAT"
+    assert mat["quantity"] == 3
+    assert mat["unit"] == "лист"
+    assert mat["size_mm"] == [320.0, 450.0]
+    assert "title" in mat

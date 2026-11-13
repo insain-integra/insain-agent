@@ -30,6 +30,11 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | `calcPrintSheet` margins -1 | `print_sheet` | 1811.964386666667 |
 | `calcPrintSheet` margins [2,2,2,2] | `print_sheet` | 3214.3125999999997 |
 | `calcPrintSheet` form 6 default | `print_sheet` | 3214.3125999999997 |
+| `calcCutPlotter` sheet RAFLACOAT | `cut_plotter` | 571 |
+| `calcSticker` form 22 default RAFLACOAT | `sticker` | 662.134 |
+| `calcSticker` 50×50 VHI80 4+0 | `sticker` | 1307.5632666666668 |
+| `calcPolySticker` 80×80 | `poly_sticker` | 4107.8 |
+| `calcPolyStickerPack` 80×80 | `poly_sticker_pack` | 6341.1 |
 
 ```powershell
 node scripts/run_js_calc.mjs calcFlagPaper --data current --args '[100,[100,150],\"4+0\",\"PaperCoated115M\",{},1]'
@@ -75,6 +80,18 @@ node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[297,210
 node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[297,210],\"4+0\",[2,2,2,2],0,\"VHI80\",{},1]'
 
 node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[297,210],\"4+0\",[2,2,2,2],4,\"VHI80\",{},1]'
+
+node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[100,[50,50],50,0,1,\"RAFLACOAT\",{},1]'
+
+node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,\"RAFLACOAT\",{},1]'
+
+node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,\"VHI80\",{\"isPrint\":{\"printerID\":\"KMBizhubC220\",\"color\":\"4+0\"}},1]'
+
+node scripts/run_js_calc.mjs calcPolySticker --data current --args '[20,[80,80],1,\"PaperCoated115M\",{\"isPrint\":{\"printerID\":\"KMBizhubC220\",\"color\":\"4+0\"}},1]'
+
+node scripts/run_js_calc.mjs calcPolyStickerPack --data current --args '[20,[80,80],[{\"size\":[30,30],\"difficulty\":1},{\"size\":[30,30],\"difficulty\":1},{\"size\":[30,30],\"difficulty\":1},{\"size\":[30,30],\"difficulty\":1},{\"size\":[30,30],\"difficulty\":1}],\"PaperCoated115M\",{\"isPrint\":{\"printerID\":\"KMBizhubC220\",\"color\":\"4+0\"}},1]'
 ```
 
-Известные расхождения Python с JS вне этих кейсов: бейдж (JS 4708, Python ~6509) и стикер 50×50 VHI80 (JS 1308, Python ~1107) — отдельные задачи `badge-vs-js` и `sticker-vs-js`. Вес лазерной листовой печати к JS не выравнивать: `calcPrintLaser` считает весь лист (`numSheet` × `sizeSheet`, с обрезью), Python — тираж × размер изделия. Верный вес — Python, решение 11.11.2026. Вымпел 50×80×120 `PaperCoated115M` без ламинации: JS `weight_kg` 0.1328, Python 0.1052 (лист того же входа: JS 0.0828, Python 0.0552).
+Листовые кейсы `calcCutPlotter` / `calcSticker` / `calcPolySticker` / `calcPolyStickerPack` сняты 14.11.2026 (`--data current`). У полимерных наклеек `time_hours` Python на 0.01 ч ниже раннера: `print_laser` округляет время через `round`, JS — `Math.ceil`. Вес стикерпака: раннер 0.2, Python 0.19 — `round` веса эпоксидки. Оба остатка вне `cut-plotter-sheet-layout`.
+
+Известные расхождения Python с JS вне этих кейсов: бейдж (JS 4708, Python ~6509) — задача `badge-vs-js`. Вес лазерной листовой печати к JS не выравнивать: `calcPrintLaser` считает весь лист (`numSheet` × `sizeSheet`, с обрезью), Python — тираж × размер изделия. Верный вес — Python, решение 11.11.2026. Вымпел 50×80×120 `PaperCoated115M` без ламинации: JS `weight_kg` 0.1328, Python 0.1052 (лист того же входа: JS 0.0828, Python 0.0552).

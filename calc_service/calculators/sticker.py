@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List, Mapping, Optional
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import BaseCalculator, ProductionMode, material_line
 from calculators.cut_plotter import CutPlotterCalculator
 from calculators.lamination import LaminationCalculator
 from calculators.print_laser import PrintLaserCalculator
@@ -256,7 +256,12 @@ class StickerCalculator(BaseCalculator):
                 unit = m.get("unit", "")
                 if unit == "лист":
                     num_sheet = float(qty)
-                    size_sheet = (material.sizes[0] if material.sizes else [320, 450])[:2]
+                    # Выбранный лист — из резки (несколько размеров в material.sizes).
+                    size_from_cut = m.get("size_mm")
+                    if isinstance(size_from_cut, (list, tuple)) and len(size_from_cut) >= 2:
+                        size_sheet = [float(size_from_cut[0]), float(size_from_cut[1])]
+                    else:
+                        size_sheet = (material.sizes[0] if material.sizes else [320, 450])[:2]
                 else:
                     length_m = float(qty)
                     roll_sizes = material.sizes or [[1000, 0]]
@@ -391,7 +396,6 @@ class StickerCalculator(BaseCalculator):
             cost_material * (1 + MARGIN_MATERIAL)
             + (price_cut + price_print + price_lam + price_film) * (1 + margin_sticker)
         )
-        price_total = math.ceil(price_total)
 
         time_hours = math.ceil((time_cut + time_print + time_lam + time_film) * 100) / 100.0
         try:
@@ -419,13 +423,15 @@ class StickerCalculator(BaseCalculator):
             code = m.get("code", "")
             if code and code not in seen:
                 seen.add(code)
-                materials_out.append({
-                    "code": code,
-                    "name": m.get("name", m.get("description", "")),
-                    "title": m.get("title", m.get("name", "")),
-                    "quantity": m.get("quantity"),
-                    "unit": m.get("unit", "шт"),
-                })
+                size_mm = m.get("size_mm")
+                materials_out.append(material_line(
+                    code=code,
+                    name=m.get("name", m.get("description", "")) or code,
+                    title=m.get("title", m.get("name", "")) or code,
+                    quantity=m.get("quantity") if m.get("quantity") is not None else 0,
+                    unit=m.get("unit", "шт"),
+                    size_mm=list(size_mm) if size_mm else None,
+                ))
 
         return {
             "cost": float(cost_total),

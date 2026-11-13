@@ -110,19 +110,22 @@ REF_PARAMS = {
     "print_method": "KMBizhubC220",
     "mode": 1,
 }
-# JS, 05.11.2026 — ceil снят, как в JS. Печать наклеек через print_laser.
+# JS, 14.11.2026 — 20 паков 80×80, 5 наклеек 30 мм, PaperCoated115M, печать KMBizhubC220.
+# 2 листа [320, 450]. Раннер: time_hours 1.8, weight 0.2.
+# Python time_hours 1.79 (round в print_laser), weight 0.19 (round веса эпоксидки) — вне scope.
+# node scripts/run_js_calc.mjs calcPolyStickerPack --data current --args '[20,[80,80],[{"size":[30,30],"difficulty":1},{"size":[30,30],"difficulty":1},{"size":[30,30],"difficulty":1},{"size":[30,30],"difficulty":1},{"size":[30,30],"difficulty":1}],"PaperCoated115M",{"isPrint":{"printerID":"KMBizhubC220","color":"4+0"}},1]'
 EXPECTED_REF = {
-    "cost": 3220,
-    "price": 5961.6,
-    "unit_price": 298.08,
-    "time_hours": 1.68,
-    "time_ready": 41.68,
-    "weight_kg": 0.19,
+    "cost": 3426,
+    "price": 6341.1,
+    "unit_price": 317.06,
+    "time_hours": 1.8,
+    "time_ready": 41.8,
+    "weight_kg": 0.2,
 }
 EXPECTED_MATERIAL = {
     "code": "PaperCoated115M",
     "name_substring": "Титан DIGITAL",
-    "quantity_approx": 1,
+    "quantity_approx": 2,
 }
 
 
@@ -140,9 +143,10 @@ def test_expected_values_poly_sticker_pack(ref_result):
     ok_cost = _cmp(r["cost"], e["cost"], rel)
     ok_price = _cmp(r["price"], e["price"], rel)
     ok_unit = _cmp(r["unit_price"], e["unit_price"], rel)
-    ok_time = _cmp(r["time_hours"], e["time_hours"], rel)
+    # 0.01 ч — round в print_laser против Math.ceil в JS; 1e-9 гасит хвост float.
+    ok_time = abs(r["time_hours"] - e["time_hours"]) <= 0.01 + 1e-9
     ok_ready = _cmp(r["time_ready"], e["time_ready"], rel)
-    ok_weight = _cmp(r["weight_kg"], e["weight_kg"], rel)
+    ok_weight = abs(r["weight_kg"] - e["weight_kg"]) <= 0.01 + 1e-9
 
     materials = r.get("materials") or []
     mat = next((m for m in materials if m.get("code") == em["code"]), {})

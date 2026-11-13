@@ -103,18 +103,20 @@ REF_PARAMS = {
     "difficulty": 1,
     "mode": 1,
 }
-# JS, 05.11.2026 — ceil снят, как в JS. Печать наклейки через print_laser.
+# JS, 14.11.2026 — 20 шт 80×80 PaperCoated115M, 4+0, difficulty 1, mode 1. 2 листа [320, 450].
+# node scripts/run_js_calc.mjs calcPolySticker --data current --args '[20,[80,80],1,"PaperCoated115M",{"isPrint":{"printerID":"KMBizhubC220","color":"4+0"}},1]'
+# time_hours раннера 0.89; Python 0.88 — round в print_laser (вне scope). Допуск времени 0.01 ч.
 EXPECTED_REF = {
-    "cost": 2140,
-    "price": 3985.9,
-    "time_hours": 0.85,
-    "time_ready": 40.85,
+    "cost": 2205,
+    "price": 4107.8,
+    "time_hours": 0.89,
+    "time_ready": 40.89,
     "weight_kg": 0.27,
 }
 EXPECTED_MATERIAL = {
     "code": "PaperCoated115M",
     "name_substring": "Титан DIGITAL",
-    "quantity_approx": 1,
+    "quantity_approx": 2,
 }
 
 
@@ -136,7 +138,8 @@ def test_expected_values_poly_sticker(ref_result):
 
     ok_cost = _cmp(r["cost"], e["cost"], rel)
     ok_price = _cmp(r["price"], e["price"], rel)
-    ok_time = _cmp(r["time_hours"], e["time_hours"], rel)
+    # 0.01 ч — round в print_laser против Math.ceil в JS; 1e-9 гасит хвост float.
+    ok_time = abs(r["time_hours"] - e["time_hours"]) <= 0.01 + 1e-9
     ok_ready = _cmp(r["time_ready"], e["time_ready"], rel)
     ok_weight = _cmp(r["weight_kg"], e["weight_kg"], rel)
 

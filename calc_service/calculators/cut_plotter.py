@@ -11,7 +11,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List, Mapping, Optional
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import BaseCalculator, ProductionMode, material_line
 from common.layout import layout_on_roll, layout_on_roll_with_orientation, layout_on_sheet
 from common.markups import (
     BASE_TIME_READY,
@@ -222,6 +222,7 @@ class CutPlotterCalculator(BaseCalculator):
         max_plotter = plotter.max_size or [603, 5000]
         is_roll = material and getattr(material, "is_roll", False)
         len_material_mm: Optional[float] = None
+        chosen_size_mm: Optional[List[float]] = None
 
         if is_roll and material and material.sizes:
             # Рулон: как в JS — перебираем варианты раскроя, выбираем минимальный расход
@@ -307,9 +308,11 @@ class CutPlotterCalculator(BaseCalculator):
                 if cur_len > 0 and (len_material_mm is None or cur_len < len_material_mm):
                     len_material_mm = cur_len
                     num_sheet = cur_num_sheet
+                    chosen_size_mm = [roll_w, 0.0]
 
             if len_material_mm is None or len_material_mm <= 0:
                 # Fallback: изделие не помещается ни одним способом — разбиваем на куски (JS: else)
+                chosen_size_mm = [float(roll_sizes[0][0]), 0.0]
                 roll_eff = float(roll_sizes[0][0]) - margins[1] - margins[3]
                 if roll_eff < max_plotter[0]:
                     num_bond_material = math.ceil(min_size / roll_eff)
@@ -332,15 +335,43 @@ class CutPlotterCalculator(BaseCalculator):
             if num_sheet is None:
                 num_sheet = math.ceil(len_material_mm / max_plotter[0])
         else:
-            layout_plotter = layout_on_sheet(size, max_plotter, margins, interval)
-            if layout_plotter["num"] == 0:
+            # Листовой материал: перебор material.sizes, лист с минимальной стоимостью
+            # (calcCutPlotter.js:188–219). material is None — один лист max_plotter.
+            # JS margins [left, top, right, bottom] → layout_on_sheet [top, right, bottom, left].
+            if material is not None and material.sizes:
+                sheet_sizes = [
+                    [float(item[0]), float(item[1])]
+                    for item in material.sizes
+                    if len(item) >= 2 and float(item[1]) != 0
+                ]
+            else:
+                sheet_sizes = []
+            if not sheet_sizes:
+                sheet_sizes = [[float(max_plotter[0]), float(max_plotter[1])]]
+            layout_margins = [margins[1], margins[2], margins[3], margins[0]]
+            min_cost_material: Optional[float] = None
+            num_sheet = 0
+            len_cut_with_defects = 0.0
+            for sheet_size in sheet_sizes:
+                layout_sheet = layout_on_sheet(size, sheet_size, layout_margins, interval)
+                if layout_sheet["num"] == 0:
+                    continue
+                sheets = math.ceil(num_with_defects / layout_sheet["num"])
+                if material is not None:
+                    cost_mat = float(material.get_cost(sheets)) * sheets
+                else:
+                    cost_mat = 0.0
+                if min_cost_material is None or cost_mat < min_cost_material:
+                    min_cost_material = cost_mat
+                    num_sheet = sheets
+                    len_cut_with_defects = (
+                        len_cut * num_with_defects
+                        if sheets <= 1
+                        else len_cut * layout_sheet["num"] * sheets
+                    )
+                    chosen_size_mm = [sheet_size[0], sheet_size[1]]
+            if chosen_size_mm is None:
                 return self._empty_result(size, quantity, mode)
-            num_sheet = math.ceil(num_with_defects / layout_plotter["num"])
-            len_cut_with_defects = (
-                len_cut * num_with_defects
-                if num_sheet <= 1
-                else len_cut * layout_plotter["num"] * num_sheet
-            )
 
         # В JS: lenCut в метрах, timeCut = lenCutWithDefects/processPerHour (без /1000), costCut += lenCutWithDefects*costProcess
         time_prepare = (plotter.time_prepare or 0.05) * mode.value
@@ -351,15 +382,20 @@ class CutPlotterCalculator(BaseCalculator):
         if is_find_mark:
             time_cut += num_sheet * time_find_mark
 
+        # JS: Math.ceil(timeCut * 100) / 100. На листовых кейсах сырое время уже на границе
+        # сотой, round и ceil дают одно число. ceil поднимает рулон Avery500c с 0.22 до 0.23
+        # и роняет эталон 0.21 (допуск 5%). Оставляем round.
         time_hours = round(time_cut * 100) / 100.0
         cost_depreciation = plotter.depreciation_per_hour * time_cut
         cost_process = len_cut_with_defects * (plotter.cost_process or 0.3)
         cost_operator = time_cut * plotter.operator_cost_per_hour
-        cost = cost_depreciation + cost_process + cost_operator
+        raw_cost = cost_depreciation + cost_process + cost_operator
+        # JS округляет себестоимость вверх, цену считает от суммы до округления.
+        cost = math.ceil(raw_cost)
 
         margin_extra = get_margin("marginPlotter")
         effective_margin = max(MARGIN_OPERATION + margin_extra, MARGIN_MIN)
-        price = math.ceil(cost * (1 + effective_margin))
+        price = math.ceil(raw_cost * (1 + effective_margin))
 
         base_ready = plotter.base_time_ready or BASE_TIME_READY
         idx = max(0, min(len(base_ready) - 1, mode.value))
@@ -381,25 +417,28 @@ class CutPlotterCalculator(BaseCalculator):
             except Exception:
                 pass
             if is_roll and len_material_mm is not None:
-                # Рулон: расход в метрах, дробное значение
+                # Рулон: расход в метрах, дробное значение; size_mm — ширина рулона.
+                roll_size_mm = chosen_size_mm or [float(material.sizes[0][0]), 0.0]
                 materials_out = [
-                    {
-                        "code": material.code,
-                        "name": material.description,
-                        "title": material.title,
-                        "quantity": round(len_material_mm / 1000.0, 2),
-                        "unit": "м",
-                    }
+                    material_line(
+                        code=material.code,
+                        name=material.description,
+                        title=material.title,
+                        quantity=round(len_material_mm / 1000.0, 2),
+                        unit="м",
+                        size_mm=roll_size_mm,
+                    )
                 ]
             else:
                 materials_out = [
-                    {
-                        "code": material.code,
-                        "name": material.description,
-                        "title": material.title,
-                        "quantity": num_sheet,
-                        "unit": "лист",
-                    }
+                    material_line(
+                        code=material.code,
+                        name=material.description,
+                        title=material.title,
+                        quantity=num_sheet,
+                        unit="лист",
+                        size_mm=chosen_size_mm,
+                    )
                 ]
 
         return {
