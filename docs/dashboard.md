@@ -35,7 +35,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **17**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **17**. В работе/ревью: `dashboard-harness.md`, `form-sticker.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -45,7 +45,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-laser.md` | черновик |
 | `form-print-offset.md` | черновик |
 | `form-print-roll.md` | черновик |
-| `form-sticker.md` | черновик |
+| `form-sticker.md` | выкатка |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |

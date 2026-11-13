@@ -323,3 +323,59 @@ def test_sheet_raflacoat_js(calc):
     assert mat["unit"] == "лист"
     assert mat["size_mm"] == [320.0, 450.0]
     assert "title" in mat
+
+
+# JS, 14.11.2026 — calcCutPlotter.js: layoutOnSheet.num == 0 → ICalcError.
+# node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[100,[400,400],50,0,1,"RAFLACOAT",{},1]'
+# выход 1, текст «Размер изделия больше допустимого» (то же на 281×281 и 280×431).
+# 280×430: cost 3268, price 5228, time_ready 17.85.
+# 281×280: cost 2985, price 4776, time_ready 17.69.
+OVERSIZE_SHEET_MESSAGE = "Размер изделия больше допустимого"
+_OVERSIZE_SIZES = ((400, 400), (281, 281), (280, 431))
+
+
+def _raflacoat_sheet(width: float, height: float) -> dict:
+    return {
+        "quantity": 100,
+        "width": width,
+        "height": height,
+        "material_id": "RAFLACOAT",
+        "size_item": 50,
+        "difficulty": 1,
+        "mode": 1,
+    }
+
+
+@pytest.mark.parametrize("width,height", _OVERSIZE_SIZES)
+def test_sheet_larger_than_material_raises(calc, width, height):
+    """Изделие не помещается на лист RAFLACOAT 320×450 — та же ошибка, что в JS."""
+    with pytest.raises(ValueError, match="^Размер изделия больше допустимого$"):
+        calc.execute(_raflacoat_sheet(width, height))
+
+
+def test_sheet_just_fits_raflacoat(calc):
+    """Граница листа: 280×430 считается, соседний 280×431 — ошибка (см. тест выше)."""
+    result = calc.execute(_raflacoat_sheet(280, 430))
+    assert _cmp(result["cost"], 3268, 0.001), result["cost"]
+    assert _cmp(result["price"], 5228, 0.001), result["price"]
+    assert _cmp(result["time_ready"], 17.85, 0.001), result["time_ready"]
+    assert result["materials"], "ожидается лист"
+    assert result["materials"][0]["quantity"] == 105
+
+
+def test_sheet_just_fits_swapped_raflacoat(calc):
+    """281×280 помещается; 281×281 — нет."""
+    result = calc.execute(_raflacoat_sheet(281, 280))
+    assert _cmp(result["cost"], 2985, 0.001), result["cost"]
+    assert _cmp(result["price"], 4776, 0.001), result["price"]
+    assert _cmp(result["time_ready"], 17.69, 0.001), result["time_ready"]
+
+
+def test_oversize_sheet_http_400():
+    """POST /calc/cut_plotter на 400×400 — HTTP 400 и текст JS."""
+    from fastapi.testclient import TestClient
+    from main import app
+
+    response = TestClient(app).post("/api/v1/calc/cut_plotter", json=_raflacoat_sheet(400, 400))
+    assert response.status_code == 400, response.text
+    assert response.json()["detail"] == OVERSIZE_SHEET_MESSAGE

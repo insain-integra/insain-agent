@@ -223,3 +223,57 @@ def test_form_default_raflacoat(calc):
     assert mat["unit"] == "лист"
     assert mat["size_mm"] == [320.0, 450.0]
     assert "title" in mat
+
+
+# JS, 14.11.2026 — calcSticker → calcCutPlotter, RAFLACOAT, тираж 100, сложность 1, без печати.
+# 400×400, 281×281, 280×431: «Размер изделия больше допустимого».
+# 280×430: price 8417.69, time_ready 17.85. 281×280: price 7965.69, time_ready 17.69.
+OVERSIZE_SHEET_MESSAGE = "Размер изделия больше допустимого"
+_OVERSIZE_SIZES = ((400, 400), (281, 281), (280, 431))
+
+
+def _raflacoat_oversize(width: float, height: float) -> dict:
+    return {
+        "quantity": 100,
+        "width": width,
+        "height": height,
+        "material_id": "RAFLACOAT",
+        "size_item": 50,
+        "difficulty": 1,
+        "mode": 1,
+    }
+
+
+@pytest.mark.parametrize("width,height", _OVERSIZE_SIZES)
+def test_sheet_larger_than_material_raises(calc, width, height):
+    """Резка не ловится: стикер бросает ту же ошибку, что calcCutPlotter."""
+    with pytest.raises(ValueError, match="^Размер изделия больше допустимого$"):
+        calc.execute(_raflacoat_oversize(width, height))
+
+
+def test_sheet_just_fits_raflacoat(calc):
+    """280×430 ещё помещается на лист: цена и срок как у раннера."""
+    result = calc.execute(_raflacoat_oversize(280, 430))
+    rel = 0.001
+    assert _cmp(result["price"], 8417.69, rel), result["price"]
+    assert _cmp(result["time_ready"], 17.85, rel), result["time_ready"]
+    assert result["materials"][0]["code"] == "RAFLACOAT"
+    assert result["materials"][0]["quantity"] == 105
+
+
+def test_sheet_just_fits_swapped_raflacoat(calc):
+    """281×280 помещается; 281×281 — нет."""
+    result = calc.execute(_raflacoat_oversize(281, 280))
+    rel = 0.001
+    assert _cmp(result["price"], 7965.69, rel), result["price"]
+    assert _cmp(result["time_ready"], 17.69, rel), result["time_ready"]
+
+
+def test_oversize_sheet_http_400():
+    """POST /calc/sticker на 400×400 — HTTP 400, detail для showError."""
+    from fastapi.testclient import TestClient
+    from main import app
+
+    response = TestClient(app).post("/api/v1/calc/sticker", json=_raflacoat_oversize(400, 400))
+    assert response.status_code == 400, response.text
+    assert response.json()["detail"] == OVERSIZE_SHEET_MESSAGE

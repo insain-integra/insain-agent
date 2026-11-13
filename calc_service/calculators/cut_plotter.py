@@ -371,7 +371,9 @@ class CutPlotterCalculator(BaseCalculator):
                     )
                     chosen_size_mm = [sheet_size[0], sheet_size[1]]
             if chosen_size_mm is None:
-                return self._empty_result(size, quantity, mode)
+                # JS calcCutPlotter.js: layoutOnSheet.num == 0 → ICalcError.
+                # Пустой результат sticker принимает за 1 лист и считает его цену.
+                raise ValueError("Размер изделия больше допустимого")
 
         # В JS: lenCut в метрах, timeCut = lenCutWithDefects/processPerHour (без /1000), costCut += lenCutWithDefects*costProcess
         time_prepare = (plotter.time_prepare or 0.05) * mode.value
