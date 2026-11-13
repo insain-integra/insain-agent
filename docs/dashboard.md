@@ -53,7 +53,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
 | `smartcaptcha-replace.md` | черновик |
 | `spam-users-cleanup.md` | заблокировано: ждёт todo/registration-harden.md |
-| `sticker-print-wide.md` | ревью |
+| `sticker-print-wide.md` | выкатка |
 | `supplier-catalog-load.md` | заблокировано: ждёт todo/supplier-parser.md |
 | `supplier-old-cleanup.md` | черновик |
 | `supplier-parser.md` | черновик |
