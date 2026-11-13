@@ -1,6 +1,6 @@
 # form-sticker
 
-Статус: выкатка
+Статус: заблокировано: ждёт todo/sticker-print-wide.md
 Сложность: средняя
 Implementer: Grok 4.7
 Reviewer: Auto
@@ -29,23 +29,24 @@ Site ops: Grok 4.7
 - После слияния в `main` и зелёного CI (Site ops, skill `deploy-api`): выкатка API. Затем на копии 97 под админом размер, который не помещается на лист (400×400, RAFLACOAT, тираж 100), показывает в блоке срока «Ошибка: Размер изделия больше допустимого», а не цену одного листа. Боевую форму 22 не переключать.
 - После принятия копии человеком строка для «Состава пакета» пишется в «Результат», не в `todo/forms-batch-switch.md`. В файл пакета её переносят при слиянии, если та задача не в статусе `в работе`.
 - Ветка `task/form-sticker` от `main`.
+- После `close` `todo/sticker-print-wide.md` (статус этой задачи станет `черновик`): в `wp-plugin/forms/sticker.js` передавать в `calcApi` широкие `printer_code` (`Technojet160ECO`, `HPLatex335`, `TechnojetXR720`) с `color` `4+0`; для `Technojet160ECO` — `lamination_id` из `dpdRollWideLaminat` (1064), если не `No`; свериться с формой 22 (элемент 811 / 1064). Перезаписать custom JS копии 97 тем же текстом. На копии сверить кейсы интерьерной печати с раннером / API. Бой 22 не переключать.
 
 ## Файлы
 
-- `wp-plugin/forms/sticker.js` — уже в ветке; в порте ошибки не менялся
+- `wp-plugin/forms/sticker.js` — уже в ветке; после предпосылки — широкая печать и `dpdRollWideLaminat` в POST
 - `calc_service/calculators/cut_plotter.py`
 - `calc_service/tests/test_calculators/test_cut_plotter.py`
-- `calc_service/tests/test_calculators/test_sticker.py`
-- `calc_service/calculators/sticker.py` — только если исключение резки перехватывается (в этой правке не менялся)
-- WordPress: копия 97 и черновик 2586891 уже есть. После `deploy-api` — проверка копии, без новой записи JS
+- `calc_service/tests/test_calculators/test_sticker.py` — эталоны формы; широкая ветка правит `sticker-print-wide`
+- WordPress: копия 97 и черновик 2586891 уже есть. После предпосылки — перезапись JS копии 97
 
 ## Не-scope
 
-- `read_file` и любое переключение боевой формы 22. Выкладка плагина.
-- `infra/deploy.sh` в сессии Implementer. Выкатка API — после слияния, skill `deploy-api`.
+- `read_file` и любое переключение боевой формы 22. Выкладка плагина — только если после правки `sticker.js` нужна выкатка моста (отдельно решить при возобновлении).
+- `infra/deploy.sh` в сессии Implementer. Выкатка API широкой ветки — в `sticker-print-wide` / skill `deploy-api`.
 - `docs/site/forms.md`, `site/forms/22.json`, `todo/forms-batch-switch.md`.
-- Цены, `calc_service/data/`, `scripts/js_port_gaps_allowed.txt`, `scripts/run_js_calc.mjs`.
-- Правка `sticker.py` и `wp-plugin/js/insain-calc-bridge.js`, пока HTTP 400 доходит до уже существующего `showError`.
+- Цены, `calc_service/data/`. Порт `calcPrintWide` / `calcLaminationWide` / модуль `lamination_wide` / `scripts/js_port_gaps_allowed.txt` / `scripts/run_js_calc.mjs` — задача `todo/sticker-print-wide.md`.
+- Правка `sticker.py` в этой задаче (кроме уже сделанного проброса ошибки резки): широкая печать — в предпосылке.
+- `wp-plugin/js/insain-calc-bridge.js`, пока HTTP 400 доходит до уже существующего `showError`.
 - Рулонная ветка `cut_plotter`: JS эту ошибку там не бросает.
 - Форма 29 CalcStickerPack и остальные формы эпика.
 - Расхождение стикера 50×50 VHI80 (JS 1308, Python ~1107) — задача `sticker-vs-js` в `docs/js-runner-cases.md`. В этой задаче цену не выравнивать.
@@ -65,7 +66,7 @@ Site ops: Grok 4.7
 - [x] `POST /api/v1/calc/cut_plotter` и `POST /api/v1/calc/sticker` на 400×400 — HTTP 400, `detail` равен этому тексту.
 - [x] Новые тесты без `ValueError` падают (`DID NOT RAISE`, HTTP 200). С правкой соседи `poly_sticker`, `poly_sticker_pack`, `keychain` и `test_api.py` остаются зелёными.
 - [x] `sticker.js`: `catch` вызывает `showError`. `postCalc` кладёт `detail` в `Error.message`. `showError` пишет `Ошибка: …` во внутренний `div` `.htmTime` (тот же узел, что «Срок …»). Файлы не менялись.
-- [ ] После слияния в `main`, зелёный CI, skill `deploy-api`: на копии 97 под админом 400×400 RAFLACOAT в блоке срока «Ошибка: Размер изделия больше допустимого», не цена одного листа. Боевая форма 22 на `calcSticker`. Черновик 2586891 остаётся `draft`.
+- [x] После слияния в `main`, зелёный CI, skill `deploy-api`: на копии 97 под админом 400×400 RAFLACOAT в блоке срока «Ошибка: Размер изделия больше допустимого», не цена одного листа. Боевая форма 22 на `calcSticker`. Черновик 2586891 остаётся `draft`.
 
 ## Проверки
 
@@ -93,37 +94,90 @@ Site ops: Grok 4.7
 14.11.2026 — Implementer, Grok 4.7 — ValueError в cut_plotter, sticker пробрасывает, HTTP 400, тесты — дальше Reviewer, Auto
 14.11.2026 — Reviewer, Auto — ревью 2 принято — дальше человек (слияние), затем Site ops (`deploy-api`, копия 97)
 14.11.2026 — человек — принято, слияние и выкатка — дальше Site ops
+14.11.2026 — Site ops, Grok 4.7 — API `73a52f6` выкачен (skill `deploy-api`); копия 97: 400×400 «Ошибка: Размер изделия больше допустимого», возврат 50×50 — 700 руб. и «Срок 2 дня»; форма 22 на `calcSticker`, черновик `draft` — дальше человек (finish-task)
+14.11.2026 — человек — замечание при приёмке копии: не сходятся расчёты при выборе интерьерной печати — дальше Implementer
+14.11.2026 — Implementer, Grok 4.7 — интерьерная печать: `sticker.js` не шлёт широкий принтер, но и прокидывание в API не считает `calcPrintWide` / `calcLaminationWide`; `sticker.py` и `js_port_gaps_allowed.txt` не менялись — дальше человек
+14.11.2026 — человек — оформлять отдельную задачу-предпосылку на порт `calcPrintWide` и `calcLaminationWide` в `sticker.py` — дальше аналитик
+14.11.2026 — Analyst, Grok 4.7 — оформлена `todo/sticker-print-wide.md`; статус ждёт предпосылку — дальше закрытие `sticker-print-wide`, затем Implementer этой задачи
 
 Блокер: копия показывает цену, когда изделие не помещается на лист. Сообщение об ошибке не появляется, потому что `POST /api/v1/calc/sticker` отвечает 200. Исправление не в `wp-plugin/forms/sticker.js`.
 Пробовал: раннер `--data current` и боевой API, материал RAFLACOAT, тираж 100, сложность 1, без печати. `calcSticker` / `calcCutPlotter` на 400×400, 281×281 и 280×431 — выход 1, текст `Размер изделия больше допустимого`. На 280×430 — `price` 8417.69, `time_ready` 17.85; на 281×280 — `price` 7965.69, `time_ready` 17.69; те же числа у `StickerCalculator`. `POST https://insain.ru/api/v1/calc/sticker` на 400×400 — HTTP 200, `cost` 18.3, `price` 30.378, `time_ready` 16, `materials` []. Боевая страница формы 22, элемент 629: `catch` ставит `price = 0`, `PriceTotalManager = 0`, `CostTotal = 0` и делает `console.log(err.message)`; в блок срока текст ошибки не пишет.
 Гипотеза: `calcCutPlotter.js` при `layoutOnSheet.num == 0` бросает `ICalcError`. `cut_plotter.py` такой лист пропускает и при нуле подходящих размеров возвращает пустой результат (`cost`/`price` 0). `sticker.py` при пустой резке подставляет 1 лист и считает его цену (18.3 × наценка материала). `sticker.js` уже зовёт `showError` только из `catch` неуспешного HTTP; на 200 вызывается `showResult`. `insaincalc.round(30.378, 100)` = 100 ₽.
 Вопрос: расширить scope и портировать исключение здесь, завести предпосылку, или принять копию с этим пробелом.
 Следующая сессия: человек
+Снято 14.11.2026 выкаткой `73a52f6`: `POST /api/v1/calc/sticker` на 400×400 — HTTP 400, на копии 97 в блоке срока текст ошибки.
+
+Блокер: при «интерьерной» печати копия 97 считает ту же цену, что без печати. Старый JS формы 22 либо обнуляет цену (листовой материал), либо добавляет `calcPrintWide` и, для рулона с ламинацией, `calcLaminationWide`. Правка только `wp-plugin/forms/sticker.js` цену не сближает: `sticker.py` эти две функции не вызывает. `sticker.py` и `scripts/js_port_gaps_allowed.txt` в Не-scope, в этой сессии не менялись.
+Пробовал: форма 22, элемент 811 `dpdPrint` — «Интерьерная экосольвентная» = `Technojet160ECO` (открывает 1064 `dpdRollWideLaminat`), «Интерьерная латексная» = `HPLatex335` (ламинацию не открывает). Старый cjsCalc 629 кладёт любой принтер кроме `No` в `isPrint` и для `Technojet160ECO` ламинацию из 1064. Раннер `--data current`, 100 шт, 50×50, size_item 50, density 0, difficulty 1, mode 1. RAFLACOAT + `Technojet160ECO` / `HPLatex335` — выход 1, `Cannot read properties of undefined (reading 'name')` (`calcPrintWide` ищет материал только в roll). ORAJET3640 без печати — `price` 577.368832; + экосольвент — 979.368832; + экосольвент и `LaminatDLCLAM` — 1732.368832; + латекс — 2750.368832. `POST https://insain.ru/api/v1/calc/sticker` как копия 97 (без `color` / `printer_code`): RAFLACOAT `price` 662.134; ORAJET3640 `price` 558.59224. Тот же POST с `color` `4+0` и `printer_code` широкого принтера — те же 662.134 и 558.59224. С `lamination_id` `LaminatDLCLAM` API даёт 1382.134 (лист) и 1024.59224 (рулон) — это `LaminationCalculator`, не `calcLaminationWide`, и копия это поле не шлёт.
+Гипотеза: дыра порта, уже записанная в `scripts/js_port_gaps_allowed.txt` (`calcSticker call calcPrintWide`, `calcSticker call calcLaminationWide`, `calcLaminationWide module`). `print_wide.py` есть и в реестре, из `sticker.py` не вызывается. Модуля широкой ламинации нет. `sticker.py` печатает только лист через `PrintLaserCalculator` и только если передан `color`.
+Вопрос: предпосылка на порт этих двух вызовов, расширить scope здесь, или принять копию без переключения боя и вынести широкую ветку в отдельную задачу до переключения формы 22.
+Следующая сессия: закрытие `sticker-print-wide`, затем Implementer `form-sticker`
+Снято оформлением `todo/sticker-print-wide.md` 14.11.2026 (вариант 1).
 
 ## Найдено вне scope
 
 - Ползунок `numDensity` (649): на странице скрыт (`ezfc-hidden`), в инпуте «25%», `factor` 0.01, `calculate_when_hidden` = 0. Плейсхолдер `{{numDensity}}` на дефолте равен 0. В API уходит 0. Поле видно только при сложности 1.7.
 - `chkMark` / `isFindMark`: параметра в API `sticker` нет (на `cut_plotter` есть, `sticker.py` его не прокидывает). На дефолте флажок выключен. В `syncUrl` пишется, в `calcApi` не уходит.
-- Широкоформатная печать и широкая ламинация — допустимые пропуски `calcPrintWide` / `calcLaminationWide` (`scripts/js_port_gaps_allowed.txt`). В `calcApi` уходит только лазер `KMBizhubC220` и листовая ламинация `dpdRollLaminat`. Широкие принтеры и `dpdRollWideLaminat` — только в URL.
+- Широкоформатная печать и широкая ламинация — допустимые пропуски `calcPrintWide` / `calcLaminationWide` (`scripts/js_port_gaps_allowed.txt`). В `calcApi` уходит только лазер `KMBizhubC220` и листовая ламинация `dpdRollLaminat`. Широкие принтеры и `dpdRollWideLaminat` — только в URL. Числа, почему это уже не даёт принять копию, — раздел «Факты: интерьерная печать».
 - На живой странице старый JS даёт price 653.134 при тех же материалах (3 листа 320×450 RAFLACOAT). Раннер `--data current` и боевой API — 662.134. `insaincalc.round` обоих — 700. Цены JSON не менялись.
 - Боевая страница под админом: старый блок «через менеджера» 800 ₽ и «при заказе с сайта» 700 ₽, срок «2 дня». Копия по `showResult`: «цена» 700 ₽, «со скидкой» 536 ₽, срок «2 дня». Срок совпал. 800 — старое поле, в этой задаче не выравнивается.
 - `wp litespeed-purge all` вернул `Error: Something went wrong! Got 400`. `wp cache flush` — `Success`. Превью копии после этого отдало свежий расчёт.
 - `showError` не обнуляет уже показанную цену: после успешного расчёта слишком большой размер меняет срок на текст ошибки, сумма в колонке цены остаётся прежней. Общее для форм на API. На копии это изменится только с правкой моста и выкладкой плагина.
 - JS бросает ошибку на первом листе с раскладкой 0, даже если следующий размер вмещает. Python пропускает неподходящий размер и берёт следующий подходящий; ошибка — когда не подошёл ни один. В `sheet.json` у листовых материалов один размер, для RAFLACOAT это одно и то же.
+- Рулон ORAJET3640, 100 шт 50×50, без печати: раннер `price` 577.368832, боевой `POST /api/v1/calc/sticker` 558.59224. Оба `insaincalc.round(..., 100)` дают 600. К замечанию про интерьерную печать не относится: там расхождение — сама печать.
+
+## Факты: интерьерная печать
+
+Снято 14.11.2026. Боевая форма 22 и копия 97, элемент печати. `sticker.py` и `scripts/js_port_gaps_allowed.txt` не менялись.
+
+`dpdPrint` формы 22 (элемент 811; на копии 97 это 3641, те же value):
+
+| index | value | Подпись | Что открывается |
+| --- | --- | --- | --- |
+| 0 | `No` | Без печати | — |
+| 1 | `KMBizhubC220` | Цифровая лазерная печать | листовая ламинация `dpdRollLaminat` (1063 / на копии 3642) |
+| 2 | `Technojet160ECO` | Интерьерная экосольвентная | широкая ламинация `dpdRollWideLaminat` (1064 / 3643): «нет», «глянцевая», «матовая». Глянец и мат — оба value `LaminatDLCLAM` |
+| 3 | `HPLatex335` | Интерьерная латексная | ламинация не открывается |
+| 4 | `TechnojetXR720` | Широкоформатная сольвентная | ламинация не открывается |
+| 5 | `TechnojetXR720` | Широкоформатная УФ-печать | тот же value, что у строки 4 |
+
+Старый cjsCalc формы 22 (элемент 629): любой принтер кроме `No` → `options.isPrint = {printerID, color: '4+0'}`. Ламинация: `KMBizhubC220` читает 1063, `Technojet160ECO` читает 1064, остальные принтеры ламинацию не ставят. `calcSticker.js`: `KMBizhubC220` → `calcPrintLaser`; `Technojet160ECO`, `HPLatex335`, `TechnojetXR720` → `calcPrintWide(1, размер_расхода_резки, materialID, printerID, …)`. Если ламинация задана и расход резки — рулон (высота 0) → `calcLaminationWide(1, тот же размер)` с зашитым `LaminatDLCLAM`. Если лист → `calcLamination` с id из списка. `catch` ставит `price = 0`.
+
+`wp-plugin/forms/sticker.js` и тот же текст на копии 97 (элемент 3646, `read_file=0`): в `calcApi` печать и ламинация уходят только при `printerId === 'KMBizhubC220'`. Широкий принтер и `dpdRollWideLaminat` пишутся в URL и в POST не входят.
+
+В `calc_service/calculators/`: `print_wide.py` (`PrintWideCalculator`, slug `print_wide`) есть, из `sticker.py` не вызывается. `print_roll.py` вызывает `print_wide` для своего калькулятора. `lamination.py` — это `calcLamination` (ламинатор `FGKFM360`). Файла широкой ламинации нет. `sticker.py` печатает только при `color` и листовом материале, всегда через `PrintLaserCalculator`; исключение печати глотается. В `scripts/js_port_gaps_allowed.txt` для этого пропуска три строки: `calcLaminationWide module`, `calcSticker call calcPrintWide`, `calcSticker call calcLaminationWide`.
+
+Кейс дефолта формы, 100 шт, 50×50, size_item 50, density 0, difficulty 1, mode 1. Раннер `node scripts/run_js_calc.mjs calcSticker --data current`. Боевой `POST /api/v1/calc/sticker` — то тело, которое шлёт копия. «На странице» — `insaincalc.round(price, 100)`. Срок на всех этих `time_ready` ≈ 16 ч — «2 дня» (`Math.round(time/8) = 2`). Число широкой ламинации снято раннером с подгруженными `calcLamination.js` и `laminat.json` текущего прайса: штатный `run_js_calc.mjs` каталог ламината не грузит, без него вызов падает на `insaincalc.laminat`.
+
+| Кейс | Старый JS `price` / страница | Копия 97 / POST `price` / страница |
+| --- | --- | --- |
+| RAFLACOAT, без печати | 662.134 / 700 ₽ | 662.134 / 700 ₽ |
+| RAFLACOAT, экосольвент или латекс, с широкой ламинацией и без | выход 1, `reading 'name'` (`calcPrintWide` не находит листовой материал в roll). Форма 22 ставит цену 0 | 662.134 / 700 ₽. POST с `color` `4+0` и `printer_code` `Technojet160ECO` или `HPLatex335` — те же 662.134 |
+| ORAJET3640, без печати | 577.368832 / 600 ₽ | 558.59224 / 600 ₽ |
+| ORAJET3640, экосольвент, ламинация «нет» | 979.368832 / 1000 ₽, `time_ready` 16.32 | 558.59224 / 600 ₽. POST с `printer_code` `Technojet160ECO` и `color` `4+0` — те же 558.59224 |
+| ORAJET3640, экосольвент + `LaminatDLCLAM` | 1732.368832 / 1800 ₽, `time_ready` 16.33 | копия поле не шлёт, остаётся 558.59224 / 600 ₽. Если передать `lamination_id` вручную — 1024.59224 / 1100 ₽ (`LaminationCalculator`, не `calcLaminationWide`) |
+| ORAJET3640, латекс | 2750.368832 / 2800 ₽, `time_ready` 16.68 | 558.59224 / 600 ₽ |
+
+Вывод: причина не только в `sticker.js`. Прокинуть `printer_code` и `lamination_id` можно, но текущий `sticker.py` от этого не вызывает `calcPrintWide` и `calcLaminationWide`. Чтобы сойтись со старым JS, нужен порт этих двух вызовов (широкая ламинация — новый модуль: в Python его нет).
 
 ## Результат
 
-- Ветка, PR или коммит: `task/form-sticker`, коммита нет. Прод: форма 97 `CalcSticker duplicate`, товар 2586891 «Плоттерная резка (Копировать)», `post_status` `draft`.
-- Сделано: дубль формы 22 (строка 97) и черновик 2586891, JS копии с GET. Боевая форма 22 и товар 5601 не менялись. Порт ошибки: листовой `cut_plotter` при раскладке 0 на всех размерах бросает `ValueError('Размер изделия больше допустимого')` вместо пустого результата. `sticker.py` не менялся — вызов резки не в `try`, исключение доходит до `POST /calc/sticker`. `sticker.js` и `showError` не менялись: `catch` уже пишет `detail` во внутренний `div` `.htmTime` как `Ошибка: …`.
+- Ветка, PR или коммит: `main` @ `73a52f6` (CI `completed success`). Прод API выкачен этим коммитом с `7c88dfb`. Форма 97 `CalcSticker duplicate`, товар 2586891 «Плоттерная резка (Копировать)», `post_status` `draft`.
+- Сделано: дубль формы 22 (строка 97) и черновик 2586891, JS копии с GET. Боевая форма 22 и товар 5601 не менялись. Порт ошибки: листовой `cut_plotter` при раскладке 0 на всех размерах бросает `ValueError('Размер изделия больше допустимого')` вместо пустого результата. `sticker.py` не менялся — вызов резки не в `try`, исключение доходит до `POST /calc/sticker`. `sticker.js` и `showError` не менялись: `catch` уже пишет `detail` во внутренний `div` `.htmTime` как `Ошибка: …`. API `73a52f6` выкачен на прод skill `deploy-api`; копия 97 показывает ошибку размера, боевая форма 22 осталась на `calcSticker`.
 - Чем проверено (копия, прошлая сессия): `wp post get 2586891 --field=post_status` — `draft`. `curl.exe` без cookies на `/?post_type=product&p=2586891` — `404`. Превью под админом: `POST /api/v1/calc/sticker` 200, `price` 662.134, на странице 700 ₽. Боевая страница на `calcSticker`.
 - Чем проверено (порт): до правки `pytest -k "larger_than_material or just_fits or oversize_sheet_http"` — 8 failed (`DID NOT RAISE`, HTTP 200: cut `price` 0, sticker `price` 30.378), 4 passed (280×430 и 281×280). После правки те же кейсы и соседи — `56 passed`. Раннер `calcCutPlotter` на 400×400 — выход 1, текст ошибки; на 280×430 — `price` 5228, `time_ready` 17.85; на 281×280 — `price` 4776, `time_ready` 17.69. `python scripts/dev.py check` — код 0, 563 + 81.
-- Не сделано и почему: боевая форма 22 не переключалась. Выкладка плагина нет. `deploy-api` и проверка копии 97 на 400×400 — после слияния, критерий открыт. `sticker.py` не менялся: подстановка 1 листа не выполняется, потому что резка бросает исключение раньше.
-- Требуется решение: нет. Дальше Reviewer (Auto). Незакоммичены `todo/form-sticker.md`, `docs/dashboard.md`, `wp-plugin/forms/sticker.js`, `calc_service/calculators/cut_plotter.py`, `calc_service/tests/test_calculators/test_cut_plotter.py`, `calc_service/tests/test_calculators/test_sticker.py`.
-- Как откатить: калькулятор — не сливать ветку. Копию и черновик удалять только с отдельного «да». Бэкап элементов копии: `/tmp/ezfc-copy-97-20261113-190404.json`. После выкатки API откат — автооткат skill `deploy-api`.
+- Чем проверено (выкатка 14.11.2026): `bash infra/deploy.sh` на VDS — fast-forward `7c88dfb` → `73a52f6`, smoke скрипта `GET /api/v1/calculators` 200 и `POST /api/v1/calc/puzzle` 200, контейнер healthy. `POST /api/v1/calc/sticker` дефолт (100 шт, 50×50, RAFLACOAT) — HTTP 200, `price` 662.134. Oversize 400×400 RAFLACOAT тираж 100 — HTTP 400, `detail` `Размер изделия больше допустимого`. Превью копии под админом: тот же POST 400, `.htmTime` — `Ошибка: Размер изделия больше допустимого`; возврат 50×50 — POST 200, `price` 662.134, на странице `700 руб.` и `Срок 2 дня`. `wp post get 2586891 --field=post_status` — `draft`. Боевая страница https://insain.ru/catalog/plotternaya-rezka/ содержит `insaincalc.calcSticker(`, вызова `calcApi` нет. Копия и форма 22 не перезаписывались.
+- Не сделано и почему: боевая форма 22 не переключалась (так и задумано). Выкладка плагина нет — вне scope. `sticker.py` не менялся: подстановка 1 листа не выполняется, потому что резка бросает исключение раньше.
+- Требуется решение: нет. Выбрана предпосылка `todo/sticker-print-wide.md`. `finish-task` не запускать, пока широкая ветка не сойдётся на копии 97 после возобновления этой задачи.
+- Как откатить: перед выкаткой `deploy.sh` сохранил предыдущий образ как `insain-agent-calc-api:rollback` (сервер был на `7c88dfb`). Копию и черновик не удалять. Бэкап элементов копии: `/tmp/ezfc-copy-97-20261113-190404.json`.
 - Поля только в URL, не в `calcApi`: `chkMark`; `dpdPrint` кроме `KMBizhubC220`; `dpdRollWideLaminat`. Файл `fluAtrwork` в URL не кладётся.
 - Для Reviewer: id в git — боевая форма 22. На копии их подставил `ezfc_copy.py`. Дефолт бьёт в `REF_FORM_DEFAULT`. Порт — замена пустого результата на `ValueError` в листовой ветке `cut_plotter.py` (около прежнего `chosen_size_mm is None`). `sticker.py` без diff. Тест на исключение до правки падал с `DID NOT RAISE`.
 - Выбран вариант 1 из блока «Варианты» (14.11.2026).
-- Строка в «Состав пакета» (в `todo/forms-batch-switch.md` не писать, пока та задача `в работе`): после приёмки копии. Копия 97, черновик 2586891.
+- Строка в «Состав пакета» (в `todo/forms-batch-switch.md` не писать в этой сессии; статус пакета `черновик`, строку переносит `finish-task`): | 22 CalcSticker | `sticker` | `/catalog/plotternaya-rezka/` | 97 / 2586891 (draft) | копия принята 14.11.2026, `form-sticker` |
+- Период: 2026-11-14 — 2026-11-14 (1 дн.) по чатам Cursor (`hours_from_chats`); git-история файла 2026-11-12 — 2026-11-14 (3 дн.)
+- Часы человека: 24 сообщ. в чатах Cursor; активно 3.8 ч (ходы агента > 30 мин — с коэфф. 0.5)
+- Работа агентов: 13 чатов Cursor, 24 сообщ. человека, 3.8 ч активных; Implementer — Grok 4.7; Reviewer — Auto; Site ops — Grok 4.7
+- Было / стало: до выкатки API (`7c88dfb`) `POST /api/v1/calc/sticker` на 400×400 RAFLACOAT тираж 100 отвечал HTTP 200 с `price` 30.378 (цена одного листа), копия показывала цену / после `73a52f6` тот же запрос — HTTP 400, `detail` «Размер изделия больше допустимого»; на копии 97 в блоке срока «Ошибка: Размер изделия больше допустимого»; дефолт 50×50 — `price` 662.134, на странице 700 руб. и «Срок 2 дня». Боевая форма 22 по-прежнему на `calcSticker`, черновик 2586891 — `draft`.
 - Превью: https://insain.ru/?post_type=product&p=2586891&preview=true
 
 ### Варианты
@@ -132,6 +186,15 @@ Site ops: Grok 4.7
 2. Предпосылка `todo/<fix>.md`: та же правка отдельно, эту задачу не расширять. `form-sticker` ждёт закрытия предпосылки. Имеет смысл, если порт исключения не должен смешиваться с приёмкой копии.
 3. Принять копию с пробелом. Цена вместо ошибки остаётся, пока порт не сделают отдельной задачей, не блокирующей слияние `form-sticker`. Боевая форма 22 по-прежнему на `calcSticker` и при непомещении обнуляет цену.
 4. Не менять API. В `sticker.js` трактовать пустой `materials` как ошибку и звать `showError`. Боевой `POST` останется 200 с ценой 30.378; текст на копии появится только после перезаписи JS копии. Это не порт JS.
+
+### Варианты (интерьерная печать, 14.11.2026)
+
+Числа — в разделе «Факты: интерьерная печать». Боевую форму 22 ни один вариант не переключает.
+
+1. Отдельная задача-предпосылка на порт интерьерной и широкоформатной ветки в `sticker.py` (Рекомендуется). `print_wide` уже есть: вызов как в JS (`n = 1`, размер расхода резки, принтеры `Technojet160ECO`, `HPLatex335`, `TechnojetXR720`). `calcLaminationWide` в Python нет — порт функции, сейчас это строка `calcLaminationWide module` в `scripts/js_port_gaps_allowed.txt`. Эталон с раннера: лист RAFLACOAT (JS падает на `name`) и рулон с широкой ламинацией (ORAJET3640 + `LaminatDLCLAM`, JS `price` 1732.368832). Две строки `calcSticker call …` снимаются в той задаче. `form-sticker` ждёт, копию по интерьерной печати не принимать, форму 22 не переключать.
+2. Расширить scope `form-sticker` и портировать те же два вызова здесь. `sticker.py`, модуль широкой ламинации, тесты, правки `scripts/js_port_gaps_allowed.txt`. Боевую форму не переключать, пока копия не сойдётся с раннером на этих кейсах.
+3. Принять копию для «без печати» и лазера `KMBizhubC220`. Боевую форму 22 не переключать. Широкую ветку (интерьерная, широкоформатная, `dpdRollWideLaminat`) вынести в отдельную задачу до переключения боя. На копии интерьерная печать останется ценой без печати: дефолт RAFLACOAT — 700 ₽, у старой формы при том же выборе цена 0.
+4. Не портировать расчёт. В `sticker.js` при широком принтере не показывать цену резки как итог с печатью (ошибка или пустая цена). Это не сходимость: на ORAJET3640 старый JS даёт 1000 / 1800 / 2800 ₽. Имеет смысл только если интерьер на копии до отдельной задачи не нужен и нельзя оставлять цену «без печати».
 
 ## Ревью 1
 
