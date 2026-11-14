@@ -47,6 +47,10 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | `calcLaminationWide` 10 шт 1000×500 | `lamination_wide` | 3877.95 |
 | `calcPolySticker` 80×80 | `poly_sticker` | 4107.8 |
 | `calcPolyStickerPack` 80×80 | `poly_sticker_pack` | 6341.1 |
+| `calcLaser` номерки | `laser` | 5631 |
+| `calcLaser` простая резка AcrylWhite3 | `laser` | 23638 |
+| `calcLaser` без резки AcrylWhite3 | `laser` | 1404 |
+| `calcLaser` form 28 default | `laser` | 480 |
 
 ```powershell
 node scripts/run_js_calc.mjs calcFlagPaper --data current --args '[100,[100,150],\"4+0\",\"PaperCoated115M\",{},1]'
@@ -136,7 +140,17 @@ node scripts/run_js_calc.mjs calcLaminationWide --data current --args '[10,[1000
 node scripts/run_js_calc.mjs calcPolySticker --data current --args '[20,[80,80],1,\"PaperCoated115M\",{\"isPrint\":{\"printerID\":\"KMBizhubC220\",\"color\":\"4+0\"}},1]'
 
 node scripts/run_js_calc.mjs calcPolyStickerPack --data current --args '[20,[80,80],[{\"size\":[30,30],\"difficulty\":1},{\"size\":[30,30],\"difficulty\":1},{\"size\":[30,30],\"difficulty\":1},{\"size\":[30,30],\"difficulty\":1},{\"size\":[30,30],\"difficulty\":1}],\"PaperCoated115M\",{\"isPrint\":{\"printerID\":\"KMBizhubC220\",\"color\":\"4+0\"}},1]'
+
+node scripts/run_js_calc.mjs calcLaser --data current --args '[50,[40,80],\"AcrylColor3\",{\"isCutLaser\":{\"lenCut\":0,\"sizeItem\":0,\"density\":0,\"difficulty\":1},\"isGrave\":1,\"isGraveFill\":[30,40]},1]'
+
+node scripts/run_js_calc.mjs calcLaser --data current --args '[100,[50,50],\"AcrylWhite3\",{\"isCutLaser\":{\"sizeItem\":50,\"density\":25,\"difficulty\":1,\"lenCut\":0},\"isFindMark\":false,\"Material\":\"isMaterial\"},1]'
+
+node scripts/run_js_calc.mjs calcLaser --data current --args '[100,[50,50],\"AcrylWhite3\",{\"Material\":\"isMaterial\"},1]'
+
+node scripts/run_js_calc.mjs calcLaser --data current --args '[100,[50,50],\"\",{\"isCutLaser\":{\"sizeItem\":50,\"density\":25,\"difficulty\":1,\"lenCut\":0},\"isFindMark\":false,\"Material\":\"isMaterial\"},1]'
 ```
+
+Кейсы `calcLaser` сняты 15.11.2026 (`--data current`). Номерки: `time_ready` 19.05. Простая резка: `time_ready` 27.17. «Без резки»: `time_ready` 16.2. Дефолт формы 28 (пустой материал) раннер не печатает: `weight` становится NaN и скрипт пишет «Поле cost не число (NaN)». На странице `calcLaser` даёт cost 300, price 480, time 0.2, `time_ready` 16.2. В API вес 0 и `materials` пустой — контракт ответа, не NaN.
 
 Листовые кейсы `calcCutPlotter` / `calcSticker` / `calcPolySticker` / `calcPolyStickerPack` сняты 14.11.2026 (`--data current`). У полимерных наклеек `time_hours` Python на 0.01 ч ниже раннера: `print_laser` округляет время через `round`, JS — `Math.ceil`. Вес стикерпака: раннер 0.2, Python 0.19 — `round` веса эпоксидки. Оба остатка вне `cut-plotter-sheet-layout`.
 

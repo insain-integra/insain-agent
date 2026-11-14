@@ -60,6 +60,23 @@ def test_sticker_js_posts_wide_print():
     assert not re.search(r"\bprice\s*=", text)
 
 
+def test_laser_js_calls_laser_api():
+    """Форма 28: материал, резка и режим уходят в calcApi('laser'), без своей цены."""
+    text = (FORMS / "laser.js").read_text(encoding="utf-8")
+    assert "insaincalc.calcApi('laser'" in text
+    assert "insaincalc.syncUrl(" in text
+    assert "insaincalc.showResult(" in text
+    assert "ezfc_functions.get_value_from(989, true)" in text
+    assert "ezfc_functions.get_value_from(985, true)" in text
+    assert "ezfc_functions.get_value_from(1006, true)[0]" in text
+    assert "material_id: materialId" in text
+    assert "String(cut) !== 'noCut'" in text
+    assert "is_cut_laser" in text
+    assert "querySelector" not in text
+    assert "calcLaser" not in text
+    assert not re.search(r"\bprice\s*=", text)
+
+
 def test_forms_keep_mode_zero():
     """Режим 0 («дешевле») не превращается в 1 через ||, даже если сейчас в форме его нет."""
     bad = []

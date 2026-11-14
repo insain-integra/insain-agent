@@ -311,11 +311,11 @@ class LaserCalculator(BaseCalculator):
         # Оборудование и материал (явно Qualitech11G1290)
         laser = laser_catalog.get(LASER_CODE)
 
+        # Пустой material_id — материал «не задан» (дефолт формы 28).
+        # Как в JS: блок материала и резки пропускается, остаётся время подготовки.
         material = None
         if material_id:
             material = hardsheet.get(material_id)
-        else:
-            raise ValueError("параметр material_id обязателен для лазерного калькулятора")
 
         # Брак
         defect_rate = laser.get_defect_rate(quantity)
@@ -361,18 +361,13 @@ class LaserCalculator(BaseCalculator):
 
         if material is not None:
             sizes_material = material.sizes or []
-            if sizes_material:
-                # Параметры резки
-                len_cut = 0.0
-                if isinstance(is_cut, Mapping):
-                    len_cut = float(is_cut.get("len_cut", 0.0))
-                    size_item = float(is_cut.get("size_item", 0.0))
-                    density = float(is_cut.get("density", 0.0))
-                    difficulty = float(is_cut.get("difficulty", 1.0))
-                else:
-                    size_item = 0.0
-                    density = 0.0
-                    difficulty = 1.0
+            # is_cut_laser нет — ветка «без резки»: площадь без раскладки и без времени реза.
+            # Пустой объект {} — резка есть, как options.has('isCutLaser') в JS.
+            if sizes_material and isinstance(is_cut, Mapping):
+                len_cut = float(is_cut.get("len_cut", 0.0))
+                size_item = float(is_cut.get("size_item", 0.0))
+                density = float(is_cut.get("density", 0.0))
+                difficulty = float(is_cut.get("difficulty", 1.0))
 
                 if len_cut == 0.0:
                     len_cut = (size[0] + size[1]) * 2.0
@@ -488,6 +483,43 @@ class LaserCalculator(BaseCalculator):
                     material_qty = num_sheet
                     material_unit = "лист"
 
+                materials.append(
+                    {
+                        "code": material.code,
+                        "name": material.description,
+                        "title": material.title,
+                        "size_mm": size_material,
+                        "quantity": material_qty,
+                        "unit": material_unit,
+                    }
+                )
+            elif sizes_material:
+                # Первый размер, как setSizeMaterial[0] в JS. Время реза не начисляется.
+                size_w, size_h = float(sizes_material[0][0]), float(sizes_material[0][1])
+                size_material = [size_w, size_h]
+                if size_h == 0.0:
+                    len_material = (num_with_defects * size[0] * size[1]) / size_w
+                    base_cost = material.get_cost(len_material / 1000.0)
+                    if material.length_min and material.length_min > 0:
+                        cost_material = (
+                            base_cost
+                            * math.ceil(len_material / material.length_min)
+                            * material.length_min
+                            / 1_000_000.0
+                            * size_w
+                        )
+                    else:
+                        cost_material = base_cost * len_material * size_w / 1_000_000.0
+                    material_qty = len_material
+                    material_unit = "мм"
+                else:
+                    num_sheet = (num_with_defects * size[0] * size[1]) / size_w / size_h
+                    base_cost = material.get_cost(num_sheet)
+                    cost_material = (
+                        base_cost * num_sheet * size_w * size_h / 1_000_000.0
+                    )
+                    material_qty = num_sheet
+                    material_unit = "лист"
                 materials.append(
                     {
                         "code": material.code,

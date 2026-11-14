@@ -245,3 +245,273 @@ def test_laser_real_nomerki_high(nomerki_high_result):
     assert ok_time, "time_hours: got %s, expected ~%s" % (r["time_hours"], e["time_hours"])
     assert ok_ready, "time_ready: got %s, expected ~%s" % (r["time_ready"], e["time_ready"])
     assert ok_weight, "weight_kg: got %s, expected ~%s" % (r["weight_kg"], e["weight_kg"])
+
+
+JS_REL = 0.001
+
+
+def _assert_js(result: Dict[str, Any], expected: Dict[str, Any]) -> None:
+    assert result["cost"] == pytest.approx(expected["cost"], rel=JS_REL)
+    assert result["price"] == pytest.approx(expected["price"], rel=JS_REL)
+    assert result["time_hours"] == pytest.approx(expected["time_hours"], rel=JS_REL)
+    assert result["time_ready"] == pytest.approx(expected["time_ready"], rel=JS_REL)
+
+
+# JS, 15.11.2026 — дефолт формы 28: 100 шт., 50×50, материал «не задан», простая резка, mode 1.
+# Раннер падает на weight NaN (material = []). Цена и срок — calcLaser на странице.
+# Вес и materials по контракту API: 0 и пустой список.
+# node scripts/run_js_calc.mjs calcLaser --data current --args
+# '[100,[50,50],"",{"isCutLaser":{"sizeItem":50,"density":25,"difficulty":1,"lenCut":0},"isFindMark":false,"Material":"isMaterial"},1]'
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "",
+    "mode": 1,
+    "is_cut_laser": {"len_cut": 0, "size_item": 50, "density": 25, "difficulty": 1},
+    "is_find_mark": False,
+    "material_mode": "isMaterial",
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 300,
+    "price": 480,
+    "time_hours": 0.2,
+    "time_ready": 16.2,
+    "weight_kg": 0.0,
+}
+
+
+def test_form_default_empty_material(laser_calc):
+    """JS, 15.11.2026: дефолт формы 28, пустой материал — только время подготовки."""
+    r = laser_calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    _assert_js(r, e)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], abs=1e-9)
+    assert r["materials"] == []
+    for key in ("cost", "price", "unit_price", "time_hours", "time_ready", "weight_kg", "materials"):
+        assert key in r
+
+
+# JS, 15.11.2026 — тот же пустой материал без ключа material_id и без is_cut_laser.
+REF_EMPTY_MATERIAL = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "mode": 1,
+}
+
+
+def test_laser_empty_material_id(laser_calc):
+    """JS, 15.11.2026: material_id не передан — не 400, та же цена подготовки."""
+    r = laser_calc.execute(REF_EMPTY_MATERIAL)
+    _assert_js(r, EXPECTED_FORM_DEFAULT)
+    assert r["weight_kg"] == pytest.approx(0.0, abs=1e-9)
+    assert r["materials"] == []
+
+
+# JS, 15.11.2026 — «без резки», 100 шт. 50×50 AcrylWhite3, mode 1.
+# node scripts/run_js_calc.mjs calcLaser --data current --args
+# '[100,[50,50],"AcrylWhite3",{"Material":"isMaterial"},1]'
+REF_NO_CUT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "AcrylWhite3",
+    "mode": 1,
+    "material_mode": "isMaterial",
+}
+EXPECTED_NO_CUT = {
+    "cost": 857,
+    "price": 1404,
+    "time_hours": 0.2,
+    "time_ready": 16.2,
+    "weight_kg": 0.8925,
+}
+
+
+def test_laser_no_cut(laser_calc):
+    """JS, 15.11.2026: нет is_cut_laser — площадь первого листа, время реза 0."""
+    r = laser_calc.execute(REF_NO_CUT)
+    _assert_js(r, EXPECTED_NO_CUT)
+    assert r["weight_kg"] == pytest.approx(EXPECTED_NO_CUT["weight_kg"], rel=JS_REL)
+    mats = r["materials"]
+    assert len(mats) == 1
+    mat = mats[0]
+    assert mat["code"] == "AcrylWhite3"
+    assert mat["name"] == "Акрил молочный Plexiglas XT 3мм"
+    assert mat["title"] == "Акрил молочный 3мм"
+    assert mat["name"] != mat["code"]
+    assert mat["unit"] == "лист"
+    assert list(mat["size_mm"]) == [3050.0, 2050.0]
+    assert mat["quantity"] == pytest.approx(105 * 50 * 50 / 3050 / 2050, rel=JS_REL)
+
+
+# JS, 15.11.2026 — простая резка, эталон не должен сдвинуться после ветки «без резки».
+# node scripts/run_js_calc.mjs calcLaser --data current --args
+# '[100,[50,50],"AcrylWhite3",{"isCutLaser":{"sizeItem":50,"density":25,"difficulty":1,"lenCut":0},"isFindMark":false,"Material":"isMaterial"},1]'
+REF_SIMPLE_CUT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "AcrylWhite3",
+    "mode": 1,
+    "is_cut_laser": {"len_cut": 0, "size_item": 50, "density": 25, "difficulty": 1},
+    "is_find_mark": False,
+    "material_mode": "isMaterial",
+}
+EXPECTED_SIMPLE_CUT = {
+    "cost": 14748,
+    "price": 23638,
+    "time_hours": 11.17,
+    "time_ready": 27.17,
+    "weight_kg": 0.8925,
+}
+
+
+def test_laser_simple_cut_unchanged(laser_calc):
+    """JS, 15.11.2026: простая резка AcrylWhite3 — price 23638, time_ready 27.17."""
+    r = laser_calc.execute(REF_SIMPLE_CUT)
+    _assert_js(r, EXPECTED_SIMPLE_CUT)
+    assert r["weight_kg"] == pytest.approx(EXPECTED_SIMPLE_CUT["weight_kg"], rel=JS_REL)
+
+
+def test_nomerki_matches_js_tight(laser_calc):
+    """JS, 15.11.2026: номерки — price 5631, time_ready 19.05."""
+    r = laser_calc.execute(_nomerki_params())
+    assert r["price"] == pytest.approx(5631, rel=JS_REL)
+    assert r["time_ready"] == pytest.approx(19.05, rel=JS_REL)
+
+
+JS_REL = 0.001
+
+
+def _assert_js(result: Dict[str, Any], expected: Dict[str, Any]) -> None:
+    assert result["cost"] == pytest.approx(expected["cost"], rel=JS_REL)
+    assert result["price"] == pytest.approx(expected["price"], rel=JS_REL)
+    assert result["time_hours"] == pytest.approx(expected["time_hours"], rel=JS_REL)
+    assert result["time_ready"] == pytest.approx(expected["time_ready"], rel=JS_REL)
+
+
+# JS, 15.11.2026 — дефолт формы 28: 100 шт., 50×50, материал «не задан», простая резка, mode 1.
+# Раннер падает на weight NaN (material = []). Цена и срок — calcLaser на странице.
+# Вес и materials по контракту API: 0 и пустой список.
+# node scripts/run_js_calc.mjs calcLaser --data current --args
+# '[100,[50,50],"",{"isCutLaser":{"sizeItem":50,"density":25,"difficulty":1,"lenCut":0},"isFindMark":false,"Material":"isMaterial"},1]'
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "",
+    "mode": 1,
+    "is_cut_laser": {"len_cut": 0, "size_item": 50, "density": 25, "difficulty": 1},
+    "is_find_mark": False,
+    "material_mode": "isMaterial",
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 300,
+    "price": 480,
+    "time_hours": 0.2,
+    "time_ready": 16.2,
+    "weight_kg": 0.0,
+}
+
+
+def test_form_default_empty_material(laser_calc):
+    """JS, 15.11.2026: дефолт формы 28, пустой материал — только время подготовки."""
+    r = laser_calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    _assert_js(r, e)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], abs=1e-9)
+    assert r["materials"] == []
+    for key in ("cost", "price", "unit_price", "time_hours", "time_ready", "weight_kg", "materials"):
+        assert key in r
+
+
+# JS, 15.11.2026 — тот же пустой материал без ключа material_id и без is_cut_laser.
+REF_EMPTY_MATERIAL = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "mode": 1,
+}
+
+
+def test_laser_empty_material_id(laser_calc):
+    """JS, 15.11.2026: material_id не передан — не 400, та же цена подготовки."""
+    r = laser_calc.execute(REF_EMPTY_MATERIAL)
+    _assert_js(r, EXPECTED_FORM_DEFAULT)
+    assert r["weight_kg"] == pytest.approx(0.0, abs=1e-9)
+    assert r["materials"] == []
+
+
+# JS, 15.11.2026 — «без резки», 100 шт. 50×50 AcrylWhite3, mode 1.
+# node scripts/run_js_calc.mjs calcLaser --data current --args
+# '[100,[50,50],"AcrylWhite3",{"Material":"isMaterial"},1]'
+REF_NO_CUT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "AcrylWhite3",
+    "mode": 1,
+    "material_mode": "isMaterial",
+}
+EXPECTED_NO_CUT = {
+    "cost": 857,
+    "price": 1404,
+    "time_hours": 0.2,
+    "time_ready": 16.2,
+    "weight_kg": 0.8925,
+}
+
+
+def test_laser_no_cut(laser_calc):
+    """JS, 15.11.2026: нет is_cut_laser — площадь первого листа, время реза 0."""
+    r = laser_calc.execute(REF_NO_CUT)
+    _assert_js(r, EXPECTED_NO_CUT)
+    assert r["weight_kg"] == pytest.approx(EXPECTED_NO_CUT["weight_kg"], rel=JS_REL)
+    mats = r["materials"]
+    assert len(mats) == 1
+    mat = mats[0]
+    assert mat["code"] == "AcrylWhite3"
+    assert mat["name"] == "Акрил молочный Plexiglas XT 3мм"
+    assert mat["title"] == "Акрил молочный 3мм"
+    assert mat["name"] != mat["code"]
+    assert mat["unit"] == "лист"
+    assert list(mat["size_mm"]) == [3050.0, 2050.0]
+    assert mat["quantity"] == pytest.approx(105 * 50 * 50 / 3050 / 2050, rel=JS_REL)
+
+
+# JS, 15.11.2026 — простая резка, эталон не должен сдвинуться после ветки «без резки».
+# node scripts/run_js_calc.mjs calcLaser --data current --args
+# '[100,[50,50],"AcrylWhite3",{"isCutLaser":{"sizeItem":50,"density":25,"difficulty":1,"lenCut":0},"isFindMark":false,"Material":"isMaterial"},1]'
+REF_SIMPLE_CUT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "AcrylWhite3",
+    "mode": 1,
+    "is_cut_laser": {"len_cut": 0, "size_item": 50, "density": 25, "difficulty": 1},
+    "is_find_mark": False,
+    "material_mode": "isMaterial",
+}
+EXPECTED_SIMPLE_CUT = {
+    "cost": 14748,
+    "price": 23638,
+    "time_hours": 11.17,
+    "time_ready": 27.17,
+    "weight_kg": 0.8925,
+}
+
+
+def test_laser_simple_cut_unchanged(laser_calc):
+    """JS, 15.11.2026: простая резка AcrylWhite3 — price 23638, time_ready 27.17."""
+    r = laser_calc.execute(REF_SIMPLE_CUT)
+    _assert_js(r, EXPECTED_SIMPLE_CUT)
+    assert r["weight_kg"] == pytest.approx(EXPECTED_SIMPLE_CUT["weight_kg"], rel=JS_REL)
+
+
+def test_nomerki_matches_js_tight(laser_calc):
+    """JS, 15.11.2026: номерки — price 5631, time_ready 19.05."""
+    r = laser_calc.execute(_nomerki_params())
+    assert r["price"] == pytest.approx(5631, rel=JS_REL)
+    assert r["time_ready"] == pytest.approx(19.05, rel=JS_REL)

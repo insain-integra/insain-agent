@@ -116,12 +116,15 @@ class UVBadgeCalculator(BaseCalculator):
             len_cut += 0.180  # ~180мм для окошка кармана
 
         laser_calc = LaserCalculator()
+        # Пустой is_cut_laser включает резку периметра. Без ключа калькулятор
+        # считает ветку «без резки», и цена бейджа сдвинется.
         laser_result = laser_calc.calculate({
             "quantity": n_items,
             "width": width,
             "height": height,
             "material_id": material_id,
             "cut_length_m": len_cut * n_items,
+            "is_cut_laser": {},
             "mode": mode.value,
         })
 
