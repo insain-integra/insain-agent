@@ -1,7 +1,9 @@
 // Форма 22 CalcSticker, элемент cjsCalc (629). Id полей — боевой формы 22.
 // numDensity скрыт, пока сложность не 1.7: calculate_when_hidden=0, на дефолте в расчёт уходит 0.
 // {{numDensity}} — это get_value_from(649): factor 0.01 уже внутри, скрытое поле даёт 0.
-// chkMark (резка по меткам) в API стикера нет. Широкая печать и широкая ламинация в порт не входят.
+// chkMark (резка по меткам) в API стикера нет: в URL пишется, в calcApi не уходит.
+// Широкая печать: Technojet160ECO, HPLatex335, TechnojetXR720, цветность всегда 4+0.
+// Широкая ламинация (элемент 1064) уходит только с Technojet160ECO и только если value не No.
 var qty = {{numN}};
 var widthRaw = ezfc_functions.get_value_from(620, true);
 var heightRaw = ezfc_functions.get_value_from(621, true);
@@ -20,6 +22,7 @@ var printerId = ezfc_functions.get_value_from(811, true)[0];
 var printerIndex = ezfc_functions.get_value_from(811, true, false, { return_value: 'index' })[0];
 var sheetLaminat = ezfc_functions.get_value_from(1063, true)[0];
 var sheetLaminatIndex = ezfc_functions.get_value_from(1063, true, false, { return_value: 'index' })[0];
+var wideLaminat = ezfc_functions.get_value_from(1064, true)[0];
 var wideLaminatIndex = ezfc_functions.get_value_from(1064, true, false, { return_value: 'index' })[0];
 // Чекбокс: get_value_from → 1 / 0, как в боевом cjsCalc. В API стикера метки нет.
 var isFindMark = ezfc_functions.get_value_from(653, false) == 1;
@@ -66,12 +69,19 @@ var params = {
     mode: mode
 };
 // Цветность на форме не выбирается: у печати в старом JS всегда 4+0.
-// Широкий принтер в калькуляторе не считается (calcPrintWide не перенесён).
+// Лазер читает листовую ламинацию 1063. Экосольвент — широкую 1064.
+// Латекс, сольвент и УФ ламинацию не передают.
 if (printerId === 'KMBizhubC220') {
     params.color = '4+0';
     params.printer_code = printerId;
     if (sheetLaminat && String(sheetLaminat) !== 'No') {
         params.lamination_id = sheetLaminat;
+    }
+} else if (printerId === 'Technojet160ECO' || printerId === 'HPLatex335' || printerId === 'TechnojetXR720') {
+    params.color = '4+0';
+    params.printer_code = printerId;
+    if (printerId === 'Technojet160ECO' && wideLaminat && String(wideLaminat) !== 'No') {
+        params.lamination_id = wideLaminat;
     }
 }
 

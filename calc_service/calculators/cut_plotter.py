@@ -37,6 +37,78 @@ def _find_material(material_id: str):
     return None
 
 
+def _tier_price_js(tiers: List, length_m: float) -> float:
+    """Цена градации как в calcCutPlotter.js:173–179.
+
+    findIndex порога >= длины, затем index-1. Если порог — первый, JS берёт
+    последний элемент массива (индекс -1).
+    """
+    index = -1
+    for i, item in enumerate(tiers):
+        if float(item[0]) >= length_m:
+            index = i
+            break
+    if index == -1:
+        index = len(tiers) - 1
+    else:
+        index -= 1
+    return float(tiers[index][1])
+
+
+def _roll_piece_cost(material, width_mm: float, length_mm: float) -> float:
+    """Стоимость куска рулона, calcCutPlotter.js:170–186. По ней выбирается ширина."""
+    length_m = length_mm / 1000.0
+    tiers = getattr(material, "cost_tiers", None)
+    if tiers:
+        unit = _tier_price_js(tiers, length_m)
+    else:
+        unit = float(material.cost or 0.0)
+    length_min = float(getattr(material, "length_min", 0) or 0)
+    if length_min > 0:
+        return unit * math.ceil(length_mm / length_min) * length_min / 1_000_000.0 * width_mm
+    return unit * length_mm * width_mm / 1_000_000.0
+
+
+def _bond_roll_layout(
+    roll_w: float,
+    min_size: float,
+    max_size: float,
+    num_with_defects: float,
+    margins: List[float],
+    max_plotter: List[float],
+) -> Optional[tuple]:
+    """Запасная раскладка, когда изделие не помещается на плоттер.
+
+    calcCutPlotter.js:157–168. Возвращает (длина_мм, число_полос).
+    None — нулевой делитель, ширину пропускаем.
+    """
+    size_with_margins = roll_w - margins[1] - margins[3]
+    num_bond_plotter = 1.0
+    if size_with_margins < max_plotter[0]:
+        if size_with_margins == 0:
+            return None
+        num_bond_material = float(math.ceil(min_size / size_with_margins))
+    else:
+        if max_plotter[0] == 0:
+            return None
+        num_bond_plotter = float(math.ceil(min_size / max_plotter[0]))
+        if num_bond_plotter == 0:
+            return None
+        strip = min_size / num_bond_plotter + margins[1] + margins[3]
+        if strip == 0:
+            return None
+        num_bond_material = 1.0 / math.ceil(roll_w / strip)
+    along = min(float(max_plotter[1]), max_size)
+    if along <= 0:
+        return None
+    num_sheet = math.ceil(max_size * num_with_defects * num_bond_plotter / along)
+    length_mm = (
+        max_size * num_with_defects * num_bond_plotter
+        + num_sheet * (margins[0] + margins[2])
+    ) * num_bond_material
+    return length_mm, num_sheet
+
+
 class CutPlotterCalculator(BaseCalculator):
     """Плоттерная резка: листовой или рулонный материал, резка по контуру."""
 
@@ -233,17 +305,44 @@ class CutPlotterCalculator(BaseCalculator):
             len_material_mm = None
             num_sheet = None
 
+            # JS: layoutOnPlotter.length == 0 → запасная ветка на каждой ширине,
+            # затем ширина с меньшей стоимостью (calcCutPlotter.js:157–168, 214–219).
+            layout_plotter_check = layout_on_roll(
+                num_with_defects, size, [max_plotter[0], 0.0], interval
+            )
+            plotter_fits = layout_plotter_check["length"] > 0
+            if not plotter_fits:
+                best_cost: Optional[float] = None
+                for roll_size in roll_sizes:
+                    roll_w = float(roll_size[0])
+                    bonded = _bond_roll_layout(
+                        roll_w,
+                        min_size,
+                        max_size,
+                        num_with_defects,
+                        margins,
+                        max_plotter,
+                    )
+                    if bonded is None:
+                        continue
+                    cur_len, cur_num_sheet = bonded
+                    if cur_len <= 0:
+                        continue
+                    cost_mat = _roll_piece_cost(material, roll_w, cur_len)
+                    if best_cost is None or cost_mat < best_cost:
+                        best_cost = cost_mat
+                        len_material_mm = cur_len
+                        num_sheet = cur_num_sheet
+                        chosen_size_mm = [roll_w, 0.0]
+
+            # Способы 1–4 — только когда изделие входит в ширину плоттера.
             for roll_size in roll_sizes:
+                if not plotter_fits:
+                    break
                 roll_w = float(roll_size[0])
                 # Полезная ширина рулона (JS: sizeMaterial[0] - margins[0] - margins[2])
                 roll_eff = roll_w - margins[0] - margins[2]
                 if roll_eff <= 0:
-                    continue
-                # Проверка: изделие помещается на плоттер (JS: layoutOnPlotter)
-                layout_plotter_check = layout_on_roll(
-                    num_with_defects, size, [max_plotter[0], 0.0], interval
-                )
-                if layout_plotter_check["length"] <= 0:
                     continue
 
                 cur_len = 0.0
@@ -310,8 +409,9 @@ class CutPlotterCalculator(BaseCalculator):
                     num_sheet = cur_num_sheet
                     chosen_size_mm = [roll_w, 0.0]
 
-            if len_material_mm is None or len_material_mm <= 0:
-                # Fallback: изделие не помещается ни одним способом — разбиваем на куски (JS: else)
+            if plotter_fits and (len_material_mm is None or len_material_mm <= 0):
+                # Плоттер вмещает, но ни один способ раскроя не дал длину.
+                # Прежняя запасная формула этой ветки (не случай «обе стороны > ширины плоттера»).
                 chosen_size_mm = [float(roll_sizes[0][0]), 0.0]
                 roll_eff = float(roll_sizes[0][0]) - margins[1] - margins[3]
                 if roll_eff < max_plotter[0]:

@@ -41,6 +41,25 @@ def test_form_js_has_form_default_reference():
     assert not missing, "\n".join(missing)
 
 
+def test_sticker_js_posts_wide_print():
+    """Форма 22: широкие принтеры и ламинация 1064 уходят в calcApi, не только в URL."""
+    text = (FORMS / "sticker.js").read_text(encoding="utf-8")
+    assert "var wideLaminat = ezfc_functions.get_value_from(1064, true)[0];" in text
+    assert (
+        "printerId === 'Technojet160ECO' || printerId === 'HPLatex335' "
+        "|| printerId === 'TechnojetXR720'"
+    ) in text
+    assert re.search(
+        r"printerId === 'Technojet160ECO' && wideLaminat && String\(wideLaminat\) !== 'No'\) \{\s*"
+        r"params\.lamination_id = wideLaminat;",
+        text,
+    )
+    assert "printerId === 'KMBizhubC220'" in text
+    assert "params.lamination_id = sheetLaminat;" in text
+    assert "insaincalc.calcApi('sticker'" in text
+    assert not re.search(r"\bprice\s*=", text)
+
+
 def test_forms_keep_mode_zero():
     """Режим 0 («дешевле») не превращается в 1 через ||, даже если сейчас в форме его нет."""
     bad = []

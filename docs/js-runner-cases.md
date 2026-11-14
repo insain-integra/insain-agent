@@ -39,6 +39,11 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | `calcSticker` ORAJET3640 HPLatex335 | `sticker` | 2750.368832 |
 | `calcSticker` ORAJET3640 TechnojetXR720 | `sticker` | 1003.368832 |
 | `calcSticker` ORAJET3640 LaminatDLCLAM без печати | `sticker` | 1330.368832 |
+| `calcSticker` ORAJET3640 1000×1000 1 шт | `sticker` | 890.06336 |
+| `calcSticker` ORAJET3640 1000×1000 100 шт | `sticker` | 39485.3264 |
+| `calcSticker` ORAJET3640 604×604 1 шт | `sticker` | 555.9914752 |
+| `calcCutPlotter` ORAJET3640 1000×1000 1 шт | `cut_plotter` | 368 |
+| `calcCutPlotter` ORAJET3640 604×604 1 шт | `cut_plotter` | 322 |
 | `calcLaminationWide` 10 шт 1000×500 | `lamination_wide` | 3877.95 |
 | `calcPolySticker` 80×80 | `poly_sticker` | 4107.8 |
 | `calcPolyStickerPack` 80×80 | `poly_sticker_pack` | 6341.1 |
@@ -106,6 +111,26 @@ node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,
 
 node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0,1,\"ORAJET3640\",{\"isLamination\":\"LaminatDLCLAM\"},1]'
 
+node scripts/run_js_calc.mjs calcSticker --data current --args '[1,[1000,1000],50,0,1,\"ORAJET3640\",{},1]'
+
+node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[1000,1000],50,0,1,\"ORAJET3640\",{},1]'
+
+node scripts/run_js_calc.mjs calcSticker --data current --args '[1,[604,604],50,0,1,\"ORAJET3640\",{},1]'
+
+node scripts/run_js_calc.mjs calcSticker --data current --args '[1,[500,500],50,0,1,\"ORAJET3640\",{},1]'
+
+node scripts/run_js_calc.mjs calcSticker --data current --args '[1,[1000,500],50,0,1,\"ORAJET3640\",{},1]'
+
+node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[1,[1000,1000],50,0,1,\"ORAJET3640\",{},1]'
+
+node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[100,[1000,1000],50,0,1,\"ORAJET3640\",{},1]'
+
+node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[1,[604,604],50,0,1,\"ORAJET3640\",{},1]'
+
+node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[1,[500,500],50,0,1,\"ORAJET3640\",{},1]'
+
+node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[1,[1000,500],50,0,1,\"ORAJET3640\",{},1]'
+
 node scripts/run_js_calc.mjs calcLaminationWide --data current --args '[10,[1000,500],1]'
 
 node scripts/run_js_calc.mjs calcPolySticker --data current --args '[20,[80,80],1,\"PaperCoated115M\",{\"isPrint\":{\"printerID\":\"KMBizhubC220\",\"color\":\"4+0\"}},1]'
@@ -116,5 +141,7 @@ node scripts/run_js_calc.mjs calcPolyStickerPack --data current --args '[20,[80,
 Листовые кейсы `calcCutPlotter` / `calcSticker` / `calcPolySticker` / `calcPolyStickerPack` сняты 14.11.2026 (`--data current`). У полимерных наклеек `time_hours` Python на 0.01 ч ниже раннера: `print_laser` округляет время через `round`, JS — `Math.ceil`. Вес стикерпака: раннер 0.2, Python 0.19 — `round` веса эпоксидки. Оба остатка вне `cut-plotter-sheet-layout`.
 
 Рулонные кейсы `calcSticker` и `calcLaminationWide` сняты 14.11.2026 (`--data current`, раннер грузит `calcLamination.js` и `laminat.json`). `cost` и `price` совпадают до копейки; `time_ready` Python на 0.01–0.02 ч ниже: резка округляет время через `round`, JS — `Math.ceil`.
+
+ORAJET3640 1000×1000, 604×604 и контроль 500×500 / 1000×500 сняты 15.11.2026 (`--data current`). Запасная ветка рулона: длина с `numBondMaterial`, на 604×604 ширина 1520 мм. У 604×604 `time_ready` Python на 0.01 ч ниже (тот же `round`).
 
 Известные расхождения Python с JS вне этих кейсов: бейдж (JS 4708, Python ~6509) — задача `badge-vs-js`. Вес лазерной листовой печати к JS не выравнивать: `calcPrintLaser` считает весь лист (`numSheet` × `sizeSheet`, с обрезью), Python — тираж × размер изделия. Верный вес — Python, решение 11.11.2026. Вымпел 50×80×120 `PaperCoated115M` без ламинации: JS `weight_kg` 0.1328, Python 0.1052 (лист того же входа: JS 0.0828, Python 0.0552).

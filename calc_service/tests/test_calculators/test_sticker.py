@@ -279,6 +279,58 @@ def test_oversize_sheet_http_400():
     assert response.json()["detail"] == OVERSIZE_SHEET_MESSAGE
 
 
+# JS, 15.11.2026 — запасная ветка резки на рулоне (обе стороны > 603 мм).
+# Цена стикера берёт метры из cut_plotter. До правки 1000×1000 было в 3 раза длиннее.
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[1,[1000,1000],50,0,1,\"ORAJET3640\",{},1]'
+# 1 шт: cost 544.496, price 890.06336, time_ready 16.13, [1260, 0] × 1.3866666666666665 м
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[1000,1000],50,0,1,\"ORAJET3640\",{},1]'
+# 100 шт: cost 24059.04, price 39485.3264, time_ready 20.25, [1260, 0] × 72.8 м
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[1,[604,604],50,0,1,\"ORAJET3640\",{},1]'
+# 604×604: cost 341.95872, price 555.9914752, time_ready 16.12, [1520, 0] × 0.5152 м
+# Контроль ≤ 603 мм:
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[1,[500,500],50,0,1,\"ORAJET3640\",{},1]'
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[1,[1000,500],50,0,1,\"ORAJET3640\",{},1]'
+# 500×500: price 421.77376, time_ready 16.08, [1260, 0] × 0.52 м
+# 1000×500: price 674.54752, time_ready 16.1, [1260, 0] × 1.04 м
+# 604×604: time_ready Python на 0.01 ч ниже (round против Math.ceil), rel=0.001 проходит.
+_ROLL_BOND_CASES = (
+    (1000, 1000, 1, 544.4959999999999, 890.06336, 16.13, 1260.0, 1.3866666666666665),
+    (1000, 1000, 100, 24059.04, 39485.3264, 20.25, 1260.0, 72.8),
+    (604, 604, 1, 341.95872, 555.9914752, 16.12, 1520.0, 0.5152),
+    (500, 500, 1, 258.936, 421.77376, 16.08, 1260.0, 0.52),
+    (1000, 500, 1, 412.872, 674.54752, 16.1, 1260.0, 1.04),
+)
+
+
+@pytest.mark.parametrize(
+    "width,height,quantity,cost,price,time_ready,roll_w,length_m",
+    _ROLL_BOND_CASES,
+)
+def test_roll_bond_when_wider_than_plotter(
+    calc, width, height, quantity, cost, price, time_ready, roll_w, length_m
+):
+    """ORAJET3640 без печати: длина рулона с numBondMaterial, ширина по минимальной стоимости."""
+    result = calc.execute({
+        "quantity": quantity,
+        "width": width,
+        "height": height,
+        "material_id": "ORAJET3640",
+        "size_item": 50,
+        "density": 0,
+        "difficulty": 1,
+        "mode": 1,
+    })
+    assert _cmp(result["cost"], cost, 0.001), result["cost"]
+    assert _cmp(result["price"], price, 0.001), result["price"]
+    assert _cmp(result["time_ready"], time_ready, 0.001), result["time_ready"]
+    mat = result["materials"][0]
+    assert mat["code"] == "ORAJET3640"
+    assert mat["name"] and mat["title"]
+    assert mat["unit"] == "м"
+    assert mat["size_mm"] == [roll_w, 0.0]
+    assert mat["quantity"] == pytest.approx(length_m, abs=1e-6)
+
+
 # ── Широкоформатная печать и ламинация (рулон) ──────────────────────
 # JS, 14.11.2026 — calcSticker → calcPrintWide(1, [1520, 0], …) и calcLaminationWide(1, [1520, 0]).
 # Рулон ORAJET3640, 100 шт 50×50, size_item 50, density 0, difficulty 1, mode 1.

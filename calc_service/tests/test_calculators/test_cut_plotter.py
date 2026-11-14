@@ -381,6 +381,63 @@ def test_oversize_sheet_http_400():
     assert response.json()["detail"] == OVERSIZE_SHEET_MESSAGE
 
 
+# JS, 15.11.2026 — запасная ветка рулона: обе стороны больше ширины плоттера 603 мм.
+# numBondMaterial и ширина с меньшей стоимостью (calcCutPlotter.js:157–168, 214–219).
+# node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[1,[1000,1000],50,0,1,\"ORAJET3640\",{},1]'
+# 1 шт 1000×1000: cost 230, price 368, time_ready 16.13, [1260, 0] × 1.3866666666666665 м
+# node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[100,[1000,1000],50,0,1,\"ORAJET3640\",{},1]'
+# 100 шт: cost 7548, price 12077, time_ready 20.25, [1260, 0] × 72.8 м
+# node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[1,[604,604],50,0,1,\"ORAJET3640\",{},1]'
+# 604×604: cost 201, price 322, time_ready 16.12, [1520, 0] × 0.5152 м (1520 дешевле 1260)
+# Контроль, короткая сторона ≤ 603 — раскладка на плоттере, не запасная ветка:
+# node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[1,[500,500],50,0,1,\"ORAJET3640\",{},1]'
+# node scripts/run_js_calc.mjs calcCutPlotter --data current --args '[1,[1000,500],50,0,1,\"ORAJET3640\",{},1]'
+# 500×500: cost 141, price 226, time_ready 16.08, [1260, 0] × 0.52 м
+# 1000×500: cost 177, price 283, time_ready 16.1, [1260, 0] × 1.04 м
+# 604×604: time_ready Python 16.11 — round против Math.ceil в JS (0.01 ч), rel=0.001 проходит.
+_ROLL_BOND_CASES = (
+    (1000, 1000, 1, 230, 368, 16.13, 1260.0, 1.3866666666666665),
+    (1000, 1000, 100, 7548, 12077, 20.25, 1260.0, 72.8),
+    (604, 604, 1, 201, 322, 16.12, 1520.0, 0.5152),
+    (500, 500, 1, 141, 226, 16.08, 1260.0, 0.52),
+    (1000, 500, 1, 177, 283, 16.1, 1260.0, 1.04),
+)
+
+
+def _orajet_roll(quantity: int, width: float, height: float) -> dict:
+    return {
+        "quantity": quantity,
+        "width": width,
+        "height": height,
+        "material_id": "ORAJET3640",
+        "size_item": 50,
+        "density": 0,
+        "difficulty": 1,
+        "mode": 1,
+    }
+
+
+@pytest.mark.parametrize(
+    "width,height,quantity,cost,price,time_ready,roll_w,length_m",
+    _ROLL_BOND_CASES,
+)
+def test_roll_bond_when_wider_than_plotter(
+    calc, width, height, quantity, cost, price, time_ready, roll_w, length_m
+):
+    """Рулон ORAJET3640: запасная ветка с numBondMaterial и контроль, где изделие входит в плоттер."""
+    result = calc.execute(_orajet_roll(quantity, width, height))
+    assert _cmp(result["cost"], cost, 0.001), result["cost"]
+    assert _cmp(result["price"], price, 0.001), result["price"]
+    assert _cmp(result["time_ready"], time_ready, 0.001), result["time_ready"]
+    mat = result["materials"][0]
+    assert mat["code"] == "ORAJET3640"
+    assert mat["name"] and mat["title"]
+    assert mat["unit"] == "м"
+    assert mat["size_mm"] == [roll_w, 0.0]
+    # Длина в ответе округлена до 6 знаков: 1.3866666666666665 → 1.386667.
+    assert mat["quantity"] == pytest.approx(length_m, abs=1e-6)
+
+
 def test_roll_length_not_rounded(calc):
     """Расход рулона ORAJET3640 — 232 мм на ширине 1520, не 0.23 м: от него стоимость плёнки в sticker.
 
