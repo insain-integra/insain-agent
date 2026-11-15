@@ -9,10 +9,10 @@
 
 ## Задачи
 
-1. `todo/site-content-guardrails.md` — правила безопасности редакционного контента, дополнение `docs/site/access-tools.md` (WPBakery `[vc_…]`, `wp yoast index`, бэкапы) и базовый каркас skill контура сайта.
+1. `site-content-guardrails` (закрыто 2026-11-16, `docs/history/log.md`) — правила безопасности редакционного контента, дополнение `docs/site/access-tools.md` (WPBakery `[vc_…]`, `wp yoast index`, бэкапы) и базовый каркас skill контура сайта.
 2. Прогон 4 skills контура сайта на реальных задачах `todo/EPIC-ai-seo.md` (начиная с `todo/ai-seo-h1-structure.md` — страница/WPBakery; далее товар Woo + SEO-мета, меню/шаблон темы и медиа по мере постановки волн 1–2).
 3. Журнал изменений контента — дополняется только если `docs/history/log.md` после `close` этого не покрывает.
 
 ## Порядок
 
-`todo/site-content-guardrails.md` идёт первой; после её закрытия — задачи `todo/EPIC-ai-seo.md` и дальнейшая обкатка skills параллельно с G1 при отсутствии пересечений в `## Файлы`.
+`site-content-guardrails` закрыта (2026-11-16, `docs/history/log.md`). Дальше — задачи `todo/EPIC-ai-seo.md` и обкатка skills параллельно с G1 при отсутствии пересечений в `## Файлы`.

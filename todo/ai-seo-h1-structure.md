@@ -1,12 +1,12 @@
 # ai-seo-h1-structure
 
-Статус: заблокировано: ждёт todo/site-content-guardrails.md
+Статус: черновик
 Сложность: средняя
 Implementer: не нужен
 Reviewer: Grok 4.7
 Site ops: Opus 5.5
 Почему: правка WPBakery главной страницы и шаблона заголовков категорий Porto на проде с обкаткой skill `.cursor/skills/site-page-seo/SKILL.md` (`T03`, `G2`).
-Чат: после закрытия `todo/site-content-guardrails.md` (и снятия статуса `ждёт`) — новая сессия Site ops (Opus 5.5) с захватом `lock acquire prod ai-seo-h1-structure`.
+Чат: новая сессия Site ops (Opus 5.5) с захватом `lock acquire prod ai-seo-h1-structure`.
 
 ## Цель
 
@@ -16,7 +16,7 @@ Site ops: Opus 5.5
 
 - `insain-ru-ai-audit.md` — задача `T03`, «План правок → п. 3».
 - `todo/EPIC-ai-seo.md` и `todo/EPIC-site-content.md` (`G2`).
-- `.cursor/skills/site-page-seo/SKILL.md` и `docs/site/access-tools.md` (обновлены в `todo/site-content-guardrails.md`).
+- `.cursor/skills/site-page-seo/SKILL.md` и `docs/site/access-tools.md` (из `site-content-guardrails`, закрыто 2026-11-16, `docs/history/log.md`).
 - `.cursor/rules/insain-site-autonomous.mdc`.
 - `docs/site/content-inventory.md` — главная (`ID 143`, `_wpb_vc_js_status=true`), тема `insain` 1.1 / `porto` 7.8.5, шаблоны `porto_builder`.
 - Остальное не открывать.

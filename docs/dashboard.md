@@ -2,7 +2,7 @@
 
 # Дашборд insain.ru
 
-Состояние на последнюю запись журнала: **15.11.2026**.
+Состояние на последнюю запись журнала: **16.11.2026**.
 
 Собрано из `docs/vision.md`, `todo/`, `docs/site/forms.md`, `docs/history/log.md`. Обновляет
 `python scripts/dev.py dashboard` и `python scripts/dev.py close <задача>`.
@@ -36,13 +36,13 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **19**. В работе/ревью: `site-content-guardrails.md`. Заблокировано: `ai-seo-h1-structure.md`, `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **18**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `ai-seo-cleanup-noindex.md` | черновик |
 | `ai-seo-geo-yoast.md` | черновик |
-| `ai-seo-h1-structure.md` | заблокировано: ждёт todo/site-content-guardrails.md |
+| `ai-seo-h1-structure.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
 | `form-button-pins.md` | черновик |
 | `form-print-offset.md` | черновик |
@@ -53,7 +53,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `presswall-banner-mode.md` | черновик |
 | `print-sheet-copy-result.md` | черновик |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
-| `site-content-guardrails.md` | ревью |
 | `smartcaptcha-replace.md` | черновик |
 | `spam-users-cleanup.md` | заблокировано: ждёт todo/registration-harden.md |
 | `supplier-catalog-load.md` | заблокировано: ждёт todo/supplier-parser.md |
@@ -68,8 +67,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-16 — site-content-guardrails
 - 2026-11-15 — dashboard-harness
 - 2026-11-15 — form-laser
 - 2026-11-15 — form-sticker
 - 2026-11-14 — sticker-print-wide
-- 2026-11-14 — cut-plotter-sheet-layout
