@@ -6,6 +6,15 @@
 `docs/archive/`. Число сессий агентов — файлы чатов Cursor за период, включая субагентов.
 Часы человека — оценка по правилу 1 ч на коммит. Вне этапов — 1 коммит (`cd640ec`, правило ролей, 1 ч).
 
+## 2026-11-16 — print-offset-promo
+
+- Период: 2026-11-16 — 2026-11-16 (1 дн.)
+- Часы человека: 3 сообщ. в чатах Cursor; активно 0.3 ч (ходы агента > 30 мин — с коэфф. 0.5)
+- Работа агентов: 3 чатов Cursor, 3 сообщ. человека, 0.3 ч активных; Implementer — Opus 5.5; Reviewer — Grok 4.7; Site ops — Grok 4.7
+- Было / стало: до выкатки боевой `print_offset` на `OffsetPromoА51000` (коммит `7e61511`) отдавал price 0 и time_ready 8. После `e11ac75`: `POST https://insain.ru/api/v1/calc/print_offset` с `{"num_sheet":1000,"material_id":"OffsetPromoА51000","mode":0}` → 200, cost 2250.0, price 4244.4 (abs 0, rel 0), time_hours 0.0, time_ready 56.0, weight_kg 3.5742. Локально до выкатки (TestClient, то же тело): 200, cost 2250.0, price 4244.4, time_hours 0.0, time_ready 56.0, weight_kg 3.5742.
+- Эффект: —
+- Источник: задача `todo/print-offset-promo.md`, коммиты 0fc2784 2c125b2
+
 ## 2026-11-16 — form-print-roll
 
 - Период: 2026-11-15 — 2026-11-16 (2 дн.)

@@ -36,7 +36,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **18**. В работе/ревью: `print-offset-promo.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **17**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -50,7 +50,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
 | `presswall-banner-mode.md` | черновик |
-| `print-offset-promo.md` | выкатка |
 | `print-sheet-copy-result.md` | черновик |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
 | `smartcaptcha-replace.md` | черновик |
@@ -67,8 +66,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-16 — print-offset-promo
 - 2026-11-16 — form-print-roll
 - 2026-11-16 — site-content-guardrails
 - 2026-11-15 — dashboard-harness
 - 2026-11-15 — form-laser
-- 2026-11-15 — form-sticker

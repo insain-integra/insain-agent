@@ -17,12 +17,12 @@
 - `todo/presswall-banner-mode.md` — баннер и чехол `presswall` в режиме формы; до переключения формы 46
 - `todo/form-button-pins.md` — калькулятор `button_pins` + копия формы 12
 - `todo/print-sheet-copy-result.md` — на копии 96 показать за шт со скидкой (`htmCost`)
-- `todo/print-offset-promo.md` — порт `calcPrintOffsetPromo` в slug `print_offset`; пока не закрыта, копия формы 82 ждёт
-- `todo/form-print-offset.md` — копия формы 82, slug `print_offset` (`calcPrintOffsetPromo`); ждёт `todo/print-offset-promo.md`
+- `todo/form-print-offset.md` — копия формы 82, slug `print_offset` (`calcPrintOffsetPromo`); предпосылка `print-offset-promo` закрыта 2026-11-16
 - `form-print-roll` (закрыто 2026-11-16, `docs/history/log.md`) — копия формы 23, slug `print_roll` (форма CalcPrintWide)
 
 Закрытые (файла в `todo/` нет, запись в `docs/history/log.md`):
 
+- `print-offset-promo` (закрыто 2026-11-16, `docs/history/log.md`) — порт `calcPrintOffsetPromo` в slug `print_offset`
 - `form-mug` (закрыто 2026-11-07) — копия 41 (88 / 2586882)
 - `form-embossing` (закрыто 2026-11-07) — копия 85
 - `form-acrylic-prizes` (закрыто 2026-11-08) — копия 78
@@ -44,7 +44,7 @@
 
 1. `todo/presswall-banner-mode.md` — параллельно пакету: правит только `presswall.py` и его тест. Форму 46 на бой не переключать, пока новый `price` не на боевом API.
 2. `todo/forms-batch-switch.md` — одно подтверждение на 12 форм ниже. Форма 46 в очереди последней и только после пункта 1.
-3. Сначала `todo/print-offset-promo.md` (калькулятор, его тест, раннер). `todo/form-print-offset.md` стартует после её `close`: в «Файлах» копии нет теста, пока эталоны promo пишет предпосылка. Параллельно пакету, файлы не пересекаются: `todo/form-button-pins.md`, `form-print-roll` (закрыто 2026-11-16, `docs/history/log.md`), `todo/print-sheet-copy-result.md` (только `htmCost` копии 96).
+3. Сначала `print-offset-promo` (закрыто 2026-11-16, `docs/history/log.md`) (калькулятор, его тест, раннер). `todo/form-print-offset.md` стартует после её `close`: в «Файлах» копии нет теста, пока эталоны promo пишет предпосылка. Параллельно пакету, файлы не пересекаются: `todo/form-button-pins.md`, `form-print-roll` (закрыто 2026-11-16, `docs/history/log.md`), `todo/print-sheet-copy-result.md` (только `htmCost` копии 96).
 4. После принятия копии своего slug — отдельные задачи, не строки этого пакета: форма 19 (`print_sheet`), 83 (`print_offset`), 29 (`sticker`).
 5. Пачки 4–7 — новые файлы задач. Их бой — новая `forms-batch-N`. Состав текущего пакета не расширять.
 
