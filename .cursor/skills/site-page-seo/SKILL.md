@@ -1,6 +1,6 @@
 ---
 name: site-page-seo
-description: Правка страницы на insain.ru (в том числе WPBakery/Porto и шаблонов porto_builder) и SEO-меты Yoast — заголовок, description, focus keyword, текст страницы. Порядок — бэкап, замер curl до, правка нужным каналом, wp yoast index, сброс кэша, замер после (h1, title, description, JSON-LD), консоль, откат. Применять, когда задача из todo/ меняет одну или несколько опубликованных страниц или их SEO-мету. Не для товаров WooCommerce, меню, медиа, темы и форм ezFC (skill ezfc-form-to-api).
+description: Правка страницы на insain.ru (в том числе WPBakery/Porto и шаблонов porto_builder), описания рубрики product_cat и SEO-меты Yoast — заголовок, h1, description, focus keyword, текст страницы. Порядок — бэкап, замер curl до, правка нужным каналом, wp yoast index, сброс кэша, замер после (h1, title, description, JSON-LD), консоль, откат. Применять, когда задача из todo/ меняет одну или несколько опубликованных страниц или их SEO-мету. Не для товаров WooCommerce, меню, медиа, темы и форм ezFC (skill ezfc-form-to-api).
 ---
 
 # Правка страницы и SEO-меты Yoast
@@ -32,11 +32,38 @@ Select-String -Path $env:TEMP\page-<id>-before.html -Pattern '<title>','<h1','na
 curl.exe -fsS "https://insain.ru/wp-json/yoast/v1/get_head?url=<url>" -o $env:TEMP\head-<id>-before.json
 ```
 
-Записать в отчёт: `<title>`, число и текст `<h1>` (на странице ровно один), `description`, наличие JSON-LD (`application/ld+json`). Переменная `{region_name_prepositional}` в заголовках — от геоплагина, не раскрывать и не удалять.
+Записать в отчёт: `<title>`, число и текст `<h1>` (на странице ровно один), `description`, наличие JSON-LD (`application/ld+json`). Переменная `{region_name_prepositional}` в заголовках — от геоплагина, не раскрывать и не удалять. Число `<h1>` считать по `curl.exe -A "GPTBot/1.0"` разбором Python (`re.findall(r"<h1\b[^>]*>(.*?)</h1>", body, re.S)`), а не `Select-String`: тег и текст бывают на разных строках. VDS отвечает 5–30 с и иногда рвёт соединение — у `curl.exe` ставить `--retry 3 --retry-all-errors --connect-timeout 30`.
 
 ## 2. Правка
 
-Одна страница за раз, каналом из шага 0.2. В WPBakery — менять только текст нужных блоков, не структуру строк и колонок; после «Обновить» проверить, что страница не перешла в классический редактор.
+Одна страница за раз, каналом из шага 0.2. В WPBakery — менять только текст нужных блоков, не структуру строк и колонок (новая строка — только если её добавление записано в задаче); после «Обновить» проверить, что страница не перешла в классический редактор.
+
+### 2.1. WPBakery через Browser MCP
+
+1. Открыть `https://insain.ru/wp-admin/post.php?post=<id>&action=edit`. Конструктор грузится 20–60 с: ждать, пока `eval "() => typeof vc === 'object' && vc.shortcodes.length"` не вернёт число, иначе правки теряются.
+2. Строки верхнего уровня — `vc.shortcodes.where({parent_id: false})` с полем `order`. Новый блок первой строкой — тем же API, что панель «Добавить элемент»: `vc.shortcodes.create({shortcode: 'vc_row', params: {wrap_container: 'yes'}, order: -1, parent_id: false, root_id: false})`, внутри `vc_column` (`width: '1/1'`) и `vc_column_text` (`params.content` — HTML). Тема подставляет в новый `vc_column_text` мусорный `css: "35px"` — удалить из `params` до сохранения.
+3. До сохранения сверить разметку: `vc.shortcodes.createShortcodeString(<модель строки>)`. Сохранять кнопкой `#publish` («Обновить»), затем проверить `post_content` и `_wpb_vc_js_status=true` через wp-cli.
+4. Пересохранение пересериализует весь контент: перевод строки в атрибуте (`text="…\n…"` у `vc_custom_heading`) становится `<br />`, вокруг шорткодов внутри текстовых блоков появляются `</p>`/`<p>` от wpautop, атрибуты со значением по умолчанию пропадают, порядок атрибутов меняется. Это ожидаемо; проверить в HTML страницы, что нет пустых `<p></p>` и сырых `[vc_…]`, и записать diff `post_content` до/после в отчёт.
+5. Точка отката — последняя ревизия до правки: `wp post list --post_type=revision --post_parent=<id> --orderby=ID --order=DESC`, её `post_content` сверить `diff` с `/tmp/page-<id>-<задача>-before.txt` и записать id в отчёт.
+
+### 2.2. Город в тексте (WTGeotargeting)
+
+- Маски `{region_*}` работают только в `title`/`description` Yoast и `the_title`, в `post_content` и описаниях рубрик — нет. В тексте — шорткод `[wt_contacts get="region_name_prepositional"]` (падежи: `nominative`, `genitive`, `dative`, `accusative`, `instrumental`, `prepositional`) внутри `vc_column_text`; в атрибуте `text` у `vc_custom_heading` шорткоды не раскрываются.
+- Проверка: `wp eval 'echo do_shortcode("[wt_contacts get=\"region_name_prepositional\"]");'` и `curl.exe -A "GPTBot/1.0" -b "wt_geo_data=<urlencoded JSON {\"city\":\"Пермь\",\"region\":\"\",\"district\":\"\",\"country\":\"RU\"}>"` по каждому из 5 городов; без cookie — Екатеринбург. Страничного кэша нет, HTML собирается на каждый запрос.
+
+### 2.3. Описание рубрики `product_cat` и Porto Page Title
+
+- Porto на рубриках, карточках и страницах всегда печатает `<h1 class="page-title">` (скрыт при пустом `porto_settings.show-pagetitle`), на главной — не печатает. Значит, в описаниях рубрик и текстах карточек заголовки — не выше `<h2>`, а `<h1>` главной — в её контенте.
+- `description` рубрики — не WPBakery и не `wpseo_taxonomy_meta`, его можно писать wp-cli. Но `wp term update --description=…` (даже с `--user=1`) молча вырезает заголовки: ядро вешает `wp_filter_kses` на `pre_term_description`. Писать из файла на сервере:
+
+  ```bash
+  wp eval 'wp_set_current_user(1); remove_filter("pre_term_description", "wp_filter_kses");
+  $d = rtrim(file_get_contents("/tmp/term-<id>-<задача>-after.txt"), "\n");
+  $r = wp_update_term(<id>, "product_cat", ["description" => $d]); echo is_wp_error($r) ? $r->get_error_message() : "ok";'
+  wp term get product_cat <id> --field=description | diff - /tmp/term-<id>-<задача>-after.txt && echo matches
+  ```
+
+  Исходник — `wp term get product_cat <id> --field=description > /tmp/term-<id>-<задача>-before.txt`, откат — тем же `wp eval` из файла `-before`.
 
 ## 3. Переиндексация и кэш
 
