@@ -32,8 +32,10 @@ alwaysApply: false
 - Проверка страниц через Browser MCP; Network: /api/v1/
 - wp cache flush, wp plugin list/activate (через sudo -u www-data)
 
-## Перед массовыми правками контента WordPress
-- Бэкап БД: sudo -u www-data wp db export /tmp/insain-db.sql --path=/var/www/insain.ru
+## Правки контента WordPress (страницы, SEO, меню, товары)
+- Правила — docs/site/access-tools.md, раздел «Правила правки редакционного контента»; страницы и SEO — skill site-page-seo
+- Перед массовой или структурной правкой — бэкап БД: sudo -u www-data wp db export /tmp/insain-db-<задача>-<дата>.sql --path=/var/www/insain.ru
+- После CLI-правки меты Yoast — обязательно wp yoast index, затем wp cache flush и wp litespeed-purge all
 
 ## Спроси подтверждение у пользователя (через AskQuestion)
 - Переключение живой боевой формы или правка опубликованных товаров/страниц вне списка выше

@@ -36,7 +36,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **19**. В работе/ревью: нет. Заблокировано: `ai-seo-h1-structure.md`, `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **19**. В работе/ревью: `site-content-guardrails.md`. Заблокировано: `ai-seo-h1-structure.md`, `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -53,7 +53,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `presswall-banner-mode.md` | черновик |
 | `print-sheet-copy-result.md` | черновик |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
-| `site-content-guardrails.md` | черновик |
+| `site-content-guardrails.md` | ревью |
 | `smartcaptcha-replace.md` | черновик |
 | `spam-users-cleanup.md` | заблокировано: ждёт todo/registration-harden.md |
 | `supplier-catalog-load.md` | заблокировано: ждёт todo/supplier-parser.md |
