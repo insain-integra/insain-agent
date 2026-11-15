@@ -28,7 +28,8 @@ Site ops: Opus 5.5
 | 73 CalcPennantPaper | `pennant` | `/catalog/kalkulyator-vympelov-bumazhnyh/` | 94 / 2586887 (draft) | копия принята 11.11.2026, `form-pennant` (закрыто 2026-11-11, `docs/history/log.md`) |
 | 55 CalcFlagPaper | `flag` | `/catalog/kalkulyator-flazhkov-bumazhnyh/` | 95 / 2586888 (draft) | копия принята 12.11.2026, `form-flag` (закрыто 2026-11-12, `docs/history/log.md`) |
 | 6 CalcPrint | `print_sheet` | `/catalog/listovki-pod-zakaz/` | 96 / 2586890 (draft) | копия принята 13.11.2026, `form-print-sheet` (закрыто 2026-11-14, `docs/history/log.md`) |
-| 22 CalcSticker | `sticker` | `/catalog/plotternaya-rezka/` | 97 / 2586891 (draft) | копия принята 15.11.2026, `form-sticker` |
+| 22 CalcSticker | `sticker` | `/catalog/plotternaya-rezka/` | 97 / 2586891 (draft) | копия принята 15.11.2026, `form-sticker` (закрыто 2026-11-15, `docs/history/log.md`) |
+| 28 CalcLaser | `laser` | `/catalog/lazernaya-gravirovka-i-rezka/` | 98 / 2586892 (draft) | копия принята 15.11.2026, `form-laser` |
 
 ## Контекст и ссылки
 

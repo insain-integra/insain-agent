@@ -35,14 +35,13 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **16**. В работе/ревью: `dashboard-harness.md`, `form-laser.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **15**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `dashboard-harness.md` | ревью |
 | `ezfc-options-source-reset.md` | черновик |
 | `form-button-pins.md` | черновик |
-| `form-laser.md` | выкатка |
 | `form-print-offset.md` | черновик |
 | `form-print-roll.md` | черновик |
 | `forms-batch-switch.md` | черновик |
@@ -64,8 +63,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-15 — form-laser
 - 2026-11-15 — form-sticker
 - 2026-11-14 — sticker-print-wide
 - 2026-11-14 — cut-plotter-sheet-layout
 - 2026-11-14 — form-print-sheet
-- 2026-11-13 — print-sheet-margins-minus-one

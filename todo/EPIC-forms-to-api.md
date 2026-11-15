@@ -28,7 +28,7 @@
 - `todo/print-sheet-copy-result.md` — на копии 96 показать за шт со скидкой (`htmCost`)
 - `todo/form-print-offset.md` — копия формы 82, slug `print_offset` (`calcPrintOffsetPromo`)
 - `todo/form-print-roll.md` — копия формы 23, slug `print_roll` (форма CalcPrintWide)
-- `todo/form-laser.md` — копия формы 28, slug `laser`
+- `form-laser` (закрыто 2026-11-15, `docs/history/log.md`) — копия формы 28, slug `laser`
 - `cut-plotter-sheet-layout` (закрыто 2026-11-14, `docs/history/log.md`) — предпосылка `form-sticker`: раскладка листа в `cut_plotter.py`, снятие `ceil` цены `sticker` и обновление эталонов `50×50 VHI80` / `poly_sticker`
 - `sticker-print-wide` (закрыто 2026-11-14, `docs/history/log.md`) — предпосылка `form-sticker`: порт `calcPrintWide` / `calcLaminationWide` в `sticker.py`, модуль `lamination_wide`
 - `form-sticker` (закрыто 2026-11-15, `docs/history/log.md`) — копия формы 22, slug `sticker`
@@ -39,12 +39,12 @@
 2. `todo/forms-batch-switch.md` — пачка 1 (69 + 26 + 41). Параллельно копии пачки 2 (embossing … flag): «Файлы» `forms/<slug>.js` не пересекаются; общий `todo/forms-batch-switch.md` дописывает строку только после принятия копии и не во время выкатки пачки 1.
 3. `todo/form-button-pins.md` — можно параллельно пачке 2.
 4. Копия 46 принята (`form-presswall` закрыта 09.11.2026) — Analyst заводит задачу `presswall-banner-mode`: баннер и чехол в `presswall` получают режим формы вместо режима 1 из JS (`calcPresswall.js:50`, решение человека 08.11.2026). Меняет цену на сайте — до или вместе с переключением формы 46 на бой.
-5. Пачка 3: ~~`form-print-sheet` (6) закрыта 14.11.2026~~, ~~`form-sticker` (22) закрыта 15.11.2026~~; параллельно `form-print-offset` (82), `form-print-roll` (23), `form-laser` (28). Форма 19 после копии 6 — `print-sheet-copy-result` / отдельная задача; 83 и 29 — после первой копии своего slug.
+5. Пачка 3: ~~`form-print-sheet` (6) закрыта 14.11.2026~~, ~~`form-sticker` (22) закрыта 15.11.2026~~, ~~`form-laser` (28) закрыта 15.11.2026~~; параллельно `form-print-offset` (82), `form-print-roll` (23). Форма 19 после копии 6 — `print-sheet-copy-result` / отдельная задача; 83 и 29 — после первой копии своего slug.
 6. Копия 6 принята выборочно — Analyst может заводить файлы следующей пачки. Переключение — новая задача `forms-batch-N`, не расширение пачки 1 без решения человека.
 
 ## Пачки
 
-Боевая на API: **79 puzzle**. Копии приняты: **69 plaque, 26 uv_print, 41 mug, 85 embossing, 78 acrylic_prizes, 46 presswall, 49 rollup, 73 pennant, 55 flag, 6 print_sheet, 22 sticker**.
+Боевая на API: **79 puzzle**. Копии приняты: **69 plaque, 26 uv_print, 41 mug, 85 embossing, 78 acrylic_prizes, 46 presswall, 49 rollup, 73 pennant, 55 flag, 6 print_sheet, 22 sticker, 28 laser**.
 
 | Пачка | Формы (id, slug) | Заметка |
 | --- | --- | --- |
