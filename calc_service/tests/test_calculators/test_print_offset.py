@@ -180,3 +180,44 @@ def test_expected_values_print_offset(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+# ── Сборный тираж (calcPrintOffsetPromo) ─────────────────────────────
+
+# JS, 16.11.2026:
+# node scripts/run_js_calc.mjs calcPrintOffsetPromo --data current --args '[<num_sheet>,"OffsetPromoА51000",<mode>]'
+PROMO_CODE = "OffsetPromoА51000"
+PROMO_CASES = [
+    # num_sheet, mode, cost, price, time_hours, time_ready, weight_kg
+    (1000, 0, 2250.0, 4244.4, 0.0, 56.0, 3.5742),
+    (1000, 1, 2250.0, 4244.4, 0.0, 48.0, 3.5742),
+    (1000, 2, 2250.0, 4244.4, 0.0, 40.0, 3.5742),
+    (2000, 1, 4050.0, 7592.4, 0.0, 48.0, 7.1484),
+    (2000, 0, 4050.0, 7592.4, 0.0, 56.0, 7.1484),
+]
+
+
+@pytest.mark.parametrize("num_sheet,mode,cost,price,time_hours,time_ready,weight_kg", PROMO_CASES)
+def test_promo_matches_js(calc, num_sheet, mode, cost, price, time_hours, time_ready, weight_kg):
+    """JS, 16.11.2026: сборный тираж А5 считается как calcPrintOffsetPromo."""
+    r = calc.execute({"num_sheet": num_sheet, "material_id": PROMO_CODE, "mode": mode})
+    assert r["cost"] == pytest.approx(cost, rel=0.001)
+    assert r["price"] == pytest.approx(price, rel=0.001)
+    assert r["time_ready"] == pytest.approx(time_ready, rel=0.001)
+    assert r["time_hours"] == pytest.approx(time_hours, abs=0.01)
+    assert r["weight_kg"] == pytest.approx(weight_kg, rel=0.001)
+    mat = r["materials"][0]
+    assert mat["code"] == PROMO_CODE
+    assert mat["name"] and mat["title"] and mat["name"] != PROMO_CODE
+    assert mat["quantity"] == num_sheet
+
+
+def test_promo_ignores_size_and_color(calc):
+    """Размер и цветность промо берутся из каталога: width/height/color в запросе ничего не меняют."""
+    short = calc.execute({"num_sheet": 1000, "material_id": PROMO_CODE, "mode": 0})
+    full = calc.execute({
+        "num_sheet": 1000, "material_id": PROMO_CODE, "mode": 0,
+        "width": 148, "height": 210, "color": "4+4",
+    })
+    assert short["price"] == pytest.approx(full["price"], rel=1e-9)
+    assert short["time_ready"] == pytest.approx(full["time_ready"], rel=1e-9)

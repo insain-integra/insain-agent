@@ -20,6 +20,7 @@
  *   js_legacy/calc/calcMug.js
  *   js_legacy/calc/calcPrintLaser.js
  *   js_legacy/calc/calcPrintSheet.js
+ *   js_legacy/calc/calcPrintOffset.js
  *   js_legacy/calc/calcPrintInkJet.js
  *   js_legacy/calc/calcPrintRoll.js
  *   js_legacy/calc/calcPrintWide.js
@@ -80,6 +81,7 @@ const JS_FILES = [
     'js_legacy/calc/calcMug.js',
     'js_legacy/calc/calcPrintLaser.js',
     'js_legacy/calc/calcPrintSheet.js',
+    'js_legacy/calc/calcPrintOffset.js',
     'js_legacy/calc/calcPrintInkJet.js',
     'js_legacy/calc/calcPrintRoll.js',
     'js_legacy/calc/calcPrintWide.js',

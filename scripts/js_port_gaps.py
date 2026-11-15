@@ -73,6 +73,7 @@ PORTS: Dict[str, str] = {
     "calcPrintInkJet": "calculators.print_inkjet",
     "calcPrintLaser": "calculators.print_laser",
     "calcPrintOffset": "calculators.print_offset",
+    "calcPrintOffsetPromo": "calculators.print_offset",
     "calcPrintRoll": "calculators.print_roll",
     "calcPrintSheet": "calculators.print_sheet",
     "calcPrintWide": "calculators.print_wide",

@@ -18,8 +18,11 @@ from common.markups import (
     MARGIN_MATERIAL,
     MARGIN_OPERATION,
     get_margin,
+    get_time_ready,
 )
+from common.process_tools import _get_raw_material, calc_shipment
 from equipment import printer as printer_catalog
+from materials import offset_promo as offset_promo_catalog
 from materials import sheet as sheet_catalog
 
 OFFSET_PRINTER_CODE = "OffsetPrint"
@@ -55,7 +58,10 @@ class PrintOffsetCalculator(BaseCalculator):
                     "width": {"type": "number", "minimum": 1, "description": "Ширина листа, мм"},
                     "height": {"type": "number", "minimum": 1, "description": "Высота листа, мм"},
                     "color": {"type": "string", "description": "Цветность: 0+0, 1+0, 4+0, 1+1, 4+1, 4+4"},
-                    "material_id": {"type": "string", "description": "Код бумаги (из каталога sheet)"},
+                    "material_id": {
+                        "type": "string",
+                        "description": "Код бумаги (каталог sheet) или сборного тиража (каталог offset_promo)",
+                    },
                     "mode": {"type": "integer", "enum": [0, 1, 2], "default": 1},
                 },
                 "required": ["num_sheet", "width", "height", "color", "material_id"],
@@ -85,12 +91,19 @@ class PrintOffsetCalculator(BaseCalculator):
 
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
         num_sheet = int(params.get("num_sheet", 1))
+        material_id = str(params.get("material_id", "")).strip()
+        mode = ProductionMode(int(params.get("mode", 1)))
+        try:
+            promo = offset_promo_catalog.get(material_id)
+        except KeyError:
+            promo = None
+        if promo is not None:
+            return self._calculate_promo(num_sheet, promo, mode)
+
         width = float(params.get("width", 0))
         height = float(params.get("height", 0))
         size_sheet = [width, height]
         color = str(params.get("color", "4+0") or "4+0").strip()
-        material_id = str(params.get("material_id", "")).strip()
-        mode = ProductionMode(int(params.get("mode", 1)))
 
         try:
             printer = printer_catalog.get(OFFSET_PRINTER_CODE)
@@ -181,6 +194,57 @@ class PrintOffsetCalculator(BaseCalculator):
             "time_ready": time_ready,
             "weight_kg": round(weight_kg, 3),
             "materials": materials_out,
+        }
+
+    @staticmethod
+    def _calculate_promo(num_sheet: int, promo, mode: ProductionMode) -> Dict[str, Any]:
+        """Сборный тираж на офсете (calcPrintOffsetPromo): размер, плотность и тираж набора — из каталога."""
+        raw = _get_raw_material("offset_promo", promo.code)
+        sheets_in_set = int(raw["numSheet"])
+        size_sheet = list(promo.sizes[0])
+        density = float(promo.density or 0)
+
+        num_set = math.ceil(num_sheet / sheets_in_set)
+        num_printed = num_set * sheets_in_set
+        cost_materials = num_set * promo.get_cost()
+
+        weight_kg = calc_weight(
+            quantity=num_printed,
+            density=density,
+            thickness=0,
+            size=size_sheet,
+            density_unit="гм2",
+        )
+        size_shipment = [size_sheet[0], size_sheet[1], num_printed * density / 80 / 10]
+        shipment = calc_shipment(1, size_shipment, weight_kg, "Luch")
+
+        margin_promo = get_margin("marginOffsetPromo")
+        cost = shipment.cost + cost_materials
+        price = (
+            shipment.price * (1 + margin_promo)
+            + cost_materials * (1 + MARGIN_MATERIAL + margin_promo)
+        )
+
+        base_time_ready = get_time_ready("baseTimeReadyPrintOffsetPromo")
+        idx = max(0, min(len(base_time_ready) - 1, mode.value))
+        time_hours = 0.0
+        time_ready = time_hours + float(base_time_ready[idx])
+
+        return {
+            "cost": float(cost),
+            "price": float(price),
+            "unit_price": float(price) / max(1, num_sheet),
+            "time_hours": time_hours,
+            "time_ready": time_ready,
+            "weight_kg": round(weight_kg, 4),
+            "materials": [{
+                "code": promo.code,
+                "name": promo.description,
+                "title": promo.title,
+                "quantity": num_printed,
+                "unit": "шт",
+                "size_mm": size_sheet,
+            }],
         }
 
     @staticmethod
