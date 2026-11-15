@@ -15,6 +15,7 @@ Site ops: Opus 5.5
 ## Контекст и ссылки
 
 - Эпик `todo/EPIC-supplier-catalog.md`; цель G7 в `docs/vision.md`.
+- Связь с `todo/EPIC-ai-seo.md`: механизм 301-редиректов из п. 3 переиспользуется в `T09` (старые URL `/catalog_hg?rid=…`); изменения меню завершаются до задачи `T07` (скрытие пустых категорий в HTML-меню).
 - `docs/site/content-inventory.md` — «Каталог поставщиков» (рубрики, числа), «Плагин insainParse». Прочитать до действий — правило `AGENTS.md`.
 - `.cursor/rules/insain-site-autonomous.mdc` — целиком до первого действия на сервере.
 - `docs/site/access-tools.md` — wp-cli. Префикс таблиц БД — `wp_insain_`.

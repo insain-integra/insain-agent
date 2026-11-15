@@ -25,6 +25,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 | Файл | Цель | Статус |
 | --- | --- | --- |
+| `EPIC-ai-seo.md` | G4 | черновик |
 | `EPIC-antispam-recaptcha.md` | отложено (`docs/vision.md`) | черновик |
 | `EPIC-bot.md` | G5 | черновик |
 | `EPIC-dashboard.md` | G6 | в работе |
@@ -35,10 +36,13 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **15**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **19**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `ai-seo-h1-structure.md`, `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
+| `ai-seo-cleanup-noindex.md` | черновик |
+| `ai-seo-geo-yoast.md` | черновик |
+| `ai-seo-h1-structure.md` | заблокировано: ждёт todo/site-content-guardrails.md |
 | `dashboard-harness.md` | ревью |
 | `ezfc-options-source-reset.md` | черновик |
 | `form-button-pins.md` | черновик |
@@ -49,6 +53,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `metrics-baseline.md` | заблокировано: человек |
 | `print-sheet-copy-result.md` | черновик |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
+| `site-content-guardrails.md` | черновик |
 | `smartcaptcha-replace.md` | черновик |
 | `spam-users-cleanup.md` | заблокировано: ждёт todo/registration-harden.md |
 | `supplier-catalog-load.md` | заблокировано: ждёт todo/supplier-parser.md |
