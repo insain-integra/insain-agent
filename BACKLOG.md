@@ -110,3 +110,9 @@
 - Из `print-offset-promo`: Радио «стандарт» на форме 82: value 0 и data-value 1. Боевой JS читает value. В калькулятор и в форму не переносить.
 - Из `print-offset-promo`: Штатный раннер до этой задачи не загружает `calcPrintOffset.js`.
 - Из `print-offset-promo`: Живой price обычного офсета `PaperCoated115M`, 1000 шт, 210×297, `4+0`, mode 1 — 14450.546 и до этой правки, и после. Константа теста 14108.116 не менялась; тест держится на `rel=0.03`. В этой задаче не чинить.
+- Из `ai-seo-h1-structure`: Единственный `<h1>` в карточках, на `/about/`, `/shipment/` и в рубриках без `<h1>` в описании скрыт (`.pt-right.d-none`, `porto_settings.show-pagetitle=""`); видимый заголовок — `<h2>`. Счёт «ровно один `<h1>`» выполнен, но заголовок невидим пользователю.
+- Из `ai-seo-h1-structure`: Страница 2975 `agreement` — `<h1>` в `post_content`, не проверялась на дубль.
+- Из `ai-seo-h1-structure`: WTGeotargeting: `GPTBot` и другие ИИ-боты не в списке `isBot()` — для них выполняется запрос DaData по IP на каждый визит без cookie (лишний внешний вызов); итог всё равно Екатеринбург по умолчанию.
+- Из `ai-seo-h1-structure`: В `post_content` 143 остались демо-заголовки Porto («BIG SALE … UP TO 70% OFF», «Online Purchases Only»); в HTML главной их нет (скрытая строка).
+- Из `ai-seo-h1-structure`: На всех проверенных страницах (главная, плакетки, пазлы) в консоли 3 uncaught `TypeError` из `wp-content/plugins/insainParse/includes/script/scrtp.js` (строки 31, 49, 59) — не связаны с правкой (есть и на незатронутых страницах).
+- Из `ai-seo-h1-structure`: Форма калькулятора плакеток (69 CalcPlaque) — на старом JS (`/icalc/*.json`), запросов к `/api/v1/` нет; API проверен на форме пазлов.

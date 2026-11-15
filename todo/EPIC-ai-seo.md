@@ -18,7 +18,7 @@
 - `site-content-guardrails` (закрыто 2026-11-16, `docs/history/log.md`) — правила безопасности правок WP/WPBakery/Yoast, дополнение `docs/site/access-tools.md`, каркас skill контура сайта (G2, предпосылка `T03`).
 - `todo/ai-seo-geo-yoast.md` — `T01` + `T11`: убрать `{region_name_prepositional}` из title/description/JSON-LD в Yoast; решить проблему токена DaData / cookie `wt_geo_data`.
 - `todo/ai-seo-cleanup-noindex.md` — `T02`: удалить/закрыть 410/301 страницы-заглушки (`/services/`, демо `faq`, `sample-page`, `test-mode`, `header-types`), выставить `noindex` и убрать из sitemap служебные Woo и технические CPT.
-- `todo/ai-seo-h1-structure.md` — `T03`: один `<h1>` на главной, категориях и карточках. Предпосылка `site-content-guardrails` закрыта (2026-11-16, `docs/history/log.md`).
+- `ai-seo-h1-structure` (закрыто 2026-11-16, `docs/history/log.md`) — `T03`: один `<h1>` на главной, категориях и карточках. Предпосылка `site-content-guardrails` закрыта (2026-11-16, `docs/history/log.md`).
 
 ## Планируемые волны (файлы `todo/` заводятся перед стартом волны)
 
@@ -41,6 +41,6 @@
 ## Порядок
 
 1. `site-content-guardrails` закрыта (2026-11-16, `docs/history/log.md`). Дальше параллельно: `todo/ai-seo-geo-yoast.md` (прод, `lock prod`), затем `todo/ai-seo-cleanup-noindex.md` (прод, `lock prod`, после снятия блокировки с предыдущей).
-2. `todo/ai-seo-h1-structure.md` можно стартовать: предпосылка закрыта.
+2. `ai-seo-h1-structure` (закрыто 2026-11-16, `docs/history/log.md`) можно стартовать: предпосылка закрыта.
 3. Перед стартом Волны 1 владелец передаёт подтверждённый факт-лист (адреса, телефоны, ИНН, ссылки `sameAs`, цифры заказов/сроков и ответы для FAQ).
 4. После `todo/supplier-old-cleanup.md` заводятся задачи Волны 2; после G1 — задачи Волны 3.
