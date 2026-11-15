@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
@@ -19,6 +20,7 @@ if _calc_service.name == "calc_service" and str(_calc_service) not in sys.path:
     sys.path.insert(0, str(_calc_service))
 
 from calculators.laser import LaserCalculator
+from materials import tape
 
 ACRYL_3MM_CODE = "AcrylColor3"
 
@@ -449,4 +451,107 @@ def test_laser_nomerki_material_customer(laser_calc):
     _assert_js(r, EXPECTED_NOMERKI_CUSTOMER)
     assert r["weight_kg"] == pytest.approx(EXPECTED_NOMERKI_CUSTOMER["weight_kg"], rel=JS_REL)
     assert all(item.get("code") != ACRYL_3MM_CODE for item in r["materials"])
+
+
+def _assert_price_tolerances(price: float, expected: float) -> None:
+    """Допуск цены: abs ≤ 0.02 и rel ≤ 0.001."""
+    assert abs(price - expected) <= 0.02
+    assert price == pytest.approx(expected, rel=JS_REL)
+
+
+# JS, 15.11.2026 — простая резка AcrylWhite3, 100 шт., 50×50, клеевой слой.
+# Лист из каталога tape: Sheet3M7952 / Sheet3M7955, cost скаляр (не тиры).
+# Число листов: numWithDefects * (50+5) * (50+5) / (609*900).
+# node scripts/run_js_calc.mjs calcLaser --data current --args
+# '[100,[50,50],"AcrylWhite3",{"isCutLaser":{"sizeItem":50,"density":25,"difficulty":1,"lenCut":0},"isFindMark":false,"Material":"isMaterial","isAdhesiveLayer":"AdhesiveLayer50"},1]'
+# AdhesiveLayer130 — isAdhesiveLayer":"AdhesiveLayer130"; noMaterial — "Material":"noMaterial".
+# На laser.py из HEAD (misc.get + tool._items) execute падает: KeyError Sheet3M7952.
+_ADH_SHEETS = 105 * (50 + 5) * (50 + 5) / (609 * 900)
+REF_ADHESIVE = {
+    "AdhesiveLayer50": {
+        "cost": 15959,
+        "price": 25626,
+        "time_hours": 11.44,
+        "time_ready": 27.44,
+        "weight_kg": 0.9389,
+        "code": "Sheet3M7952",
+    },
+    "AdhesiveLayer130": {
+        "cost": 16152,
+        "price": 25946,
+        "time_hours": 11.44,
+        "time_ready": 27.44,
+        "weight_kg": 0.9852,
+        "code": "Sheet3M7955",
+    },
+}
+
+
+def _adhesive_params(layer: str, material_mode: str = "isMaterial", material_id: str = "AcrylWhite3") -> Dict[str, Any]:
+    params = dict(REF_SIMPLE_CUT)
+    params["material_mode"] = material_mode
+    params["material_id"] = material_id
+    params["is_adhesive_layer"] = layer
+    return params
+
+
+def _assert_tape_sheet(materials: List[Dict[str, Any]], code: str, only: bool = False) -> None:
+    if only:
+        assert [item.get("code") for item in materials] == [code]
+    else:
+        assert any(item.get("code") == code for item in materials)
+    item = next(row for row in materials if row.get("code") == code)
+    spec = tape.get(code)
+    assert item["name"] == spec.description
+    assert item["title"] == spec.title
+    assert item["name"] != item["code"]
+    assert item["unit"] == "лист"
+    assert list(item["size_mm"]) == [609.0, 900.0]
+    assert item["quantity"] == pytest.approx(_ADH_SHEETS, rel=JS_REL)
+
+
+@pytest.mark.parametrize("layer", ["AdhesiveLayer50", "AdhesiveLayer130"])
+def test_laser_adhesive_layer_matches_js(laser_calc, layer):
+    """JS, 15.11.2026: клеевой слой на простой резке — tape и calc_manual_roll."""
+    expected = REF_ADHESIVE[layer]
+    r = laser_calc.execute(_adhesive_params(layer))
+    _assert_js(r, expected)
+    _assert_price_tolerances(r["price"], expected["price"])
+    assert r["time_ready"] == pytest.approx(expected["time_ready"], rel=JS_REL)
+    assert r["weight_kg"] == pytest.approx(expected["weight_kg"], rel=JS_REL)
+    assert any(item.get("code") == "AcrylWhite3" for item in r["materials"])
+    _assert_tape_sheet(r["materials"], expected["code"])
+    for key in ("cost", "price", "unit_price", "time_hours", "time_ready", "weight_kg", "materials"):
+        assert key in r
+
+
+def test_laser_adhesive_no_material(laser_calc):
+    """JS, 15.11.2026: noMaterial + AdhesiveLayer130 — акрил не в цене, скотч в цене."""
+    r = laser_calc.execute(_adhesive_params("AdhesiveLayer130", material_mode="noMaterial"))
+    _assert_price_tolerances(r["price"], 24772)
+    assert r["time_ready"] == pytest.approx(27.44, rel=JS_REL)
+    assert r["cost"] == pytest.approx(15445, rel=JS_REL)
+    assert r["time_hours"] == pytest.approx(11.44, rel=JS_REL)
+    # Вес изделия по материалу сохраняется и к нему добавляется вес листа.
+    assert r["weight_kg"] == pytest.approx(0.9852, rel=JS_REL)
+    assert all(item.get("code") != "AcrylWhite3" for item in r["materials"])
+    _assert_tape_sheet(r["materials"], "Sheet3M7955", only=True)
+
+
+def test_laser_adhesive_empty_material(laser_calc):
+    """JS, 15.11.2026: пустой material_id и клеевой слой — не NaN и не цена дефолта 480.
+
+    В JS calcWeight по пустому материалу даёт NaN. В API вес изделия 0,
+    плюс вес листа скотча; в materials только этот лист, слой входит в цену.
+    """
+    r = laser_calc.execute(_adhesive_params("AdhesiveLayer50", material_id=""))
+    assert r["price"] == pytest.approx(2468, abs=0.02)
+    assert r["price"] == pytest.approx(2468, rel=JS_REL)
+    assert r["price"] != pytest.approx(480, abs=0.02)
+    assert r["cost"] == pytest.approx(1512, rel=JS_REL)
+    assert r["time_hours"] == pytest.approx(0.47, rel=JS_REL)
+    assert r["time_ready"] == pytest.approx(16.47, rel=JS_REL)
+    assert math.isfinite(r["weight_kg"])
+    assert r["weight_kg"] == pytest.approx(_ADH_SHEETS * 80 / 1000, rel=JS_REL)
+    _assert_tape_sheet(r["materials"], "Sheet3M7952", only=True)
 

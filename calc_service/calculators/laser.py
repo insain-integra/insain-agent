@@ -12,8 +12,9 @@ from common.markups import (
     MARGIN_OPERATION,
     get_margin,
 )
-from equipment import laser as laser_catalog, tools as tools_catalog
-from materials import hardsheet, misc
+from common.process_tools import calc_manual_roll
+from equipment import laser as laser_catalog
+from materials import hardsheet, tape
 
 # Код лазера для расчёта (должен соответствовать data/equipment/laser.json)
 LASER_CODE = "Qualitech11G1290"
@@ -33,8 +34,8 @@ class LaserCalculator(BaseCalculator):
     5. Подбор оптимального формата материала (лист / рулон) с минимальной себестоимостью
        через перебор всех размеров `material.sizes` и `layout_on_sheet/layout_on_roll`.
     6. Расчёт времени резки и загрузки (`timeCut` в JS) по скорости `cut_speed_table`.
-    7. Опционально — расчёт ручных операций нанесения клеевого слоя через инструмент
-       `ManualRoll` из каталога `tools` (аналог `calcManualRoll` из JS).
+    7. Опционально — клеевой слой: лист из каталога `tape`, число листов как в JS,
+       накатка через `calc_manual_roll` (не пересчёт `ManualRoll` на месте).
     8. Суммирование времени (`timePrepare`, `timeCut`, `timeGrave`, время клеевого слоя)
        и вычисление `time_hours` и `time_ready` с учётом `baseTimeReady` лазера.
     9. Расчёт полной себестоимости: материал + амортизация + оператор + расходники
@@ -543,67 +544,51 @@ class LaserCalculator(BaseCalculator):
                 time_cut *= 1.25
                 time_grave *= 1.25
 
-        # Нанесение клеевого слоя (через ManualRoll)
+        # Нанесение клеевого слоя, как js_legacy/calc/calcLaser.js:241-260.
+        # Листы Sheet3M7952 / Sheet3M7955 лежат в каталоге tape (JS ищет их через
+        # findMaterial('misc'), обходя группы). Считаем и при пустом material_id:
+        # вес изделия тогда 0, в materials остаётся только лист скотча.
+        # Число листов — numWithDefects * (ширина+5) * (высота+5) / размер листа.
+        # В calc_manual_roll уходит ceil(листов) и размер листа, не размер изделия.
         cost_adhesive_cost = 0.0
         cost_adhesive_price = 0.0
         cost_adhesive_time = 0.0
         cost_adhesive_weight = 0.0
 
         adhesive_layer = params.get("is_adhesive_layer")
-        if adhesive_layer and material is not None:
+        if adhesive_layer:
             if adhesive_layer == "AdhesiveLayer130":
                 adhesive_id = "Sheet3M7955"
             else:
                 adhesive_id = "Sheet3M7952"
 
-            mat_adh = misc.get(adhesive_id)
+            mat_adh = tape.get(adhesive_id)
             size_adh = mat_adh.sizes[0]
             num_adh_sheets = (
-                quantity
+                num_with_defects
                 * (size[0] + 5.0)
                 * (size[1] + 5.0)
                 / (size_adh[0] * size_adh[1])
             )
-
-            tool = tools_catalog.get("ManualRoll")
-            area = size[0] * size[1] / 1_000_000.0
-            roll_table = tool._items.get("ManualRoll") if False else None  # type: ignore[attr-defined]
-            # Упрощённая версия calcManualRoll: без подгиба края.
-            roll_per_hour = tool._items is None  # type: ignore[attr-defined]
-            # Берём скорость из данных JSON напрямую:
-            raw = next(iter(tool._items.values())).__dict__  # type: ignore[attr-defined]
-            roll_per_hour_val = 1.0
-            edge_per_hour_val = 1.0
-            if "rollPerHour" in raw:
-                from equipment.base import LookupTable
-
-                roll_per_hour_val = LookupTable(raw["rollPerHour"]).find(area * num_adh_sheets)  # type: ignore[arg-type]
-            if "edgePerHour" in raw:
-                edge_per_hour_val = float(raw["edgePerHour"])
-
-            sum_len = 0.0
-            sum_area = area * num_adh_sheets
-            time_prepare = tool.time_prepare * mode.value
-            time_process = (
-                sum_area / roll_per_hour_val + sum_len / edge_per_hour_val + time_prepare
+            roll = calc_manual_roll(
+                math.ceil(num_adh_sheets),
+                size_adh,
+                params,
+                mode.value,
             )
-            time_operator = time_process
-            cost_depr_hour_tool = tool.depreciation_per_hour
-            cost_process = cost_depr_hour_tool * time_process
-            cost_operator_tool = time_operator * tool.operator_cost_per_hour
-            cost_manual = cost_process + cost_operator_tool
-            margin_extra_manual = get_margin("marginProcessManual")
-            margin_manual = max(MARGIN_OPERATION + margin_extra_manual, MARGIN_MIN)
-            price_manual = cost_manual * (1 + margin_manual)
-
-            cost_adhesive_cost = cost_manual
-            cost_adhesive_price = price_manual
-            cost_adhesive_time = time_process
-            cost_adhesive_weight = (
-                num_adh_sheets * (mat_adh.weight_per_unit or 0.0) / 1000.0
+            # tape.json: cost листа — скаляр, не таблица тиров.
+            # get_cost(1.0) возвращает этот скаляр, как materialAdhesiveLayer.cost в JS.
+            unit_cost = mat_adh.get_cost(1.0)
+            cost_adhesive_cost = roll.cost + num_adh_sheets * unit_cost
+            cost_adhesive_price = roll.price + num_adh_sheets * unit_cost * (
+                1 + MARGIN_MATERIAL
             )
+            # time_hours уже округлён до 0.01, как result.time в calcManualRoll.
+            cost_adhesive_time = roll.time_hours
+            # weight в tape.json — граммы листа; JS: num * weight / 1000.
+            adh_weight_g = float(mat_adh.weight_per_unit or 0.0)
+            cost_adhesive_weight = num_adh_sheets * adh_weight_g / 1000.0
 
-            # Материал клеевого слоя
             materials.append(
                 {
                     "code": adhesive_id,
@@ -613,12 +598,6 @@ class LaserCalculator(BaseCalculator):
                     "quantity": num_adh_sheets,
                     "unit": "лист",
                 }
-            )
-
-            # Себестоимость и цена клеевого слоя (материал)
-            cost_adhesive_cost += num_adh_sheets * mat_adh.get_cost(1.0)
-            cost_adhesive_price += num_adh_sheets * mat_adh.get_cost(1.0) * (
-                1 + MARGIN_MATERIAL
             )
 
         # Время

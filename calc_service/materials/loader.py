@@ -52,6 +52,13 @@ def normalize_sizes(size_data: Any) -> List[List[float]]:
     return result
 
 
+def _as_float(value: Any) -> Optional[float]:
+    """Число из JSON или None, если поля нет или это не скаляр."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return float(value)
+
+
 def parse_cost(raw_cost: Any) -> Tuple[Optional[float], Optional[List[Tuple[float, float]]]]:
     """
     Разобрать поле cost из JSON.
@@ -165,7 +172,9 @@ def load_catalog(filename: str) -> MaterialCatalog:
                 thickness=merged.get("thickness"),
                 density=merged.get("density"),
                 density_unit=merged.get("unitDensity", "гсм3"),
-                weight_per_unit=merged.get("weightPerUnit"),
+                # В JSON вес единицы — поле weight (как material.weight в JS).
+                # weightPerUnit в файлах нет; без weight каталог теряет граммы листа.
+                weight_per_unit=_as_float(merged.get("weightPerUnit", merged.get("weight"))),
                 available=bool(merged.get("available", True)),
             )
 

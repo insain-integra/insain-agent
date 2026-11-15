@@ -21,7 +21,6 @@ calcHeatPress call calcLayoutOnSheet
 calcHeatPress call calcCutPlotter
 calcHeatPress call calcPrintRoll
 calcHeatPress call calcCutSaber
-calcLaser call calcManualRoll
 calcMagnetLamination option isLamination
 calcMagnetLamination option isBarcode
 calcMagnetLamination option isVariables
