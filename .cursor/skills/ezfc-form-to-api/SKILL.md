@@ -26,18 +26,18 @@ description: Перевод одной формы ezFC на сайте insain.ru
 Запросы к базе ezFC. В Windows PowerShell 5.1 кавычки внутри аргумента `ssh` теряются, поэтому SQL идёт файлом:
 
 ```powershell
-Set-Content -Encoding ascii -Path $env:TEMP\ezfc-<шаг>.sql -Value "<SQL>"
-scp $env:TEMP\ezfc-<шаг>.sql insain-prod:/tmp/ezfc-<шаг>.sql
-ssh insain-prod "sudo -u www-data wp db query --skip-column-names --path=/var/www/insain.ru < /tmp/ezfc-<шаг>.sql 2>/dev/null"
+Set-Content -Encoding ascii -Path $env:TEMP\ezfc-<slug>-<шаг>.sql -Value "<SQL>"
+scp $env:TEMP\ezfc-<slug>-<шаг>.sql insain-prod:/tmp/ezfc-<slug>-<шаг>.sql
+ssh insain-prod "sudo -u www-data wp db query --skip-column-names --path=/var/www/insain.ru < /tmp/ezfc-<slug>-<шаг>.sql 2>/dev/null"
 ```
 
-Ниже «SQL через файл» — эти три команды с нужным `<SQL>`. Только `SELECT`. У каждого запроса своё имя файла (`ezfc-5.sql`, `ezfc-9.sql`), запросы — по одному, не параллельно: с одним файлом параллельные вызовы перетирают друг друга.
+Ниже «SQL через файл» — эти три команды с нужным `<SQL>`. Только `SELECT`. У каждого запроса своё имя файла с `<slug>` и шагом (`ezfc-laser-5.sql`, `ezfc-laser-9.sql`), чтобы задачи не перетирали временные файлы.
 
 Запись в таблицы `wp_insain_ezfc_*`: в копию формы JS и GET пишет только `scripts/ezfc_copy_apply.php` (шаг 10), структуру формы и блок результата правят в админке ezFC (Browser MCP). Свой PHP, `wp eval-file` или SQL на запись не писать.
 
 ## Роли и цепочка
 
-- Implementer, git: шаги 0–5б, текст `wp-plugin/forms/<slug>.js` (шаг 10), эталон в тесте, `make check`. Статус остаётся `в работе`, дальше Site ops.
-- Site ops, прод: шаги 6–16 самостоятельно (в том же чате Orchestrator), затем статус `закрытие` (если `Reviewer: не нужен`, иначе `ревью`). Расхождение на копии — обратно Implementer (шаг 15).
+- Implementer, git (в worktree `..\insain-agent-<задача>`, можно вести параллельно по разным формам без пересечения «Файлов»): шаги 0–5б, текст `wp-plugin/forms/<slug>.js` (шаг 10), эталон в тесте, `make check`. Статус остаётся `в работе`, дальше Site ops.
+- Site ops, прод (строго последовательно под `python scripts/dev.py lock acquire prod <задача>` / `release prod <задача>` — общий Chrome и БД): шаги 6–16 самостоятельно (в том же чате Orchestrator), затем статус `закрытие` (если `Reviewer: не нужен`, иначе `ревью`). Расхождение на копии — обратно Implementer (шаг 15).
 - Человек принимает копию через `AskQuestion` → закрытие через `finish-task` (если в шапке `Reviewer: не нужен`, отдельный Reviewer не запускается).
 - Каждый отчёт роли заканчивается готовым промптом следующей сессии (или карточкой `AskQuestion`, если дальше человек).

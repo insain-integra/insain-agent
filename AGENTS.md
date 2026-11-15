@@ -27,11 +27,11 @@
 Сообщение начинается с имени роли (Analyst, Implementer, Reviewer, Site ops) — прочитать её файл в `docs/agents/roles/` и работать только в этой роли.
 Orchestrator ведёт задачу субагентами по цепочке до первой остановки на человеке.
 
-- **Быстрый** — 1–3 файла в одном контуре: цена в JSON, мелкий баг-фикс, правка копии формы, доки, правила. Без `todo/*.md`, без отдельной ветки и без Reviewer: правка → `make check` → `AskQuestion` (коммит / push / деплой).
-- **Поточный** — типовая задача по готовому skill (копия формы ezFC, однотипный калькулятор): `todo/<задача>.md` → ветка `task/<имя>` → Implementer (+ Site ops для копии) → `make check` → приёмка человеком через `AskQuestion` → `finish-task`. При `Сложность: низкая` и копиях форм `Reviewer: не нужен`.
+- **Быстрый** — 1–3 файла в одном контуре: цена в JSON, мелкий баг-фикс, правка копии формы, доки, правила. Без `todo/*.md`, без отдельной ветки и без Reviewer: правка в `main` → `make check` → `AskQuestion` (коммит / push / деплой).
+- **Поточный** — типовая задача по готовому skill (копия формы ezFC, однотипный калькулятор): `todo/<задача>.md` в `main` → worktree `..\insain-agent-<имя>` (`task/<имя>`) → Implementer (+ Site ops для копии) → `make check` → приёмка человеком через `AskQuestion` → `finish-task`. При `Сложность: низкая` и копиях форм `Reviewer: не нужен`.
 - **Полный** — боевые формы, массовые правки прода/БД, конфликт цен, новый модуль: добавляется `Reviewer` (другая модель) до слияния в `main`.
 
-Маршруты, статусы и блокеры — [docs/agents/workflow.md](docs/agents/workflow.md). Точки выбора и подтверждений — через `AskQuestion` (`.cursor/rules/interactive-choices.mdc`).
+Маршруты, статусы и блокеры — [docs/agents/workflow.md](docs/agents/workflow.md), параллельные задачи — [docs/agents/parallel-protocol.md](docs/agents/parallel-protocol.md). Точки выбора и подтверждений — через `AskQuestion` (`.cursor/rules/interactive-choices.mdc`).
 
 ## Команды
 
@@ -41,8 +41,9 @@ Windows/PowerShell: `&&` не работает, разделитель `;`. Ес
 | --- | --- |
 | Проверка перед сдачей | `make check` (или `python scripts/dev.py check`): пересборка `docs/dashboard.md`, pytest `calc_service/tests`, затем `bot_service/tests`, ~2–4 мин |
 | Закрыть задачу | `python scripts/dev.py close <имя>`: журнал, дашборд, снять «ждёт», удалить `todo/<имя>.md` |
+| Worktree и блокировки | `python scripts/dev.py wt-add <имя>` / `wt-check <имя>` / `wt-rm <имя>`; `lock acquire\|release <prod\|merge> <имя>` |
 | Быстрая петля | `python -m pytest calc_service/tests` |
-| Локальный API | `make calc-up` → http://127.0.0.1:8001, `make calc-down`, `make status` |
+| Локальный API | `make calc-up` → http://127.0.0.1:8001 (`CALC_PORT` — свой в каждом worktree), `make calc-down`, `make status` |
 | Сверка реестра калькуляторов с API | `python bot_service/check_calc_registry.py` (нужен запущенный API) |
 
 ### Прод
@@ -57,8 +58,9 @@ Windows/PowerShell: `&&` не работает, разделитель `;`. Ес
 
 ## Git
 
-- Работа идёт в основной папке репозитория: быстрый трек — в `main`; поточный и полный — в ветке `task/<имя>` от `main`; после приёмки — fast-forward в `main`. Прод деплоится только с `main`.
-- **Дополнительные папки проекта и `git worktree` за пределами корня репозитория не создавать.** В одной папке одновременно идёт не больше одной ветки с git-правками.
+- Основная папка `insain-agent` всегда на `main`: здесь работают `Analyst`, быстрый трек, задачи без ветки («прод без git»), слияние и `close` (`finish-task`), деплой.
+- Поточный и полный треки (с git-правками) — в своём `git worktree` `..\insain-agent-<имя>` на `task/<имя>`: `Orchestrator` создаёт его сам (`python scripts/dev.py wt-add <имя>`), человек — опционально. Протокол и блокировки — [docs/agents/parallel-protocol.md](docs/agents/parallel-protocol.md).
+- В одной папке одновременно работает не больше одного агента; ветки в активном worktree не переключаются. Слияние в `main` — по одной ветке (`lock merge`, fast-forward). Прод деплоится только с `main`.
 - `git push` и коммит — по просьбе человека или при выборе соответствующего варианта в `AskQuestion` (команды «закрывай» / «принято, закрывай» в `finish-task` включают коммит, слияние и `push`).
 - Изменения малыми порциями, не пакетом: один коммит — одна осмысленная правка.
 
@@ -80,7 +82,7 @@ Windows/PowerShell: `&&` не работает, разделитель `;`. Ес
 
 ## Запреты
 
-- Не создавать доп. папки и `git worktree` вне корня репозитория (`..\insain-agent-*`).
+- Не переключать основную папку с `main` на ветки `task/*` и не запускать двух агентов с правками в одной папке/worktree.
 - Не коммитить и не выводить в ответы и логи `.env` и любые секреты (пароли, ключи, токены, `wp-config.php`).
 - Без подтверждения человека: `wp search-replace`, `docker compose down -v`, удаление файлов и данных
   (локально и на сервере), смена DNS, отключение плагинов оплаты и SEO, прямой SQL в таблицы WordPress

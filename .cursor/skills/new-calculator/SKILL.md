@@ -15,13 +15,15 @@ description: Заведение нового калькулятора в calc_se
 
 0. Порт полон: `python scripts/js_port_gaps.py <calcX>` для JS-функции, которую переносит калькулятор, печатает её и всю цепочку вызовов. Если строка `нет в Python` хоть в одном блоке не пустая и этот пропуск не записан в «не перенесено» (docstring модуля и файл допустимых пропусков рядом со скриптом) — стоп, порт не полон.
 
-1. Ветка от свежего `main`:
+1. Worktree и ветка от свежего `main`:
+
+   Работа идёт в worktree `..\insain-agent-<имя-задачи>` на ветке `task/<имя-задачи>` (основную папку на `main` не переключать). Если worktree ещё не создан, из основной папки на `main` после коммита `todo/<имя-задачи>.md`:
 
    ```powershell
-   git switch main; git pull --ff-only; git switch -c task/<имя-задачи>
+   git pull --ff-only; python scripts/dev.py wt-add <имя-задачи>
    ```
 
-   Ожидается: `Switched to a new branch 'task/<имя-задачи>'`.
+   Ожидается: worktree создан и стоит на ветке `task/<имя-задачи>`. Если `Orchestrator` уже создал worktree — работать прямо в нём (`git branch --show-current` → `task/<имя-задачи>`).
 
 2. Слаг свободен:
 

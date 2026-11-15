@@ -32,8 +32,8 @@
 3. Боевой API отдаёт тот же эталон и кейс дефолта. Тело запроса — из `REF_*` теста, не набирать руками (`<REF>` — `REF_PARAMS`, `REF_FORM_DEFAULT`):
 
    ```powershell
-   python -c "import sys,json; sys.path[:0]=['calc_service','calc_service/tests/test_calculators']; import test_<slug> as t; print(json.dumps(t.<REF>))" | Set-Content -Encoding ascii $env:TEMP\body.json
-   Invoke-RestMethod -Method Post -Uri https://insain.ru/api/v1/calc/<slug> -ContentType 'application/json' -Body (Get-Content -Raw $env:TEMP\body.json) | Select-Object cost, price, unit_price, time_ready
+   python -c "import sys,json; sys.path[:0]=['calc_service','calc_service/tests/test_calculators']; import test_<slug> as t; print(json.dumps(t.<REF>))" | Set-Content -Encoding ascii $env:TEMP\body-<slug>.json
+   Invoke-RestMethod -Method Post -Uri https://insain.ru/api/v1/calc/<slug> -ContentType 'application/json' -Body (Get-Content -Raw $env:TEMP\body-<slug>.json) | Select-Object cost, price, unit_price, time_ready
    ```
 
    Ожидается: `price` равна раннеру (допуск шага 2), `time_ready` — `rel ≤ 0.001`, на обоих кейсах. `weight_kg` в цепочках `calcPrintSheet` с JS не сверяется: JS считает лист с обрезью, Python — изделие; верный вес и вес в эталоне — Python (решение 11.11.2026). Другое число или 404 — стоп:

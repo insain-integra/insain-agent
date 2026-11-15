@@ -33,7 +33,7 @@ git add <файлы задачи>; git commit -m "<task>: WIP до <fix>"
 
 ## Задача-предпосылка (Analyst)
 
-6. `todo/<fix>.md` по `todo/_template.md` создаётся на `main` (работа идёт в основной папке репозитория, без создания доп. папок и worktree). Статус `<task>` — `заблокировано: ждёт todo/<fix>.md`. После `close` `<fix>` в ветке `<task>` делают `git rebase main`, ставят `черновик` и пишут строку в журнал.
+6. `todo/<fix>.md` по `todo/_template.md` создаётся и коммитится на `main` (в основной папке), после чего для `<fix>` заводится свой worktree (`python scripts/dev.py wt-add <fix>`). Статус `<task>` в её worktree — `заблокировано: ждёт todo/<fix>.md`. После `close` `<fix>` на `main` в worktree `<task>` делают `git rebase main` (при конфликте в `docs/dashboard.md` — `python scripts/dev.py dashboard; git add docs/dashboard.md`), ставят `черновик` и пишут строку в журнал.
 
 ### Быстрый путь (тот же класс, что закрытый образец)
 
@@ -77,4 +77,4 @@ git add <файлы задачи>; git commit -m "<task>: WIP до <fix>"
 
 12. После ревью и слияния в `main` — зелёный CI, `bash infra/deploy.sh`, затем боевой API на входе блокера `<task>` (тело из теста, skill `ezfc-form-to-api`, шаг 3). Ожидается: `price` и `time_ready` равны раннеру.
 
-13. Закрытие `<fix>` — skill `finish-task`. `close` ставит `<task>` статус `черновик`. Дальше Implementer `<task>`: `git rebase main` (конфликт в тесте — брать `main`, там эталоны `<fix>`), кейс дефолта формы, затем Site ops — перепрогон копии.
+13. Закрытие `<fix>` — skill `finish-task` (удаляет worktree и ветку `<fix>`). `close` на `main` снимает `ждёт`, а в worktree `<task>` делают `git rebase main` (конфликт в тесте — брать `main`, там эталоны `<fix>`; конфликт в `docs/dashboard.md` — `python scripts/dev.py dashboard; git add docs/dashboard.md`), ставят `черновик`, кейс дефолта формы, затем Site ops — перепрогон копии.

@@ -63,9 +63,9 @@ WHERE f_id = <id>
 21. Снимок в `site/forms/<id>.json`. SQL через файл, но ответ сохраняется на сервере и забирается `scp` (вывод в консоль PowerShell портит кириллицу):
 
     ```powershell
-    Set-Content -Encoding ascii -Path $env:TEMP\ezfc.sql -Value "SELECT JSON_OBJECT('form', (SELECT JSON_OBJECT('id', id, 'name', name, 'data', data) FROM wp_insain_ezfc_forms WHERE id = <id>), 'elements', (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', id, 'e_id', e_id, 'position', position, 'data', data)) FROM wp_insain_ezfc_forms_elements WHERE f_id = <id>), 'options', (SELECT JSON_ARRAYAGG(JSON_OBJECT('o_id', o_id, 'value', value)) FROM wp_insain_ezfc_forms_options WHERE f_id = <id>));"
-    scp $env:TEMP\ezfc.sql insain-prod:/tmp/ezfc.sql
-    ssh insain-prod "sudo -u www-data wp db query --raw --skip-column-names --path=/var/www/insain.ru < /tmp/ezfc.sql 2>/dev/null | grep '^{' > /tmp/ezfc-form-<id>.json; wc -c /tmp/ezfc-form-<id>.json"
+    Set-Content -Encoding ascii -Path $env:TEMP\ezfc-snap-<id>.sql -Value "SELECT JSON_OBJECT('form', (SELECT JSON_OBJECT('id', id, 'name', name, 'data', data) FROM wp_insain_ezfc_forms WHERE id = <id>), 'elements', (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', id, 'e_id', e_id, 'position', position, 'data', data)) FROM wp_insain_ezfc_forms_elements WHERE f_id = <id>), 'options', (SELECT JSON_ARRAYAGG(JSON_OBJECT('o_id', o_id, 'value', value)) FROM wp_insain_ezfc_forms_options WHERE f_id = <id>));"
+    scp $env:TEMP\ezfc-snap-<id>.sql insain-prod:/tmp/ezfc-snap-<id>.sql
+    ssh insain-prod "sudo -u www-data wp db query --raw --skip-column-names --path=/var/www/insain.ru < /tmp/ezfc-snap-<id>.sql 2>/dev/null | grep '^{' > /tmp/ezfc-form-<id>.json; wc -c /tmp/ezfc-form-<id>.json"
     New-Item -ItemType Directory -Force site\forms | Out-Null
     scp insain-prod:/tmp/ezfc-form-<id>.json site/forms/<id>.json
     ```

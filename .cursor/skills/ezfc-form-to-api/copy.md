@@ -6,7 +6,7 @@
 
 Дубль формы и создание скрытого черновика товара (`draft`/`private`, недоступного гостям) выполняются самостоятельно без отдельного запроса. Если открылась `wp-login.php` или ошибка доступа — стоп, попросить человека войти в браузере (через `AskQuestion`). Логин и пароль не вводить, автозаполнение браузера не использовать. wp-cli дубль формы ezFC не делает — не искать.
 
-6. В админке ezFC у формы `<id>` — «Duplicate», один клик, без повтора. Id копии, SQL через файл:
+6. В админке ezFC у формы `<id>` — «Duplicate», один клик, без повтора (убедиться, что параллельно не запущен другой `Site ops`, чтобы не перепутать id копии). Id копии, SQL через файл:
 
    ```sql
    SELECT id, name FROM wp_insain_ezfc_forms ORDER BY id DESC LIMIT 3;
@@ -37,7 +37,7 @@
    SELECT JSON_UNQUOTE(JSON_EXTRACT(b.data, '$.name')) AS name, b.id AS id_live, c.id AS id_copy FROM wp_insain_ezfc_forms_elements b LEFT JOIN wp_insain_ezfc_forms_elements c ON c.f_id = <copy> AND JSON_UNQUOTE(JSON_EXTRACT(c.data, '$.name')) = JSON_UNQUOTE(JSON_EXTRACT(b.data, '$.name')) WHERE b.f_id = <id> ORDER BY b.position;
    ```
 
-   Третья команда «SQL через файл» здесь пишет вывод в файл: `... 2>/dev/null" | Set-Content -Encoding utf8 $env:TEMP\ezfc-map.tsv`.
+   Третья команда «SQL через файл» здесь пишет вывод в файл: `... 2>/dev/null" | Set-Content -Encoding utf8 $env:TEMP\ezfc-map-<slug>.tsv`.
 
    Ожидается: у каждой строки `id_copy` заполнен и отличается от `id_live`. `JSON_UNQUOTE` с обеих сторон обязателен: без него на форме 91 сравнение имён дало пустые `id_copy`. Пустой `id_copy` или `id_copy = id_live` — в запросе не тот `<copy>` или дубль не создался: повторить шаг 6, не подставлять id боевой формы. Эта таблица — источник id для JS копии в шаге 10.
 
@@ -50,9 +50,9 @@
     Источник правды — `wp-plugin/forms/<slug>.js` в ветке задачи, с id **боевой** формы. В копию его пишет скрипт: id из таблицы шага 9 подставляет `scripts/ezfc_copy.py`, записывает `scripts/ezfc_copy_apply.php` вместе с GET (шаг 14). `--get` — каждое поле из `syncUrl`; dropdown с кодом — `:index`, `rdoModeProduction` — `:value`, числа — без суффикса:
 
     ```powershell
-    python scripts/ezfc_copy.py wp-plugin/forms/<slug>.js --live <id> --copy <copy> --map $env:TEMP\ezfc-map.tsv --get numN --get rdoModeProduction:value --get <dpdX>:index --out $env:TEMP\ezfc-copy.json
-    scp scripts/ezfc_copy_apply.php $env:TEMP\ezfc-copy.json insain-prod:/tmp/
-    ssh insain-prod "sudo -u www-data wp eval-file /tmp/ezfc_copy_apply.php /tmp/ezfc-copy.json --path=/var/www/insain.ru"
+    python scripts/ezfc_copy.py wp-plugin/forms/<slug>.js --live <id> --copy <copy> --map $env:TEMP\ezfc-map-<slug>.tsv --get numN --get rdoModeProduction:value --get <dpdX>:index --out $env:TEMP\ezfc-copy-<slug>.json
+    scp scripts/ezfc_copy_apply.php $env:TEMP\ezfc-copy-<slug>.json insain-prod:/tmp/
+    ssh insain-prod "sudo -u www-data wp eval-file /tmp/ezfc_copy_apply.php /tmp/ezfc-copy-<slug>.json --path=/var/www/insain.ru"
     ```
 
     Ожидается: `стоп` нет; по строке на ключ, `→` у меняемых значений, у элемента расчёта `calcApi=1`. `стоп: … опубликованных товарах` — `<copy>` боевая форма, ничего не записано, вернуться к шагу 6. Затем та же команда `ssh` с `apply` после пути к пакету: `бэкап: /tmp/ezfc-copy-…json` и `записано` у каждого элемента. Откат — строки из бэкапа. Скрипт пишет только `custom_calculation`, `custom_calculation_function_read_file`, `GET`, `GET_check_option_value` в элементы копии; боевую форму, опубликованную форму и структуру формы он не меняет.

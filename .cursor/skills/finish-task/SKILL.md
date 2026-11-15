@@ -7,8 +7,10 @@ description: Завершение принятой задачи из todo/ од�
 
 Кто выполняет шаг — роль из docs/agents/roles/. Skill описывает действия, не подменяет роль и не выбирает модель. Выполняет агент по команде человека или выбору в `AskQuestion`.
 
-`<имя>` — имя файла задачи без `.md`. Вся работа идёт в основной папке репозитория (никаких `git worktree` и папок в `..\`). Если ветка `task/<имя>` есть — сначала завершаются шаги 1–5 на ней, затем шаги 6–12 на `main`. Ветки нет (быстрый трек, прод без git, закрытие после выкатки) — всё на `main`, шаги 4–6 пропустить.
-Таблица «кто и когда» — `docs/agents/workflow.md`, «Слияние и закрытие».
+`<имя>` — имя файла задачи без `.md`. Ветка — `task/<имя>`, её worktree — `..\insain-agent-<имя>` (`git worktree list`).
+Если ветка `task/<имя>` и её worktree есть — шаги 1–5 выполняются в worktree `..\insain-agent-<имя>`, а шаги 6–12 — в основной папке на `main` (основная папка не переключается на `task/*`). Ветки нет (быстрый трек, прод без git, закрытие после выкатки) — всё в основной папке на `main`, шаги 4–6 пропустить.
+Перед слиянием в `main` (шаг 6) обязательно захватывается `python scripts/dev.py lock acquire merge <имя>`, после окончания или остановки — `lock release merge <имя>`.
+Таблица «кто и когда» — `docs/agents/workflow.md`, «Слияние и закрытие». Протокол параллельной работы — `docs/agents/parallel-protocol.md`.
 
 ## Можно ли завершать
 
@@ -49,14 +51,24 @@ description: Завершение принятой задачи из todo/ од�
 
 ## Слияние
 
-6. Fast-forward в `main`:
+6. Блокировка `merge` и fast-forward в `main` — выполняется в **основной папке** (на `main`). Сначала захватить блокировку слияния (если занята — стоп и `AskQuestion`) и проверить diff ветки:
 
    ```powershell
-   git diff --stat main...task/<имя>
-   git switch main; git pull --ff-only; git merge --ff-only task/<имя>
+   python scripts/dev.py lock acquire merge <имя>
+   git branch --show-current; git diff --stat main...task/<имя>
+   git pull --ff-only; git merge --ff-only task/<имя>
    ```
 
-   Если не fast-forward — вернуться в `task/<имя>`, сделать `git rebase main`, затем повторить шаг 6. Конфликт — стоп, `заблокировано: исполнитель`, предложить варианты через `AskQuestion`.
+   Ожидается: блокировка захвачена, текущая ветка — `main`, merge прошёл как fast-forward. Если основная папка не на `main` — освободить lock (`lock release merge <имя>`) и проверить через `AskQuestion`.
+
+   Если `merge --ff-only` не прошёл (`main` ушёл вперёд из-за параллельной задачи) — перейти в worktree `..\insain-agent-<имя>` и сделать `git rebase main`:
+   - Конфликт только в `docs/dashboard.md` — пересобрать и продолжить rebase:
+     ```powershell
+     python scripts/dev.py dashboard; git add docs/dashboard.md; git rebase --continue
+     ```
+   - Закрытый в `main` файл `todo/` вернулся после rebase — убрать его из ветки после подтверждения через `AskQuestion`.
+   - Иной конфликт — освободить lock (`python scripts/dev.py lock release merge <имя>`), стоп, `заблокировано: исполнитель`, предложить варианты через `AskQuestion`.
+   После успешного rebase вернуться в основную папку и повторить `git merge --ff-only task/<имя>`.
 
 7. Проверка на `main`:
 
@@ -68,13 +80,13 @@ description: Завершение принятой задачи из todo/ од�
 
 ## Закрытие
 
-8. Закрыть задачу:
+8. Закрыть задачу (в основной папке на `main`):
 
    ```powershell
    python scripts/dev.py close <имя>
    ```
 
-   Ожидается: `закрыто: <имя>.md`, `журнал и дашборд обновлены`. Строки «снят «ждёт»» и «ссылки помечены закрытыми» — перечислить в отчёте.
+   Ожидается: `закрыто: <имя>.md`, `журнал и дашборд обновлены`. Строки «снят «ждёт»» и «ссылки помечены закрытыми» — перечислить в отчёте. Задача, которая ждёт эту и живёт в своём worktree со статусом `заблокировано: ждёт todo/<имя>.md`, разблокируется в её worktree после `git rebase main` — статус `черновик` и строка в журнал.
 
 9. Проверить запись и закоммитить:
 
@@ -88,16 +100,17 @@ description: Завершение принятой задачи из todo/ од�
 ## Пуш и очистка ветки
 
 10. Если человек уже выбрал вариант с `push` (в `AskQuestion` или фразой «принято, закрывай» / «закрывай») — **повторно про `git push` не переспрашивать**. Если запускали без явного решения о `push`, спросить через `AskQuestion`:
-    - «Запушить `main` и удалить ветку `task/<имя>` (Рекомендуется)»
+    - «Запушить `main` и удалить worktree `..\insain-agent-<имя>` и ветку `task/<имя>` (Рекомендуется)»
     - «Оставить коммиты локально (без push)»
+    Если выбран локальный вариант (без `push`), снять блокировку: `python scripts/dev.py lock release merge <имя>`.
 
-11. При подтверждении `push`:
+11. При подтверждении `push` (в основной папке на `main`):
 
     ```powershell
-    git push origin main; git branch -d task/<имя>; git push origin --delete task/<имя>
+    git push origin main; python scripts/dev.py wt-rm <имя>; git push origin --delete task/<имя>; python scripts/dev.py lock release merge <имя>
     ```
 
-    Ветки уже нет (второй запуск, задача без ветки) — только `git push origin main`. Ветки на origin нет — ошибку `remote ref does not exist` игнорировать.
+    `wt-rm` удаляет `..\insain-agent-<имя>` и ветку `task/<имя>` без `--force` (если в worktree есть незакоммиченные файлы — откажет и покажет ошибку). Ветки и worktree уже нет (второй запуск, задача без ветки) — только `git push origin main` и `lock release merge <имя>`. Ветки на origin нет — ошибку `remote ref does not exist` игнорировать.
 
 12. CI по пушнутому коммиту (`gh` нет, публичный API):
 

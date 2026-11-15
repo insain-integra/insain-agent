@@ -8,16 +8,25 @@
   python scripts/dev.py status
   python scripts/dev.py restart bot
   python scripts/dev.py check
+  python scripts/dev.py wt-add <имя> [--force]
+  python scripts/dev.py wt-check <имя>
+  python scripts/dev.py wt-rm <имя>
+  python scripts/dev.py lock acquire <prod|merge> <имя> [--force]
+  python scripts/dev.py lock release <prod|merge> <имя> [--force]
+  python scripts/dev.py lock status
   python scripts/dev.py usage <выгрузка Usage из Cursor.csv>
 
 Переменные окружения (опционально):
   CALC_HOST   — по умолчанию 127.0.0.1
-  CALC_PORT   — по умолчанию 8001
+  CALC_PORT   — по умолчанию 8001 (в параллельном worktree задайте свой, например 8011)
 """
 
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
+import fnmatch
+import json
 import os
 import re
 import subprocess
@@ -28,6 +37,9 @@ ROOT = Path(__file__).resolve().parent.parent
 RUN_DIR = ROOT / ".run"
 CALC_HOST = os.environ.get("CALC_HOST", "127.0.0.1")
 CALC_PORT = int(os.environ.get("CALC_PORT", "8001"))
+ACTIVE_TASK_STATUSES = {"в работе", "ревью", "доработка", "выкатка", "закрытие"}
+LOCK_RESOURCES = ("prod", "merge")
+SKIP_TODO_FILES = {"AGENTS.md", "_template.md", "_template-epic.md"}
 
 
 def _is_windows() -> bool:
@@ -231,6 +243,330 @@ def cmd_check() -> None:
             sys.exit(rc)
 
 
+def _git_out(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["git", "-c", "core.quotepath=off", *args],
+        cwd=cwd or ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+
+def _normalize_task_name(raw: str) -> str:
+    name = raw.strip().replace("\\", "/")
+    if "/" in name:
+        name = name.rsplit("/", 1)[-1]
+    name = name.removesuffix(".md")
+    if not name or not re.fullmatch(r"[A-Za-z0-9._-]+", name):
+        sys.exit(f"некорректное имя задачи: {raw!r}")
+    return name
+
+
+def _require_main_repo_root() -> None:
+    if not (ROOT / ".git").is_dir():
+        sys.exit("команда выполняется только из основной папки репозитория (не из worktree)")
+    r = _git_out("branch", "--show-current")
+    if r.returncode != 0 or r.stdout.strip() != "main":
+        cur = r.stdout.strip() or "?"
+        sys.exit(f"основная папка должна быть на ветке main (сейчас: {cur!r})")
+
+
+def _git_common_dir(cwd: Path | None = None) -> Path:
+    r = _git_out("rev-parse", "--git-common-dir", cwd=cwd or ROOT)
+    if r.returncode != 0 or not r.stdout.strip():
+        sys.exit(r.stderr.strip() or "не удалось определить общий каталог .git")
+    p = Path(r.stdout.strip())
+    if not p.is_absolute():
+        p = (cwd or ROOT) / p
+    return p.resolve()
+
+
+def _main_repo_root(cwd: Path | None = None) -> Path:
+    common = _git_common_dir(cwd)
+    return common.parent if common.name == ".git" else ROOT
+
+
+def _locks_dir(cwd: Path | None = None) -> Path:
+    return _git_common_dir(cwd) / "insain-locks"
+
+
+def _list_worktrees(cwd: Path | None = None) -> list[tuple[Path, str]]:
+    """Вернуть список (путь, ветка) из `git worktree list --porcelain`."""
+    r = _git_out("worktree", "list", "--porcelain", cwd=cwd or ROOT)
+    if r.returncode != 0:
+        return []
+    items: list[tuple[Path, str]] = []
+    cur_path: Path | None = None
+    cur_branch = ""
+    for line in r.stdout.splitlines() + [""]:
+        if not line.strip():
+            if cur_path is not None:
+                items.append((cur_path, cur_branch))
+            cur_path = None
+            cur_branch = ""
+        elif line.startswith("worktree "):
+            cur_path = Path(line[len("worktree ") :].strip()).resolve()
+        elif line.startswith("branch "):
+            ref = line[len("branch ") :].strip()
+            cur_branch = ref.removeprefix("refs/heads/")
+    return items
+
+
+def _extract_todo_files(text: str) -> list[str]:
+    """Извлечь пути/маски из раздела «## Файлы» задачи."""
+    m = re.search(r"^## Файлы\s*$", text, re.M)
+    if not m:
+        return []
+    rest = text[m.end() :]
+    nxt = re.search(r"^## ", rest, re.M)
+    section = rest[: nxt.start()] if nxt else rest
+
+    found: list[str] = []
+    for raw_line in section.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("- "):
+            continue
+        ticks = re.findall(r"`([^`]+)`", line)
+        candidates = ticks if ticks else re.findall(r"[\w.<>*?-]+(?:/[\w.<>*?-]+)+", line)
+        for c in candidates:
+            norm = c.strip().replace("\\", "/").lstrip("./")
+            if "/" in norm or norm.endswith((".py", ".js", ".md", ".json", ".php", ".sh", ".yml")):
+                if norm not in found:
+                    found.append(norm)
+    return found
+
+
+def _paths_overlap(a: str, b: str) -> bool:
+    pa = re.sub(r"<[^>]+>", "*", a)
+    pb = re.sub(r"<[^>]+>", "*", b)
+    return a == b or fnmatch.fnmatch(a, pb) or fnmatch.fnmatch(b, pa)
+
+
+def _todo_status(text: str) -> str:
+    for ln in text.splitlines():
+        if ln.startswith("Статус:"):
+            return ln[len("Статус:") :].strip()
+    return ""
+
+
+def find_file_conflicts(name: str, repo_root: Path | None = None) -> list[tuple[str, list[str]]]:
+    """Найти пересечения «## Файлы» задачи name с активными задачами."""
+    root = repo_root or ROOT
+    todo_dir = root / "todo"
+    target = todo_dir / f"{name}.md"
+    if not target.is_file():
+        return []
+    my_files = _extract_todo_files(target.read_text(encoding="utf-8"))
+    if not my_files:
+        return []
+
+    active_wt_tasks = {
+        branch.removeprefix("task/")
+        for _p, branch in _list_worktrees(root)
+        if branch.startswith("task/")
+    }
+
+    conflicts: list[tuple[str, list[str]]] = []
+    for path in sorted(todo_dir.glob("*.md")):
+        if path.name in SKIP_TODO_FILES or path.name.startswith("EPIC-"):
+            continue
+        other = path.stem
+        if other == name:
+            continue
+        text = path.read_text(encoding="utf-8")
+        status = _todo_status(text)
+        if other not in active_wt_tasks and status not in ACTIVE_TASK_STATUSES:
+            continue
+        other_files = _extract_todo_files(text)
+        overlaps = sorted({mf for mf in my_files for of in other_files if _paths_overlap(mf, of)})
+        if overlaps:
+            conflicts.append((other, overlaps))
+    return conflicts
+
+
+def cmd_wt_add(raw_name: str, force: bool = False) -> Path:
+    """Создать worktree ..\\insain-agent-<имя> на ветке task/<имя> от main."""
+    _require_main_repo_root()
+    name = _normalize_task_name(raw_name)
+    todo_rel = f"todo/{name}.md"
+    todo_file = ROOT / "todo" / f"{name}.md"
+    if not todo_file.is_file():
+        sys.exit(f"нет файла {todo_rel} на main")
+
+    tracked = _git_out("ls-files", "--error-unmatch", "--", todo_rel)
+    dirty = _git_out("status", "--porcelain", "--", todo_rel)
+    if tracked.returncode != 0 or dirty.stdout.strip():
+        sys.exit(f"{todo_rel} не закоммичен в main — сначала закоммитьте файл задачи")
+
+    wt_path = (ROOT.parent / f"{ROOT.name}-{name}").resolve()
+    branch = f"task/{name}"
+    existing_wts = dict(_list_worktrees(ROOT))
+    if wt_path in existing_wts:
+        if existing_wts[wt_path] == branch:
+            print(f"worktree уже существует: {wt_path} (ветка {branch})")
+            return wt_path
+        sys.exit(f"папка {wt_path} уже привязана к ветке {existing_wts[wt_path]!r}, ожидалась {branch!r}")
+
+    if wt_path.exists():
+        sys.exit(f"папка уже существует: {wt_path}")
+
+    if not force:
+        conflicts = find_file_conflicts(name, ROOT)
+        if conflicts:
+            details = "; ".join(f"{t}: {', '.join(fs)}" for t, fs in conflicts)
+            sys.exit(
+                f"пересечение «## Файлы» с активными задачами ({details}). "
+                "Дождитесь их закрытия или передайте --force"
+            )
+
+    has_branch = _git_out("show-ref", "--verify", "--quiet", f"refs/heads/{branch}").returncode == 0
+    args = ["worktree", "add", str(wt_path), branch] if has_branch else ["worktree", "add", str(wt_path), "-b", branch, "main"]
+    res = _git_out(*args)
+    if res.returncode != 0:
+        sys.exit(res.stderr.strip() or res.stdout.strip() or f"не удалось создать worktree {wt_path}")
+
+    print(f"worktree создан: {wt_path} (ветка {branch})")
+    print(f"Рабочая папка задачи: {wt_path}")
+    return wt_path
+
+
+def cmd_wt_check(raw_name: str) -> None:
+    """Проверить изоляцию: основная папка чистая на main, worktree задачи на task/<имя>."""
+    name = _normalize_task_name(raw_name)
+    main_root = _main_repo_root(ROOT)
+    wt_path = (main_root.parent / f"{main_root.name}-{name}").resolve()
+    branch = f"task/{name}"
+
+    errors: list[str] = []
+    main_branch = _git_out("branch", "--show-current", cwd=main_root)
+    cur_main = main_branch.stdout.strip() if main_branch.returncode == 0 else "?"
+    if cur_main != "main":
+        errors.append(f"основная папка {main_root} на ветке {cur_main!r}, должна быть на 'main'")
+
+    main_status = _git_out("status", "--porcelain", cwd=main_root)
+    dirty_lines = [ln for ln in main_status.stdout.splitlines() if ln.strip()]
+    if dirty_lines:
+        preview = ", ".join(dirty_lines[:5])
+        errors.append(f"незакоммиченные правки в основной папке {main_root}: {preview}")
+
+    wts = dict(_list_worktrees(main_root))
+    if wt_path not in wts:
+        errors.append(f"worktree {wt_path} не найден (создайте: python scripts/dev.py wt-add {name})")
+    elif wts[wt_path] != branch:
+        errors.append(f"worktree {wt_path} на ветке {wts[wt_path]!r}, ожидалась {branch!r}")
+
+    if errors:
+        sys.exit("Нарушена изоляция worktree:\n- " + "\n- ".join(errors))
+
+    print(f"изоляция ok: main чистый ({main_root}), worktree {wt_path} ({branch})")
+
+
+def cmd_wt_rm(raw_name: str) -> None:
+    """Удалить worktree ..\\insain-agent-<имя> и слитую ветку task/<имя>."""
+    _require_main_repo_root()
+    name = _normalize_task_name(raw_name)
+    wt_path = ROOT.parent / f"{ROOT.name}-{name}"
+    branch = f"task/{name}"
+
+    if wt_path.exists():
+        res = _git_out("worktree", "remove", str(wt_path))
+        if res.returncode != 0:
+            sys.exit(res.stderr.strip() or res.stdout.strip() or f"не удалось удалить worktree {wt_path}")
+        print(f"worktree удалён: {wt_path}")
+    else:
+        _git_out("worktree", "prune")
+        print(f"worktree отсутствует: {wt_path}")
+
+    has_branch = _git_out("show-ref", "--verify", "--quiet", f"refs/heads/{branch}").returncode == 0
+    if has_branch:
+        del_res = _git_out("branch", "-d", branch)
+        if del_res.returncode != 0:
+            sys.exit(del_res.stderr.strip() or del_res.stdout.strip() or f"ветка {branch} не удалена")
+        print(f"ветка удалена: {branch}")
+
+
+def _read_lock(path: Path) -> dict[str, str]:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def cmd_lock_acquire(resource: str, raw_name: str, force: bool = False) -> None:
+    if resource not in LOCK_RESOURCES:
+        sys.exit(f"неизвестный ресурс {resource!r}; доступно: {', '.join(LOCK_RESOURCES)}")
+    name = _normalize_task_name(raw_name)
+    locks_dir = _locks_dir(ROOT)
+    locks_dir.mkdir(parents=True, exist_ok=True)
+    lock_file = locks_dir / f"{resource}.lock"
+
+    payload = json.dumps(
+        {
+            "resource": resource,
+            "task": name,
+            "cwd": str(ROOT),
+            "acquired_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        },
+        ensure_ascii=False,
+        indent=2,
+    )
+
+    if not force:
+        try:
+            fd = os.open(lock_file, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                fh.write(payload + "\n")
+            print(f"lock {resource}: захвачен задачей {name}")
+            return
+        except FileExistsError:
+            cur = _read_lock(lock_file)
+            holder = cur.get("task", "?")
+            if holder == name:
+                lock_file.write_text(payload + "\n", encoding="utf-8")
+                print(f"lock {resource}: подтверждён задачей {name}")
+                return
+            since = cur.get("acquired_at", "?")
+            sys.exit(
+                f"ресурс {resource!r} занят задачей {holder!r} (с {since}). "
+                f"Дождитесь завершения или снимите: python scripts/dev.py lock release {resource} {holder} --force"
+            )
+
+    lock_file.write_text(payload + "\n", encoding="utf-8")
+    print(f"lock {resource}: принудительно захвачен задачей {name}")
+
+
+def cmd_lock_release(resource: str, raw_name: str, force: bool = False) -> None:
+    if resource not in LOCK_RESOURCES:
+        sys.exit(f"неизвестный ресурс {resource!r}; доступно: {', '.join(LOCK_RESOURCES)}")
+    name = _normalize_task_name(raw_name)
+    lock_file = _locks_dir(ROOT) / f"{resource}.lock"
+    if not lock_file.is_file():
+        print(f"lock {resource}: не был занят")
+        return
+    cur = _read_lock(lock_file)
+    holder = cur.get("task", "?")
+    if holder != name and not force:
+        sys.exit(f"lock {resource} удерживает задача {holder!r}, а не {name!r} (для сброса — --force)")
+    lock_file.unlink()
+    print(f"lock {resource}: освобождён (была задача {holder})")
+
+
+def cmd_lock_status() -> None:
+    locks_dir = _locks_dir(ROOT)
+    any_lock = False
+    for resource in LOCK_RESOURCES:
+        lf = locks_dir / f"{resource}.lock"
+        if lf.is_file():
+            any_lock = True
+            cur = _read_lock(lf)
+            print(f"  {resource}: занят задачей {cur.get('task', '?')} (с {cur.get('acquired_at', '?')})")
+    if not any_lock:
+        print("locks: свободен (prod, merge)")
+
+
 def cmd_status() -> None:
     print(f"CALC_API: http://{CALC_HOST}:{CALC_PORT}")
     cp = _read_pid("calc")
@@ -249,29 +585,91 @@ def cmd_status() -> None:
     else:
         print("bot:  не запущен (или запущен не через dev.py)")
 
+    wt = _git_out("worktree", "list")
+    if wt.returncode == 0:
+        lines = [ln for ln in wt.stdout.splitlines() if ln.strip()]
+        if len(lines) > 1:
+            print("worktrees:")
+            for ln in lines:
+                print(f"  {ln}")
+    cmd_lock_status()
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Запуск/остановка calc_service и бота")
     parser.add_argument(
         "action",
-        choices=("start", "stop", "restart", "status", "check", "close", "dashboard", "usage"),
+        choices=(
+            "start",
+            "stop",
+            "restart",
+            "status",
+            "check",
+            "close",
+            "dashboard",
+            "usage",
+            "wt-add",
+            "wt-check",
+            "wt-rm",
+            "lock",
+        ),
         help="действие",
     )
     parser.add_argument(
-        "service",
-        nargs="?",
-        default=None,
-        help="сервис (calc|bot|all), имя задачи для close или CSV для usage",
+        "args",
+        nargs="*",
+        help="аргументы команды",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="игнорировать блокировку/пересечение (для wt-add и lock)",
     )
     args = parser.parse_args()
+    first = args.args[0] if args.args else None
+
+    if args.action == "wt-add":
+        if not first:
+            sys.exit("нужно имя задачи: python scripts/dev.py wt-add <имя>")
+        cmd_wt_add(first, force=args.force)
+        return
+
+    if args.action == "wt-check":
+        if not first:
+            sys.exit("нужно имя задачи: python scripts/dev.py wt-check <имя>")
+        cmd_wt_check(first)
+        return
+
+    if args.action == "wt-rm":
+        if not first:
+            sys.exit("нужно имя задачи: python scripts/dev.py wt-rm <имя>")
+        cmd_wt_rm(first)
+        return
+
+    if args.action == "lock":
+        if not first:
+            sys.exit("использование: python scripts/dev.py lock <acquire|release|status> [prod|merge] [<имя>]")
+        if first == "status":
+            cmd_lock_status()
+            return
+        if len(args.args) < 3:
+            sys.exit(f"использование: python scripts/dev.py lock {first} <prod|merge> <имя>")
+        sub, resource, task_name = args.args[0], args.args[1], args.args[2]
+        if sub == "acquire":
+            cmd_lock_acquire(resource, task_name, force=args.force)
+        elif sub == "release":
+            cmd_lock_release(resource, task_name, force=args.force)
+        else:
+            sys.exit("подкоманда lock: acquire, release или status")
+        return
 
     if args.action == "usage":
-        if not args.service:
+        if not first:
             sys.exit("нужен CSV из кабинета Cursor: python scripts/dev.py usage <файл.csv>")
         sys.path.insert(0, str(Path(__file__).parent))
         from usage_report import main as usage_main
 
-        usage_main(args.service)
+        usage_main(first)
         return
 
     if args.action == "check":
@@ -286,19 +684,19 @@ def main() -> None:
         return
 
     if args.action == "close":
-        if not args.service:
+        if not first:
             sys.exit("нужно имя задачи: python scripts/dev.py close <имя>")
         sys.path.insert(0, str(Path(__file__).parent))
         from close_task import close as close_task
 
-        close_task(args.service)
+        close_task(first)
         return
 
     if args.action == "status":
         cmd_status()
         return
 
-    svc = args.service or "all"
+    svc = first or "all"
     if svc not in ("calc", "bot", "all"):
         sys.exit("сервис: calc, bot или all")
 
