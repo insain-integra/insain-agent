@@ -101,10 +101,15 @@ REF_PARAMS = {
     "is_uv_print": False,
     "mode": 1,
 }
-# JS, 05.11.2026 — ceil снят, как в JS. Печать бейджа через print_sheet.
+# JS, 15.11.2026 — вторая резка с печатью идёт как Material=noMaterial, PVC в неё не входит.
+# node scripts/run_js_calc.mjs calcBadge --data current --args
+# '[50,[85,55],1,"PVC3",{"isPrint":"","isCutLaser":""},1]'
+# Раннер: cost 3335, price 6060.5, time_hours 1.35, time_ready 17.9, weight_kg 0.87.
+# cost/price/time_hours сходятся (допуск 0.001). time_ready и weight — прежний порт badge.py:
+# JS прибавляет result.time к max(timeReady) и не включает вес второй резки (badge-vs-js).
 EXPECTED_REF = {
-    "cost": 3568.14,
-    "price": 6509,
+    "cost": 3335,
+    "price": 6060.5,
     "time_hours": 1.35,
     "time_ready": 16.55,
     "weight_kg": 1.18,

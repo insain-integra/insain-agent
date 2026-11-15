@@ -531,6 +531,18 @@ class LaserCalculator(BaseCalculator):
                     }
                 )
 
+        # Режим материала, как js_legacy/calc/calcLaser.js:220-238.
+        # По умолчанию isMaterial. Иначе стоимость основного материала 0 и его нет в materials.
+        # isMaterialCustomer ещё умножает время реза и гравировки на 1.25.
+        # Вес ниже считается по material всегда, даже когда стоимость обнулена.
+        material_mode = str(params.get("material_mode", "isMaterial") or "isMaterial")
+        if material is not None and material_mode != "isMaterial":
+            cost_material = 0.0
+            materials = [item for item in materials if item.get("code") != material.code]
+            if material_mode == "isMaterialCustomer":
+                time_cut *= 1.25
+                time_grave *= 1.25
+
         # Нанесение клеевого слоя (через ManualRoll)
         cost_adhesive_cost = 0.0
         cost_adhesive_price = 0.0

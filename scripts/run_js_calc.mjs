@@ -36,6 +36,7 @@
  *   js_legacy/calc/calcEmbossing.js
  *   js_legacy/calc/calcAcrilycPrizes.js
  *   js_legacy/calc/calcLamination.js
+ *   js_legacy/calc/calcBadge.js
  * Прайс legacy:
  *   js_legacy/calc/common.json
  *   js_legacy/material/misc.json
@@ -95,6 +96,7 @@ const JS_FILES = [
     'js_legacy/calc/calcEmbossing.js',
     'js_legacy/calc/calcAcrilycPrizes.js',
     'js_legacy/calc/calcLamination.js',
+    'js_legacy/calc/calcBadge.js',
 ];
 
 const LEGACY_DATA = [
