@@ -77,6 +77,22 @@ def test_laser_js_calls_laser_api():
     assert not re.search(r"\bprice\s*=", text)
 
 
+def test_print_roll_js_writes_eyelet_step_cm_and_reads_radio_zero():
+    """Ссылка: шаг люверсов в см поля, радио value 0 не теряется. sameEdges не меняется."""
+    text = (FORMS / "print_roll.js").read_text(encoding="utf-8")
+    assert "numStepEyelets: stepAll / 10" in text
+    assert "numStepEyeletsTop: stepTop / 10" in text
+    assert "numStepEyeletsRight: stepRight / 10" in text
+    assert "numStepEyeletsBottom: stepBottom / 10" in text
+    assert "numStepEyeletsLeft: stepLeft / 10" in text
+    assert "processUrl === '0'" in text
+    assert "processListed = [1]" in text
+    assert "sameEdges = processNum === 1" in text
+    assert "insaincalc.calcApi('print_roll'" in text
+    assert "querySelector" not in text
+    assert not re.search(r"\bprice\s*=", text)
+
+
 def test_forms_keep_mode_zero():
     """Режим 0 («дешевле») не превращается в 1 через ||, даже если сейчас в форме его нет."""
     bad = []

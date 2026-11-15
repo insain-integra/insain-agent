@@ -13,6 +13,7 @@ import math
 from typing import Any, Dict, List, Mapping, Optional
 
 from calculators.base import BaseCalculator, ProductionMode
+from calculators.lamination_wide import LaminationWideCalculator
 from calculators.print_wide import PrintWideCalculator
 from common.helpers import calc_weight, find_in_table
 from common.layout import layout_on_roll
@@ -304,6 +305,22 @@ class PrintRollCalculator(BaseCalculator):
             price_opt += rg.price
             time_opt += rg.time_hours
             materials_extra.extend(rg.materials)
+
+        # JS calcPrintRoll: isLamination → calcLaminationWide(n, size изделия, mode).
+        # timeReady у calcLaminationWide в JS остаётся 0, в срок печати не входит;
+        # в time и weight берём time_hours и weight_kg вложенного расчёта.
+        if is_lamination:
+            lam = LaminationWideCalculator().calculate({
+                "quantity": n,
+                "width": width,
+                "height": height,
+                "mode": mode.value,
+            })
+            cost_opt += float(lam.get("cost", 0))
+            price_opt += float(lam.get("price", 0))
+            time_opt += float(lam.get("time_hours", 0))
+            weight_opt += float(lam.get("weight_kg", 0))
+            materials_extra.extend(lam.get("materials") or [])
 
         # Итоговый расчёт
         cost_print_val = float(cost_print_result.get("cost", 0))

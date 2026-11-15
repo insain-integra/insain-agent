@@ -542,6 +542,74 @@ EXPECTED_REF_EYELET_3000 = {
 }
 
 
+# Дефолт формы 23 CalcPrintWide: 1 шт, А0 1189×841, ORAJET3640, Technojet160ECO,
+# ламинация «нет», края «поля 5 см» (calcPrintRoll их не считает), режим 1.
+# JS, 15.11.2026
+# node scripts/run_js_calc.mjs calcPrintRoll --data current --args '[1,[1189,841],"ORAJET3640","Technojet160ECO",{},1]'
+REF_FORM_DEFAULT = {
+    "quantity": 1,
+    "width": 1189,
+    "height": 841,
+    "material_id": "ORAJET3640",
+    "printer_code": "Technojet160ECO",
+    "mode": 1,
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 955,
+    "price": 1544,
+    "time_hours": 0.26,
+    "time_ready": 16.52,
+    "weight_kg": 0.22,
+}
+
+
+def test_form_default_print_roll(calc):
+    """JS, 15.11.2026: дефолт формы 23, А0, ORAJET3640, без обработки."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    rel = 0.001
+    assert r["cost"] == pytest.approx(e["cost"], rel=rel)
+    assert r["price"] == pytest.approx(e["price"], rel=rel)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=rel)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=rel)
+    mats = r["materials"]
+    assert mats, "ожидается материал в результате"
+    mat = mats[0]
+    assert mat.get("code") == "ORAJET3640"
+    assert "ORAJET" in (mat.get("name") or "")
+    assert mat.get("title")
+    assert mat.get("quantity") == pytest.approx(1.2, rel=rel)
+
+
+# Дефолт формы 23 + ламинация. Плёнка внутри calcLaminationWide — LaminatDLCLAM.
+# JS, 16.11.2026
+# node scripts/run_js_calc.mjs calcPrintRoll --data current --args '[1,[1189,841],"ORAJET3640","Technojet160ECO",{"isLamination":1},1]'
+REF_FORM_LAMINATION = {
+    "quantity": 1,
+    "width": 1189,
+    "height": 841,
+    "material_id": "ORAJET3640",
+    "printer_code": "Technojet160ECO",
+    "is_lamination": True,
+    "mode": 1,
+}
+EXPECTED_FORM_LAMINATION = {
+    "cost": 1443,
+    "price": 2335,
+    "time_ready": 16.55,
+}
+
+
+def test_form_default_lamination_print_roll(calc):
+    """JS, 16.11.2026: дефолт А0 с ламинацией — calcLaminationWide."""
+    r = calc.execute(REF_FORM_LAMINATION)
+    e = EXPECTED_FORM_LAMINATION
+    rel = 0.001
+    assert r["cost"] == pytest.approx(e["cost"], rel=rel)
+    assert r["price"] == pytest.approx(e["price"], rel=rel)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=rel)
+
+
 def test_expected_values_print_roll_eyelet_3000x2000(calc):
     """JS, 08.11.2026: 3000×2000, люверсы 300 — 34 люверса (Math.round)."""
     r = calc.execute(REF_PARAMS_EYELET_3000)
