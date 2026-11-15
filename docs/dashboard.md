@@ -42,7 +42,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `dashboard-harness.md` | ревью |
 | `ezfc-options-source-reset.md` | черновик |
 | `form-button-pins.md` | черновик |
-| `form-laser.md` | ревью |
+| `form-laser.md` | выкатка |
 | `form-print-offset.md` | черновик |
 | `form-print-roll.md` | черновик |
 | `forms-batch-switch.md` | черновик |
