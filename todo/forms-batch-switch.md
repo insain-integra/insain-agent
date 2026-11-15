@@ -30,6 +30,7 @@ Site ops: Opus 5.5
 | 6 CalcPrint | `print_sheet` | `/catalog/listovki-pod-zakaz/` | 96 / 2586890 (draft) | копия принята 13.11.2026, `form-print-sheet` (закрыто 2026-11-14, `docs/history/log.md`) |
 | 22 CalcSticker | `sticker` | `/catalog/plotternaya-rezka/` | 97 / 2586891 (draft) | копия принята 15.11.2026, `form-sticker` (закрыто 2026-11-15, `docs/history/log.md`) |
 | 28 CalcLaser | `laser` | `/catalog/lazernaya-gravirovka-i-rezka/` | 98 / 2586892 (draft) | копия принята 15.11.2026, `form-laser` |
+| 23 CalcPrintWide | `print_roll` | `/catalog/shirokoformatnaya-pechat-na-zakaz/` | 99 / 2586893 (draft) | копия принята 16.11.2026, `form-print-roll` |
 
 ## Контекст и ссылки
 

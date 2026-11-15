@@ -18,7 +18,7 @@
 - `todo/form-button-pins.md` — калькулятор `button_pins` + копия формы 12
 - `todo/print-sheet-copy-result.md` — на копии 96 показать за шт со скидкой (`htmCost`)
 - `todo/form-print-offset.md` — копия формы 82, slug `print_offset` (`calcPrintOffsetPromo`)
-- `todo/form-print-roll.md` — копия формы 23, slug `print_roll` (форма CalcPrintWide)
+- `form-print-roll` (закрыто 2026-11-16, `docs/history/log.md`) — копия формы 23, slug `print_roll` (форма CalcPrintWide)
 
 Закрытые (файла в `todo/` нет, запись в `docs/history/log.md`):
 
@@ -43,7 +43,7 @@
 
 1. `todo/presswall-banner-mode.md` — параллельно пакету: правит только `presswall.py` и его тест. Форму 46 на бой не переключать, пока новый `price` не на боевом API.
 2. `todo/forms-batch-switch.md` — одно подтверждение на 12 форм ниже. Форма 46 в очереди последней и только после пункта 1.
-3. Параллельно пакету, файлы не пересекаются: `todo/form-button-pins.md`, `todo/form-print-offset.md`, `todo/form-print-roll.md`, `todo/print-sheet-copy-result.md` (только `htmCost` копии 96).
+3. Параллельно пакету, файлы не пересекаются: `todo/form-button-pins.md`, `todo/form-print-offset.md`, `form-print-roll` (закрыто 2026-11-16, `docs/history/log.md`), `todo/print-sheet-copy-result.md` (только `htmCost` копии 96).
 4. После принятия копии своего slug — отдельные задачи, не строки этого пакета: форма 19 (`print_sheet`), 83 (`print_offset`), 29 (`sticker`).
 5. Пачки 4–7 — новые файлы задач. Их бой — новая `forms-batch-N`. Состав текущего пакета не расширять.
 

@@ -36,7 +36,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **18**. В работе/ревью: `form-print-roll.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **17**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -46,7 +46,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `ezfc-options-source-reset.md` | черновик |
 | `form-button-pins.md` | черновик |
 | `form-print-offset.md` | черновик |
-| `form-print-roll.md` | выкатка |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
@@ -67,8 +66,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-16 — form-print-roll
 - 2026-11-16 — site-content-guardrails
 - 2026-11-15 — dashboard-harness
 - 2026-11-15 — form-laser
 - 2026-11-15 — form-sticker
-- 2026-11-14 — sticker-print-wide
