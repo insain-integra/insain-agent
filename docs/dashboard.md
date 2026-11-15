@@ -36,14 +36,13 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **20**. В работе/ревью: `dashboard-harness.md`. Заблокировано: `ai-seo-h1-structure.md`, `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **19**. В работе/ревью: нет. Заблокировано: `ai-seo-h1-structure.md`, `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `ai-seo-cleanup-noindex.md` | черновик |
 | `ai-seo-geo-yoast.md` | черновик |
 | `ai-seo-h1-structure.md` | заблокировано: ждёт todo/site-content-guardrails.md |
-| `dashboard-harness.md` | ревью |
 | `ezfc-options-source-reset.md` | черновик |
 | `form-button-pins.md` | черновик |
 | `form-print-offset.md` | черновик |
@@ -69,8 +68,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-15 — dashboard-harness
 - 2026-11-15 — form-laser
 - 2026-11-15 — form-sticker
 - 2026-11-14 — sticker-print-wide
 - 2026-11-14 — cut-plotter-sheet-layout
-- 2026-11-14 — form-print-sheet
