@@ -42,7 +42,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | --- | --- |
 | `ai-seo-geo-yoast.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
-| `form-button-pins.md` | в работе |
+| `form-button-pins.md` | выкатка |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
