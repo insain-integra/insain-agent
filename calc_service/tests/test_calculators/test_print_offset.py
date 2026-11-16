@@ -221,3 +221,30 @@ def test_promo_ignores_size_and_color(calc):
     })
     assert short["price"] == pytest.approx(full["price"], rel=1e-9)
     assert short["time_ready"] == pytest.approx(full["time_ready"], rel=1e-9)
+
+
+# JS, 17.11.2026 — дефолт боевой формы 82: тираж 1000, А5, режим «стандарт».
+# node scripts/run_js_calc.mjs calcPrintOffsetPromo --data current --args '[1000,"OffsetPromoА51000",1]'
+# Страница https://insain.ru/catalog/listovki-po-akczii/: get_value_from(3221) = 1 (data-value),
+# срок «6 дней». HTML value радио «стандарт» равен 0, в расчёт не попадает.
+REF_FORM_DEFAULT = {
+    "num_sheet": 1000,
+    "material_id": PROMO_CODE,
+    "mode": 1,
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 2250.0,
+    "price": 4244.4,
+    "time_hours": 0.0,
+    "time_ready": 48.0,
+}
+
+
+def test_form_default_print_offset_promo(calc):
+    """JS, 17.11.2026: дефолт формы 82, сборный тираж А5, режим data-value 1."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    assert r["cost"] == pytest.approx(e["cost"], rel=0.001)
+    assert r["price"] == pytest.approx(e["price"], rel=0.001)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=0.001)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=0.001)
