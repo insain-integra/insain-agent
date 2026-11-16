@@ -16,7 +16,7 @@ Slug из имени функции (`calcLaser` → `laser`) не подста�
 |---|---|---|---|
 | https://insain.ru/catalog/listovki-pod-zakaz/ (Листовки под заказ) | 6 CalcPrint | — | старый JS `insaincalc.calcPrintSheet` |
 | — | 10 _ExternalTest | — | старый JS `insaincalc.calc_fun1`, `insaincalc.calc_fun2`, `insaincalc.calc_fun3` |
-| https://insain.ru/catalog/znachki-zakatnye-kruglye/ (Значки закатные круглые) | 12 CalcButtonPins | — | старый JS `insaincalc.calcButtonPins` |
+| https://insain.ru/catalog/znachki-zakatnye-kruglye/ (Значки закатные круглые) | 12 CalcButtonPins | — | старый JS `insaincalc.calcButtonPins` (копия: форма 101, товар 2586896 draft) |
 | https://insain.ru/catalog/vizitki/ (Визитки) | 19 CalcCards | — | старый JS `insaincalc.calcPrintSheet` |
 | https://insain.ru/catalog/plotternaya-rezka/ (Плоттерная резка) | 22 CalcSticker | — | старый JS `insaincalc.calcSticker` |
 | https://insain.ru/catalog/shirokoformatnaya-pechat-na-zakaz/ (Широкоформатная печать на заказ) | 23 CalcPrintWide | — | старый JS `insaincalc.calcPrintRoll` |

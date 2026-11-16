@@ -166,3 +166,30 @@ def test_bad_quantity_raises(calc):
 def test_bad_mode_raises(calc):
     with pytest.raises(ValueError, match="режим"):
         calc.calculate({"quantity": 2, "pin_id": "D38", "mode": 9})
+
+
+# Дефолт формы 12: numN=100, dpdSize preselect 0 → D25, упаковка выключена, режим 1.
+# node scripts/run_js_calc.mjs calcButtonPins --data current --args '[100,"D25",{},1]' — 17.11.2026
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "pin_id": "D25",
+    "mode": 1,
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 2346.9722813333333,
+    "price": 3513.86888712,
+    "time_hours": 0.93,
+    "time_ready": 16.93,
+    "weight_kg": 0.25,
+}
+
+
+def test_form_default_button_pins(calc):
+    """Дефолт формы 12: 100×D25, без упаковки, стандарт. Цена — раннер, rel ≤ 0.001."""
+    result = calc.execute(REF_FORM_DEFAULT)
+    expected = EXPECTED_FORM_DEFAULT
+    assert _cmp(result["cost"], expected["cost"]), result["cost"]
+    assert _cmp(result["price"], expected["price"]), result["price"]
+    assert abs(result["time_hours"] - expected["time_hours"]) <= TIME_ABS
+    assert abs(result["time_ready"] - expected["time_ready"]) <= TIME_ABS
+    assert _cmp(result["weight_kg"], expected["weight_kg"])

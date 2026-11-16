@@ -1,6 +1,6 @@
 # form-button-pins
 
-Статус: выкатка
+Статус: закрытие
 Сложность: средняя
 Implementer: Grok 4.7
 Reviewer: Auto
@@ -48,8 +48,8 @@ Site ops: Grok 4.7
 - [x] `python bot_service/check_calc_registry.py` на локальном API — в списке есть `button_pins` (нужен `make calc-up`)
 - [x] `python -m pytest calc_service/tests/test_calculators/test_button_pins.py -q` — `passed`
 - [x] Раннер JS и API: rel ≤ 0.001 на эталоне (команда раннера — из skill / `docs/js-runner-cases.md` после добавления кейса)
-- [ ] Копия не на витрине: `draft` или `private`, гость `404`
-- [ ] На копии POST `/api/v1/calc/button_pins` → 200, цена на странице = API с округлением `showResult`
+- [x] Копия не на витрине: `draft` или `private`, гость `404`
+- [x] На копии POST `/api/v1/calc/button_pins` → 200, цена на странице = API с округлением `showResult`
 
 ## Проверки
 
@@ -75,6 +75,12 @@ Site ops: Grok 4.7
 17.11.2026 — Reviewer, Auto — принято по diff Implementer — дальше человек (слияние)
 
 17.11.2026 — человек — принято — выкатка, дальше Site ops
+
+17.11.2026 — Site ops, Grok 4.7 — API `291810f` на проде, копия формы 101 на черновике 2586896, боевая 12 не переключена — дальше Reviewer
+
+17.11.2026 — Reviewer, Auto — принято по отчёту Site ops и diff копии (JS, REF_FORM_DEFAULT) — дальше человек (`finish-task`)
+
+17.11.2026 — человек — принято — закрытие
 
 ## Найдено вне scope
 
@@ -112,6 +118,24 @@ node scripts/run_js_calc.mjs calcButtonPins --data current --args '[2500,\"D38\"
 
 Параметры API эталона: `{"quantity":2,"pin_id":"D38","mode":1}`. Упаковка: `is_packing: true` (автоподбор) или строка — код пакета.
 
+### Site ops, 17.11.2026
+
+- Сделано: API `291810f` выкачен с `main` (`e11ac75` → `291810f`). Копия формы 12: ezFC id `101` «CalcButtonPins duplicate». Черновик товара `2586896` «Значки закатные круглые (Копировать)», `post_status=draft`, `ezfc_form_id=101`. Боевой товар `4818` остался `publish` и `ezfc_form_id=12`. JS копии записан в элемент `3782` (`calcApi`, `read_file=0`). В git не коммитилось: `wp-plugin/forms/button_pins.js`, дописка `REF_FORM_DEFAULT` в `test_button_pins.py`. Чужой `todo/ai-seo-cleanup-noindex.md` не трогался. Блокировка `prod` не снималась.
+- Чем проверено:
+  - `bash infra/deploy.sh` на VDS: `Готово: 291810f выкачен, smoke пройден.` Контейнер `insain-calc-api` healthy, `127.0.0.1:8002`. Образ отката `insain-agent-calc-api:rollback` (`c92ab96c80fa`).
+  - `GET https://insain.ru/api/v1/calculators` — в списке `button_pins`.
+  - `POST /api/v1/calc/button_pins` `{"quantity":2,"pin_id":"D38","mode":1}` → HTTP 200, `price` 760.59, `cost` 519.3422813333333. `{"quantity":2500,"pin_id":"D38","mode":1}` → HTTP 200, `price` 47982.30.
+  - Гость: `curl.exe -s -o NUL -w "%{http_code}" "https://insain.ru/?post_type=product&p=2586896"` → `404`.
+  - Превью под админом: `POST /api/v1/calc/button_pins` 200. Дефолт 100×D25: тело `{"quantity":100,"pin_id":"D25","is_packing":false,"mode":1}`, на странице `3 600 руб.` (API `price` 3514.575, `showResult`/`round`). Эталон 2×D38: тело `pin_id` `D38`, на странице `800 руб.` / `400 руб./шт` (API 760.59). D78×20: `1 800 руб.`, с упаковкой `is_packing:true` → `2 060 руб.`. Режим «быстрее»: URL `rdoModeProduction=2`, срок `1 день`, цена `3 100 руб.`; после перезагрузки режим, срок и цена те же.
+  - Срок боевой формы 12 на тех же входах: 2×D38 стандарт `Срок 2 дня` и `800 руб.`; режим «быстрее» `Срок 1 день` и `1 280 руб.` — на копии то же. «Со скидкой» на копии на 1 руб. выше (`676` против `675`): `showResult` делает `Math.ceil`.
+  - Материалы: имена, без внутренних `code`. У заготовки значка колонка «Размер» пустая (в ответе API нет `size_mm`) — шаг 3а `verify.md`, JS не менялся.
+  - Флаги скидки копии: `sbtPriceTotalDiscount` и `sbtPriceDiscount` — `hidden=1`, `calc_hidden=1`. Менеджерские поля `hidden=0`. У `sbtPriceTotalManager` унаследован `calc_hidden=1` при видимом поле; цену не обнуляет.
+  - Боевой `cjsCalc` 1639: `calcButtonPins` на месте, `calcApi` нет. Копия 3782: `calcApi=1`.
+  - `python -m pytest calc_service/tests/test_calculators/test_button_pins.py calc_service/tests/test_wp_plugin_forms.py -q` — `19 passed`.
+- Не сделано и почему: боевая форма 12 и страница https://insain.ru/catalog/znachki-zakatnye-kruglye/ не переключались. Плагин не выкладывался: skill `deploy-wp-plugin` собирает zip командой `git archive HEAD:wp-plugin`, незакоммиченный `button_pins.js` в архив не входит; дерево не чистое из‑за чужого `todo/ai-seo-cleanup-noindex.md`; коммит в `main` не делался. Копии файл плагина не нужен: `custom_calculation_function_read_file=0`, JS лежит в элементе. `wp litespeed-purge all` дважды вернул `Error: Something went wrong! Got 400`; `wp cache flush` — `Success`. Превью нового черновика отдало новый JS. Общие файлы (`docs/site/forms.md`, эпики, `STATUS.md`) не правились.
+- Как откатить: API — на VDS `git reset --hard e11ac75`, `docker tag insain-agent-calc-api:rollback insain-agent-calc-api:latest`, `docker compose -f docker-compose.calc-only.yml up -d --no-build --force-recreate`. Копия — бэкап элементов `/tmp/ezfc-copy-101-20261116-195433.json`; черновик `2586896` убрать в корзину, форму 101 удалить в админке ezFC. Боевую форму откатывать не из чего: она не менялась.
+- Дописать в `docs/site/forms.md` при закрытии: боевая строка формы 12 остаётся «старый JS». Рядом: копия форма `101`, товар `2586896` (`draft`), превью `/?post_type=product&p=2586896&preview=true`. В `todo/EPIC-forms-to-api.md`: `form-button-pins` — API на проде, копия готова, боевая 12 ждёт пакет `forms-batch-switch`.
+
 ## Ревью 1
 
 **Вердикт:** принято
@@ -143,3 +167,35 @@ node scripts/run_js_calc.mjs calcButtonPins --data current --args '[2500,\"D38\"
 - `python scripts/dev.py check` — exit 0
 - `python -m pytest calc_service/tests/test_calculators/test_button_pins.py calc_service/tests/test_calculators/test_sticker.py calc_service/tests/test_calculators/test_cut_plotter.py -q` — 66 passed
 - `node scripts/run_js_calc.mjs calcButtonPins --data current --args '[2,\"D38\",{},1]'` и локальный `ButtonPinsCalculator().execute` — cost 519.3422813333333, rel price 0.00093
+
+## Ревью 2
+
+**Вердикт:** принято
+
+**Статус задачи:** `закрытие` (дальше человек: коммит незакоммиченного, `finish-task`, опционально `docs/js-runner-cases.md` / `docs/site/forms.md` по блокам задачи — общие файлы Reviewer не правил)
+
+**Замечания**
+
+- **желательно:** при закрытии закоммитить вместе `wp-plugin/forms/button_pins.js` и дописку `REF_FORM_DEFAULT` в `test_button_pins.py`; не включать в тот же коммит чужой `todo/ai-seo-cleanup-noindex.md`.
+- **желательно:** `deploy-wp-plugin` до пакета `forms-batch-switch` не обязателен (JS копии в элементе, `read_file=0`); при переключении боевой формы файл из git должен быть в архиве плагина.
+- **вне scope:** расхождение «со скидкой» на 1 руб. (`Math.ceil` в `showResult`) и rel price 2×D38 — уже в «Найдено вне scope».
+
+**Критерии Site ops (копия) — сверка с отчётом и diff**
+
+| Критерий | Сверка |
+| --- | --- |
+| API на проде, `button_pins` в реестре | отчёт Site ops: deploy `291810f`, smoke, GET calculators |
+| Копия draft/private, гость 404 | отчёт: `2586896` draft, HTTP 404 |
+| POST на копии, цена = API + `showResult` | отчёт: 2×D38 `800`/`400`, дефолт `3 600`, D78+packing, режим «быстрее» |
+| Боевая форма 12 не переключена | отчёт: `4818` ezfc 12, `calcButtonPins` без `calcApi` |
+| `wp-plugin/forms/button_pins.js` | diff: `calcApi('button_pins')`, `syncUrl` (`dpdSize`, `chkPacking`, `rdoModeProduction`), `showResult`/`showError`; нет `querySelector`, `calcButtonPins`, своей `price` |
+| Эталон дефолта формы | `REF_FORM_DEFAULT` 100×D25; раннер → price 3513.86888712, cost 2346.972… — совпало с тестом |
+| Инвариант `test_wp_plugin_forms` | `button_pins.js` участвует в glob; `REF_FORM_DEFAULT` есть — не в `NO_FORM_DEFAULT_YET` |
+
+**Чем проверено Reviewer**
+
+- `git diff` / untracked: `wp-plugin/forms/button_pins.js`, `test_button_pins.py` (+журнал задачи)
+- `python -m pytest calc_service/tests/test_calculators/test_button_pins.py calc_service/tests/test_wp_plugin_forms.py -q` — 19 passed
+- `node scripts/run_js_calc.mjs calcButtonPins --data current --args '[100,\"D25\",{},1]'` — cost/price/time/weight как в `EXPECTED_FORM_DEFAULT`
+- `python scripts/dev.py check` — 644 + 81 passed, exit 0
+- Сверка `button_pins.js` с шаблоном `docs/ezfc-api-migration.md` и эталоном `mug.js` (mode, syncUrl чекбокса, `is_packing` в API)

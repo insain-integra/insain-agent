@@ -7,16 +7,16 @@
 
 К 30.11.2026 все 45 боевых форм-калькуляторов на https://insain.ru считают через `insaincalc.calcApi`. Переключение пачками по 5–10 форм, копии принимаются выборочно. Форма 10 `_ExternalTest` и не-калькуляторы 71/72/77 в G1 не входят.
 
-Сверка 07.11.2026: публичный slug в `calc_service/calculators/__init__.py` есть у **44 из 45** боевых форм. Нет slug у формы **12** (`calcButtonPins`: логика в `calc_button_pins`, в реестр API не входит) — сначала обёртка-калькулятор. На 15.11.2026 обёртки всё ещё нет.
+Сверка 17.11.2026: публичный slug `button_pins` добавлен и выкачен на прод API (`form-button-pins` — копия 101 / 2586896 готова, боевая форма 12 ждёт пакет переключения).
 
 ## Задачи в файлах
 
 Открытые:
 
-- `todo/forms-batch-switch.md` — боевой пакет, 12 принятых копий (список в «Пачки»)
+- `todo/forms-batch-switch.md` — боевой пакет, 14 принятых копий (список в «Пачки»)
 - `todo/presswall-banner-mode.md` — баннер и чехол `presswall` в режиме формы; до переключения формы 46
-- `todo/form-button-pins.md` — калькулятор `button_pins` + копия формы 12
 - `todo/print-sheet-copy-result.md` — на копии 96 показать за шт со скидкой (`htmCost`)
+- `todo/form-button-pins.md` — калькулятор `button_pins` + копия формы 12 (API на проде, копия 101 / 2586896 готова, боевая 12 ждёт переключения)
 - `form-print-offset` (закрыто 2026-11-17, `docs/history/log.md`) — копия формы 82, slug `print_offset` (`calcPrintOffsetPromo`); предпосылка `print-offset-promo` закрыта 2026-11-16
 - `form-print-roll` (закрыто 2026-11-16, `docs/history/log.md`) — копия формы 23, slug `print_roll` (форма CalcPrintWide)
 
@@ -57,7 +57,7 @@
 | 1 бой | 69 `plaque`, 26 `uv_print`, 41 `mug`, 85 `embossing`, 78 `acrylic_prizes`, 49 `rollup`, 73 `pennant`, 55 `flag`, 6 `print_sheet`, 22 `sticker`, 28 `laser`, 46 `presswall` | `forms-batch-switch`, 12 форм. 46 — после `presswall-banner-mode` на проде |
 | 3 остаток | 82 и 83 `print_offset`, 23 `print_roll`, 19 `print_sheet`, 29 `sticker` | открыты копии 82 и 23. 19, 83, 29 — после первой копии slug; в пакет 1 не входят |
 | 4 копии | 30 `poly_sticker`, 70 `poly_sticker_pack`, 35 `milling`, 38 `pad_print`, 40 `heat_press`, 45 `notebook`, 80 `canvas` | 7, файлов задач ещё нет |
-| 5 копии | 31 60 61 64 84 `badge`, 34 `metal_pins`, 12 `button_pins` | 12 после обёртки (`form-button-pins`) |
+| 5 копии | 31 60 61 64 84 `badge`, 34 `metal_pins`, 12 `button_pins` | копия 12 (`101` / `2586896`) готова, `button_pins` на проде |
 | 6 копии | 36 48 51 76 `tablets`, 68 `shild`, 50 52 66 `calendar` | 8 |
 | 7 копии | 54 57 `magnet_laminated`, 56 `cards`, 74 `keychain`, 75 `magnet_acrylic` | 5 |
 
