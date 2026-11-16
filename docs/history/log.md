@@ -6,6 +6,15 @@
 `docs/archive/`. Число сессий агентов — файлы чатов Cursor за период, включая субагентов.
 Часы человека — оценка по правилу 1 ч на коммит. Вне этапов — 1 коммит (`cd640ec`, правило ролей, 1 ч).
 
+## 2026-11-17 — form-print-offset
+
+- Период: 2026-11-16 — 2026-11-17 (2 дн.)
+- Часы человека: 13 сообщ. в чатах Cursor; активно 1.7 ч (ходы агента > 30 мин — с коэфф. 0.5)
+- Работа агентов: 6 чатов Cursor, 13 сообщ. человека, 1.7 ч активных; Implementer — Grok 4.7; Reviewer — Auto; Site ops — Grok 4.7
+- Было / стало: форма 82 `CalcPrintPromo` была только на старом JS `calcPrintOffsetPromo`; сделаны `wp-plugin/forms/print_offset.js`, `REF_FORM_DEFAULT` в `test_print_offset.py` и копия формы 100 на черновике 2586895 (GET `numN`, `dpdFormat=index`, `rdoModeProduction=value`, расчёт через `POST /api/v1/calc/print_offset`). Боевая форма 82 не переключалась.
+- Эффект: —
+- Источник: задача `todo/form-print-offset.md`, коммиты 61d677a 9a7878b 8ce35e7 2c125b2 45aa2f6
+
 ## 2026-11-16 — ai-seo-h1-structure
 
 - Период: 2026-11-16 — 2026-11-16 (1 дн.)

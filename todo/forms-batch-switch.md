@@ -31,6 +31,7 @@ Site ops: Opus 5.5
 | 22 CalcSticker | `sticker` | `/catalog/plotternaya-rezka/` | 97 / 2586891 (draft) | копия принята 15.11.2026, `form-sticker` (закрыто 2026-11-15, `docs/history/log.md`) |
 | 28 CalcLaser | `laser` | `/catalog/lazernaya-gravirovka-i-rezka/` | 98 / 2586892 (draft) | копия принята 15.11.2026, `form-laser` |
 | 23 CalcPrintWide | `print_roll` | `/catalog/shirokoformatnaya-pechat-na-zakaz/` | 99 / 2586893 (draft) | копия принята 16.11.2026, `form-print-roll` |
+| 82 CalcPrintPromo | `print_offset` | `/catalog/listovki-po-akczii/` | 100 / 2586895 (draft) | копия принята 17.11.2026, `form-print-offset` |
 
 ## Контекст и ссылки
 
