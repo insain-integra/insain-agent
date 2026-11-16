@@ -25,12 +25,18 @@ Site ops: Opus 5.5
 
 На проде (Site ops):
 
-1. Диагностика (только чтение):
-   - зафиксировать текущий вывод `curl` с `User-Agent: GPTBot/1.0` на `/`, `/catalog/magnity-pvh/`, `/category/awards/znachki/`, `/contacts/perm/` (`<title>`, `description`, JSON-LD, заголовок `Set-Cookie: wt_geo_data`);
-   - прочитать в WP опции `wpseo_titles`, настройки `wt_geotargeting_pro`, в каких постметах/опциях стоит `{region_name_prepositional}`, и как работает текущая геоподмена телефона/города в шапке.
+1. Диагностика (только чтение, уточнение фактов от 2026-11-17):
+   - предварительно проверено (2026-11-17): в `<title>` и `<meta name="description">` плейсхолдера нет, утечка идёт только в `og:description` и Yoast JSON-LD (`WebPage.name`/`description`) на 2 страницах (`/`, `/contacts/all/`), 6 категориях и ~7% выборки товаров (~50 из 758); причина — `wt_geotargeting_pro` (`1.7.6`, `modules/WtGtPost/WtGtPost.php`) подписывается на `wpseo_title`, `wpseo_opengraph_title`, `wpseo_metadesc`, но не покрывает `wpseo_opengraph_desc` и `wpseo_schema_graph` / `wpseo_schema_webpage`;
+   - зафиксировать перед правкой текущий вывод `curl` с `User-Agent: GPTBot/1.0` на `/`, `/contacts/all/`, `/catalog/magnity-pvh/`, `/category/awards/znachki/`, `/contacts/perm/` (`<title>`, `description`, `og:description`, JSON-LD, заголовок `Set-Cookie: wt_geo_data`);
+   - прочитать в WP опции `wpseo_titles`, настройки `wt_geotargeting_pro`, в каких постметах/опциях стоит `{region_*}`, и как работает текущая геоподмена телефона/города в шапке.
 2. Подтверждение человека (`заблокировано: человек` через `AskQuestion`):
    - по `T11` (DaData / `wt_geotargeting_pro`): выбрать — передать новый рабочий токен DaData (вне git), переключить определение города на локальную базу без DaData или отключить автозапись DaData-запросов (оставив ручной выбор города в шапке);
-   - по `T01`: подтвердить точную замену `{region_name_prepositional}` в SEO-полях Yoast на статичный текст «в Екатеринбурге» и отдельные статичные title/description для страниц 4 филиалов (`/contacts/perm/`, `/contacts/chelyabinsk/`, `/contacts/tyumen/`, `/contacts/snezhinsk/`).
+   - по `T01` (выбор архитектуры — альтернативы):
+     - обновить `wt_geotargeting_pro` до новой версии (проверить закрытие `wpseo_opengraph_desc` и `wpseo_schema_graph` в Yoast 27.x);
+     - заменить плагин на `BelingoGeo`;
+     - реализовать собственный геоплагин (геоподстановка в контенте/SEO/OG/JSON-LD, обработка ИИ-ботов, cookie без DaData-ошибок);
+     - добавить обёртку фильтров `wpseo_opengraph_desc` и `wpseo_schema_graph` (`mu-plugin` / `wp-plugin`) поверх текущего `wt_geotargeting_pro`;
+     - заменить `{region_*}` в SEO-полях Yoast на статичный текст («в Екатеринбурге» + отдельные статичные title/description для 4 филиалов `/contacts/perm/`, `/contacts/chelyabinsk/`, `/contacts/tyumen/`, `/contacts/snezhinsk/`).
 3. Бэкап БД: `sudo -u www-data wp db export /tmp/insain-db-before-ai-seo-geo.sql --path=/var/www/insain.ru`.
 4. Применить согласованные правки в Yoast и `wt_geotargeting_pro`, выполнить `wp yoast index --path=/var/www/insain.ru`, сбросить кэш (`wp cache flush` и при необходимости `wp litespeed-purge all` / `purge url`).
 5. Проверка `curl` с `GPTBot/1.0` и проверка отображения телефона/выбора города в браузере (и отсутствии сбоя на страницах калькуляторов на API).
