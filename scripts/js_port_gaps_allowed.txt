@@ -15,7 +15,6 @@ calcCalendarFlip option isLamination
 calcCanvas call calcBaguette
 calcBaguette module
 calcPlasticCards option isMagneticStripeHiCo
-calcCutPlotter option isCarrier
 calcHeatPress call calcSticker
 calcHeatPress call calcLayoutOnSheet
 calcHeatPress call calcCutPlotter
@@ -29,7 +28,6 @@ calcMilling option isCutMilling
 calcPadPrint option Material
 calcPrintSheet call calcCutRoller
 calcPrintSheet call calcPrintLaser
-calcButtonPins call calcSticker
 calcPuzzle call calcTablets
 calcPuzzle call calcHeatPress
 calcShildSublimaton option isBarcode

@@ -246,6 +246,14 @@ class StickerCalculator(BaseCalculator):
             "difficulty": difficulty,
             "mode": mode.value,
         }
+        # Форма стикера эти поля не шлёт: дефолт резки не меняется.
+        # Закатные значки передают interval / метки / подложку, как calcSticker.js.
+        if params.get("interval") is not None:
+            cut_params["interval"] = float(params["interval"])
+        if params.get("is_find_mark"):
+            cut_params["is_find_mark"] = True
+        if "is_carrier" in params:
+            cut_params["is_carrier"] = params.get("is_carrier")
         cut_calc = CutPlotterCalculator()
         cut_result = cut_calc.calculate(cut_params)
 

@@ -227,6 +227,7 @@ class CutPlotterCalculator(BaseCalculator):
                     "plotter_code": {"type": "string"},
                     "interval": {"type": "number", "description": "Интервал между изделиями, мм"},
                     "is_find_mark": {"type": "boolean"},
+                    "is_carrier": {"type": "boolean", "description": "Подложка: все отступы равны минимальному"},
                     "is_del_film": {"type": "boolean"},
                     "len_cut": {"type": "number", "description": "Длина реза одного элемента, м (0 = по размерам)"},
                     "density": {"type": "number"},
@@ -247,6 +248,8 @@ class CutPlotterCalculator(BaseCalculator):
         plotter_code = str(params.get("plotter_code", "") or PLOTTER_CODE).strip() or PLOTTER_CODE
         interval = float(params.get("interval", INTERVAL_DEFAULT) or INTERVAL_DEFAULT)
         is_find_mark = bool(params.get("is_find_mark", False))
+        # JS: options.has('isCarrier') — само наличие ключа, значение не смотрит.
+        is_carrier = "is_carrier" in params
         is_del_film = bool(params.get("is_del_film", True))
         len_cut_param = params.get("len_cut")
         len_cut = float(len_cut_param) if len_cut_param is not None else 0.0
@@ -263,10 +266,16 @@ class CutPlotterCalculator(BaseCalculator):
             return self._empty_result(size, quantity, mode)
 
         material = _find_material(material_id) if material_id else None
-        margins = list(plotter.margins or [30, 10, 10, 10])
+        margins = [float(x) for x in (plotter.margins or [30, 10, 10, 10])]
         if len(margins) < 4:
-            margins = [30, 10, 10, 10]
-        # TODO: marginsMark from plotter when is_find_mark
+            margins = [30.0, 10.0, 10.0, 10.0]
+        # Как в calcCutPlotter.js: метки увеличивают отступ, подложка схлопывает его до минимума.
+        if is_find_mark:
+            mark = float(getattr(plotter, "margins_mark", 0) or 0)
+            margins = [m + mark for m in margins]
+        if is_carrier:
+            least = min(margins)
+            margins = [least, least, least, least]
         defects = plotter.get_defect_rate(float(quantity))
         if mode.value >= 2:
             defects += defects * (mode.value - 1)

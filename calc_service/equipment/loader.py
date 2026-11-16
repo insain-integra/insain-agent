@@ -220,6 +220,7 @@ def load_generic_catalog(filename: str) -> EquipmentCatalog:
             category=category,
             max_size=raw.get("maxSize"),
             margins=raw.get("margins"),
+            margins_mark=_to_float(raw.get("marginsMark")),
             purchase_cost=purchase_cost,
             depreciation_years=raw.get("timeDepreciation", 10.0),
             work_days_year=raw.get("workDay", 250),

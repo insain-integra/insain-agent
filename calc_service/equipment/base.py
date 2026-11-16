@@ -46,6 +46,7 @@ class EquipmentSpec(BaseModel):
 
     max_size: Optional[List[float]] = None
     margins: Optional[List[float]] = None
+    margins_mark: float = 0.0  # плоттер: добавка к отступам при резке по меткам (marginsMark)
 
     purchase_cost: float = 0.0
     depreciation_years: float = 10.0

@@ -43,6 +43,7 @@ from .embossing import EmbossingCalculator
 from .pad_print import PadPrintCalculator
 from .magnets import MagnetAcrylicCalculator, MagnetLaminatedCalculator
 from .badge import BadgeCalculator
+from .button_pins import ButtonPinsCalculator
 from .calendar import CalendarCalculator
 from .heat_press import HeatPressCalculator
 from .canvas import CanvasCalculator
@@ -86,6 +87,7 @@ CALCULATORS: Dict[str, BaseCalculator] = {
     "magnet_acrylic": MagnetAcrylicCalculator(),
     "magnet_laminated": MagnetLaminatedCalculator(),
     "badge": BadgeCalculator(),
+    "button_pins": ButtonPinsCalculator(),
     "calendar": CalendarCalculator(),
     "heat_press": HeatPressCalculator(),
     "canvas": CanvasCalculator(),

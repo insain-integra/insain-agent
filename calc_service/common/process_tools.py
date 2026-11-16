@@ -12,7 +12,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 import json5
 
@@ -1795,7 +1795,97 @@ def calc_silk_print(
 #  ЗАКАТНЫЕ ЗНАЧКИ
 # ══════════════════════════════════════════════════════════════════════
 
-# TODO: вынести в отдельный калькулятор или интегрировать в существующие
+# В pins.json одни и те же коды D25…D78 лежат в ButtonPins и ButtonPinsAmalit.
+# Плоский каталог оставляет только последнюю группу (Амалит, цена лесенкой),
+# поэтому заготовку читаем из своей группы, как insaincalc.misc.ButtonPins[pinID].
+_pins_json_cache: Dict[str, Any] | None = None
+
+_BUTTON_PIN_TOOLS = {
+    "D25": "PressButtonPin25",
+    "D38": "PressButtonPin38",
+    "D56": "PressButtonPin56",
+    "D78": "PressButtonPin78",
+}
+
+
+def _pins_json() -> Dict[str, Any]:
+    global _pins_json_cache
+    if _pins_json_cache is None:
+        with open(_MATERIALS_DIR / "pins.json", "r", encoding="utf-8") as f:
+            _pins_json_cache = json5.load(f)
+    return _pins_json_cache
+
+
+def _button_pin_raw(group: str, pin_id: str) -> Dict[str, Any]:
+    group_data = _pins_json().get(group) or {}
+    raw = group_data.get(pin_id)
+    if not isinstance(raw, dict):
+        raise ValueError(f"Неизвестный размер значка: {pin_id!r}")
+    merged = dict(group_data.get("Default") or {})
+    merged.update(raw)
+    return merged
+
+
+def _amalit_unit_cost(cost_table: Sequence[Sequence[float]], n: int) -> float:
+    """Цена Амалита: последняя ступень, у которой порог ещё не больше тиража.
+
+    Как в JS: findIndex(item => item[0] > n), затем индекс на шаг назад.
+    Если тираж меньше первой ступени, JS берёт последнюю (индекс -1).
+    """
+    if not cost_table:
+        raise ValueError("У заготовки Амалит не задана цена")
+    idx = -1
+    for i, row in enumerate(cost_table):
+        if float(row[0]) > n:
+            idx = i
+            break
+    if idx == -1:
+        idx = len(cost_table) - 1
+    else:
+        idx -= 1
+    return float(cost_table[idx][1])
+
+
+def _button_pin_insert(n: int, size_insert: Sequence[float], mode: int) -> Dict[str, Any]:
+    """Бумажная вставка через калькулятор стикера, без копирования его формул.
+
+    В старом JS isPrint — строка «KMBizhubC220», а не объект {printerID, color}.
+    У строки нет printerID, ветка печати не выполняется: только резка и ламинация.
+    """
+    from calculators.sticker import StickerCalculator
+
+    if len(size_insert) < 2:
+        raise ValueError("У заготовки значка не задан размер вставки")
+    width = float(size_insert[0])
+    height = float(size_insert[1])
+    return StickerCalculator().calculate({
+        "quantity": n,
+        "width": width,
+        "height": height,
+        "size_item": width,
+        "density": 0,
+        "difficulty": 1,
+        "material_id": "ColotechPlus90M",
+        "lamination_id": "Laminat75G",
+        "is_find_mark": True,
+        "is_carrier": True,
+        "interval": 2,
+        "mode": mode,
+    })
+
+
+def _pin_material_line(pin_id: str, raw: Mapping[str, Any], quantity: int) -> Dict[str, Any]:
+    name = str(raw.get("description") or raw.get("name") or pin_id)
+    title = str(raw.get("title") or name)
+    return {
+        "code": pin_id,
+        "name": name,
+        "title": title,
+        "quantity": quantity,
+        "unit": "шт",
+    }
+
+
 def calc_button_pins(
     n: int,
     pin_id: str,
@@ -1805,39 +1895,34 @@ def calc_button_pins(
     """
     Изготовление закатных значков.
 
-    При n ≤ 2000 — собственное производство (закатка + печать вставок).
-    При n > 2000 — заказ у подрядчика (Амалит) + доставка.
+    При n ≤ 2000 — своя закатка и вставка (стикер: резка + ламинация).
+    При n > 2000 — заказ у подрядчика (Амалит) и доставка.
+
+    Наценка marginButtonPins уже внутри: на материал и операцию поверх
+    MARGIN_MATERIAL / MARGIN_OPERATION, на вставку и упаковку — множителем цены.
+    Публичный калькулятор — calculators.button_pins, формул здесь не копирует.
 
     :param n: кол-во значков
     :param pin_id: код размера (D25, D38, D56, D78)
-    :param options: {'isPacking': ...}
+    :param options: {'isPacking': код пакета или '' — автоподбор}
     :param mode: режим производства
-
-    ВНИМАНИЕ: расчёт бумажных вставок зависит от calcSticker (ещё не мигрирован).
-    В текущей версии стоимость вставок не включена — будет добавлена после миграции
-    калькулятора calcSticker.js (Батч B, Фаза 2).
     """
-    base_time_ready = BASE_TIME_READY
-    result = ProcessResult()
-    pin_size: List[float] = []
+    if n < 1:
+        raise ValueError("Тираж должен быть не меньше 1")
 
     margin_button = get_margin("marginButtonPins")
+    result = ProcessResult()
+    ready_val = 0.0
+    ship_ready = 0.0
 
     if n <= 2000:
-        pin = _get_material("pins", pin_id)
-        pin_raw = _get_raw_material("pins", pin_id)
-        pin_size = pin.sizes[0] if pin.sizes else [0, 0]
-        pin_cost_unit = float(pin.cost or 0)
-        pin_weight = float(pin_raw.get("weight", 0))
+        pin_raw = _button_pin_raw("ButtonPins", pin_id)
+        pin_size = list(pin_raw.get("size") or [0, 0])
+        pin_cost_unit = float(pin_raw.get("cost") or 0)
+        pin_weight = float(pin_raw.get("weight") or 0)
 
-        tool_map = {"D25": "PressButtonPin25", "D38": "PressButtonPin38",
-                     "D56": "PressButtonPin56", "D78": "PressButtonPin78"}
-        tool_code = tool_map.get(pin_id, "PressButtonPin25")
-        tool = _get_tool(tool_code)
-
-        tool_btr = tool.base_time_ready
-        if tool_btr:
-            base_time_ready = tool_btr
+        tool = _get_tool(_BUTTON_PIN_TOOLS.get(pin_id, "PressButtonPin25"))
+        base_time_ready = tool.base_time_ready or BASE_TIME_READY
         btr_idx = max(0, min(len(base_time_ready) - 1, math.ceil(mode)))
         ready_val = float(base_time_ready[btr_idx])
 
@@ -1852,10 +1937,10 @@ def calc_button_pins(
         cost_operator = time_press * tool.operator_cost_per_hour
         cost_material = pin_cost_unit * num_with_defects
 
-        # TODO: добавить расчёт вставок через calcSticker после миграции
-        cost_insert = 0.0
-        price_insert = 0.0
-        time_insert = 0.0
+        insert = _button_pin_insert(num_with_defects, pin_raw.get("sizeInsert") or pin_size, mode)
+        cost_insert = float(insert.get("cost") or 0)
+        price_insert = float(insert.get("price") or 0)
+        time_insert = float(insert.get("time_hours") or 0)
 
         result.cost = cost_material + cost_process + cost_operator + cost_insert
         result.price = (
@@ -1865,36 +1950,17 @@ def calc_button_pins(
         )
         result.time_hours = time_press + time_insert
         result.weight_kg = pin_weight * n / 1000
-        result.materials = [{
-            "code": pin_id,
-            "name": pin.description,
-            "title": pin.title,
-            "quantity": num_with_defects,
-            "unit": "шт",
-        }]
-
-        # Упаковка
-        if options.get("isPacking"):
-            cost_pack = calc_packing(n, [pin_size[0], pin_size[1], 5], options, mode)
-            result = result.merge(cost_pack)
-            result.price += cost_pack.price * margin_button
-
-        result.time_ready = result.time_hours + ready_val
-
+        result.materials = list(insert.get("materials") or [])
+        result.materials.append(_pin_material_line(pin_id, pin_raw, num_with_defects))
     else:
-        # Заказ у подрядчика
-        try:
-            pin = _get_material("pins", pin_id)
-            pin_raw = _get_raw_material("pins", pin_id)
-        except KeyError:
-            raise ValueError(f"Неизвестный размер значка: {pin_id!r}")
+        pin_raw = _button_pin_raw("ButtonPinsAmalit", pin_id)
+        pin_size = list(pin_raw.get("size") or [0, 0])
+        pin_weight = float(pin_raw.get("weight") or 0)
+        cost_table = pin_raw.get("cost")
+        if not isinstance(cost_table, list):
+            raise ValueError(f"У заготовки Амалит {pin_id!r} не задана цена по тиражу")
 
-        pin_size = pin.sizes[0] if pin.sizes else [0, 0]
-        pin_weight = float(pin_raw.get("weight", 0))
-        pin_cost_unit = float(pin.cost or 0)
-
-        # Стоимость берётся напрямую по тиражу (упрощённый расчёт)
-        cost_material = pin_cost_unit * n
+        cost_material = _amalit_unit_cost(cost_table, n) * n
         time_press = 8 * (n / 2000)
         result.weight_kg = pin_weight * n / 1000
 
@@ -1909,21 +1975,18 @@ def calc_button_pins(
         result.cost = cost_material + cost_ship.cost
         result.price = cost_material * (1 + MARGIN_MATERIAL) + cost_ship.price
         result.time_hours = time_press + cost_ship.time_hours
-        result.time_ready = cost_ship.time_ready
+        ship_ready = cost_ship.time_ready
+        result.materials = [_pin_material_line(pin_id, pin_raw, n)]
 
-        result.materials = [{
-            "code": pin_id,
-            "name": pin.description,
-            "title": pin.title,
-            "quantity": n,
-            "unit": "шт",
-        }]
+    # JS: options.has('isPacking'), пустая строка — автоподбор пакета.
+    if "isPacking" in options:
+        cost_pack = calc_packing(n, [pin_size[0], pin_size[1], 5], options, mode)
+        result = result.merge(cost_pack)
+        result.price += cost_pack.price * margin_button
 
-        if options.get("isPacking"):
-            cost_pack = calc_packing(n, [pin_size[0], pin_size[1], 5], options, mode)
-            result = result.merge(cost_pack)
-            result.price += cost_pack.price * margin_button
-
-        result.time_ready += result.time_hours
+    if n <= 2000:
+        result.time_ready = result.time_hours + ready_val
+    else:
+        result.time_ready = ship_ready + result.time_hours
 
     return result
