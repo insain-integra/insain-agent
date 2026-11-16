@@ -17,7 +17,7 @@
 
 - `site-content-guardrails` (закрыто 2026-11-16, `docs/history/log.md`) — правила безопасности правок WP/WPBakery/Yoast, дополнение `docs/site/access-tools.md`, каркас skill контура сайта (G2, предпосылка `T03`).
 - `todo/ai-seo-geo-yoast.md` — `T01` + `T11`: убрать `{region_name_prepositional}` из title/description/JSON-LD в Yoast; решить проблему токена DaData / cookie `wt_geo_data`.
-- `todo/ai-seo-cleanup-noindex.md` — `T02`: удалить/закрыть 410/301 страницы-заглушки (`/services/`, демо `faq`, `sample-page`, `test-mode`, `header-types`), выставить `noindex` и убрать из sitemap служебные Woo и технические CPT.
+- `ai-seo-cleanup-noindex` (закрыто 2026-11-17, `docs/history/log.md`) — `T02`: выставить `noindex` и убрать из sitemap служебные Woo, технические CPT (`porto_builder`, `faq`) и страницы-заглушки; перевод заглушек в 410/301 перенесён в Волну 2 (`ai-seo-redirects-indexation`).
 - `ai-seo-h1-structure` (закрыто 2026-11-16, `docs/history/log.md`) — `T03`: один `<h1>` на главной, категориях и карточках. Предпосылка `site-content-guardrails` закрыта (2026-11-16, `docs/history/log.md`).
 
 ## Планируемые волны (файлы `todo/` заводятся перед стартом волны)
@@ -31,7 +31,7 @@
 ### Волна 2 — меню, HTML-структура, редиректы и индексация (после `todo/supplier-old-cleanup.md`)
 
 - **ai-seo-html-nav-popup** (`T07`, после `supplier-old-cleanup` и `ai-seo-h1-structure`): программно скрывать в HTML-меню пустые категории `product_cat` (сохраняя в админке всю структуру из 287 пунктов для будущей загрузки поставщиков), `noindex` пустым рубрикам, перенос поп-апа выбора города после `<main>`, обёртка `<nav>` / `<main>` / `<article>`, smoke форм ezFC.
-- **ai-seo-redirects-indexation** (`T09` + `T10` + `T12`, после `supplier-old-cleanup` и `ai-seo-faq-and-facts`): 301 со старых URL (`/catalog_hg?rid=…`) тем же механизмом, что выбран в `supplier-old-cleanup`; регистрация в Яндекс Вебмастере, Google Search Console, Bing Webmaster Tools + IndexNow; выкладка `/llms.txt`.
+- **ai-seo-redirects-indexation** (`T09` + `T10` + `T12`, после `supplier-old-cleanup` и `ai-seo-faq-and-facts`): 301 со старых URL (`/catalog_hg?rid=…`) и 410/301 со страниц-заглушек из `ai-seo-cleanup-noindex` (`/services/`, `/careers/`, `/our-office/`, `/contact-us-advanced/`, `/site-map/`, `/header-types/`, `/sample-page/`, `/test-mode/`, демо-`faq`) тем же механизмом, что выбран в `supplier-old-cleanup`; регистрация в Яндекс Вебмастере, Google Search Console, Bing Webmaster Tools + IndexNow; выкладка `/llms.txt`.
 
 ### Волна 3 — производительность, внешние карточки и регламент (после G1 — 30.11.2026)
 
@@ -40,7 +40,7 @@
 
 ## Порядок
 
-1. `site-content-guardrails` закрыта (2026-11-16, `docs/history/log.md`). Дальше параллельно: `todo/ai-seo-geo-yoast.md` (прод, `lock prod`), затем `todo/ai-seo-cleanup-noindex.md` (прод, `lock prod`, после снятия блокировки с предыдущей).
+1. `site-content-guardrails` закрыта (2026-11-16, `docs/history/log.md`). Дальше параллельно: `todo/ai-seo-geo-yoast.md` (прод, `lock prod`), затем `ai-seo-cleanup-noindex` (закрыто 2026-11-17, `docs/history/log.md`) (прод, `lock prod`, после снятия блокировки с предыдущей).
 2. `ai-seo-h1-structure` (закрыто 2026-11-16, `docs/history/log.md`) можно стартовать: предпосылка закрыта.
 3. Перед стартом Волны 1 владелец передаёт подтверждённый факт-лист (адреса, телефоны, ИНН, ссылки `sameAs`, цифры заказов/сроков и ответы для FAQ).
 4. После `todo/supplier-old-cleanup.md` заводятся задачи Волны 2; после G1 — задачи Волны 3.

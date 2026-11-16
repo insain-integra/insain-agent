@@ -100,7 +100,7 @@
 Где лежат мета:
 
 - Постмета записей и товаров: `_yoast_wpseo_title` (45), `_yoast_wpseo_metadesc` (45), `_yoast_wpseo_focuskw` (60), `_yoast_wpseo_primary_product_cat` (63), плюс служебные `_yoast_wpseo_linkdex`, `_yoast_wpseo_content_score`, `_yoast_wpseo_estimated-reading-time-minutes`, `_yoast_wpseo_wordproof_timestamp`.
-- Индекс Yoast, таблицы `wp_insain_yoast_indexable`, `wp_insain_yoast_indexable_hierarchy`, `wp_insain_yoast_migrations`, `wp_insain_yoast_primary_term`, `wp_insain_yoast_seo_links`, `wp_insain_yoast_seo_meta`. В индексе есть строка на каждый товар (758), каждую рубрику `product_cat` (305), каждую страницу (38) и каждый шаблон `porto_builder` (23).
+- Индекс Yoast, таблицы `wp_insain_yoast_indexable`, `wp_insain_yoast_indexable_hierarchy`, `wp_insain_yoast_migrations`, `wp_insain_yoast_primary_term`, `wp_insain_yoast_seo_links`, `wp_insain_yoast_seo_meta`. На 17.11.2026 (`ai-seo-cleanup-noindex`): служебные страницы WooCommerce (6), заглушки (8 + `/blog/`) и демо-`faq` (2) закрыты `_yoast_wpseo_meta-robots-noindex=1`; в `wpseo_titles` отключены в поиске и картах `faq` и `porto_builder`; в `sitemap_index.xml` осталось 4 карты (`page`, `product`, `category`, `product_cat`), в `page-sitemap.xml` — 22 живых URL.
 - Шаблоны заголовков и соцсети: опции `wpseo`, `wpseo_titles` (10 978 байт), `wpseo_social` (648 байт).
 - SEO рубрик и меток: опция `wpseo_taxonomy_meta` (40 755 байт).
 

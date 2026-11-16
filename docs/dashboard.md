@@ -36,14 +36,13 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **15**. В работе/ревью: `form-button-pins.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **14**. В работе/ревью: `form-button-pins.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
-| `ai-seo-cleanup-noindex.md` | черновик |
 | `ai-seo-geo-yoast.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
-| `form-button-pins.md` | выкатка |
+| `form-button-pins.md` | в работе |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
@@ -64,8 +63,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-17 — ai-seo-cleanup-noindex
 - 2026-11-17 — form-print-offset
 - 2026-11-16 — ai-seo-h1-structure
 - 2026-11-16 — print-offset-promo
 - 2026-11-16 — form-print-roll
-- 2026-11-16 — site-content-guardrails

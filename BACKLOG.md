@@ -120,3 +120,7 @@
 - Из `form-print-offset`: Радио «стандарт»: HTML `value` 0, `data-value` 1. Боевой `get_value_from(3221)` без `true` суммирует `parseFloat(data-value)` и даёт 1, не 0. Срок на странице «6 дней» (48 ч). В калькулятор это не переносил: цена от режима не зависит.
 - Из `form-print-offset`: Имя `GET` у `numN`, `dpdFormat`, `rdoModeProduction` в базе боевой формы пустое. `GET_check` у формата и режима на боевой уже `index` (не пусто). На копии Site ops прописал имена GET; у формата оставил `index`, у режима сменил на `value`. Боевую не менял.
 - Из `form-print-offset`: В `docs/js-runner-cases.md` строка дефолта формы 82 всё ещё с mode 0 (`time_ready` 56). Файл общий, не правил. Актуальная команда — в «Результат».
+- Из `ai-seo-cleanup-noindex`: Страницы `/wishlist/` (ID 3) и `/my-orders/` (ID 2154) отдают сырые шорткоды `[yith_wcwl_wishlist]` и `[dokan-my-orders]` — плагины YITH Wishlist и Dokan не установлены; на `/wishlist/` ведёт сквозная иконка в шапке.
+- Из `ai-seo-cleanup-noindex`: `porto_builder` отдаёт два `<meta name="robots">`: Porto `noindex,nofollow` и Yoast `index, follow` (конфликт снимется настройкой `noindex-porto_builder`).
+- Из `ai-seo-cleanup-noindex`: Porto `enable-faq=1` занимает слаг `/faq/` (архив CPT) — будущий раздел `/faq/` (`ai-seo-faq-and-facts`) с ним конфликтует.
+- Из `ai-seo-cleanup-noindex`: `category-sitemap.xml` содержит `/category/banner/`, который отдаёт 404 (записей `post` — 0).
