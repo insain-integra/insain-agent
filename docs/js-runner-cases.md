@@ -55,6 +55,8 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | `calcLaser` без резки AcrylWhite3 | `laser` | 1404 |
 | `calcLaser` form 28 default | `laser` | 480 |
 | `calcPrintOffsetPromo` form 82 default | `print_offset` | 4244.4 |
+| `calcButtonPins` 2×D38 mode 1 | `button_pins` | 759.88388712 |
+| `calcButtonPins` 2500×D38 Амалит | `button_pins` | 47982.30000000001 |
 
 ```powershell
 node scripts/run_js_calc.mjs calcFlagPaper --data current --args '[100,[100,150],\"4+0\",\"PaperCoated115M\",{},1]'
@@ -166,6 +168,10 @@ node scripts/run_js_calc.mjs calcLaser --data current --args '[100,[50,50],\"Acr
 node scripts/run_js_calc.mjs calcBadge --data current --args '[50,[85,55],1,\"PVC3\",{\"isPrint\":\"\",\"isCutLaser\":\"\"},1]'
 
 node scripts/run_js_calc.mjs calcPrintOffsetPromo --data current --args '[1000,\"OffsetPromoА51000\",1]'
+
+node scripts/run_js_calc.mjs calcButtonPins --data current --args '[2,\"D38\",{},1]'
+
+node scripts/run_js_calc.mjs calcButtonPins --data current --args '[2500,\"D38\",{},1]'
 ```
 
 Кейсы `calcLaser` сняты 15.11.2026 (`--data current`). Номерки: `time_ready` 19.05. Простая резка: `time_ready` 27.17. «Без резки»: `time_ready` 16.2. Дефолт формы 28 (пустой материал) раннер не печатает: `weight` становится NaN и скрипт пишет «Поле cost не число (NaN)». На странице `calcLaser` даёт cost 300, price 480, time 0.2, `time_ready` 16.2. В API вес 0 и `materials` пустой — контракт ответа, не NaN. `noMaterial` на простой резке: price 22465, `time_ready` 27.17, вес как у `isMaterial` (0.8925), основной материал в расход не входит. `isMaterialCustomer`: price 27961, `time_ready` 29.92 (рез и гравировка × 1.25), вес тот же.
@@ -177,5 +183,7 @@ node scripts/run_js_calc.mjs calcPrintOffsetPromo --data current --args '[1000,\
 ORAJET3640 1000×1000, 604×604 и контроль 500×500 / 1000×500 сняты 15.11.2026 (`--data current`). Запасная ветка рулона: длина с `numBondMaterial`, на 604×604 ширина 1520 мм. У 604×604 `time_ready` Python на 0.01 ч ниже (тот же `round`).
 
 Кейс `calcPrintOffsetPromo` снят 17.11.2026 (`--data current`): дефолт формы 82 использует mode 1 (`time_ready` 48, `price` 4244.4; mode 0 даёт 56 ч, mode 2 — 40 ч, цена от `mode` не зависит). Второй эталон тиража: `[2000,\"OffsetPromoА51000\",1]` → `price` 7592.4, `time_ready` 48.
+
+Кейсы `calcButtonPins` сняты 17.11.2026 (`--data current`). Параметры API эталона: `{"quantity":2,"pin_id":"D38","mode":1}` (`price` API 760.59, rel 0.00093 к раннеру из-за `math.ceil` в ламинации); упаковка: `is_packing: true` (автоподбор) или строка — код пакета.
 
 Известные расхождения Python с JS вне этих кейсов: бейдж на кейсе 50 шт. 85×55 PVC3 с печатью — price сходится (JS 6060.5, Python 6061, 15.11.2026, после `material_mode=noMaterial` на второй резке). Не сходятся `time_ready` (JS 17.9, Python 16.55: JS прибавляет `result.time` к max времени операций) и вес (JS 0.87, Python 1.18: JS не включает вес второй резки). Это прежний порт `badge.py`, не цена материала. Вес лазерной листовой печати к JS не выравнивать: `calcPrintLaser` считает весь лист (`numSheet` × `sizeSheet`, с обрезью), Python — тираж × размер изделия. Верный вес — Python, решение 11.11.2026. Вымпел 50×80×120 `PaperCoated115M` без ламинации: JS `weight_kg` 0.1328, Python 0.1052 (лист того же входа: JS 0.0828, Python 0.0552).
