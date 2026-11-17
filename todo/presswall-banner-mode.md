@@ -2,7 +2,7 @@
 
 Статус: черновик
 Сложность: высокая
-Implementer: Opus 5.5
+Implementer: Gemini 4 Hydrogen High
 Reviewer: Grok 4.7
 Site ops: Grok 4.7
 Почему: решение человека 08.11.2026 меняет цену `presswall` на проде относительно JS (`calcPresswall.js:50`); выкатка API — по skill `deploy-api`.

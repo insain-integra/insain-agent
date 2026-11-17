@@ -2,7 +2,7 @@
 
 Статус: черновик
 Сложность: низкая | средняя | высокая
-Implementer: Grok 4.7 | Opus 5.5
+Implementer: Grok 4.7 | Gemini 4 Hydrogen High
 Reviewer: <не та модель, что у Implementer; не нужен для быстрого/поточного треков и копий форм>
 Site ops: Grok 4.7 | Opus 5.5 | не нужен
 Почему: <одна строка>

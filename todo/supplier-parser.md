@@ -2,7 +2,7 @@
 
 Статус: черновик
 Сложность: высокая
-Implementer: Opus 5.5
+Implementer: Gemini 4 Hydrogen High
 Reviewer: Grok 4.7
 Site ops: Opus 5.5
 Почему: новый модуль на два контура (код в git и WordPress на проде), наценка — правило цен, перенос данных старого плагина.
