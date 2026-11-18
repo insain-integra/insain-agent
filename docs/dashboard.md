@@ -36,7 +36,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **23**. В работе/ревью: `form-notebook.md`. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **24**. В работе/ревью: нет. Заблокировано: `form-notebook.md`, `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -45,7 +45,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-canvas.md` | черновик |
 | `form-heat-press.md` | черновик |
 | `form-milling.md` | черновик |
-| `form-notebook.md` | выкатка |
+| `form-notebook.md` | заблокировано: ждёт todo/print-sheet-mode2-defects.md |
 | `form-pad-print.md` | черновик |
 | `form-poly-sticker-pack.md` | черновик |
 | `form-poly-sticker.md` | черновик |
@@ -57,6 +57,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `metrics-baseline.md` | заблокировано: человек |
 | `presswall-banner-mode.md` | черновик |
 | `print-sheet-copy-result.md` | черновик |
+| `print-sheet-mode2-defects.md` | черновик |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
 | `smartcaptcha-replace.md` | черновик |
 | `spam-users-cleanup.md` | заблокировано: ждёт todo/registration-harden.md |
