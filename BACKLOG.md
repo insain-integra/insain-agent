@@ -127,3 +127,5 @@
 - Из `form-button-pins`: Старый JS кладёт в `isPrint` вставки строку `KMBizhubC220`, а не `{printerID, color}`: печать вставки не считается. API повторяет это, иначе цена разойдётся с боевой формой.
 - Из `form-button-pins`: В `pins.json` у D78 поле `title` говорит «56мм» при размере 78.
 - Из `form-button-pins`: Боевой `LaminationCalculator` делает `math.ceil` цены, `cut_plotter` и ламинация отдают `time_hours` через `round`, раннер — `ceil`. На эталоне 2×D38: price API 760.59 против раннера 759.88388712 (rel 0.00093), time 0.25 против 0.27. Боевые калькуляторы не менялись.
+- Из `print-sheet-mode2-defects`: В `D:\Projects\insain-agent-print-sheet-mode2-defects` при `wt-check` обнаружены незакоммиченные правки в основной папке `D:\Projects\insain-agent`: `M todo/ai-seo-geo-yoast.md` (чужая работа на `main`, не трогалась).
+- Из `print-sheet-mode2-defects`: 19.11.2026, Site ops: на `main` файл `todo/ai-seo-geo-yoast.md` по-прежнему `M`, не трогался.

@@ -2,7 +2,7 @@
 
 # Дашборд insain.ru
 
-Состояние на последнюю запись журнала: **17.11.2026**.
+Состояние на последнюю запись журнала: **19.11.2026**.
 
 Собрано из `docs/vision.md`, `todo/`, `docs/site/forms.md`, `docs/history/log.md`. Обновляет
 `python scripts/dev.py dashboard` и `python scripts/dev.py close <задача>`.
@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **27**. В работе/ревью: `print-sheet-mode2-defects.md`. Заблокировано: `ai-calc-authoring-skill.md`, `form-notebook.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **26**. В работе/ревью: нет. Заблокировано: `ai-calc-authoring-skill.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -48,7 +48,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-canvas.md` | черновик |
 | `form-heat-press.md` | черновик |
 | `form-milling.md` | черновик |
-| `form-notebook.md` | заблокировано: ждёт todo/print-sheet-mode2-defects.md |
+| `form-notebook.md` | черновик |
 | `form-pad-print.md` | черновик |
 | `form-poly-sticker-pack.md` | черновик |
 | `form-poly-sticker.md` | черновик |
@@ -61,7 +61,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `pilot-acrylic-medals-calc.md` | заблокировано: ждёт todo/ai-calc-authoring-skill.md |
 | `presswall-banner-mode.md` | черновик |
 | `print-sheet-copy-result.md` | черновик |
-| `print-sheet-mode2-defects.md` | выкатка |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
 | `smartcaptcha-replace.md` | черновик |
 | `spam-users-cleanup.md` | заблокировано: ждёт todo/registration-harden.md |
@@ -72,13 +71,13 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 ## Репозиторий
 
 - Плагин `insain-calc-bridge`: 0.2.6 (шапка в git)
-- Срез метрик: 04.11.2026
+- Срез метрик: 04.11.2026 — устарело
 - Снимок прода `STATUS.md`: 25.10.2026
 
 ## Журнал (последние 5)
 
+- 2026-11-19 — print-sheet-mode2-defects
 - 2026-11-17 — form-button-pins
 - 2026-11-17 — ai-seo-cleanup-noindex
 - 2026-11-17 — form-print-offset
 - 2026-11-16 — ai-seo-h1-structure
-- 2026-11-16 — print-offset-promo

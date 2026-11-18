@@ -1,6 +1,6 @@
 # form-notebook
 
-Статус: заблокировано: ждёт todo/print-sheet-mode2-defects.md
+Статус: черновик
 Сложность: низкая
 Implementer: Grok 4.7
 Reviewer: не нужен
@@ -107,7 +107,7 @@ Site ops: Grok 4.7
 
 19.11.2026 — человек — принято решение оставить `form-notebook` в `заблокировано: аналитик`, завести предпосылку `port-fix-prerequisite` по mode 2 в Analyst, после фикса и деплоя API перепроверить копию 102 — дальше Analyst
 
-19.11.2026 — Analyst, Composer — локализован mode 2: в `print_sheet.py` (лазер) mode-надбавка брака попадает в расход бумаги; в JS только в `calcPrintLaser`. Дельта `cost` = лишние листы × 9.9 ₽. Заведена `todo/print-sheet-mode2-defects.md` (боевой `puzzle` зовёт `print_sheet`). Статус `заблокировано: ждёт todo/print-sheet-mode2-defects.md`. После `close` фикса и деплоя API — Site ops повторяет шаги 13–14 на копии 102 / товаре 2586897 без нового дубля — дальше ждёт close предпосылки
+19.11.2026 — Analyst, Composer — локализован mode 2: в `print_sheet.py` (лазер) mode-надбавка брака попадает в расход бумаги; в JS только в `calcPrintLaser`. Дельта `cost` = лишние листы × 9.9 ₽. Заведена `print-sheet-mode2-defects` (закрыто 2026-11-19, `docs/history/log.md`) (боевой `puzzle` зовёт `print_sheet`). Статус `заблокировано: ждёт `print-sheet-mode2-defects` (закрыто 2026-11-19, `docs/history/log.md`). После `close` фикса и деплоя API — Site ops повторяет шаги 13–14 на копии 102 / товаре 2586897 без нового дубля — дальше ждёт close предпосылки
 
 ## Найдено вне scope
 
