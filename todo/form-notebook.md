@@ -1,6 +1,6 @@
 # form-notebook
 
-Статус: черновик
+Статус: выкатка
 Сложность: низкая
 Implementer: Grok 4.7
 Reviewer: не нужен
@@ -113,11 +113,15 @@ Site ops: Grok 4.7
 
 19.11.2026 — человек — на приёмке копии 102 найдена ошибка блока 4+0 + цифровая печать (`margins_inner = -1` вместо `[-1, -1, -1, -1]` в `notebook.py`); вывод расхода пружины не трогать — дальше Implementer
 
+19.11.2026 — Implementer, Grok 4.7 — блок `4+0` + цифровая печать: `margins_inner = -1`, тест на 1263 листа `VHI80`, `python scripts/dev.py check` код 0. Коммита нет — дальше человек
+
+19.11.2026 — человек — принято: закоммитить, слить в `main`, выкатить API (`deploy-api`) и перепроверить копию 102 — дальше Site ops
+
 ## Найдено вне scope
 
 - `ssh insain-prod` (порт 22) — timeout. Id и имена полей формы 45 сняты с HTML боевой страницы (`data-id`, `ezfc_vars`), не из SQL.
 - `calcNotebook` не подключён в `scripts/run_js_calc.mjs`. Эталон дефолта — консоль страницы. В `docs/js-runner-cases.md` не писал.
-- Вес дефолта: JS 15.2892 (лист с обрезью), Python 15.00. В критерий цены и срока не входит.
+- Вес дефолта: JS 15.2892 (лист с обрезью), Python 15.00. В критерий цены и срока не входит. Тот же зазор на кейсе блока `4+0` + цифровая печать: JS 15.2892, Python 15.00.
 - В блоке `calcPrintSheet` пропуски `call calcCutRoller`, `call calcPrintLaser` уже есть в `scripts/js_port_gaps_allowed.txt`. Блок `calcNotebook` пустой.
 - Код проволоки в API `MetallBindindWire3_8`, в JS `MetallBindindWire`. Имя и `size_mm` 9.5×42000 совпали.
 - Ламинация листа `0+0`: `cost` совпал с JS (1388.1508256410257), `price` 2262.59 против 2262.41 (разница 0.18 ₽, rel < 0.001).
@@ -145,3 +149,9 @@ Site ops: Grok 4.7
 - Шаг 16 повторно: товар 2586897 `draft`, `ezfc_form_id` 102; товар 2586681 `publish`, `ezfc_form_id` 45. Гость без cookies: `?post_type=product&p=2586897` — 404, с `&preview=true` — 404. HTML `https://insain.ru/catalog/kalkulyator-bloknotov/`: `calcNotebook` 2, `calcApi` 0. В HTML копии вызов расчёта — `calcApi`; строка `calcNotebook` только в `src="/icalc/calc/calcNotebook.js"`. Плагин не выкладывался. Блокировка `prod` не снята.
 - Строка для будущего `forms-batch-2` (не в текущий пакет): `| 45 CalcNotebook | notebook | /catalog/kalkulyator-bloknotov/ | копия 102, товар 2586897 draft | form-notebook — копия на API, mode 2 совпал с JS 19.11.2026 |`
 - Требуется решение: приёмка копии человеком. Боевую 45 не переключать и плагин не выкладывать, пока это не отдельное решение.
+- 19.11.2026, Implementer, Grok 4.7. Ветка `task/form-notebook`, коммита нет. Файлы: `calc_service/calculators/notebook.py`, `calc_service/tests/test_calculators/test_notebook.py`.
+- Сделано: для внутреннего блока `VHI80` в `notebook.py` передаётся `margins_inner = -1`, как `js_legacy/calc/calcNotebook.js:61`. `print_sheet.py`, `print_offset.py` и вывод пружины (`process_tools.py`) не менялись.
+- Сверка с `calcNotebook.js` на прайсе `calc_service/data`. Кейс: тираж 100, 148×210, обложка `PaperCoated250M` `4+0`, подложка `0+0`, блок `VHI80` 50 листов `4+0`, `isPrintLaser`, `short`, `mode=1`. JS: `cost` 26447.067724489796, `price` 47816.70263991839, `time` 5.77, `timeReady` 24.82, `VHI80` 1263 шт 297×420, обложка 54, проволока 0.040285714285714286. Python: `cost` тот же, `price` 47817 (`ceil`), `time_hours` 5.77, `time_ready` 24.82, `VHI80` 1263, обложка 54, проволока 0.0403 (прежнее округление до 4 знаков).
+- Чем проверено: при `margins_inner = [-1, -1, -1, -1]` тест `test_inner_laser_4_0_lays_four_on_vhi80` падает — `assert 2525 == 1263`. После возврата `-1` `python scripts/dev.py check` — код выхода 0: `calc_service` 654 passed, `bot_service` 81 passed.
+- Не сделано и почему: коммит, слияние и выкладка API не делались — коммит без просьбы человека роль не ставит. Копия 102 на проде считает прежний API, пока этот фикс не на бою.
+- Требуется решение: принять diff, закоммитить `task/form-notebook`, слить в `main` и выкатить API. Затем Site ops на копии 102 (товар 2586897) проверяет этот кейс: в материалах Снегурочка × 1263. Боевую форму 45 не переключать.

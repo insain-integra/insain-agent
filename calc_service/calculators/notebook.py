@@ -501,7 +501,8 @@ class NotebookCalculator(BaseCalculator):
                 margins_inner = [2, 2, 2, 2]
                 interval_inner = 4
                 if inner_material_id == "VHI80":
-                    margins_inner = [-1, -1, -1, -1]
+                    # JS calcNotebook.js:61 — ровно -1, без полей принтера.
+                    margins_inner = -1
                     interval_inner = 0
                 inner_params = {
                     "quantity": num_with_defects * inner_num_sheet,

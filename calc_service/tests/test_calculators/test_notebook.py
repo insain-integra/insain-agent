@@ -236,6 +236,41 @@ def test_form_default_notebook(calc):
         assert item.get("title")
 
 
+# JS, 19.11.2026 — calcNotebook.js на текущем прайсе calc_service/data.
+# Блок 4+0, isPrintLaser, VHI80: marginsInner = -1, 4 шт А5 на лист А3.
+# Со списком [-1, -1, -1, -1] поля принтера остаются и листов VHI80 становится 2525.
+EXPECTED_INNER_LASER_4_0 = {
+    "cost": 26447.067724489796,
+    "price": 47816.70263991839,
+    "time_hours": 5.77,
+    "time_ready": 24.82,
+}
+
+
+def test_inner_laser_4_0_lays_four_on_vhi80(calc):
+    """Цифровая печать блока 4+0 на VHI80: 1263 листа А3, не 2525."""
+    params = {**REF_FORM_DEFAULT, "inner_color": "4+0", "is_print_laser": True}
+    result = calc.execute(params)
+    by_code = {m["code"]: m for m in result["materials"]}
+    inner = by_code["VHI80"]
+    # Со списком [-1, -1, -1, -1] здесь 2525.
+    assert inner["quantity"] == 1263
+    assert inner["size_mm"] == [297.0, 420.0]
+    expected = EXPECTED_INNER_LASER_4_0
+    assert _cmp(result["cost"], expected["cost"]), result["cost"]
+    assert _cmp(result["price"], expected["price"]), result["price"]
+    assert _cmp(result["time_hours"], expected["time_hours"]), result["time_hours"]
+    assert _cmp(result["time_ready"], expected["time_ready"]), result["time_ready"]
+    assert "Снегурочка" in inner["name"]
+    assert by_code["PaperCoated250M"]["quantity"] == 54
+    wire = by_code["MetallBindindWire3_8"]
+    assert _cmp(float(wire["quantity"]), 0.040285714285714286)
+    assert wire["size_mm"] == [9.5, 42000.0]
+    for item in (inner, by_code["PaperCoated250M"], wire):
+        assert item["name"] != item["code"]
+        assert item.get("title")
+
+
 def test_blank_backing_keeps_lamination(calc):
     """Ламинация на подложке 0+0 не пропадает. JS страницы, 19.11.2026."""
     params = dict(REF_FORM_DEFAULT)
