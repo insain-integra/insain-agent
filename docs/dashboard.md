@@ -36,12 +36,22 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **13**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **23**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `ai-seo-geo-yoast.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
+| `form-canvas.md` | черновик |
+| `form-heat-press.md` | черновик |
+| `form-milling.md` | черновик |
+| `form-notebook.md` | черновик |
+| `form-pad-print.md` | черновик |
+| `form-poly-sticker-pack.md` | черновик |
+| `form-poly-sticker.md` | черновик |
+| `form-sticker-pack.md` | черновик |
+| `form-vizitki-promo.md` | черновик |
+| `form-vizitki.md` | черновик |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
