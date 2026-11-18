@@ -21,7 +21,6 @@
 - `todo/form-sticker-pack.md` — вторая форма slug `sticker`, боевая 29
 - `todo/form-poly-sticker.md` — копия формы 30, slug `poly_sticker`
 - `todo/form-poly-sticker-pack.md` — копия формы 70, slug `poly_sticker_pack`
-- `todo/form-notebook.md` — копия формы 45, slug `notebook`
 - `todo/form-milling.md` — копия формы 35, slug `milling`
 - `todo/form-pad-print.md` — копия формы 38, slug `pad_print`
 - `todo/form-heat-press.md` — копия формы 40, slug `heat_press`
@@ -29,6 +28,7 @@
 
 Закрытые (файла в `todo/` нет, запись в `docs/history/log.md`):
 
+- `form-notebook` (закрыто 2026-11-19) — копия формы 45 (102 / 2586897), slug `notebook`; боевая 45 ждёт следующий пакет, не этот
 - `form-button-pins` (закрыто 2026-11-17) — калькулятор `button_pins` на проде, копия 101 / 2586896; боевая 12 ждёт следующий пакет, не этот
 - `form-print-offset` (закрыто 2026-11-17) — копия формы 82, slug `print_offset`
 - `print-offset-promo` (закрыто 2026-11-16) — порт `calcPrintOffsetPromo` в slug `print_offset`
@@ -55,7 +55,7 @@
 
 ## Пачки
 
-Боевая на API: **79 puzzle**. Копии приняты и входят в текущий боевой пакет (14): **69 plaque, 26 uv_print, 41 mug, 85 embossing, 78 acrylic_prizes, 46 presswall, 49 rollup, 73 pennant, 55 flag, 6 print_sheet, 22 sticker, 28 laser, 23 print_roll, 82 print_offset**. Копия готова, в пакет 1 не входит: **12 button_pins** (101 / 2586896).
+Боевая на API: **79 puzzle**. Копии приняты и входят в текущий боевой пакет (14): **69 plaque, 26 uv_print, 41 mug, 85 embossing, 78 acrylic_prizes, 46 presswall, 49 rollup, 73 pennant, 55 flag, 6 print_sheet, 22 sticker, 28 laser, 23 print_roll, 82 print_offset**. Копия готова, в пакет 1 не входит: **12 button_pins** (101 / 2586896), **45 notebook** (102 / 2586897).
 
 | Пачка | Формы (id, slug) | Статус 19.11.2026 |
 | --- | --- | --- |

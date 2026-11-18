@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **27**. В работе/ревью: `form-notebook.md`. Заблокировано: `ai-calc-authoring-skill.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **26**. В работе/ревью: нет. Заблокировано: `ai-calc-authoring-skill.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -48,7 +48,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-canvas.md` | черновик |
 | `form-heat-press.md` | черновик |
 | `form-milling.md` | черновик |
-| `form-notebook.md` | выкатка |
 | `form-pad-print.md` | черновик |
 | `form-poly-sticker-pack.md` | черновик |
 | `form-poly-sticker.md` | черновик |
@@ -77,8 +76,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-19 — form-notebook
 - 2026-11-19 — print-sheet-mode2-defects
 - 2026-11-17 — form-button-pins
 - 2026-11-17 — ai-seo-cleanup-noindex
 - 2026-11-17 — form-print-offset
-- 2026-11-16 — ai-seo-h1-structure

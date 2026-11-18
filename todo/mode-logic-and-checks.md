@@ -63,7 +63,7 @@ Site ops: Grok 4.7
 - Перенос новых форм ezFC, правка `wp-plugin/forms/*.js`, админки WordPress.
 - Изменение `presswall.py` (отдельная задача `todo/presswall-banner-mode.md`).
 - Изменение цен, коэффициентов `defect_table` и `baseTimeReady` в `calc_service/data/*.json`.
-- Изменение `calc_service/calculators/notebook.py` (в `закрытии` по `todo/form-notebook.md`).
+- Изменение `calc_service/calculators/notebook.py` (в `закрытии` по `form-notebook` (закрыто 2026-11-19, `docs/history/log.md`)).
 
 ## Критерии приёмки
 

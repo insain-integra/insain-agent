@@ -129,3 +129,12 @@
 - Из `form-button-pins`: Боевой `LaminationCalculator` делает `math.ceil` цены, `cut_plotter` и ламинация отдают `time_hours` через `round`, раннер — `ceil`. На эталоне 2×D38: price API 760.59 против раннера 759.88388712 (rel 0.00093), time 0.25 против 0.27. Боевые калькуляторы не менялись.
 - Из `print-sheet-mode2-defects`: В `D:\Projects\insain-agent-print-sheet-mode2-defects` при `wt-check` обнаружены незакоммиченные правки в основной папке `D:\Projects\insain-agent`: `M todo/ai-seo-geo-yoast.md` (чужая работа на `main`, не трогалась).
 - Из `print-sheet-mode2-defects`: 19.11.2026, Site ops: на `main` файл `todo/ai-seo-geo-yoast.md` по-прежнему `M`, не трогался.
+- Из `form-notebook`: `ssh insain-prod` (порт 22) — timeout. Id и имена полей формы 45 сняты с HTML боевой страницы (`data-id`, `ezfc_vars`), не из SQL.
+- Из `form-notebook`: `calcNotebook` не подключён в `scripts/run_js_calc.mjs`. Эталон дефолта — консоль страницы. В `docs/js-runner-cases.md` не писал.
+- Из `form-notebook`: Вес дефолта: JS 15.2892 (лист с обрезью), Python 15.00. В критерий цены и срока не входит. Тот же зазор на кейсе блока `4+0` + цифровая печать: JS 15.2892, Python 15.00.
+- Из `form-notebook`: В блоке `calcPrintSheet` пропуски `call calcCutRoller`, `call calcPrintLaser` уже есть в `scripts/js_port_gaps_allowed.txt`. Блок `calcNotebook` пустой.
+- Из `form-notebook`: Код проволоки в API `MetallBindindWire3_8`, в JS `MetallBindindWire`. Имя и `size_mm` 9.5×42000 совпали.
+- Из `form-notebook`: Ламинация листа `0+0`: `cost` совпал с JS (1388.1508256410257), `price` 2262.59 против 2262.41 (разница 0.18 ₽, rel < 0.001).
+- Из `form-notebook`: Копия без GET в URL: радио режима не отмечено ни одно (на боевой отмечен «стандарт»). `preselect` 0 у 1821 и 3834 одинаковый; у копии `GET_check=value`, значения вариантов 1 и 2, варианта со значением 0 нет. Цена верная: JS подставляет `mode = 1`, после `syncUrl` ссылка с `rdoModeProduction=1` отмечает «стандарт». Перед боевой формой нужен `preselect` под `value` или решение в `docs/ezfc-api-migration.md`. (Не блокер приёмки копии после фикса mode 2; на боевой 45 решать отдельно.)
+- Из `form-notebook`: `wp litespeed-purge all` снова `Error: Something went wrong! Got 400` (уже в `BACKLOG.md` из `form-sticker`). `wp cache flush` — `Success`.
+- Из `form-notebook`: `ssh insain-prod`: 2 таймаута `banner exchange` за сессию, повтор через 10–15 с проходил.
