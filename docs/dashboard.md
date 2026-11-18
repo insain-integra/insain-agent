@@ -25,6 +25,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 | Файл | Цель | Статус |
 | --- | --- | --- |
+| `EPIC-ai-calc-builder.md` | G6 | черновик |
 | `EPIC-ai-seo.md` | G4 | черновик |
 | `EPIC-antispam-recaptcha.md` | отложено (`docs/vision.md`) | черновик |
 | `EPIC-bot.md` | G5 | черновик |
@@ -36,11 +37,13 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **24**. В работе/ревью: нет. Заблокировано: `form-notebook.md`, `metrics-baseline.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **27**. В работе/ревью: `print-sheet-mode2-defects.md`. Заблокировано: `ai-calc-authoring-skill.md`, `form-notebook.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
+| `ai-calc-authoring-skill.md` | заблокировано: ждёт todo/ezfc-form-builder.md |
 | `ai-seo-geo-yoast.md` | черновик |
+| `ezfc-form-builder.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
 | `form-canvas.md` | черновик |
 | `form-heat-press.md` | черновик |
@@ -55,9 +58,10 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
+| `pilot-acrylic-medals-calc.md` | заблокировано: ждёт todo/ai-calc-authoring-skill.md |
 | `presswall-banner-mode.md` | черновик |
 | `print-sheet-copy-result.md` | черновик |
-| `print-sheet-mode2-defects.md` | черновик |
+| `print-sheet-mode2-defects.md` | ревью |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
 | `smartcaptcha-replace.md` | черновик |
 | `spam-users-cleanup.md` | заблокировано: ждёт todo/registration-harden.md |

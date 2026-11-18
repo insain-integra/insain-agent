@@ -245,3 +245,32 @@ def test_blank_backing_keeps_lamination(calc):
     # Себестоимость одной подложки с плёнкой — с консоли calcPrintSheet.
     assert laminated["cost"] > plain["cost"]
     assert _cmp(laminated["cost"] - plain["cost"], 1388.1508256410257 - 321.3)
+
+
+@pytest.mark.parametrize(
+    ("overrides", "expected_cost", "expected_price", "expected_ready", "expected_cover_qty"),
+    [
+        # JS страницы, 19.11.2026 — входы блокера form-notebook (mode 2).
+        ({}, 9354.232557823128, 16703.879550585036, 14.81, 54),
+        ({"quantity": 200, "width_mm": 210, "height_mm": 297}, 25130.240285714288, 45163.907661714285, 21.47, 210),
+        (
+            {"quantity": 200, "width_mm": 210, "height_mm": 297, "cover_lamination_id": "Laminat32G"},
+            29111.9353010989,
+            52281.42847279122,
+            22.47,
+            213,
+        ),
+    ],
+    ids=["default_100_A5", "200_A4_plain", "200_A4_laminat32G"],
+)
+def test_notebook_mode2_matches_js(
+    calc, overrides, expected_cost, expected_price, expected_ready, expected_cover_qty
+):
+    """Регрессия mode 2 на входах блокера form-notebook (дефолт, 200 А4, 200 А4 + Laminat32G)."""
+    params = {**REF_FORM_DEFAULT, "mode": 2, **overrides}
+    r = calc.execute(params)
+    assert _cmp(r["cost"], expected_cost), f"cost: got {r['cost']}, expected {expected_cost}"
+    assert _cmp(r["price"], expected_price), f"price: got {r['price']}, expected {expected_price}"
+    assert _cmp(r["time_ready"], expected_ready), f"time_ready: got {r['time_ready']}, expected {expected_ready}"
+    by_code = {m["code"]: m for m in r["materials"]}
+    assert by_code["PaperCoated250M"]["quantity"] == expected_cover_qty

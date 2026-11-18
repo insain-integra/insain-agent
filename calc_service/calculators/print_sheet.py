@@ -567,11 +567,14 @@ class PrintSheetCalculator(BaseCalculator):
             print_weight_kg = float(inkjet_result.get("weight_kg", 0.0))
         else:
             # Печать (лазерная логика как в calcPrintLaser).
+            # defects_printer для расхода материала — без mode-надбавки (как в JS calcPrintSheet).
+            # mode-надбавку к браку применяет только лазерная печать (как в JS calcPrintLaser).
             defects_printer = printer.get_defect_rate(float(num_sheet_to_print))
-            if mode.value >= 2:
-                defects_printer += defects_printer * (mode.value - 1)
+            defects_laser = defects_printer
+            if mode.value > 1:
+                defects_laser += defects_laser * (mode.value - 1)
             # JS: time — ceil(n*(1+d)); cost расходников — n*(1+d) без ceil.
-            sheets_with_defects = num_sheet_to_print * (1 + defects_printer)
+            sheets_with_defects = num_sheet_to_print * (1 + defects_laser)
             sheets_for_time = math.ceil(sheets_with_defects)
 
             coeff_size = 1.0
@@ -588,7 +591,7 @@ class PrintSheetCalculator(BaseCalculator):
             time_print_raw = (
                 sheets_for_time / sheets_per_hour * coeff_size * double_side + time_prepare
             )
-            time_operator = time_print_raw * 0.5 * (1 + defects_printer) + time_prepare
+            time_operator = time_print_raw * 0.5 * (1 + defects_laser) + time_prepare
 
             cost_print_sheet_list = getattr(printer, "cost_print_sheet", None) or [4.0, 12.0]
             cost_per_sheet_val = _cost_per_sheet_laser(color, cost_print_sheet_list)

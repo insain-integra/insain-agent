@@ -744,3 +744,106 @@ def test_print_sheet_material_size_mm(calc):
     mat = materials[0]
     assert "size_mm" in mat
     assert mat["size_mm"] == [297.0, 420.0]
+
+
+# ── Эталоны mode 2: брак материала без mode-надбавки (блокер form-notebook) ──
+
+# JS, 19.11.2026 — обложка блокнота (100 шт, 148×210, 4+0, PaperCoated250M, mode 2).
+# node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[148,210],"4+0",[2,2,2,2],4,"PaperCoated250M",{},2]'
+REF_COVER_NOTEBOOK_MODE2 = {
+    "quantity": 100,
+    "width": 148,
+    "height": 210,
+    "color": "4+0",
+    "margins": [2, 2, 2, 2],
+    "interval": 4,
+    "material_id": "PaperCoated250M",
+    "mode": 2,
+}
+EXPECTED_COVER_NOTEBOOK_MODE2 = {
+    "cost": 1381.5213333333334,
+    "price": 2251.3854133333334,
+    "time_hours": 0.44,
+    "time_ready": 1.83,
+}
+
+# JS, 19.11.2026 — тот же вход, mode 1 (контроль неизменности).
+# node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[148,210],"4+0",[2,2,2,2],4,"PaperCoated250M",{},1]'
+REF_COVER_NOTEBOOK_MODE1 = {**REF_COVER_NOTEBOOK_MODE2, "mode": 1}
+EXPECTED_COVER_NOTEBOOK_MODE1 = {
+    "cost": 1094.512,
+    "price": 1789.85992,
+    "time_hours": 0.34,
+    "time_ready": 8.629999999999999,
+}
+
+# JS, 19.11.2026 — 200 шт, 210×297, 4+0, PaperCoated250M, mode 2 (без ламинации).
+# node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[200,[210,297],"4+0",[2,2,2,2],4,"PaperCoated250M",{},2]'
+REF_COVER_A4_MODE2 = {
+    "quantity": 200,
+    "width": 210,
+    "height": 297,
+    "color": "4+0",
+    "margins": [2, 2, 2, 2],
+    "interval": 4,
+    "material_id": "PaperCoated250M",
+    "mode": 2,
+}
+EXPECTED_COVER_A4_MODE2 = {
+    "cost": 3722.1760000000004,
+    "price": 6109.482160000001,
+    "time_hours": 0.99,
+    "time_ready": 2.9299999999999997,
+}
+
+# JS, 19.11.2026 — 200 шт, 210×297, 4+0, PaperCoated250M + Laminat32G, mode 2.
+# node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[200,[210,297],"4+0",[2,2,2,2],4,"PaperCoated250M",{"isLamination":"Laminat32G"},2]'
+REF_COVER_A4_LAM_MODE2 = {
+    **REF_COVER_A4_MODE2,
+    "lamination_id": "Laminat32G",
+    "lamination_double_side": True,
+}
+EXPECTED_COVER_A4_LAM_MODE2 = {
+    "cost": 7703.871015384616,
+    "price": 12579.955624615388,
+    "time_hours": 1.99,
+    "time_ready": 3.9299999999999997,
+}
+
+
+def test_print_sheet_cover_notebook_mode2(calc):
+    """JS, 19.11.2026: mode 2 — расход бумаги по defects_printer без mode-надбавки."""
+    r = calc.execute(REF_COVER_NOTEBOOK_MODE2)
+    e = EXPECTED_COVER_NOTEBOOK_MODE2
+    assert r["cost"] == pytest.approx(e["cost"], rel=REF_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=REF_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=REF_REL_TOL)
+    assert r["materials"][0]["quantity"] == 27
+
+
+def test_print_sheet_cover_notebook_mode1_unchanged(calc):
+    """JS, 19.11.2026: тот же вход в mode 1 — эталон и расход листов не сдвинулись."""
+    r = calc.execute(REF_COVER_NOTEBOOK_MODE1)
+    e = EXPECTED_COVER_NOTEBOOK_MODE1
+    assert r["cost"] == pytest.approx(e["cost"], rel=REF_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=REF_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=REF_REL_TOL)
+    assert r["materials"][0]["quantity"] == 27
+
+
+def test_print_sheet_cover_a4_mode2(calc):
+    """JS, 19.11.2026: 200 шт А4, mode 2 без ламинации."""
+    r = calc.execute(REF_COVER_A4_MODE2)
+    e = EXPECTED_COVER_A4_MODE2
+    assert r["cost"] == pytest.approx(e["cost"], rel=REF_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=REF_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=REF_REL_TOL)
+
+
+def test_print_sheet_cover_a4_lam_mode2(calc):
+    """JS, 19.11.2026: 200 шт А4 + Laminat32G, mode 2."""
+    r = calc.execute(REF_COVER_A4_LAM_MODE2)
+    e = EXPECTED_COVER_A4_LAM_MODE2
+    assert r["cost"] == pytest.approx(e["cost"], rel=REF_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=REF_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=REF_REL_TOL)
