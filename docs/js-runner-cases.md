@@ -30,6 +30,7 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | `calcPrintSheet` margins -1 | `print_sheet` | 1811.964386666667 |
 | `calcPrintSheet` margins [2,2,2,2] | `print_sheet` | 3214.3125999999997 |
 | `calcPrintSheet` form 6 default | `print_sheet` | 3214.3125999999997 |
+| `calcPrintSheet` cover notebook mode 2 | `print_sheet` | 2251.3854133333334 |
 | `calcPrintRoll` эталон 5 шт | `print_roll` | 14291 |
 | `calcPrintRoll` form 23 default | `print_roll` | 1544 |
 | `calcPrintRoll` form 23 default + lamination | `print_roll` | 2335 |
@@ -102,6 +103,8 @@ node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[297,210
 node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[297,210],\"4+0\",[2,2,2,2],0,\"VHI80\",{},1]'
 
 node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[297,210],\"4+0\",[2,2,2,2],4,\"VHI80\",{},1]'
+
+node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[148,210],\"4+0\",[2,2,2,2],4,\"PaperCoated250M\",{},2]'
 
 node scripts/run_js_calc.mjs calcPrintRoll --data current --args '[5,[1500,1000],\"BannerFronlitCoat400\",\"Technojet160ECO\",{\"isCutting\":[1,1,1,1],\"isEyelet\":[300,300,300,300]},1]'
 

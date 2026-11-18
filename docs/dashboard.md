@@ -61,7 +61,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `pilot-acrylic-medals-calc.md` | заблокировано: ждёт todo/ai-calc-authoring-skill.md |
 | `presswall-banner-mode.md` | черновик |
 | `print-sheet-copy-result.md` | черновик |
-| `print-sheet-mode2-defects.md` | ревью |
+| `print-sheet-mode2-defects.md` | выкатка |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
 | `smartcaptcha-replace.md` | черновик |
 | `spam-users-cleanup.md` | заблокировано: ждёт todo/registration-harden.md |
