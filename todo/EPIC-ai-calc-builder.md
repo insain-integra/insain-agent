@@ -9,12 +9,12 @@
 
 ## Задачи
 
-- `todo/ezfc-form-builder.md` — конструктор новой формы ezFC по эталону 79 и синк опций из `calc_service/data/*.json`
+- `ezfc-form-builder` (закрыто 2026-11-20, `docs/history/log.md`) — конструктор новой формы ezFC по эталону 79 и синк опций из `calc_service/data/*.json`
 - `todo/ai-calc-authoring-skill.md` — сквозной skill и регламент интервью, подбора базы и сборки «API + форма»
 - `todo/pilot-acrylic-medals-calc.md` — пилот механизма: калькулятор и форма C2 «Акриловые медали и ленты» на базе `laser`
 
 ## Порядок
 
-1. `todo/ezfc-form-builder.md` — базовый инструмент сборки и обновления форм ezFC на проде по JSON-спеке.
+1. `ezfc-form-builder` (закрыто 2026-11-20, `docs/history/log.md`) — базовый инструмент сборки и обновления форм ezFC на проде по JSON-спеке.
 2. `todo/ai-calc-authoring-skill.md` — после 1: фиксирует формат спеки и команды конструктора в сквозном skill.
 3. `todo/pilot-acrylic-medals-calc.md` — после 2: сначала интервью `Analyst` с владельцем по новому skill, затем реализация API, JS и формы на черновике товара.

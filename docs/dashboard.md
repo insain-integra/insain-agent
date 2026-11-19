@@ -37,13 +37,12 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **24**. В работе/ревью: `ezfc-form-builder.md`. Заблокировано: `ai-calc-authoring-skill.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **23**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
-| `ai-calc-authoring-skill.md` | заблокировано: ждёт todo/ezfc-form-builder.md |
+| `ai-calc-authoring-skill.md` | черновик |
 | `ai-seo-geo-yoast.md` | черновик |
-| `ezfc-form-builder.md` | выкатка |
 | `ezfc-options-source-reset.md` | черновик |
 | `form-heat-press.md` | черновик |
 | `form-milling.md` | черновик |
@@ -74,8 +73,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-20 — ezfc-form-builder
 - 2026-11-20 — form-canvas
 - 2026-11-20 — mode-logic-and-checks
 - 2026-11-19 — form-notebook
 - 2026-11-19 — print-sheet-mode2-defects
-- 2026-11-17 — form-button-pins

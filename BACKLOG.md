@@ -143,3 +143,4 @@
 - Из `form-canvas`: На дефолте формы `400×500` без подрамника `materials` холста `0.6` м против `0.605` м в JS (то же округление `print_roll` до 2 знаков). Цена совпала: `2543`.
 - Из `form-canvas`: Форма 80 (`dpdSize` id=3130): у опции `id=8` подпись `"1000х1100 мм"` при `value="1000,1200"`.
 - Из `form-canvas`: `scripts/run_js_calc.mjs`: `calcCanvas` не подключён (эталоны сняты в консоли боевой страницы, 20.11.2026; Reviewer сверил тем же загрузчиком локально, скрипт не менялся).
+- Из `ezfc-form-builder`: В `materials/calendar.json` (секция Flip) и `materials/presswall.json` (Joker, Tritix) подпись в JSON совпадает с ключом, поэтому в списке опций виден код. Генератор подставляет в `text` только `title` / `name` / `description` и сам ключ туда не пишет.

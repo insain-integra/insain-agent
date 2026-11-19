@@ -1,6 +1,6 @@
 # ai-calc-authoring-skill
 
-Статус: заблокировано: ждёт todo/ezfc-form-builder.md
+Статус: черновик
 Сложность: высокая
 Implementer: Gemini 4 Hydrogen High
 Reviewer: Grok 4.7
@@ -16,7 +16,7 @@ Site ops: не нужен
 - `.cursor/skills/new-calculator/SKILL.md` — текущий skill для Python-части калькулятора (перенос/шаблон).
 - `.cursor/skills/ezfc-form-to-api/SKILL.md`, `.cursor/skills/deploy-api/SKILL.md`, `.cursor/skills/deploy-wp-plugin/SKILL.md` — эталоны деплоя и проверки форм.
 - `.cursor/rules/interactive-choices.mdc` — правила оформления `AskQuestion`.
-- `scripts/ezfc_build_form.py` (из `todo/ezfc-form-builder.md`) — интерфейс конструктора форм и формат JSON-спеки.
+- `scripts/ezfc_build_form.py` (из `ezfc-form-builder` (закрыто 2026-11-20, `docs/history/log.md`)) — интерфейс конструктора форм и формат JSON-спеки.
 - `calc_service/calculators/_template.py`, `calc_service/calculators/laser.py`, `calc_service/AGENTS.md` — единый стиль кода и контракты калькуляторов.
 - `docs/ezfc-api-migration.md` — единый стиль форм ezFC и блока результата.
 - `docs/README.md` — оглавление документации (добавить ссылку при необходимости).
@@ -54,7 +54,7 @@ Site ops: не нужен
 
 ## Не-scope
 
-- Правка `scripts/ezfc_build_form.py` и `scripts/ezfc_build_apply.php` (сделано в `todo/ezfc-form-builder.md`).
+- Правка `scripts/ezfc_build_form.py` и `scripts/ezfc_build_apply.php` (сделано в `ezfc-form-builder` (закрыто 2026-11-20, `docs/history/log.md`)).
 - Реализация конкретного калькулятора C2 (это `todo/pilot-acrylic-medals-calc.md`).
 - Правка `AGENTS.md` и `docs/site/forms.md`.
 
@@ -74,7 +74,7 @@ Site ops: не нужен
 
 - Прод: нет (изменения только в git: skills, индексный скрипт и тесты).
 - Цены: нет.
-- Формы: риск рассинхронизации описанных в skill команд с реальным CLI `ezfc_build_form.py`; снимается тем, что задача стартует строго после закрытия `todo/ezfc-form-builder.md`.
+- Формы: риск рассинхронизации описанных в skill команд с реальным CLI `ezfc_build_form.py`; снимается тем, что задача стартует строго после закрытия `ezfc-form-builder` (закрыто 2026-11-20, `docs/history/log.md`).
 
 ## Режим
 
