@@ -139,3 +139,7 @@
 - Из `form-notebook`: `wp litespeed-purge all` снова `Error: Something went wrong! Got 400` (уже в `BACKLOG.md` из `form-sticker`). `wp cache flush` — `Success`.
 - Из `form-notebook`: `ssh insain-prod`: 2 таймаута `banner exchange` за сессию, повтор через 10–15 с проходил.
 - Из `mode-logic-and-checks`: `calc_service/tests/test_calculators/test_print_offset.py`: `EXPECTED_REF.price` = `14108.116` при фактической цене `14450.546` на том же `REF_PARAMS` и `mode=1`. Старый assert проходит только из-за `rel=0.03`. Цена от этой правки не менялась (`timePrepare=0`). Точное значение уже зафиксировано в `test_print_offset_modes_match_js`.
+- Из `form-canvas`: `calc_service/calculators/print_roll.py`: при `quantity=2, width=400, height=300` (размер вне пресетов формы 80) расход `CanvasDLCNM320` (`length_min=500` мм) в `materials` даёт `0.48` м вместо `0.5` м в JS (разница ~10 ₽ в `calcCanvas` для `400×300`). `print_roll.py` не правился (вне scope).
+- Из `form-canvas`: На дефолте формы `400×500` без подрамника `materials` холста `0.6` м против `0.605` м в JS (то же округление `print_roll` до 2 знаков). Цена совпала: `2543`.
+- Из `form-canvas`: Форма 80 (`dpdSize` id=3130): у опции `id=8` подпись `"1000х1100 мм"` при `value="1000,1200"`.
+- Из `form-canvas`: `scripts/run_js_calc.mjs`: `calcCanvas` не подключён (эталоны сняты в консоли боевой страницы, 20.11.2026; Reviewer сверил тем же загрузчиком локально, скрипт не менялся).

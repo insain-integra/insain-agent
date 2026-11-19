@@ -24,7 +24,7 @@
 - `todo/form-milling.md` — копия формы 35, slug `milling`
 - `todo/form-pad-print.md` — копия формы 38, slug `pad_print`
 - `todo/form-heat-press.md` — копия формы 40, slug `heat_press`
-- `todo/form-canvas.md` — копия формы 80, slug `canvas`
+- `form-canvas` (закрыто 2026-11-20, `docs/history/log.md`) — копия формы 80, slug `canvas`
 
 Закрытые (файла в `todo/` нет, запись в `docs/history/log.md`):
 

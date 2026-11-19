@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **25**. В работе/ревью: `form-canvas.md`. Заблокировано: `ai-calc-authoring-skill.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **24**. В работе/ревью: нет. Заблокировано: `ai-calc-authoring-skill.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -45,7 +45,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `ai-seo-geo-yoast.md` | черновик |
 | `ezfc-form-builder.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
-| `form-canvas.md` | выкатка |
 | `form-heat-press.md` | черновик |
 | `form-milling.md` | черновик |
 | `form-pad-print.md` | черновик |
@@ -75,8 +74,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-20 — form-canvas
 - 2026-11-20 — mode-logic-and-checks
 - 2026-11-19 — form-notebook
 - 2026-11-19 — print-sheet-mode2-defects
 - 2026-11-17 — form-button-pins
-- 2026-11-17 — ai-seo-cleanup-noindex
