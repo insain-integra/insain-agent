@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **25**. В работе/ревью: нет. Заблокировано: `ai-calc-authoring-skill.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **25**. В работе/ревью: `form-canvas.md`. Заблокировано: `ai-calc-authoring-skill.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -45,7 +45,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `ai-seo-geo-yoast.md` | черновик |
 | `ezfc-form-builder.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
-| `form-canvas.md` | черновик |
+| `form-canvas.md` | ревью |
 | `form-heat-press.md` | черновик |
 | `form-milling.md` | черновик |
 | `form-pad-print.md` | черновик |

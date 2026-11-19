@@ -4,6 +4,12 @@
 Мигрировано из js_legacy/calc/calcCanvas.js.
 Печать на холсте + опциональный подрамник (багет) + натяжка на раму.
 Использует print_roll для печати, профиль для подрамника, SetCanvasFrame для натяжки.
+
+Список «не перенесено»: отдельный модуль calcBaguette и его опция isHanger
+не перенесены (см. scripts/js_port_gaps_allowed.txt: calcCanvas call calcBaguette,
+calcBaguette module). Для подрамника в calculate() calcBaguette заменён расчётом
+через профиль из каталога profile, _min_profiles, calc_cut_profile, сборку углов
+и calc_set_canvas_frame.
 """
 
 from __future__ import annotations
@@ -11,11 +17,12 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List, Mapping
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import BaseCalculator, ProductionMode, parse_mode
 from calculators.print_roll import PrintRollCalculator
 from common.helpers import calc_weight
 from common.markups import (
     BASE_TIME_READY,
+    COST_OPERATOR,
     MARGIN_MATERIAL,
     MARGIN_OPERATION,
     get_margin,
@@ -125,7 +132,7 @@ class CanvasCalculator(BaseCalculator):
         printer_code = str(params.get("printer_code", "") or DEFAULT_PRINTER).strip() or DEFAULT_PRINTER
         is_frame = bool(params.get("is_frame", True))
         frame_id = str(params.get("frame_id", "") or DEFAULT_FRAME).strip() or DEFAULT_FRAME
-        mode = ProductionMode(int(params.get("mode", 1)))
+        mode = parse_mode(params.get("mode", 1))
 
         if width <= 0 or height <= 0:
             raise ValueError("Ширина и высота должны быть положительными")
@@ -147,7 +154,17 @@ class CanvasCalculator(BaseCalculator):
         time_total = float(cost_print.get("time_hours", 0))
         time_ready_max = float(cost_print.get("time_ready", 0))
         weight_total = float(cost_print.get("weight_kg", 0))
-        materials_out: List[Dict[str, Any]] = list(cost_print.get("materials", []))
+        materials_out: List[Dict[str, Any]] = []
+        for item in cost_print.get("materials", []):
+            row = dict(item)
+            if not row.get("size_mm") and row.get("code"):
+                try:
+                    roll_spec = roll_catalog.get(str(row["code"]))
+                    if roll_spec.sizes:
+                        row["size_mm"] = [float(x) for x in roll_spec.sizes[0]]
+                except KeyError:
+                    pass
+            materials_out.append(row)
 
         # 2. Подрамник (багет) + натяжка
         cost_frame = 0.0
@@ -174,8 +191,8 @@ class CanvasCalculator(BaseCalculator):
 
             cost_material_frame = num_profile * profile_cost_unit
             cut_result = calc_cut_profile(n, segments, CUT_TOOL, mode.value)
-            time_assembly = (num_corners / 2 * 480) / 3600
-            from common.markups import COST_OPERATOR
+            # В calcBaguette (JS): numCut = 2 * 4 * n = 8 * n, стыковка = (numCut / 2 * 480) / 3600
+            time_assembly = (num_corners * 480) / 3600
             cost_assembly = time_assembly * COST_OPERATOR
             price_assembly = cost_assembly * (1 + MARGIN_OPERATION)
 
@@ -200,18 +217,21 @@ class CanvasCalculator(BaseCalculator):
             time_ready_frame = time_frame + float(BASE_TIME_READY[min(mode.value, len(BASE_TIME_READY) - 1)])
             time_ready_max = max(time_ready_max, time_ready_frame)
 
-            materials_out.append({
+            frame_item: Dict[str, Any] = {
                 "code": frame_id,
                 "name": profile_spec.description,
                 "title": profile_spec.title,
                 "quantity": num_profile,
                 "unit": "шт",
-            })
+            }
+            if profile_spec.sizes:
+                frame_item["size_mm"] = [float(x) for x in profile_spec.sizes[0]]
+            materials_out.append(frame_item)
 
         margin_canvas = get_margin("marginCanvas")
         price_total = price_total * (1 + margin_canvas)
         time_hours = math.ceil(time_total * 100) / 100.0
-        time_ready = max(time_ready_max, time_hours + float(BASE_TIME_READY[min(mode.value, len(BASE_TIME_READY) - 1)]))
+        time_ready = time_hours + time_ready_max
 
         return {
             "cost": float(math.ceil(cost_total)),

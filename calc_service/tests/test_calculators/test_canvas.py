@@ -100,10 +100,10 @@ REF_PARAMS = {
     "mode": 1,
 }
 EXPECTED_REF = {
-    "cost": 4518,
-    "price": 7252,
-    "time_hours": 2.25,
-    "time_ready": 33.02,
+    "cost": 5318,
+    "price": 8532,
+    "time_hours": 2.78,
+    "time_ready": 35.80,
     "weight_kg": 1.49,
 }
 EXPECTED_MATERIAL = {
@@ -111,6 +111,39 @@ EXPECTED_MATERIAL = {
     "name_substring": "Холст",
     "quantity_approx": 0.48,
 }
+
+# Дефолт боевой формы 80 (CalcCanvas): 1 шт, 400×500, без подрамника # JS, 20.11.2026 (консоль боевой страницы)
+REF_FORM_DEFAULT = {
+    "quantity": 1,
+    "width": 400,
+    "height": 500,
+    "material_id": "CanvasDLCNM320",
+    "printer_code": "HPLatex335",
+    "is_frame": False,
+    "frame_id": "CanvasFrame4520",
+    "mode": 1,
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 1581.0,
+    "price": 2543.0,
+    "time_hours": 0.51,
+    "time_ready": 33.53,
+    "weight_kg": 0.08,
+}
+
+# Режимы 0/1/2 на дефолте формы # JS, 20.11.2026
+FORM_DEFAULT_MODE_CASES = [
+    (0, {"cost": 831.0, "price": 1343.0, "time_hours": 0.01, "time_ready": 56.03}),
+    (1, {"cost": 1581.0, "price": 2543.0, "time_hours": 0.51, "time_ready": 33.53}),
+    (2, {"cost": 2352.0, "price": 3777.0, "time_hours": 1.01, "time_ready": 19.03}),
+]
+
+# Тираж ≥ 2 из списка формы (400×500) с подрамником, режимы 0/1/2 # JS, 20.11.2026
+FORM_FRAME_N2_CASES = [
+    (0, {"cost": 4955.48, "price": 7966.968, "time_hours": 2.3767, "time_ready": 58.3967, "weight_kg": 1.95}),
+    (1, {"cost": 5866.88, "price": 9425.208, "time_hours": 2.9767, "time_ready": 35.9967, "weight_kg": 1.95}),
+    (2, {"cost": 6792.28, "price": 10907.448, "time_hours": 3.5767, "time_ready": 21.5967, "weight_kg": 1.95}),
+]
 
 
 @pytest.fixture(scope="module")
@@ -177,3 +210,36 @@ def test_expected_values_canvas(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+@pytest.mark.parametrize("mode,expected", FORM_DEFAULT_MODE_CASES)
+def test_form_default_modes(calc, mode, expected):
+    r = calc.execute({**REF_FORM_DEFAULT, "mode": mode})
+    assert r["cost"] == pytest.approx(expected["cost"], rel=0.001)
+    assert r["price"] == pytest.approx(expected["price"], rel=0.001)
+    assert r["time_hours"] == pytest.approx(expected["time_hours"], rel=0.001)
+    assert r["time_ready"] == pytest.approx(expected["time_ready"], rel=0.001)
+    mats = r["materials"]
+    assert len(mats) == 1
+    assert mats[0]["code"] == "CanvasDLCNM320"
+    assert mats[0]["size_mm"] == [1270.0, 0.0]
+
+
+def test_form_default_weight(calc):
+    r = calc.execute(REF_FORM_DEFAULT)
+    assert r["weight_kg"] == pytest.approx(EXPECTED_FORM_DEFAULT["weight_kg"], rel=0.001)
+
+
+@pytest.mark.parametrize("mode,expected", FORM_FRAME_N2_CASES)
+def test_form_frame_n2_modes(calc, mode, expected):
+    params = {**REF_FORM_DEFAULT, "quantity": 2, "is_frame": True, "mode": mode}
+    r = calc.execute(params)
+    assert r["cost"] == pytest.approx(expected["cost"], rel=0.001)
+    assert r["price"] == pytest.approx(expected["price"], rel=0.001)
+    assert r["time_hours"] == pytest.approx(expected["time_hours"], rel=0.01)
+    assert r["time_ready"] == pytest.approx(expected["time_ready"], rel=0.001)
+    assert r["weight_kg"] == pytest.approx(expected["weight_kg"], rel=0.001)
+    by_code = {m["code"]: m for m in r["materials"]}
+    assert by_code["CanvasDLCNM320"]["size_mm"] == [1270.0, 0.0]
+    assert by_code["CanvasFrame4520"]["size_mm"] == [45.0, 20.0]
+    assert by_code["CanvasFrame4520"]["quantity"] == 2
