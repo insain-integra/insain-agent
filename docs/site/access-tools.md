@@ -72,6 +72,19 @@ Custom JS — строка в поле `custom_calculation` внутри JSON `f
 
 **Custom JS переведённых форм — источник правды в репозитории.** Файл `<slug>.js` поставляется в составе плагина `insain-calc-bridge` (деплой через `wp plugin install`, разрешён). При переводе формы на `calcApi` у её JS-элемента один раз в админке включается `read_file` с путём `{{abspath}}wp-content/plugins/insain-calc-bridge/forms/<slug>.js`. Id элементов не меняются, `get_value_from(N)` продолжает работать. Формы переключаются по одной, каждая — в момент перевода на API. Дальше JS правится только в git, правка в админке у такой формы не действует. Формы старого JS остаются в базе, по ним только снимки.
 
+### Конструктор новых форм (`ezfc_build_form.py` + `ezfc_build_apply.php`)
+
+Для создания новых форм в эталонной разметке формы 79 (`CalcPuzzle`) и обновления списков опций из `calc_service/data/*.json`:
+
+- Шаблон формы 79: `scripts/ezfc_form_template_79.json` (192 опции формы, блок результата `grpCalc` / `grpPrice` / `grpTime` / `sbtWeightTotal` / `grpMaterial`, заготовки элементов; скрытые поля задаются через `data.hidden = "1"` и `calculate_when_hidden = "1"`, тип `hidden` `e_id = 10` не используется).
+- Генератор пакетов: `python scripts/ezfc_build_form.py spec.json --out /tmp/ezfc-build-pkg.json` (сборка) или `--update-options --form-id <id> --out /tmp/ezfc-upd.json` (обновление `options` у `dropdown`/`radio`/`checkbox`).
+- Применение через wp-cli (`sudo -u www-data wp eval-file /tmp/ezfc_build_apply.php ... --path=/var/www/insain.ru`):
+  - без `apply` — только `dry-run` (показ структуры или diff опций без записи в БД);
+  - `<pkg.json> apply` — создаёт форму, вставляет группы до дочерних элементов (`data.group_id`), проставляет `position` (убывает сверху вниз), перепривязывает `calculate`/`conditional`/`set` и пишет манифест отката `/tmp/ezfc-build-<id>-*.json`;
+  - `<upd.json> apply` — обновляет только `options` с бэкапом в `/tmp/ezfc-build-options-<id>-*.json`; формы на `publish`-постах защищены (нужен явный `allow-published`);
+  - `restore <файл>` — удаляет созданную форму или возвращает `data` элементов из бэкапа.
+- Для новых `read_file`-форм JS в `wp-plugin/forms/<slug>.js` использует `__form_id__`, `{{name}}` (лишний `{{…}}` обнуляет расчёт в ezFC) и `ezfc_functions.get_element_id_by_name(__form_id__, '<name>')` без хардкода числовых id.
+
 ## Решения
 
 1. **Запись через REST — не используется.** Контур сайта идёт через wp-cli и Browser MCP. Учётки не созданы. Если понадобится внешний скрипт без SSH: Application Password отдельному пользователю с ролью `shop_manager` или `editor` (не `admin`), создаётся в профиле пользователя или `wp user application-password create <user> <имя>`. Для `wc/v3` отдельно — ключ WooCommerce (Woo → Настройки → Дополнительно → REST API), права read или read/write. Хранить в `.env`, в git не класть.

@@ -86,7 +86,7 @@ Windows/PowerShell: `&&` не работает, разделитель `;`. Ес
 - Не коммитить и не выводить в ответы и логи `.env` и любые секреты (пароли, ключи, токены, `wp-config.php`).
 - Без подтверждения человека: `wp search-replace`, `docker compose down -v`, удаление файлов и данных
   (локально и на сервере), смена DNS, отключение плагинов оплаты и SEO, прямой SQL в таблицы WordPress
- (исключение — `scripts/ezfc_copy_apply.php` для копии формы ezFC, skill `ezfc-form-to-api`, шаг 10).
+ (исключение — `scripts/ezfc_copy_apply.php` для копии формы ezFC и `scripts/ezfc_build_apply.php` для сборки/обновления форм по спеке с `dry-run` и откатом).
 - `test.insain.ru` — не целевой адрес, работаем только с прод https://insain.ru.
 - Не выходить за scope задачи: соседняя проблема — одна строка в отчёте, не правка.
 

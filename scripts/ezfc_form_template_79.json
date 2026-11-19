@@ -1,0 +1,2809 @@
+{
+  "meta": {
+    "source_form_id": 79,
+    "source_form_name": "CalcPuzzle",
+    "plugin_version": "2.14.0.2"
+  },
+  "element_types": {
+    "dropdown": 4,
+    "radio": 5,
+    "checkbox": 6,
+    "numbers": 7,
+    "html": 12,
+    "fileupload": 14,
+    "subtotal": 15,
+    "set": 22,
+    "custom_calculation": 24,
+    "group": 25,
+    "heading": 31
+  },
+  "form_data": {
+    "global_conditions": [
+      {
+        "action": "0",
+        "target": "0",
+        "compare_value_first": "0",
+        "operator": "0",
+        "value": "",
+        "target_value": "",
+        "redirect": "",
+        "option_index_value": ""
+      }
+    ]
+  },
+  "form_options": [
+    {
+      "o_id": 1,
+      "value": ""
+    },
+    {
+      "o_id": 2,
+      "value": ""
+    },
+    {
+      "o_id": 3,
+      "value": ""
+    },
+    {
+      "o_id": 4,
+      "value": "0"
+    },
+    {
+      "o_id": 5,
+      "value": "руб."
+    },
+    {
+      "o_id": 6,
+      "value": "Цена"
+    },
+    {
+      "o_id": 7,
+      "value": "0"
+    },
+    {
+      "o_id": 8,
+      "value": "1"
+    },
+    {
+      "o_id": 9,
+      "value": "0"
+    },
+    {
+      "o_id": 10,
+      "value": ""
+    },
+    {
+      "o_id": 11,
+      "value": ""
+    },
+    {
+      "o_id": 12,
+      "value": ""
+    },
+    {
+      "o_id": 13,
+      "value": ""
+    },
+    {
+      "o_id": 14,
+      "value": ""
+    },
+    {
+      "o_id": 15,
+      "value": "Отправить"
+    },
+    {
+      "o_id": 16,
+      "value": "Добавить в заказ"
+    },
+    {
+      "o_id": 17,
+      "value": ""
+    },
+    {
+      "o_id": 18,
+      "value": "0"
+    },
+    {
+      "o_id": 19,
+      "value": "icy-green"
+    },
+    {
+      "o_id": 20,
+      "value": "1"
+    },
+    {
+      "o_id": 21,
+      "value": ""
+    },
+    {
+      "o_id": 22,
+      "value": "0"
+    },
+    {
+      "o_id": 23,
+      "value": ""
+    },
+    {
+      "o_id": 24,
+      "value": ""
+    },
+    {
+      "o_id": 25,
+      "value": ""
+    },
+    {
+      "o_id": 26,
+      "value": ""
+    },
+    {
+      "o_id": 27,
+      "value": ""
+    },
+    {
+      "o_id": 28,
+      "value": ""
+    },
+    {
+      "o_id": 29,
+      "value": ""
+    },
+    {
+      "o_id": 30,
+      "value": "0"
+    },
+    {
+      "o_id": 31,
+      "value": ""
+    },
+    {
+      "o_id": 32,
+      "value": "0"
+    },
+    {
+      "o_id": 33,
+      "value": ""
+    },
+    {
+      "o_id": 34,
+      "value": ""
+    },
+    {
+      "o_id": 35,
+      "value": "2195358"
+    },
+    {
+      "o_id": 36,
+      "value": "0"
+    },
+    {
+      "o_id": 37,
+      "value": "0"
+    },
+    {
+      "o_id": 38,
+      "value": "0"
+    },
+    {
+      "o_id": 39,
+      "value": "Отправить"
+    },
+    {
+      "o_id": 40,
+      "value": ""
+    },
+    {
+      "o_id": 41,
+      "value": "0"
+    },
+    {
+      "o_id": 42,
+      "value": ""
+    },
+    {
+      "o_id": 43,
+      "value": ""
+    },
+    {
+      "o_id": 44,
+      "value": ""
+    },
+    {
+      "o_id": 45,
+      "value": ""
+    },
+    {
+      "o_id": 46,
+      "value": ""
+    },
+    {
+      "o_id": 47,
+      "value": ""
+    },
+    {
+      "o_id": 48,
+      "value": "0"
+    },
+    {
+      "o_id": 49,
+      "value": ""
+    },
+    {
+      "o_id": 50,
+      "value": "0"
+    },
+    {
+      "o_id": 51,
+      "value": "body .ezfc-wrapper  .ezfc-form {background-repeat:no-repeat;overflow-x:initial;overflow-y:initial;}body .ezfc-wrapper  .ezfc-element-input,body .ezfc-wrapper  .ezfc-element-numbers,body .ezfc-wrapper  .ezfc-element-textarea,body .ezfc-wrapper  .ezfc-element-select {}body .ezfc-wrapper  .ezfc-element-submit {}body .ezfc-wrapper  .ezfc-step-button-wrapper {text-align:center;}body .ezfc-wrapper  .ezfc-step-button {}body .ezfc-wrapper  .ezfc-summary-table .ezfc-summary-table-total {background-color:#d8d8d8;}body .ezfc-wrapper  .ezfc-element {}body .ezfc-wrapper  .ezfc-form * {direction:ltr;unicode-bidi:bidi-override;}"
+    },
+    {
+      "o_id": 52,
+      "value": ""
+    },
+    {
+      "o_id": 53,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 54,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 55,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 56,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 57,
+      "value": "a:4:{s:5:\"color\";s:0:\"\";s:5:\"width\";s:0:\"\";s:5:\"style\";s:4:\"none\";s:6:\"radius\";s:0:\"\";}"
+    },
+    {
+      "o_id": 58,
+      "value": ""
+    },
+    {
+      "o_id": 59,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 60,
+      "value": ""
+    },
+    {
+      "o_id": 61,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 62,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 63,
+      "value": "a:4:{s:5:\"color\";s:0:\"\";s:5:\"width\";s:0:\"\";s:5:\"style\";s:4:\"none\";s:6:\"radius\";s:0:\"\";}"
+    },
+    {
+      "o_id": 64,
+      "value": ""
+    },
+    {
+      "o_id": 65,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 66,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 67,
+      "value": "a:4:{s:5:\"color\";s:0:\"\";s:5:\"width\";s:0:\"\";s:5:\"style\";s:4:\"none\";s:6:\"radius\";s:0:\"\";}"
+    },
+    {
+      "o_id": 68,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 69,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 70,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 71,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 72,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 73,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 74,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 75,
+      "value": "0"
+    },
+    {
+      "o_id": 76,
+      "value": "a:2:{s:7:\"enabled\";s:1:\"0\";s:4:\"text\";s:0:\"\";}"
+    },
+    {
+      "o_id": 77,
+      "value": ""
+    },
+    {
+      "o_id": 78,
+      "value": ""
+    },
+    {
+      "o_id": 79,
+      "value": "1"
+    },
+    {
+      "o_id": 80,
+      "value": ""
+    },
+    {
+      "o_id": 81,
+      "value": "Проверить заказ"
+    },
+    {
+      "o_id": 82,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 83,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 84,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 85,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 86,
+      "value": "a:1:{s:5:\"color\";s:7:\"#d8d8d8\";}"
+    },
+    {
+      "o_id": 87,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 88,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 89,
+      "value": "0"
+    },
+    {
+      "o_id": 90,
+      "value": ""
+    },
+    {
+      "o_id": 91,
+      "value": ""
+    },
+    {
+      "o_id": 92,
+      "value": "Total"
+    },
+    {
+      "o_id": 93,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 94,
+      "value": "1"
+    },
+    {
+      "o_id": 95,
+      "value": "0"
+    },
+    {
+      "o_id": 96,
+      "value": "0"
+    },
+    {
+      "o_id": 97,
+      "value": "0"
+    },
+    {
+      "o_id": 98,
+      "value": "0"
+    },
+    {
+      "o_id": 99,
+      "value": "0"
+    },
+    {
+      "o_id": 100,
+      "value": "0"
+    },
+    {
+      "o_id": 101,
+      "value": ""
+    },
+    {
+      "o_id": 102,
+      "value": "0"
+    },
+    {
+      "o_id": 103,
+      "value": "0"
+    },
+    {
+      "o_id": 104,
+      "value": "0"
+    },
+    {
+      "o_id": 105,
+      "value": "0"
+    },
+    {
+      "o_id": 106,
+      "value": ""
+    },
+    {
+      "o_id": 107,
+      "value": ""
+    },
+    {
+      "o_id": 108,
+      "value": "no-repeat"
+    },
+    {
+      "o_id": 109,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 110,
+      "value": "initial"
+    },
+    {
+      "o_id": 111,
+      "value": "initial"
+    },
+    {
+      "o_id": 112,
+      "value": "0"
+    },
+    {
+      "o_id": 113,
+      "value": "0"
+    },
+    {
+      "o_id": 114,
+      "value": "0"
+    },
+    {
+      "o_id": 115,
+      "value": ""
+    },
+    {
+      "o_id": 116,
+      "value": "0"
+    },
+    {
+      "o_id": 117,
+      "value": "result_default"
+    },
+    {
+      "o_id": 118,
+      "value": "0"
+    },
+    {
+      "o_id": 119,
+      "value": ""
+    },
+    {
+      "o_id": 120,
+      "value": ""
+    },
+    {
+      "o_id": 121,
+      "value": "form"
+    },
+    {
+      "o_id": 122,
+      "value": ""
+    },
+    {
+      "o_id": 123,
+      "value": ""
+    },
+    {
+      "o_id": 124,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 125,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 126,
+      "value": "0"
+    },
+    {
+      "o_id": 127,
+      "value": "0"
+    },
+    {
+      "o_id": 128,
+      "value": ""
+    },
+    {
+      "o_id": 129,
+      "value": ""
+    },
+    {
+      "o_id": 130,
+      "value": ""
+    },
+    {
+      "o_id": 131,
+      "value": ""
+    },
+    {
+      "o_id": 132,
+      "value": ""
+    },
+    {
+      "o_id": 133,
+      "value": ""
+    },
+    {
+      "o_id": 134,
+      "value": ""
+    },
+    {
+      "o_id": 135,
+      "value": ""
+    },
+    {
+      "o_id": 136,
+      "value": ""
+    },
+    {
+      "o_id": 137,
+      "value": ""
+    },
+    {
+      "o_id": 138,
+      "value": ""
+    },
+    {
+      "o_id": 139,
+      "value": ""
+    },
+    {
+      "o_id": 140,
+      "value": "0"
+    },
+    {
+      "o_id": 141,
+      "value": ""
+    },
+    {
+      "o_id": 142,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 143,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 144,
+      "value": "ltr"
+    },
+    {
+      "o_id": 145,
+      "value": "1336"
+    },
+    {
+      "o_id": 155,
+      "value": ""
+    },
+    {
+      "o_id": 156,
+      "value": "0"
+    },
+    {
+      "o_id": 158,
+      "value": ""
+    },
+    {
+      "o_id": 159,
+      "value": ""
+    },
+    {
+      "o_id": 160,
+      "value": "0"
+    },
+    {
+      "o_id": 161,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 162,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 175,
+      "value": ""
+    },
+    {
+      "o_id": 176,
+      "value": ""
+    },
+    {
+      "o_id": 177,
+      "value": ""
+    },
+    {
+      "o_id": 178,
+      "value": ""
+    },
+    {
+      "o_id": 179,
+      "value": "default"
+    },
+    {
+      "o_id": 180,
+      "value": "0"
+    },
+    {
+      "o_id": 181,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 182,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 183,
+      "value": "a:1:{s:5:\"color\";s:0:\"\";}"
+    },
+    {
+      "o_id": 184,
+      "value": "a:2:{s:5:\"value\";s:0:\"\";s:4:\"unit\";s:2:\"px\";}"
+    },
+    {
+      "o_id": 185,
+      "value": "0"
+    },
+    {
+      "o_id": 186,
+      "value": "0"
+    },
+    {
+      "o_id": 187,
+      "value": ""
+    },
+    {
+      "o_id": 188,
+      "value": "0"
+    },
+    {
+      "o_id": 189,
+      "value": "0"
+    },
+    {
+      "o_id": 190,
+      "value": "0"
+    },
+    {
+      "o_id": 191,
+      "value": "0"
+    },
+    {
+      "o_id": 192,
+      "value": "0"
+    },
+    {
+      "o_id": 193,
+      "value": "0"
+    },
+    {
+      "o_id": 194,
+      "value": "0"
+    },
+    {
+      "o_id": 195,
+      "value": ""
+    },
+    {
+      "o_id": 196,
+      "value": "0"
+    },
+    {
+      "o_id": 197,
+      "value": "before"
+    },
+    {
+      "o_id": 198,
+      "value": ""
+    },
+    {
+      "o_id": 199,
+      "value": ""
+    },
+    {
+      "o_id": 200,
+      "value": ""
+    },
+    {
+      "o_id": 201,
+      "value": "0"
+    },
+    {
+      "o_id": 202,
+      "value": "0"
+    },
+    {
+      "o_id": 203,
+      "value": ""
+    },
+    {
+      "o_id": 204,
+      "value": "0"
+    },
+    {
+      "o_id": 205,
+      "value": "center"
+    },
+    {
+      "o_id": 208,
+      "value": "shape_blue"
+    },
+    {
+      "o_id": 209,
+      "value": "default"
+    },
+    {
+      "o_id": 210,
+      "value": "default-2-columns"
+    },
+    {
+      "o_id": 211,
+      "value": "Параметр"
+    },
+    {
+      "o_id": 212,
+      "value": "Значение"
+    },
+    {
+      "o_id": 213,
+      "value": "Количество"
+    },
+    {
+      "o_id": 214,
+      "value": "full-width"
+    },
+    {
+      "o_id": 215,
+      "value": ""
+    },
+    {
+      "o_id": 216,
+      "value": ""
+    }
+  ],
+  "loader_element": {
+    "name": "Загрузчик калькулятора",
+    "e_id": 12,
+    "group_name": "0",
+    "data": {
+      "name": "Загрузчик калькулятора",
+      "label": "",
+      "do_shortcode": "1",
+      "html": "<script type=\"text/javascript\" src=\"/icalc/calc/icdc_ls.js\"></script>\n<script type=\"text/javascript\" src=\"/icalc/calc/common.js\"></script>",
+      "add_linebreaks": "1",
+      "replace_placeholders": "1",
+      "replace_placeholders_show_zero": "1",
+      "hidden": "1",
+      "columns": "6",
+      "group_id": "0",
+      "show_in_email": "0",
+      "show_in_email_cond": [
+        "0"
+      ],
+      "show_in_email_operator": [
+        "0"
+      ],
+      "show_in_email_value": [
+        ""
+      ],
+      "show_in_email_label": "name",
+      "show_in_email_label_custom": "",
+      "email_text_column_1": "submission_value",
+      "email_text_column_2": "calculated_value",
+      "show_in_live_summary": "1",
+      "wrapper_class": "",
+      "wrapper_style": "",
+      "element_style": "default",
+      "keep_value_after_reset": "0"
+    }
+  },
+  "param_group": {
+    "name": "grpParam",
+    "e_id": 25,
+    "group_name": "0",
+    "data": {
+      "name": "grpParam",
+      "collapsible": "0",
+      "expanded": "0",
+      "title": "Параметры",
+      "group_center": "0",
+      "group_flexbox": "0",
+      "group_flexbox_align_items": "center",
+      "group_flexbox_columns": "",
+      "wrapper_class": "",
+      "wrapper_style": "",
+      "element_style": "default",
+      "hidden": "0",
+      "columns": "3",
+      "group_id": "0"
+    }
+  },
+  "fileupload_element": {
+    "name": "fluAtrwork",
+    "e_id": 14,
+    "group_name": "grpParam",
+    "data": {
+      "name": "fluAtrwork",
+      "label": "Файлы для печати",
+      "required": "0",
+      "verify_value": "1",
+      "multiple": "1",
+      "file_upload_auto": "1",
+      "placeholder": "",
+      "class": "",
+      "wrapper_class": "",
+      "hidden": "0",
+      "keep_value_after_reset": "0",
+      "columns": "6",
+      "group_id": "0"
+    }
+  },
+  "calc_js_element": {
+    "name": "cjsCalc",
+    "e_id": 24,
+    "group_name": "grpParam",
+    "data": {
+      "name": "cjsCalc",
+      "label": "Расчет",
+      "is_currency": "1",
+      "is_number": "1",
+      "text_only": "0",
+      "text_before": "",
+      "text_after": "",
+      "custom_calculation": "",
+      "custom_calculation_function_name": "",
+      "custom_calculation_function_safe": "1",
+      "custom_calculation_function_external": "",
+      "custom_calculation_init_add": "1",
+      "custom_calculation_init_js": "",
+      "custom_calculation_function_read_file": "1",
+      "custom_calculation_function_filename": "{{abspath}}wp-content/plugins/insain-calc-bridge/forms/{slug}.js",
+      "description": "",
+      "description_below_label": "",
+      "description_below_input": "",
+      "columns": "6",
+      "group_id": "0",
+      "calculate_enabled": "1",
+      "add_to_price": "0",
+      "calculate_when_hidden": "1",
+      "overwrite_price": "1",
+      "precision": "2",
+      "show_in_email": "0",
+      "show_in_email_cond": [
+        "0"
+      ],
+      "show_in_email_operator": [
+        "0"
+      ],
+      "show_in_email_value": [
+        ""
+      ],
+      "show_in_email_label": "name",
+      "show_in_email_label_custom": "",
+      "email_text_column_1": "submission_value",
+      "email_text_column_2": "calculated_value",
+      "show_in_live_summary": "0",
+      "class": "",
+      "wrapper_class": "",
+      "style": "",
+      "wrapper_style": "",
+      "element_style": "default"
+    }
+  },
+  "result_elements": [
+    {
+      "name": "grpCalc",
+      "e_id": 25,
+      "group_name": "0",
+      "data": {
+        "name": "grpCalc",
+        "collapsible": "0",
+        "expanded": "1",
+        "title": "Расчет",
+        "group_center": "1",
+        "group_flexbox": "0",
+        "group_flexbox_align_items": "center",
+        "group_flexbox_columns": "",
+        "wrapper_class": "",
+        "wrapper_style": "padding: 0 15px 0 15px;",
+        "element_style": "highlight",
+        "hidden": "0",
+        "columns": "3",
+        "group_id": "0"
+      }
+    },
+    {
+      "name": "grpPrice",
+      "e_id": 25,
+      "group_name": "grpCalc",
+      "data": {
+        "name": "grpPrice",
+        "collapsible": "0",
+        "expanded": "1",
+        "title": "Collapse title",
+        "group_center": "0",
+        "group_flexbox": "0",
+        "group_flexbox_align_items": "center",
+        "group_flexbox_columns": "",
+        "wrapper_class": "",
+        "wrapper_style": "border: 1px solid #3dcc5c; border-radius: 5px;  padding: 0.0em;",
+        "element_style": "default",
+        "hidden": "0",
+        "columns": "6",
+        "group_id": "0"
+      }
+    },
+    {
+      "name": "grpPriceManager",
+      "e_id": 25,
+      "group_name": "grpPrice",
+      "data": {
+        "name": "grpPriceManager",
+        "collapsible": "0",
+        "expanded": "1",
+        "title": "Collapse title",
+        "group_center": "0",
+        "group_flexbox": "0",
+        "group_flexbox_align_items": "center",
+        "group_flexbox_columns": "",
+        "wrapper_class": "",
+        "wrapper_style": "padding-bottom: 0em;",
+        "element_style": "default",
+        "hidden": "0",
+        "columns": "3",
+        "group_id": "0"
+      }
+    },
+    {
+      "name": "hdgBase",
+      "e_id": 31,
+      "group_name": "grpPriceManager",
+      "data": {
+        "name": "hdgBase",
+        "title": "цена",
+        "tag": "p",
+        "show_in_email": "0",
+        "show_in_email_label": "name",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "0",
+        "alignment": "default",
+        "class": "",
+        "wrapper_class": "",
+        "style": "margin-bottom: 0em;",
+        "wrapper_style": "font-size: 0.7em; padding-bottom: 0em; padding-top: 0.7em;",
+        "element_style": "default",
+        "hidden": "0",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "show_in_email_label_custom": ""
+      }
+    },
+    {
+      "name": "sbtPriceTotalManager",
+      "e_id": 15,
+      "group_name": "grpPriceManager",
+      "data": {
+        "name": "sbtPriceTotalManager",
+        "label": "",
+        "is_currency": "1",
+        "is_number": "1",
+        "min": "",
+        "max": "",
+        "price_format": "0,0",
+        "text_only": "1",
+        "text_before": "",
+        "text_after": "  руб.",
+        "read_only": "0",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "hidden": "0",
+        "columns": "6",
+        "group_id": "0",
+        "calculate_enabled": "1",
+        "add_to_price": "1",
+        "overwrite_price": "1",
+        "calculate_before": "0",
+        "calculate_when_hidden": "1",
+        "precision": "2",
+        "inline_calculation": "PriceTotalManager",
+        "calculate_when_zero": "1",
+        "calculate": [
+          {
+            "prio": "0",
+            "operator": "0",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "0",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "conditional": [
+          {
+            "action": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "calculated",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "show_in_email": "0",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "show_in_email_label": "name",
+        "show_in_email_label_custom": "",
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "0",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "font-size: 0.8em;text-align:center;padding-bottom: 0em",
+        "element_style": "default",
+        "keep_value_after_reset": "0"
+      }
+    },
+    {
+      "name": "sbtPriceManager",
+      "e_id": 15,
+      "group_name": "grpPriceManager",
+      "data": {
+        "name": "sbtPriceManager",
+        "label": "",
+        "is_currency": "1",
+        "is_number": "1",
+        "min": "",
+        "max": "",
+        "price_format": "",
+        "text_only": "1",
+        "text_before": "",
+        "text_after": " руб./шт",
+        "read_only": "0",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "hidden": "0",
+        "columns": "6",
+        "group_id": "0",
+        "calculate_enabled": "1",
+        "add_to_price": "0",
+        "overwrite_price": "1",
+        "calculate_before": "0",
+        "calculate_when_hidden": "0",
+        "precision": "2",
+        "inline_calculation": "",
+        "calculate_when_zero": "1",
+        "calculate": [
+          {
+            "prio": "0",
+            "operator": "equals",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          },
+          {
+            "prio": "0",
+            "operator": "divide",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "0",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "conditional": [
+          {
+            "action": "0",
+            "target": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "calculated",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "show_in_email": "0",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "show_in_email_label": "name",
+        "show_in_email_label_custom": "",
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "0",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "font-size: 0.6em; color: gray;  padding-bottom: 0em;",
+        "element_style": "default",
+        "keep_value_after_reset": "0"
+      },
+      "refs": [
+        {
+          "path": [
+            "calculate",
+            0,
+            "target"
+          ],
+          "target_name": "sbtPriceTotalManager"
+        },
+        {
+          "path": [
+            "calculate",
+            1,
+            "target"
+          ],
+          "target_name": "numN"
+        }
+      ]
+    },
+    {
+      "name": "grpPriceDiscount",
+      "e_id": 25,
+      "group_name": "grpPrice",
+      "data": {
+        "name": "grpPriceDiscount",
+        "collapsible": "0",
+        "expanded": "1",
+        "title": "Collapse title",
+        "group_center": "0",
+        "group_flexbox": "0",
+        "group_flexbox_align_items": "center",
+        "group_flexbox_columns": "",
+        "wrapper_class": "",
+        "wrapper_style": "padding-bottom: 0em;width: auto;",
+        "element_style": "default",
+        "hidden": "0",
+        "columns": "3",
+        "group_id": "0"
+      }
+    },
+    {
+      "name": "sbtPriceTotalDiscount",
+      "e_id": 15,
+      "group_name": "grpPriceDiscount",
+      "data": {
+        "name": "sbtPriceTotalDiscount",
+        "label": "",
+        "calculate_enabled": "1",
+        "add_to_price": "0",
+        "is_currency": "1",
+        "is_number": "1",
+        "min": "",
+        "max": "",
+        "overwrite_price": "1",
+        "calculate_before": "0",
+        "calculate_when_hidden": "1",
+        "price_format": "0,0",
+        "precision": "2",
+        "text_only": "1",
+        "text_before": "",
+        "text_after": "  руб.",
+        "read_only": "0",
+        "inline_calculation": "PriceTotalDiscount",
+        "calculate_when_zero": "1",
+        "calculate": [
+          {
+            "prio": "0",
+            "operator": "0",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "0",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "conditional": [
+          {
+            "action": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "calculated",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "show_in_email": "0",
+        "show_in_email_label": "custom",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "blank",
+        "show_in_live_summary": "1",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "hidden": "1",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "show_in_email_label_custom": "Цена"
+      }
+    },
+    {
+      "name": "sbtPriceDiscount",
+      "e_id": 15,
+      "group_name": "grpPriceDiscount",
+      "data": {
+        "name": "sbtPriceDiscount",
+        "label": "",
+        "calculate_enabled": "1",
+        "add_to_price": "0",
+        "is_currency": "1",
+        "is_number": "1",
+        "min": "",
+        "max": "",
+        "overwrite_price": "1",
+        "calculate_before": "0",
+        "calculate_when_hidden": "1",
+        "price_format": "",
+        "precision": "2",
+        "text_only": "1",
+        "text_before": "",
+        "text_after": " руб./шт",
+        "read_only": "0",
+        "inline_calculation": "",
+        "calculate_when_zero": "1",
+        "calculate": [
+          {
+            "prio": "0",
+            "operator": "equals",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          },
+          {
+            "prio": "0",
+            "operator": "divide",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "0",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "conditional": [
+          {
+            "action": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "calculated",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "show_in_email": "0",
+        "show_in_email_label": "name",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "0",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "hidden": "1",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "show_in_email_label_custom": ""
+      },
+      "refs": [
+        {
+          "path": [
+            "calculate",
+            0,
+            "target"
+          ],
+          "target_name": "sbtPriceTotalDiscount"
+        },
+        {
+          "path": [
+            "calculate",
+            1,
+            "target"
+          ],
+          "target_name": "numN"
+        }
+      ]
+    },
+    {
+      "name": "htmCost",
+      "e_id": 12,
+      "group_name": "grpPriceDiscount",
+      "data": {
+        "name": "htmCost",
+        "label": "",
+        "do_shortcode": "1",
+        "html": "[access capability=&quot;read_maxdiscount&quot;]\r\n&lt;p style=&quot;font-size: 0.7em; margin: 0em; padding-bottom: 0.7em;&quot;&gt;со скидкой&nbsp;&lt;/p&gt;\r\n&lt;p style=&quot;font-size: 1.12em; margin: 0em;&quot;&gt;{{sbtPriceTotalDiscount}}&lt;/p&gt;\r\n&lt;p style=&quot;font-size: 0.84em; margin: 0em; color: gray; padding: 0.5em;&quot;&gt;{{sbtPriceDiscount}}&lt;/p&gt;\r\n[/access]",
+        "add_linebreaks": "1",
+        "show_in_email": "0",
+        "show_in_email_label": "name",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "1",
+        "replace_placeholders": "1",
+        "replace_placeholders_show_zero": "1",
+        "wrapper_class": "",
+        "wrapper_style": "margin: 0em;padding:0em;",
+        "element_style": "default",
+        "hidden": "0",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "show_in_email_label_custom": ""
+      }
+    },
+    {
+      "name": "grpTime",
+      "e_id": 25,
+      "group_name": "grpCalc",
+      "data": {
+        "name": "grpTime",
+        "collapsible": "0",
+        "expanded": "1",
+        "title": "Collapse title",
+        "group_center": "0",
+        "group_flexbox": "0",
+        "group_flexbox_align_items": "center",
+        "group_flexbox_columns": "",
+        "wrapper_class": "",
+        "wrapper_style": "padding: 0.5em;",
+        "element_style": "default",
+        "hidden": "0",
+        "columns": "6",
+        "group_id": "0"
+      }
+    },
+    {
+      "name": "htmTime",
+      "e_id": 12,
+      "group_name": "grpTime",
+      "data": {
+        "name": "htmTime",
+        "label": "",
+        "do_shortcode": "1",
+        "html": "&lt;div class=&quot;porto-tooltip inline htmTime&quot;&gt;\r\n&lt;div class=&quot;inline&quot;&gt;Срок&lt;/div&gt;\r\n&lt;a class=&quot;inline ezfc-element-description&quot; style=&quot;white-space: pre-line;&quot; title=&quot;&quot; data-html=&quot;true&quot; data-toggle=&quot;tooltip&quot; data-bs-placement=&quot;top&quot; data-bs-original-title=&quot;Готовность&quot;&gt;&nbsp;&lt;/a&gt;\r\n\r\n&lt;/div&gt;",
+        "add_linebreaks": "0",
+        "show_in_email": "0",
+        "show_in_email_label": "name",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "1",
+        "replace_placeholders": "1",
+        "replace_placeholders_show_zero": "1",
+        "wrapper_class": "",
+        "wrapper_style": "text-align:center;padding: 0.5em;font-size: 1.2em;  ",
+        "element_style": "default",
+        "hidden": "0",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "show_in_email_label_custom": ""
+      }
+    },
+    {
+      "name": "rdoModeProduction",
+      "e_id": 5,
+      "group_name": "grpTime",
+      "data": {
+        "name": "rdoModeProduction",
+        "label": "",
+        "required": "0",
+        "verify_value": "1",
+        "calculate_enabled": "1",
+        "add_to_price": "0",
+        "is_currency": "1",
+        "is_number": "1",
+        "options": [
+          {
+            "id": "1",
+            "value": "1",
+            "text": "стандарт",
+            "image": "",
+            "icon": ""
+          },
+          {
+            "id": "2",
+            "value": "2",
+            "text": "быстрее",
+            "image": "",
+            "icon": ""
+          }
+        ],
+        "options_columns": "-1",
+        "options_source": {
+          "source": "options",
+          "value": ""
+        },
+        "options_text_only": "0",
+        "option_add_text_icon": "0",
+        "calculate": [
+          {
+            "prio": "0",
+            "operator": "0",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "0",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "overwrite_price": "0",
+        "calculate_when_hidden": "0",
+        "precision": "2",
+        "calculate_before": "0",
+        "conditional": [
+          {
+            "action": "0",
+            "target": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "raw",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "custom_regex": "",
+        "custom_error_message": "",
+        "custom_regex_check_first": "0",
+        "custom_filter": "",
+        "show_in_email": "1",
+        "show_in_email_label": "custom",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "1",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "max_width": "",
+        "max_height": "",
+        "image_auto_width": "0",
+        "inline": "1",
+        "flexbox": "0",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "font-size: 0.5em; padding: 0em",
+        "element_style": "default",
+        "GET": "rdoModeProduction",
+        "GET_check_option_value": "value",
+        "hidden": "0",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "preselect": "0",
+        "__options_columns_custom": "",
+        "show_in_email_label_custom": "Срочность"
+      }
+    },
+    {
+      "name": "sbtWeightTotal",
+      "e_id": 15,
+      "group_name": "grpCalc",
+      "data": {
+        "name": "sbtWeightTotal",
+        "label": "Вес тиража",
+        "calculate_enabled": "1",
+        "add_to_price": "0",
+        "is_currency": "1",
+        "is_number": "1",
+        "min": "",
+        "max": "",
+        "overwrite_price": "0",
+        "calculate_before": "0",
+        "calculate_when_hidden": "0",
+        "price_format": "",
+        "precision": "2",
+        "text_only": "1",
+        "text_before": "",
+        "text_after": " кг.",
+        "read_only": "0",
+        "inline_calculation": "WeightTotal",
+        "calculate_when_zero": "1",
+        "calculate": [
+          {
+            "prio": "0",
+            "operator": "0",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "0",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "conditional": [
+          {
+            "action": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "calculated",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "show_in_email": "1",
+        "show_in_email_label": "label",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "blank",
+        "show_in_live_summary": "1",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "hidden": "0",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "show_in_email_label_custom": ""
+      }
+    },
+    {
+      "name": "grpMaterial",
+      "e_id": 25,
+      "group_name": "grpCalc",
+      "data": {
+        "name": "grpMaterial",
+        "collapsible": "0",
+        "expanded": "1",
+        "title": "Collapse title",
+        "group_center": "0",
+        "group_flexbox": "0",
+        "group_flexbox_align_items": "center",
+        "group_flexbox_columns": "",
+        "wrapper_class": "",
+        "wrapper_style": "padding: 0.5em;",
+        "element_style": "default",
+        "hidden": "0",
+        "columns": "6",
+        "group_id": "0"
+      }
+    },
+    {
+      "name": "htmMaterial",
+      "e_id": 12,
+      "group_name": "grpMaterial",
+      "data": {
+        "name": "htmMaterial",
+        "label": "",
+        "do_shortcode": "1",
+        "html": "[access capability=&quot;read_material&quot;]\r\n&lt;div class=&quot;data-material&quot;&gt;\r\n&lt;h3&gt;Расход материалов&lt;/h3&gt;\r\n&lt;div class=&quot;data-material-table&quot;&gt;&nbsp;&lt;/div&gt;\r\n&lt;/div&gt;\r\n[/access]",
+        "add_linebreaks": "0",
+        "show_in_email": "0",
+        "show_in_email_label": "name",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "1",
+        "replace_placeholders": "1",
+        "replace_placeholders_show_zero": "1",
+        "wrapper_class": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "hidden": "0",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "show_in_email_label_custom": ""
+      }
+    }
+  ],
+  "field_presets": {
+    "numbers": {
+      "e_id": 7,
+      "data": {
+        "name": "",
+        "label": "",
+        "required": "0",
+        "is_currency": "0",
+        "is_number": "1",
+        "factor": "",
+        "value": "",
+        "value_attribute": "",
+        "value_external": "",
+        "value_external_listen": "1",
+        "value_http": "",
+        "value_http_json": "",
+        "min": "",
+        "max": "",
+        "slider": "0",
+        "slider_vertical": "0",
+        "slider_values": "",
+        "steps_slider": "1",
+        "spinner": "0",
+        "steps_spinner": "1",
+        "pips": "0",
+        "steps_pips": "1",
+        "pips_float": "0",
+        "price_format": "",
+        "text_only": "0",
+        "text_before": "",
+        "text_after": "",
+        "read_only": "0",
+        "placeholder": "",
+        "icon": "",
+        "max_length": "",
+        "min_length": "",
+        "image": "",
+        "alt": "",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "hidden": "0",
+        "autocomplete": "1",
+        "autocomplete_custom_value": "",
+        "columns": "6",
+        "group_id": "0",
+        "calculate_enabled": "1",
+        "add_to_price": "1",
+        "calculate": [
+          {
+            "prio": "0",
+            "operator": "0",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "0",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "overwrite_price": "0",
+        "calculate_when_hidden": "1",
+        "precision": "2",
+        "calculate_before": "0",
+        "conditional": [
+          {
+            "action": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "calculated",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "show_in_email": "1",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "show_in_email_label": "label",
+        "show_in_email_label_custom": "",
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "blank",
+        "show_in_live_summary": "1",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "verify_value": "1",
+        "custom_regex": "",
+        "custom_error_message": "",
+        "custom_regex_check_first": "0",
+        "custom_filter": "",
+        "GET": "",
+        "keep_value_after_reset": "0"
+      }
+    },
+    "dropdown": {
+      "e_id": 4,
+      "data": {
+        "name": "",
+        "label": "",
+        "required": "0",
+        "is_currency": "1",
+        "is_number": "1",
+        "options": [],
+        "preselect": "-1",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "hidden": "0",
+        "columns": "6",
+        "group_id": "0",
+        "calculate_enabled": "1",
+        "add_to_price": "1",
+        "calculate": [
+          {
+            "prio": "0",
+            "operator": "0",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "0",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "overwrite_price": "0",
+        "calculate_when_hidden": "0",
+        "precision": "2",
+        "calculate_before": "0",
+        "conditional": [
+          {
+            "action": "0",
+            "target": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "raw",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "show_in_email": "1",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "show_in_email_label": "label",
+        "show_in_email_label_custom": "",
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "blank",
+        "show_in_live_summary": "1",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "verify_value": "1",
+        "options_source": {
+          "source": "options",
+          "value": ""
+        },
+        "custom_regex": "",
+        "custom_error_message": "",
+        "custom_regex_check_first": "0",
+        "custom_filter": "",
+        "GET": "",
+        "GET_check_option_value": "index",
+        "keep_value_after_reset": "0"
+      }
+    },
+    "radio": {
+      "e_id": 5,
+      "data": {
+        "name": "",
+        "label": "",
+        "required": "0",
+        "verify_value": "1",
+        "calculate_enabled": "1",
+        "add_to_price": "0",
+        "is_currency": "1",
+        "is_number": "1",
+        "options": [],
+        "options_columns": "-1",
+        "options_source": {
+          "source": "options",
+          "value": ""
+        },
+        "options_text_only": "0",
+        "option_add_text_icon": "0",
+        "calculate": [
+          {
+            "prio": "0",
+            "operator": "0",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "0",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "overwrite_price": "0",
+        "calculate_when_hidden": "0",
+        "precision": "2",
+        "calculate_before": "0",
+        "conditional": [
+          {
+            "action": "0",
+            "target": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "raw",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "custom_regex": "",
+        "custom_error_message": "",
+        "custom_regex_check_first": "0",
+        "custom_filter": "",
+        "show_in_email": "1",
+        "show_in_email_label": "label",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "1",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "max_width": "",
+        "max_height": "",
+        "image_auto_width": "0",
+        "inline": "1",
+        "flexbox": "0",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "GET": "",
+        "GET_check_option_value": "value",
+        "hidden": "0",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "preselect": "0",
+        "__options_columns_custom": "",
+        "show_in_email_label_custom": ""
+      }
+    },
+    "checkbox": {
+      "e_id": 6,
+      "data": {
+        "name": "",
+        "label": "",
+        "required": "0",
+        "is_currency": "0",
+        "is_number": "1",
+        "min_selectable": "0",
+        "max_selectable": "0",
+        "options": [],
+        "preselect": "",
+        "options_columns": "0",
+        "__options_columns_custom": "",
+        "options_text_only": "0",
+        "option_add_text_icon": "0",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "hidden": "0",
+        "columns": "6",
+        "group_id": "0",
+        "calculate_enabled": "1",
+        "add_to_price": "1",
+        "calculate": [
+          {
+            "prio": "0",
+            "operator": "0",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "0",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "overwrite_price": "0",
+        "calculate_when_hidden": "0",
+        "precision": "2",
+        "calculate_before": "0",
+        "conditional": [
+          {
+            "action": "0",
+            "target": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "raw",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "show_in_email": "1",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "show_in_email_label": "label",
+        "show_in_email_label_custom": "",
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "blank",
+        "show_in_live_summary": "1",
+        "max_width": "",
+        "max_height": "",
+        "image_auto_width": "0",
+        "inline": "0",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "verify_value": "1",
+        "options_source": {
+          "source": "options",
+          "value": ""
+        },
+        "custom_regex": "",
+        "custom_error_message": "",
+        "custom_regex_check_first": "0",
+        "custom_filter": "",
+        "flexbox": "0",
+        "GET": "",
+        "GET_check_option_value": "index",
+        "keep_value_after_reset": "0"
+      }
+    },
+    "hidden": {
+      "e_id": 15,
+      "data": {
+        "name": "",
+        "label": "",
+        "calculate_enabled": "1",
+        "add_to_price": "0",
+        "is_currency": "1",
+        "is_number": "1",
+        "min": "",
+        "max": "",
+        "overwrite_price": "0",
+        "calculate_before": "0",
+        "calculate_when_hidden": "1",
+        "price_format": "",
+        "precision": "2",
+        "text_only": "1",
+        "text_before": "",
+        "text_after": "",
+        "read_only": "0",
+        "inline_calculation": "",
+        "calculate_when_zero": "1",
+        "calculate": [
+          {
+            "prio": "0",
+            "operator": "0",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "0",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "conditional": [
+          {
+            "action": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "calculated",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "show_in_email": "0",
+        "show_in_email_label": "name",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "blank",
+        "show_in_live_summary": "0",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "hidden": "1",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "show_in_email_label_custom": ""
+      }
+    },
+    "set": {
+      "e_id": 22,
+      "data": {
+        "name": "",
+        "label": "",
+        "is_currency": "0",
+        "is_number": "1",
+        "price_format": "",
+        "text_only": "0",
+        "text_before": "",
+        "text_after": "",
+        "set_operator": "max",
+        "set_use_factor": "0",
+        "set_allow_zero": "0",
+        "set_dom_selector": "",
+        "set": [],
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "hidden": "1",
+        "columns": "6",
+        "group_id": "0",
+        "calculate_enabled": "1",
+        "add_to_price": "0",
+        "overwrite_price": "0",
+        "calculate_when_hidden": "1",
+        "precision": "2",
+        "calculate": [
+          {
+            "prio": "",
+            "operator": "0",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "conditional": [
+          {
+            "action": "0",
+            "target": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "raw",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "show_in_email": "0",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "show_in_email_label": "name",
+        "show_in_email_label_custom": "",
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "0",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "keep_value_after_reset": "0"
+      }
+    },
+    "group": {
+      "e_id": 25,
+      "data": {
+        "name": "",
+        "collapsible": "0",
+        "expanded": "1",
+        "title": "",
+        "group_center": "0",
+        "group_flexbox": "0",
+        "group_flexbox_align_items": "center",
+        "group_flexbox_columns": "",
+        "wrapper_class": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "hidden": "0",
+        "columns": "6",
+        "group_id": "0"
+      }
+    },
+    "html": {
+      "e_id": 12,
+      "data": {
+        "name": "",
+        "label": "",
+        "do_shortcode": "0",
+        "html": "",
+        "add_linebreaks": "0",
+        "show_in_email": "0",
+        "show_in_email_label": "name",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "1",
+        "replace_placeholders": "1",
+        "replace_placeholders_show_zero": "1",
+        "wrapper_class": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "hidden": "0",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "show_in_email_label_custom": ""
+      }
+    },
+    "heading": {
+      "e_id": 31,
+      "data": {
+        "name": "",
+        "title": "",
+        "tag": "h3",
+        "show_in_email": "0",
+        "show_in_email_label": "name",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "0",
+        "alignment": "default",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "hidden": "0",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "show_in_email_label_custom": ""
+      }
+    },
+    "fileupload": {
+      "e_id": 14,
+      "data": {
+        "name": "fluAtrwork",
+        "label": "Файлы для печати",
+        "required": "0",
+        "verify_value": "1",
+        "multiple": "1",
+        "file_upload_auto": "1",
+        "placeholder": "",
+        "class": "",
+        "wrapper_class": "",
+        "hidden": "0",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0"
+      }
+    },
+    "subtotal": {
+      "e_id": 15,
+      "data": {
+        "name": "",
+        "label": "",
+        "calculate_enabled": "1",
+        "add_to_price": "0",
+        "is_currency": "1",
+        "is_number": "1",
+        "min": "",
+        "max": "",
+        "overwrite_price": "0",
+        "calculate_before": "0",
+        "calculate_when_hidden": "0",
+        "price_format": "",
+        "precision": "2",
+        "text_only": "1",
+        "text_before": "",
+        "text_after": "",
+        "read_only": "0",
+        "inline_calculation": "",
+        "calculate_when_zero": "1",
+        "calculate": [
+          {
+            "prio": "0",
+            "operator": "0",
+            "target": "0",
+            "use_calculated_target_value": "0",
+            "value": "",
+            "data": ""
+          }
+        ],
+        "calculate_routine": [
+          {
+            "index": "0",
+            "name": "",
+            "calculation_rows": [
+              {
+                "prio": "0",
+                "operator": "0",
+                "target": "0",
+                "use_calculated_target_value": "0",
+                "value": ""
+              }
+            ]
+          }
+        ],
+        "conditional": [
+          {
+            "action": "0",
+            "compare_value_first": "0",
+            "operator": "0",
+            "value": "",
+            "target_value": "",
+            "redirect": "",
+            "option_index_value": ""
+          }
+        ],
+        "discount_value_type": "calculated",
+        "discount_value_apply": "calculated",
+        "discount": [
+          {
+            "range_min": "",
+            "range_max": "",
+            "operator": "0",
+            "discount_value": ""
+          }
+        ],
+        "discount_show_table": "0",
+        "discount_show_table_indicator": "1",
+        "show_in_email": "1",
+        "show_in_email_label": "label",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "blank",
+        "show_in_live_summary": "1",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "",
+        "element_style": "default",
+        "hidden": "0",
+        "keep_value_after_reset": "0",
+        "columns": "6",
+        "group_id": "0",
+        "show_in_email_label_custom": ""
+      }
+    },
+    "custom_calculation": {
+      "e_id": 24,
+      "data": {
+        "name": "cjsCalc",
+        "label": "Расчет",
+        "is_currency": "1",
+        "is_number": "1",
+        "text_only": "0",
+        "text_before": "",
+        "text_after": "",
+        "custom_calculation": "",
+        "custom_calculation_function_name": "",
+        "custom_calculation_function_safe": "1",
+        "custom_calculation_function_external": "",
+        "custom_calculation_init_add": "1",
+        "custom_calculation_init_js": "",
+        "custom_calculation_function_read_file": "1",
+        "custom_calculation_function_filename": "{{abspath}}wp-content/plugins/insain-calc-bridge/forms/{slug}.js",
+        "description": "",
+        "description_below_label": "",
+        "description_below_input": "",
+        "columns": "6",
+        "group_id": "0",
+        "calculate_enabled": "1",
+        "add_to_price": "0",
+        "calculate_when_hidden": "1",
+        "overwrite_price": "1",
+        "precision": "2",
+        "show_in_email": "0",
+        "show_in_email_cond": [
+          "0"
+        ],
+        "show_in_email_operator": [
+          "0"
+        ],
+        "show_in_email_value": [
+          ""
+        ],
+        "show_in_email_label": "name",
+        "show_in_email_label_custom": "",
+        "email_text_column_1": "submission_value",
+        "email_text_column_2": "calculated_value",
+        "show_in_live_summary": "0",
+        "class": "",
+        "wrapper_class": "",
+        "style": "",
+        "wrapper_style": "",
+        "element_style": "default"
+      }
+    }
+  }
+}
