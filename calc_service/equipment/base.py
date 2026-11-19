@@ -139,14 +139,13 @@ class EquipmentSpec(BaseModel):
         """
         Вернуть базовый срок изготовления в рабочих часах для режима.
 
-        mode: 1 — экономичный, 2 — стандартный, 3 — экспресс (индекс в baseTimeReady).
-        При 0 трактуется как 1. Индекс зажимается в пределах массива.
+        mode: 0 — экономичный, 1 — стандартный, 2 — экспресс (0-based индекс в baseTimeReady).
+        Индекс зажимается в пределах массива.
         """
         times = self.base_time_ready or BASE_TIME_READY
         if not times:
             return 0.0
-        m = max(1, int(mode))
-        idx = max(0, min(len(times) - 1, m - 1))
+        idx = max(0, min(len(times) - 1, int(mode)))
         return float(times[idx])
 
     def get_process_speed(self, thickness_um: float) -> float:

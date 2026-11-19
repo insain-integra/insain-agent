@@ -399,16 +399,36 @@ def test_expected_values_print_wide_orajet(ref_result_3):
 
 
 def test_modes_cost_and_time(calc):
-    """Экспресс дороже стандарта; эконом дешевле/равен стандарту; time_ready убывает."""
+    """Эконом дешевле стандарта, экспресс дороже стандарта; time_ready убывает."""
     params = dict(REF_PARAMS)
     re = calc.execute({**params, "mode": 0})
     rs = calc.execute({**params, "mode": 1})
     rx = calc.execute({**params, "mode": 2})
 
-    assert re["time_ready"] >= rs["time_ready"], "эконом time_ready >= стандарт"
-    assert rs["time_ready"] >= rx["time_ready"], "стандарт time_ready >= экспресс"
-    assert rx["price"] >= rs["price"], "экспресс price >= стандарт"
-    assert rs["cost"] <= rx["cost"], "стандарт cost <= экспресс"
+    assert re["time_ready"] > rs["time_ready"] > rx["time_ready"]
+    assert re["time_hours"] < rs["time_hours"] < rx["time_hours"]
+    assert re["price"] < rs["price"] < rx["price"]
+    assert re["cost"] < rs["cost"] < rx["cost"]
+
+
+# JS, 20.11.2026 — сверка mode=0 и mode=2 с run_js_calc.mjs calcPrintWide --data current:
+# node scripts/run_js_calc.mjs calcPrintWide --data current --args '[1,[1000,1000],"BannerFronlitCoat400","Technojet160ECO",{},0]'
+# node scripts/run_js_calc.mjs calcPrintWide --data current --args '[1,[1000,1000],"BannerFronlitCoat400","Technojet160ECO",{},2]'
+@pytest.mark.parametrize(
+    "mode,exp_cost,exp_price,exp_time,exp_ready",
+    [
+        (0, 432.0, 692.0, 0.12, 24.12),
+        (1, 682.0, 1092.0, 0.26, 16.26),
+        (2, 972.0, 1556.0, 0.42, 8.42),
+    ],
+)
+def test_print_wide_modes_match_js(calc, mode, exp_cost, exp_price, exp_time, exp_ready):
+    """JS, 20.11.2026: mode=0, 1, 2 совпадают с calcPrintWide (rel <= 0.001)."""
+    r = calc.execute({**REF_PARAMS, "mode": mode})
+    assert r["cost"] == pytest.approx(exp_cost, rel=0.001)
+    assert r["price"] == pytest.approx(exp_price, rel=0.001)
+    assert r["time_hours"] == pytest.approx(exp_time, rel=0.001)
+    assert r["time_ready"] == pytest.approx(exp_ready, rel=0.001)
 
 
 def test_empty_result_on_invalid_material(calc):

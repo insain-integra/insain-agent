@@ -12,7 +12,13 @@ import math
 from pathlib import Path
 from typing import Any, Dict, List, Mapping
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import (
+    BaseCalculator,
+    ProductionMode,
+    calc_time_prepare,
+    parse_mode,
+    pick_time_ready,
+)
 from common.markups import (
     BASE_TIME_READY,
     COST_OPERATOR,
@@ -56,7 +62,7 @@ def _calc_cliche(size: List[float], mode: int) -> Dict[str, Any]:
 
     cost_per_cm2 = float(tool.get("cost", 50))
     min_cost = float(tool.get("minCostCliche", 1100))
-    time_prepare = float(tool.get("timePrepare", 0.25)) * mode
+    time_prepare = calc_time_prepare(float(tool.get("timePrepare", 0.25)), mode)
     weight_per_cm2 = float(tool.get("weight", 1.0))  # гр/см2
 
     area_cm2 = size[0] * size[1] / 100.0
@@ -74,9 +80,7 @@ def _calc_cliche(size: List[float], mode: int) -> Dict[str, Any]:
         + cost_operator * (1 + MARGIN_OPERATION)
     )
 
-    base_time_ready = tool.get("baseTimeReady") or BASE_TIME_READY
-    idx = max(0, min(len(base_time_ready) - 1, math.ceil(mode)))
-    time_ready = time_prepare + float(base_time_ready[idx])
+    time_ready = time_prepare + pick_time_ready(tool.get("baseTimeReady"), mode, BASE_TIME_READY)
 
     materials = [
         {
@@ -250,7 +254,7 @@ class EmbossingCalculator(BaseCalculator):
         embossing_type = str(params.get("embossing_type", "foil") or "foil").strip().lower()
         item_type = str(params.get("item_type", "other") or "other").strip().lower()
         is_cliche = bool(params.get("is_cliche", True))
-        mode = ProductionMode(int(params.get("mode", 1)))
+        mode = parse_mode(params.get("mode"))
 
         if cliche_w <= 0 or cliche_h <= 0:
             raise ValueError("Ширина и высота клише должны быть положительными")
@@ -263,7 +267,7 @@ class EmbossingCalculator(BaseCalculator):
 
         cost_cliche = {"cost": 0.0, "price": 0.0, "time": 0.0, "time_ready": 0.0, "weight": 0.0, "materials": []}
         if is_cliche:
-            cost_cliche = _calc_cliche(size_cliche, max(1, mode.value))
+            cost_cliche = _calc_cliche(size_cliche, mode.value)
 
         emb_cost_data = tool_emb.get("cost", {}).get(embossing_type)
         if not emb_cost_data:
@@ -271,7 +275,7 @@ class EmbossingCalculator(BaseCalculator):
         cost_table = emb_cost_data.get("cost", [[2000, 11.0]])
         min_cost = float(emb_cost_data.get("minCost", 2000))
 
-        time_prepare = float(tool_emb.get("timePrepare", 0)) * max(1, mode.value)
+        time_prepare = calc_time_prepare(float(tool_emb.get("timePrepare", 0)), mode)
         cost_operator = time_prepare * COST_OPERATOR
 
         cost_per_unit = _find_cost_for_quantity(cost_table, quantity)
@@ -291,9 +295,8 @@ class EmbossingCalculator(BaseCalculator):
         price_total = (cost_cliche["price"] + price_embossing + cost_ship.price) * (1 + margin_emb)
 
         time_total = cost_cliche["time"] + time_prepare + cost_ship.time_hours
-        base_time_ready = tool_emb.get("baseTimeReady") or BASE_TIME_READY
-        idx = max(0, min(len(base_time_ready) - 1, math.ceil(mode.value)))
-        time_ready = time_total + max(cost_cliche["time_ready"], float(base_time_ready[idx]))
+        base_ready = pick_time_ready(tool_emb.get("baseTimeReady"), mode, BASE_TIME_READY)
+        time_ready = time_total + max(cost_cliche["time_ready"], base_ready)
         weight_kg = cost_cliche["weight"]
 
         materials: List[Dict[str, Any]] = list(cost_cliche.get("materials", []))

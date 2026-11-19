@@ -151,3 +151,24 @@ def test_expected_values_pad_print(ref_result):
     assert ok_time, f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
     assert ok_ready, f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
     assert ok_weight, f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
+
+
+def test_pad_print_modes(calc):
+    """Режимы 0, 1, 2: в mode=0 time_prepare=0 (цена и время ниже стандарта), в mode=2 — выше."""
+    r0 = calc.execute({**REF_PARAMS, "mode": 0})
+    r1 = calc.execute({**REF_PARAMS, "mode": 1})
+    r2 = calc.execute({**REF_PARAMS, "mode": 2})
+
+    assert r0["cost"] == pytest.approx(3775.0, rel=0.001)
+    assert r0["price"] == pytest.approx(6964.0, rel=0.001)
+    assert r0["time_hours"] == pytest.approx(2.44, rel=0.001)
+    assert r0["time_ready"] == pytest.approx(26.44, rel=0.001)
+
+    assert r2["cost"] == pytest.approx(4325.0, rel=0.001)
+    assert r2["price"] == pytest.approx(7904.0, rel=0.001)
+    assert r2["time_hours"] == pytest.approx(2.74, rel=0.001)
+    assert r2["time_ready"] == pytest.approx(3.74, rel=0.001)
+
+    assert r0["price"] < r1["price"] < r2["price"]
+    assert r0["time_hours"] < r1["time_hours"] < r2["time_hours"]
+    assert r2["time_ready"] < r1["time_ready"] < r0["time_ready"]

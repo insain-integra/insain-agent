@@ -90,11 +90,28 @@ def test_laser_depreciation():
 
 def test_get_time_ready_default():
     # У большинства инструментов baseTimeReady не задан,
-    # например Warrior в tools.json.
+    # например Warrior в tools.json; индекс 0-based: 0 — эконом, 1 — стандарт, 2 — экспресс.
     catalog = load_generic_catalog("tools.json")
     spec = catalog.get("Warrior")
     assert spec.base_time_ready is None
-    assert spec.get_time_ready(2) == BASE_TIME_READY[1]
+    assert spec.get_time_ready(0) == BASE_TIME_READY[0]
+    assert spec.get_time_ready(1) == BASE_TIME_READY[1]
+    assert spec.get_time_ready(2) == BASE_TIME_READY[2]
+    # Зажим за границами массива
+    assert spec.get_time_ready(-1) == BASE_TIME_READY[0]
+    assert spec.get_time_ready(99) == BASE_TIME_READY[-1]
+
+
+def test_get_time_ready_custom():
+    # У лазера задан собственный baseTimeReady [40, 16, 8]
+    from equipment import laser
+
+    spec = laser.get("Qualitech11G1290")
+    assert spec.base_time_ready is not None
+    assert spec.get_time_ready(0) == spec.base_time_ready[0]
+    assert spec.get_time_ready(1) == spec.base_time_ready[1]
+    assert spec.get_time_ready(2) == spec.base_time_ready[2]
+    assert spec.get_time_ready(2) < spec.get_time_ready(1) < spec.get_time_ready(0)
 
 
 def test_uv_printer_speed_and_cost_by_layer():

@@ -53,6 +53,10 @@ description: Заведение нового калькулятора в calc_se
 
 5. Заполнить по эталону `calc_service/calculators/laser.py`: `slug`, `name`, класс `<Name>Calculator`, `get_options`, `get_tool_schema` (и `get_param_schema`, если её переопределяет эталон), `calculate`. Наценка — `get_margin("margin…")` поверх `MARGIN_OPERATION`, не ниже `MARGIN_MIN`. Комментарии и тексты ошибок — по-русски.
 
+   Логика режимов `mode` (0 — эконом, 1 — стандарт, 2 — экспресс) — строго через хелперы `calculators/base.py` (`parse_mode`, `calc_time_prepare`, `apply_mode_defects`, `pick_time_ready`) и `equipment.get_time_ready(mode)` (0-based):
+   - не писать `params.get("mode") or 1` (съедает `mode=0`) и не писать `max(1, mode.value)` на `time_prepare` (в режиме `0` подготовка равна `0`, как в `js_legacy`);
+   - если калькулятор относится к исключениям (подрядчик с фиксированной ценой, логистика, составные слои — см. `docs/migration-guide.md`), явно задокументировать это в коде и в `calc_service/tests/test_mode_contract.py`.
+
    Ответ `calculate` содержит `cost`, `price`, `unit_price`, `time_hours`, `time_ready`, `weight_kg`, `materials`. Каждый элемент `materials` — с `code`, `name`, `title`. `share_url` не добавлять: его дописывает `BaseCalculator.execute()`.
 
 6. Чисел цен в коде нет:
@@ -77,7 +81,8 @@ description: Заведение нового калькулятора в calc_se
 
    - эталон на тираже ≥ 2 со сверкой чисел `cost`, `price`, `unit_price` (не только наличие полей);
    - тест падает, если из ответа пропало обязательное поле или у элемента `materials` нет `code`, `name` или `title`;
-   - `time_ready > time_hours > 0`, режимы производства, больший тираж — больше `time_hours`;
+   - `time_ready > time_hours > 0`, обязательная проверка всех трёх режимов `mode=0, 1, 2` против JS/ТЗ (`time_ready(2) <= time_ready(1) <= time_ready(0)`, `time_hours(0) <= time_hours(1) <= time_hours(2)`, для собственного производства строго `price(0) < price(1) < price(2)`), больший тираж — больше `time_hours`;
+   - добавить кейс калькулятора в `MODE_CONTRACT_CASES` в `calc_service/tests/test_mode_contract.py` (и в список исключений, только если это подрядчик/фиксированный режим);
    - невалидный вход — ошибка с русским текстом.
 
    Если калькулятор переносится из `js_legacy` и подключён в `scripts/run_js_calc.mjs`, эталоны берутся оттуда, с комментарием-датой, как в `test_plaque.py`. В Windows PowerShell 5.1 кавычки внутри JSON экранируются `\"`, иначе скрипт ответит `params не JSON`:

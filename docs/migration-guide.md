@@ -88,16 +88,52 @@ from ..common.markups import get_time_ready
 time_ready = time_hours + get_time_ready("baseTimeReadyPrintSheet")[mode.value]
 ```
 
-#### Влияние режима производства
+#### Влияние режима производства (`ProductionMode`)
+
+Режим производства во всём ядре и API — **0-based** (`ProductionMode`):
+- `0` (`ECONOMY`) — экономичный: `time_prepare = base_prepare * 0` (`0`), брак базовый (`defect_rate`), самый длинный срок `baseTimeReady[0]`;
+- `1` (`STANDARD`) — стандартный (по умолчанию): `time_prepare = base_prepare * 1`, брак базовый, `baseTimeReady[1]`;
+- `2` (`EXPRESS`) — экспресс: `time_prepare = base_prepare * 2`, брак удваивается (`defect_rate += defect_rate * (mode - 1)`), самый короткий срок `baseTimeReady[2]`.
+
+Использовать единые хелперы из `calculators/base.py` и `EquipmentSpec.get_time_ready(mode)` (0-based, без `mode + 1`):
 
 ```Python
-# Подготовка зависит от режима (в некоторых калькуляторах)
-time_prepare = equipment.time_prepare * mode.value
+from calculators.base import (
+    ProductionMode,
+    apply_mode_defects,
+    calc_time_prepare,
+    parse_mode,
+    pick_time_ready,
+)
 
-# Брак увеличивается в экспрессе
-if mode.value > 1:
-    defect_rate += defect_rate * (mode.value - 1)
+# Чтение режима: НЕ писать `params.get("mode") or 1` (съедает mode=0!)
+mode = parse_mode(params.get("mode"))
+
+# Подготовка: НЕ писать `max(1, mode.value)` — в экономе подготовка = 0 (как в js_legacy)
+time_prepare = calc_time_prepare(equipment.time_prepare, mode)
+
+# Брак: в экспрессе (mode > 1) растёт на defect_rate * (mode - 1)
+defect_rate = apply_mode_defects(equipment.get_defect_rate(quantity), mode)
+
+# Базовый срок готовности (0-based индекс, зажим в границах массива)
+time_ready = time_hours + equipment.get_time_ready(mode)
+# Или для произвольного массива сроков:
+time_ready = time_hours + pick_time_ready(custom_times, mode, BASE_TIME_READY)
 ```
+
+Контракт (автоматически проверяется в `calc_service/tests/test_mode_contract.py`):
+- для всех калькуляторов: `time_hours(0) <= time_hours(1) <= time_hours(2)`, `price(0) <= price(1) <= price(2)`, `time_ready(2) <= time_ready(1) <= time_ready(0)`;
+- для собственного производства: строго `price(0) < price(1) < price(2)`;
+- запрещены `max(1, mode...)` в расчёте `time_prepare` и `mode or 1` при чтении режима.
+
+#### Реестр исключений `mode`
+
+| Категория | Калькуляторы / ветки | Особенность `mode` |
+| --- | --- | --- |
+| **Подрядчики** | `cards`, `print_offset` (сборники `offset_promo`), `button_pins` при `n > 2000` (Амалит), `metal_pins` | Цена либо фиксирована (`cards`, `offset_promo`, Амалит; у `cards` и `offset_promo` `mode` меняет только `time_ready`, у Амалита срок тоже фиксирован), либо зависит от тарифа логистики (`metal_pins`: Китай→РФ по индексу `mode` и `timePrepare * mode`). |
+| **Логистика** | `metal_pins`, `milling` | `metal_pins`: ступенчатый тариф доставки Китай→РФ `[5.2, 10, 17]` по `mode`. `milling`: коэффициент доставки `0.5` при `mode=0` и `max(1, mode.value)` при `mode >= 1` (`time_prepare` при этом считается честно через `mode.value`). |
+| **Составные слои / подрасчёты** | `acrylic_prizes`, `print_sheet`, `tablets`, `plaque` | `acrylic_prizes`: как в JS, `timeReady` операции берётся один раз на первом слое при `mode > 0`, поэтому при `mode=0` `time_ready == time_hours`. `print_sheet`: mode-надбавку к браку применяет только печать, а не расход бумаги. `tablets`: режим пробрасывается в подрасчёты (`laser`, `uv_print`, ручные операции). `plaque`: как в JS (`calcPlaque`, стр. 640), пластина всегда считается в `mode=1`, цена и срок фиксированы. |
+| **Нулевая подготовка в JSON** | `print_offset` (`OffsetPrint`), `cut_guillotine`, `cut_roller`, `lamination_wide` | В JSON `timePrepare = 0`: цена плоская (у `lamination_wide` `price(0) == price(1) < price(2)` за счёт брака в экспрессе), `mode` меняет `time_ready`. |
 
 ### 5. Перенести остальную логику
 
@@ -148,7 +184,7 @@ CALCULATORS = { ..., "новый": НовыйCalculator() }
 
 - Базовый расчёт: price > 0
 - Время: time_hours > 0, time_ready > time_hours
-- Режимы: EXPRESS < STANDARD < ECONOMY
+- Режимы `mode ∈ {0, 1, 2}`: `time_ready(2) <= time_ready(1) <= time_ready(0)`, `time_hours(0) <= time_hours(1) <= time_hours(2)`, `price(0) < price(1) < price(2)` (для собственного производства) и сверка `mode=0, 1, 2` с JS/ТЗ; добавление кейса в `calc_service/tests/test_mode_contract.py`
 - Тираж: больше → больше time_hours
 - Все материалы группы
 - Граничные случаи

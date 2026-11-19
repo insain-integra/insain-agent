@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Mapping
 
 import json5
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import BaseCalculator, ProductionMode, parse_mode, pick_time_ready
 from common.markups import MARGIN_MATERIAL, get_margin, get_time_ready
 
 CARDS_JSON = Path(__file__).parent.parent / "data" / "equipment" / "cards.json"
@@ -235,7 +235,7 @@ class CardsCalculator(BaseCalculator):
 
         quantity = int(params.get("quantity", 1))
         material_id = str(params.get("material_id", "") or "White")
-        mode = int(params.get("mode", ProductionMode.STANDARD))
+        mode = parse_mode(params.get("mode"))
 
         if material_id not in cost_plastic:
             raise ValueError(f"Неизвестный тип карты: {material_id!r}")
@@ -278,13 +278,13 @@ class CardsCalculator(BaseCalculator):
         margin_cards = get_margin("marginCards")
         price = cost * (1 + MARGIN_MATERIAL + margin_cards)
 
+        # Подрядчик (calcCards.js): время подготовки и цена фиксированы, mode меняет только time_ready.
         time_prepare = float(tool.get("timePrepare", 0.5))
-        base_time_ready = tool.get("baseTimeReady")
-        if base_time_ready:
-            idx = min(max(0, math.ceil(mode)), len(base_time_ready) - 1)
-            time_ready = float(base_time_ready[idx])
-        else:
-            time_ready = get_time_ready("baseTimeReady")[min(mode, 2)]
+        time_ready = pick_time_ready(
+            tool.get("baseTimeReady"),
+            mode,
+            get_time_ready("baseTimeReady"),
+        )
 
         card_name = card.get("name", material_id)
         card_size = card.get("size", default_card.get("size", [86, 54]))

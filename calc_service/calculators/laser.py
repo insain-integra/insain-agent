@@ -3,7 +3,13 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import (
+    BaseCalculator,
+    ProductionMode,
+    apply_mode_defects,
+    calc_time_prepare,
+    parse_mode,
+)
 from common.helpers import calc_weight
 from common.layout import layout_on_roll, layout_on_sheet
 from common.markups import (
@@ -307,7 +313,7 @@ class LaserCalculator(BaseCalculator):
         size = [width, height]
 
         material_id = str(params.get("material_id", "") or "")
-        mode = ProductionMode(params.get("mode", ProductionMode.STANDARD))
+        mode = parse_mode(params.get("mode"))
 
         # Оборудование и материал (явно Qualitech11G1290)
         laser = laser_catalog.get(LASER_CODE)
@@ -319,9 +325,7 @@ class LaserCalculator(BaseCalculator):
             material = hardsheet.get(material_id)
 
         # Брак
-        defect_rate = laser.get_defect_rate(quantity)
-        if mode.value > 1:
-            defect_rate += defect_rate * (mode.value - 1)
+        defect_rate = apply_mode_defects(laser.get_defect_rate(quantity), mode)
         # Округление как в JS: Math.round(x) — «половина вверх»; в Python round(52.5)==52 (banker's)
         num_with_defects = int(quantity * (1 + defect_rate) + 0.5)
 
@@ -601,7 +605,7 @@ class LaserCalculator(BaseCalculator):
             )
 
         # Время
-        time_prepare = laser.time_prepare * mode.value
+        time_prepare = calc_time_prepare(laser.time_prepare, mode)
         time_operator = 0.75 * time_cut + 0.5 * time_grave + time_prepare
 
         # Стоимость
@@ -628,7 +632,7 @@ class LaserCalculator(BaseCalculator):
         time_hours = math.ceil(
             (time_cut + time_grave + time_prepare + cost_adhesive_time) * 100.0
         ) / 100.0
-        time_ready = time_hours + laser.get_time_ready(mode.value + 1)
+        time_ready = time_hours + laser.get_time_ready(mode)
 
         weight_kg = 0.0
         if material is not None:

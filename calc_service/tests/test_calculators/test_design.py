@@ -134,3 +134,24 @@ def test_expected_values_design(ref_result):
     assert ok_ready, f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
     assert ok_weight, f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
     assert materials == [], f"materials должен быть пустым, got {len(materials)} шт"
+
+
+def test_design_modes(calc):
+    """Режимы 0, 1, 2: в mode=0 подготовка 0 (price=2400, time=1.0), в mode=2 — удвоена."""
+    r0 = calc.execute({**REF_PARAMS, "mode": 0})
+    r1 = calc.execute({**REF_PARAMS, "mode": 1})
+    r2 = calc.execute({**REF_PARAMS, "mode": 2})
+
+    assert r0["cost"] == pytest.approx(1500.0, rel=0.001)
+    assert r0["price"] == pytest.approx(2400.0, rel=0.001)
+    assert r0["time_hours"] == pytest.approx(1.0, rel=0.001)
+    assert r0["time_ready"] == pytest.approx(25.0, rel=0.001)
+
+    assert r2["cost"] == pytest.approx(1651.0, rel=0.001)
+    assert r2["price"] == pytest.approx(2641.0, rel=0.001)
+    assert r2["time_hours"] == pytest.approx(1.11, rel=0.001)
+    assert r2["time_ready"] == pytest.approx(2.11, rel=0.001)
+
+    assert r0["price"] < r1["price"] < r2["price"]
+    assert r0["time_hours"] < r1["time_hours"] < r2["time_hours"]
+    assert r2["time_ready"] < r1["time_ready"] < r0["time_ready"]

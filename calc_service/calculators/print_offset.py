@@ -10,7 +10,13 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List, Mapping
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import (
+    BaseCalculator,
+    ProductionMode,
+    calc_time_prepare,
+    parse_mode,
+    pick_time_ready,
+)
 from common.helpers import calc_weight
 from common.layout import layout_on_sheet
 from common.markups import (
@@ -92,7 +98,7 @@ class PrintOffsetCalculator(BaseCalculator):
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
         num_sheet = int(params.get("num_sheet", 1))
         material_id = str(params.get("material_id", "")).strip()
-        mode = ProductionMode(int(params.get("mode", 1)))
+        mode = parse_mode(params.get("mode"))
         try:
             promo = offset_promo_catalog.get(material_id)
         except KeyError:
@@ -115,9 +121,7 @@ class PrintOffsetCalculator(BaseCalculator):
         except KeyError:
             return self._empty(mode)
 
-        base_time_ready = printer.base_time_ready or BASE_TIME_READY
-        idx = max(0, min(len(base_time_ready) - 1, mode.value))
-        base_ready = float(base_time_ready[idx])
+        base_ready = printer.get_time_ready(mode)
 
         max_size = printer.max_size or [640, 450]
 
@@ -154,7 +158,7 @@ class PrintOffsetCalculator(BaseCalculator):
         cost_cut = printer.cost_prepare_cut + math.ceil(num_sheet_sra2 / 900) * printer.cost_cut_offset
 
         # Время и оператор
-        time_prepare = (printer.time_prepare or 0) * max(1, mode.value)
+        time_prepare = calc_time_prepare(printer.time_prepare or 0, mode)
         time_operator = time_prepare
         cost_operator = time_operator * printer.operator_cost_per_hour
 
@@ -226,9 +230,8 @@ class PrintOffsetCalculator(BaseCalculator):
         )
 
         base_time_ready = get_time_ready("baseTimeReadyPrintOffsetPromo")
-        idx = max(0, min(len(base_time_ready) - 1, mode.value))
         time_hours = 0.0
-        time_ready = time_hours + float(base_time_ready[idx])
+        time_ready = time_hours + pick_time_ready(base_time_ready, mode, BASE_TIME_READY)
 
         return {
             "cost": float(cost),
@@ -260,10 +263,8 @@ class PrintOffsetCalculator(BaseCalculator):
         return last[2], last[0]
 
     def _empty(self, mode: ProductionMode) -> Dict[str, Any]:
-        btr = BASE_TIME_READY
-        idx = max(0, min(len(btr) - 1, mode.value))
         return {
             "cost": 0.0, "price": 0.0, "unit_price": 0.0,
-            "time_hours": 0.0, "time_ready": float(btr[idx]),
+            "time_hours": 0.0, "time_ready": pick_time_ready(BASE_TIME_READY, mode),
             "weight_kg": 0.0, "materials": [],
         }

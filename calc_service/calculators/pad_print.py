@@ -12,7 +12,14 @@ import math
 from pathlib import Path
 from typing import Any, Dict, List, Mapping
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import (
+    BaseCalculator,
+    ProductionMode,
+    apply_mode_defects,
+    calc_time_prepare,
+    parse_mode,
+    pick_time_ready,
+)
 from common.currencies import parse_currency, usd_to_rub
 from common.markups import COST_OPERATOR, MARGIN_MATERIAL, MARGIN_OPERATION, get_margin
 
@@ -205,7 +212,7 @@ class PadPrintCalculator(BaseCalculator):
         is_pantone = bool(params.get("is_pantone", False))
         is_packing = bool(params.get("is_packing", False))
         material_mode = str(params.get("material_mode", "isMaterial") or "isMaterial").strip()
-        mode = ProductionMode(int(params.get("mode", 1)))
+        mode = parse_mode(params.get("mode"))
 
         raw = _load_tools_raw()
         tool = raw.get("TIC177")
@@ -213,9 +220,7 @@ class PadPrintCalculator(BaseCalculator):
         if not tool or not camera:
             raise ValueError("Не обнаружены данные для оборудования тампопечати в tools.json")
 
-        base_time_ready = tool.get("baseTimeReady") or [24, 8, 1]
-        idx = max(0, min(len(base_time_ready) - 1, math.ceil(mode.value)))
-        base_ready = float(base_time_ready[idx])
+        base_ready = pick_time_ready(tool.get("baseTimeReady"), mode, [24, 8, 1])
 
         diff_print = 0
         if width > 0 and height > 0 and depth > 0:
@@ -232,9 +237,7 @@ class PadPrintCalculator(BaseCalculator):
         )
 
         defects_table = tool.get("defects", [[10000000, 0.01]])
-        defects = _find_defect(defects_table, quantity)
-        if mode.value > 1:
-            defects += defects * (mode.value - 1)
+        defects = apply_mode_defects(_find_defect(defects_table, quantity), mode)
 
         cost_cliche_usd = float(tool.get("costCliche", 5.0))
         cost_small = tool.get("costSmallTampon", [15, 0.00001, 0.01])
@@ -269,7 +272,7 @@ class PadPrintCalculator(BaseCalculator):
             time_prepare_paint += 0.2 * color
         time_packing = 0.003 * quantity if is_packing else 0.0
 
-        time_prepare = float(tool.get("timePrepare", 0.15)) * max(1, mode.value)
+        time_prepare = calc_time_prepare(float(tool.get("timePrepare", 0.15)), mode)
         time_print = (quantity / process_per_hour + time_prepare) * color + time_packing
 
         tool_cost = parse_currency(tool.get("cost", "$1400") or "$1400")

@@ -248,3 +248,23 @@ def test_form_default_print_offset_promo(calc):
     assert r["price"] == pytest.approx(e["price"], rel=0.001)
     assert r["time_hours"] == pytest.approx(e["time_hours"], rel=0.001)
     assert r["time_ready"] == pytest.approx(e["time_ready"], rel=0.001)
+
+
+# JS, 20.11.2026 — сверка mode=0, 1, 2 с run_js_calc.mjs calcPrintOffset --data current:
+# node scripts/run_js_calc.mjs calcPrintOffset --data current --args '[1000,[210,297],"4+0","PaperCoated115M",0]'
+# node scripts/run_js_calc.mjs calcPrintOffset --data current --args '[1000,[210,297],"4+0","PaperCoated115M",2]'
+@pytest.mark.parametrize(
+    "mode,exp_cost,exp_price,exp_ready",
+    [
+        (0, 6848.6, 14450.546, 72.0),
+        (1, 6848.6, 14450.546, 56.0),
+        (2, 6848.6, 14450.546, 40.0),
+    ],
+)
+def test_print_offset_modes_match_js(calc, mode, exp_cost, exp_price, exp_ready):
+    """JS, 20.11.2026: у OffsetPrint timePrepare=0, mode меняет time_ready [72, 56, 40]."""
+    r = calc.execute({**REF_PARAMS, "mode": mode})
+    assert r["cost"] == pytest.approx(exp_cost, rel=0.001)
+    assert r["price"] == pytest.approx(exp_price, rel=0.001)
+    assert r["time_hours"] == pytest.approx(0.0, abs=1e-9)
+    assert r["time_ready"] == pytest.approx(exp_ready, rel=0.001)

@@ -177,3 +177,30 @@ def test_expected_values_print_laser(ref_result):
     assert ok_time, f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
     assert ok_ready, f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
     assert ok_weight, f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
+
+
+# JS, 20.11.2026 — сверка mode=0 и mode=2 с run_js_calc.mjs calcPrintLaser --data current:
+# node scripts/run_js_calc.mjs calcPrintLaser --data current --args '[50,[320,450],"4+4","PaperCoated300M","KMBizhubC220",0]'
+# node scripts/run_js_calc.mjs calcPrintLaser --data current --args '[50,[320,450],"4+4","PaperCoated300M","KMBizhubC220",2]'
+@pytest.mark.parametrize(
+    "mode,exp_cost,exp_price,exp_ready",
+    [
+        (0, 2231.249090909091, 3658.3416727272734, 16.97),
+        (2, 2893.4872727272723, 4724.888872727272, 2.22),
+    ],
+)
+def test_print_laser_modes_match_js(calc, mode, exp_cost, exp_price, exp_ready):
+    """JS, 20.11.2026: mode=0 и mode=2 совпадают с JS (rel <= 0.001)."""
+    r = calc.execute({**REF_PARAMS, "mode": mode})
+    assert r["cost"] == pytest.approx(exp_cost, rel=0.001)
+    assert r["price"] == pytest.approx(exp_price, rel=0.001)
+    assert r["time_ready"] == pytest.approx(exp_ready, rel=0.001)
+
+
+def test_print_laser_modes_strict(calc):
+    r0 = calc.execute({**REF_PARAMS, "mode": 0})
+    r1 = calc.execute({**REF_PARAMS, "mode": 1})
+    r2 = calc.execute({**REF_PARAMS, "mode": 2})
+    assert r0["price"] < r1["price"] < r2["price"]
+    assert r0["time_hours"] < r1["time_hours"] < r2["time_hours"]
+    assert r2["time_ready"] < r1["time_ready"] < r0["time_ready"]

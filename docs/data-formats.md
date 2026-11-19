@@ -91,6 +91,19 @@
 `quantity` — число; `unit` — строка; при наличии `size_mm` — непустой список чисел; ключ `size` запрещён.
 Нарушение — `ValueError`, API отвечает 400. Сборщик строки — `material_line()` в `calculators/base.py`.
 
+## Режим производства (`ProductionMode` / `baseTimeReady`)
+
+Поле `baseTimeReady` в `common.json` и в `data/equipment/*.json` — 3-элементный массив рабочих часов в **0-based** порядке `[экономичный, стандартный, экспресс]`:
+
+| `mode` | `ProductionMode` | `timePrepare` | `defects` | `baseTimeReady` |
+| --- | --- | --- | --- | --- |
+| `0` | `ECONOMY` | `timePrepare * 0` (`0`) | базовый | `baseTimeReady[0]` (дольше) |
+| `1` | `STANDARD` | `timePrepare * 1` | базовый | `baseTimeReady[1]` (базовый) |
+| `2` | `EXPRESS` | `timePrepare * 2` | `defects * 2` (`+ defects * (mode - 1)`) | `baseTimeReady[2]` (быстрее) |
+
+- В Python режим читается через `parse_mode(params.get("mode"))` (`calculators/base.py`), без `mode or 1`; подготовка — `calc_time_prepare(base_prepare, mode)` (без `max(1, mode)`); брак — `apply_mode_defects(defect_rate, mode)`; срок — `equipment.get_time_ready(mode)` или `pick_time_ready(times, mode, fallback)` (везде 0-based: `0, 1, 2`).
+- Исключения и особенности (подрядчики без вариативной цены: `cards`, `offset_promo`, Амалит в `button_pins > 2000`; подрядчик с вариативной ценой/тарифом доставки по `mode` и логистика: `metal_pins` — тариф Китай→РФ и `timePrepare * mode`, `milling` — доставка; составные слои: `acrylic_prizes`, `print_sheet`, `tablets`, `plaque`; `timePrepare = 0`: `print_offset`, `cut_guillotine`, `cut_roller`, `lamination_wide`) задокументированы в `docs/migration-guide.md` и проверяются контрактным тестом `calc_service/tests/test_mode_contract.py`.
+
 ## Оборудование: справочные таблицы
 
 Скорость и брак заданы массивами [порог, значение]:

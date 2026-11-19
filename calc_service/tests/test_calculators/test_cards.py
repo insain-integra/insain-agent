@@ -137,3 +137,16 @@ def test_expected_values_cards(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+def test_cards_modes_contractor(calc):
+    """Подрядчик (calcCards.js): цена и time_hours не зависят от mode, меняется только time_ready [56, 40, 32]."""
+    r0 = calc.execute({**REF_PARAMS, "mode": 0})
+    r1 = calc.execute({**REF_PARAMS, "mode": 1})
+    r2 = calc.execute({**REF_PARAMS, "mode": 2})
+
+    assert r0["price"] == r1["price"] == r2["price"]
+    assert r0["time_hours"] == r1["time_hours"] == r2["time_hours"] == pytest.approx(0.5)
+    assert r0["time_ready"] == pytest.approx(56.0)
+    assert r1["time_ready"] == pytest.approx(40.0)
+    assert r2["time_ready"] == pytest.approx(32.0)

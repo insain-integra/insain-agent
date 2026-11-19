@@ -17,7 +17,14 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import (
+    BaseCalculator,
+    ProductionMode,
+    apply_mode_defects,
+    calc_time_prepare,
+    parse_mode,
+    pick_time_ready,
+)
 from common.helpers import calc_weight, find_in_table
 from common.holidays import add_working_hours, next_working_day
 from common.layout import layout_on_roll, layout_on_sheet
@@ -123,7 +130,8 @@ class TemplateCalculator(BaseCalculator):
           1. Прочитать входные параметры.
              quantity = int(params.get("quantity", 1))
              size = [width, height]  # width, height — мм (params "width", "height")
-             mode = ProductionMode(params.get("mode", ProductionMode.STANDARD))
+             # Не писать params.get("mode") or 1 — режим 0 (эконом) не должен превращаться в 1!
+             mode = parse_mode(params.get("mode"))
 
           2. Выбрать материалы и оборудование:
              - catalog = load_catalog("hardsheet.json")
@@ -140,16 +148,17 @@ class TemplateCalculator(BaseCalculator):
              - weight_kg = calc_weight(... параметры из MaterialSpec ...)
 
           5. Посчитать брак по таблице дефектов оборудования:
-             - defect_rate = equipment.get_defect_rate(quantity)
+             - defect_rate = apply_mode_defects(equipment.get_defect_rate(quantity), mode)
              - quantity_with_defects = math.ceil(quantity * (1 + defect_rate))
 
           6. Посчитать время:
-             - time_process = ... (например, длина / скорость)
+             - time_prepare = calc_time_prepare(equipment.time_prepare, mode)
+             - time_process = ... (например, длина / скорость) + time_prepare
              - time_operator = ... (с учётом подготовки и загрузки)
              - time_hours = time_process  (или другая метрика)
-             - time_ready = add_working_hours(start_date, hours, hours_per_day=8.0)
-               (в калькуляторах обычно время_ready считают в рабочих часах, без даты,
-                поэтому достаточно time_hours + equipment.get_time_ready(mode)).
+             - time_ready = time_hours + equipment.get_time_ready(mode)
+               (или time_hours + pick_time_ready(custom_times, mode, BASE_TIME_READY);
+               mode везде 0-based: 0 — эконом, 1 — стандарт, 2 — экспресс).
 
           7. Посчитать себестоимость:
              - cost_material = material.get_cost(area_or_quantity) * (1 + defect_rate)

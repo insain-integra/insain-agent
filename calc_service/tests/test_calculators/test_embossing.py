@@ -183,3 +183,32 @@ def test_expected_values_embossing(ref_result):
     assert ok_mat_code, f"material code {em['code']} не найден в materials"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat_match.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+# JS, 20.11.2026 — сверка mode=0 и mode=2 с run_js_calc.mjs calcEmbossing --data current:
+# node scripts/run_js_calc.mjs calcEmbossing --data current --args '[500,[50,30],"","foil","diary",[],{"isCliche":true},0]'
+# node scripts/run_js_calc.mjs calcEmbossing --data current --args '[500,[50,30],"","foil","diary",[],{"isCliche":true},2]'
+@pytest.mark.parametrize(
+    "mode,exp_cost,exp_price,exp_time,exp_ready",
+    [
+        (0, 8100.0, 13446.0, 0.5, 56.5),
+        (1, 8475.0, 14046.0, 0.75, 41.0),
+        (2, 8850.0, 14646.0, 1.0, 33.5),
+    ],
+)
+def test_embossing_modes_match_js(calc, mode, exp_cost, exp_price, exp_time, exp_ready):
+    """JS, 20.11.2026: эконом/стандарт/экспресс — time_prepare=0 в mode=0 (без max(1, mode))."""
+    r = calc.execute({**REF_PARAMS, "mode": mode})
+    assert r["cost"] == pytest.approx(exp_cost, rel=0.001)
+    assert r["price"] == pytest.approx(exp_price, rel=0.001)
+    assert r["time_hours"] == pytest.approx(exp_time, rel=0.001)
+    assert r["time_ready"] == pytest.approx(exp_ready, rel=0.001)
+
+
+def test_embossing_modes_monotonic(calc):
+    r0 = calc.execute({**REF_PARAMS, "mode": 0})
+    r1 = calc.execute({**REF_PARAMS, "mode": 1})
+    r2 = calc.execute({**REF_PARAMS, "mode": 2})
+    assert r0["price"] < r1["price"] < r2["price"]
+    assert r0["time_hours"] < r1["time_hours"] < r2["time_hours"]
+    assert r2["time_ready"] < r1["time_ready"] < r0["time_ready"]

@@ -10,7 +10,14 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List, Mapping
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import (
+    BaseCalculator,
+    ProductionMode,
+    apply_mode_defects,
+    calc_time_prepare,
+    parse_mode,
+    pick_time_ready,
+)
 from common.helpers import calc_weight
 from common.markups import (
     BASE_TIME_READY,
@@ -92,7 +99,7 @@ class PrintWideCalculator(BaseCalculator):
         size = [width, height]
         material_id = str(params.get("material_id", "")).strip()
         printer_code = str(params.get("printer_code", "") or DEFAULT_PRINTER).strip() or DEFAULT_PRINTER
-        mode = ProductionMode(int(params.get("mode", 1)))
+        mode = parse_mode(params.get("mode"))
 
         printer = self._get_printer(printer_code)
         if not printer:
@@ -102,16 +109,12 @@ class PrintWideCalculator(BaseCalculator):
         if not material:
             return self._empty(mode)
 
-        base_time_ready = printer.base_time_ready or BASE_TIME_READY
-        idx = max(0, min(len(base_time_ready) - 1, mode.value))
-        base_ready = float(base_time_ready[idx])
+        base_ready = printer.get_time_ready(mode)
 
-        time_prepare = (printer.time_prepare or 0) * max(1, mode.value)
+        time_prepare = calc_time_prepare(printer.time_prepare or 0, mode)
         min_vol = printer.min_vol_print
 
-        defects = printer.get_defect_rate(float(quantity))
-        if mode.value >= 2:
-            defects += defects * (mode.value - 1)
+        defects = apply_mode_defects(printer.get_defect_rate(float(quantity)), mode)
 
         vol_print = size[0] * size[1] * (1 + defects) / 1_000_000  # м²
         if min_vol > 0 and vol_print < min_vol:
@@ -184,10 +187,8 @@ class PrintWideCalculator(BaseCalculator):
             return None
 
     def _empty(self, mode: ProductionMode) -> Dict[str, Any]:
-        btr = BASE_TIME_READY
-        idx = max(0, min(len(btr) - 1, mode.value))
         return {
             "cost": 0.0, "price": 0.0, "unit_price": 0.0,
-            "time_hours": 0.0, "time_ready": float(btr[idx]),
+            "time_hours": 0.0, "time_ready": pick_time_ready(BASE_TIME_READY, mode),
             "weight_kg": 0.0, "materials": [],
         }

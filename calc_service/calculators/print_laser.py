@@ -11,7 +11,14 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List, Mapping, Optional
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import (
+    BaseCalculator,
+    ProductionMode,
+    apply_mode_defects,
+    calc_time_prepare,
+    parse_mode,
+    pick_time_ready,
+)
 from common.helpers import calc_weight
 from common.layout import layout_on_sheet
 from common.markups import (
@@ -189,7 +196,7 @@ class PrintLaserCalculator(BaseCalculator):
         color = str(params.get("color", "4+0") or "4+0").strip()
         material_id = str(params.get("material_id", "") or "").strip()
         printer_code = str(params.get("printer_code", "") or PRINTER_CODE).strip() or PRINTER_CODE
-        mode = ProductionMode(int(params.get("mode", 1)))
+        mode = parse_mode(params.get("mode"))
 
         if color == "0+0":
             return self._empty_result(size_sheet, num_sheet, mode)
@@ -228,15 +235,13 @@ class PrintLaserCalculator(BaseCalculator):
         if sheets_per_hour <= 0:
             sheets_per_hour = 250.0
 
-        defects = printer.get_defect_rate(float(num_sheet))
-        if mode.value >= 2:
-            defects += defects * (mode.value - 1)
+        defects = apply_mode_defects(printer.get_defect_rate(float(num_sheet)), mode)
         # JS: time — Math.ceil(numSheet*(1+defects))/sheetsPerHour; cost — numSheet*(1+defects) без ceil.
         sheets_with_defects = num_sheet * (1 + defects)
         sheets_for_time = math.ceil(sheets_with_defects)
 
         double_side = 2 if color in ("1+1", "4+1", "4+4") else 1
-        time_prepare = (printer.time_prepare or 0.1) * max(1, mode.value)
+        time_prepare = calc_time_prepare(printer.time_prepare or 0.1, mode)
         time_print = (
             sheets_for_time / sheets_per_hour * coeff_size * double_side + time_prepare
         )
@@ -258,9 +263,7 @@ class PrintLaserCalculator(BaseCalculator):
         price = price_print + price_operator
 
         time_hours = round(time_print * 100) / 100.0
-        base_ready = printer.base_time_ready or [16, 8, 1]
-        idx = max(0, min(len(base_ready) - 1, mode.value))
-        time_ready = time_hours + float(base_ready[idx])
+        time_ready = time_hours + pick_time_ready(printer.base_time_ready, mode, [16, 8, 1])
 
         weight_kg = 0.0
         try:
@@ -291,14 +294,12 @@ class PrintLaserCalculator(BaseCalculator):
     ) -> Dict[str, Any]:
         from common.markups import BASE_TIME_READY
 
-        base = BASE_TIME_READY
-        idx = max(0, min(len(base) - 1, mode.value))
         return {
             "cost": 0.0,
             "price": 0,
             "unit_price": 0.0,
             "time_hours": 0.0,
-            "time_ready": float(base[idx]),
+            "time_ready": pick_time_ready(BASE_TIME_READY, mode),
             "weight_kg": 0.0,
             "materials": [],
         }

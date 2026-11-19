@@ -14,7 +14,13 @@ from typing import Any, Dict, List, Mapping
 
 import json5
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import (
+    BaseCalculator,
+    ProductionMode,
+    calc_time_prepare,
+    parse_mode,
+    pick_time_ready,
+)
 from common.markups import BASE_TIME_READY, COST_OPERATOR, MARGIN_OPERATION, get_margin
 
 DESIGN_JSON = Path(__file__).parent.parent / "data" / "equipment" / "design.json"
@@ -108,19 +114,17 @@ class DesignCalculator(BaseCalculator):
         n = int(params.get("quantity", 1))
         design_id = str(params.get("design_id", "") or "DesignCard").strip() or "DesignCard"
         difficulty = int(params.get("difficulty", 1))
-        mode = ProductionMode(int(params.get("mode", 1)))
+        mode = parse_mode(params.get("mode"))
 
         tool = _get_design_tool(design_id)
 
         time_prepare = float(tool.get("timePrepare", 0.05))
         time_process_arr = tool.get("timeProcess", [0.25, 1, 2])
         cost_operator = float(tool.get("costOperator", 0.0)) or COST_OPERATOR
-        base_time_ready = tool.get("baseTimeReady") or BASE_TIME_READY
-        idx = max(0, min(len(base_time_ready) - 1, math.ceil(mode.value)))
-        ready_hours = float(base_time_ready[idx])
+        ready_hours = pick_time_ready(tool.get("baseTimeReady"), mode, BASE_TIME_READY)
 
         # Время: подготовка * режим + время работы по сложности
-        time_prepare_total = n * time_prepare * max(1, mode.value)
+        time_prepare_total = n * calc_time_prepare(time_prepare, mode)
         time_process = time_prepare_total
         if difficulty > 0 and difficulty <= len(time_process_arr):
             time_process += n * time_process_arr[difficulty - 1]

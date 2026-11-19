@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from enum import IntEnum
-from typing import Any, Dict, Mapping, TypedDict, Literal, List
+from typing import Any, Dict, Mapping, Sequence, TypedDict, Literal, List
 
 from urllib.parse import urlencode
 
@@ -45,6 +45,63 @@ class ProductionMode(IntEnum):
     ECONOMY = 0
     STANDARD = 1
     EXPRESS = 2
+
+
+def parse_mode(
+    raw: Any,
+    default: ProductionMode = ProductionMode.STANDARD,
+) -> ProductionMode:
+    """
+    Безопасно разобрать режим производства (0 — эконом, 1 — стандарт, 2 — экспресс).
+
+    Нельзя использовать ``raw or 1``: режим ``0`` — валидное значение, а не пустота.
+    При ``None`` или пустой строке возвращается ``default``.
+    """
+    if raw is None or (isinstance(raw, str) and not raw.strip()):
+        return default
+    return ProductionMode(int(raw))
+
+
+def calc_time_prepare(base_prepare: float, mode: int | ProductionMode) -> float:
+    """
+    Время подготовки с учётом режима производства (0 → 0, 1 → ×1, 2 → ×2).
+
+    По стандарту (как в js_legacy) в эконом-режиме (mode=0) подготовка обнуляется,
+    в экспресс-режиме (mode=2) — удваивается (без зажима снизу единицей).
+    """
+    return float(base_prepare or 0.0) * int(mode)
+
+
+def apply_mode_defects(defect_rate: float, mode: int | ProductionMode) -> float:
+    """
+    Скорректировать долю брака с учётом режима производства.
+
+    В режимах 0 (эконом) и 1 (стандарт) брак не меняется;
+    в экспресс-режиме (mode > 1) увеличивается на ``defect_rate * (mode - 1)``
+    (при mode=2 — удваивается).
+    """
+    rate = float(defect_rate or 0.0)
+    m = int(mode)
+    if m > 1:
+        rate += rate * (m - 1)
+    return rate
+
+
+def pick_time_ready(
+    times: Sequence[float] | None,
+    mode: int | ProductionMode,
+    fallback: Sequence[float] | None = None,
+) -> float:
+    """
+    Выбрать базовый срок готовности (в рабочих часах) по 0-based режиму ``mode`` (0, 1, 2).
+
+    Индекс зажимается в пределах массива ``[0, len(arr) - 1]``.
+    """
+    arr = times if times else fallback
+    if not arr:
+        return 0.0
+    idx = max(0, min(len(arr) - 1, int(mode)))
+    return float(arr[idx])
 
 
 def material_line(
