@@ -2,7 +2,7 @@
 
 # Дашборд insain.ru
 
-Состояние на последнюю запись журнала: **19.11.2026**.
+Состояние на последнюю запись журнала: **20.11.2026**.
 
 Собрано из `docs/vision.md`, `todo/`, `docs/site/forms.md`, `docs/history/log.md`. Обновляет
 `python scripts/dev.py dashboard` и `python scripts/dev.py close <задача>`.
@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **26**. В работе/ревью: `mode-logic-and-checks.md`. Заблокировано: `ai-calc-authoring-skill.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **25**. В работе/ревью: нет. Заблокировано: `ai-calc-authoring-skill.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -57,7 +57,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
-| `mode-logic-and-checks.md` | выкатка |
 | `pilot-acrylic-medals-calc.md` | заблокировано: ждёт todo/ai-calc-authoring-skill.md |
 | `presswall-banner-mode.md` | черновик |
 | `print-sheet-copy-result.md` | черновик |
@@ -76,8 +75,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-20 — mode-logic-and-checks
 - 2026-11-19 — form-notebook
 - 2026-11-19 — print-sheet-mode2-defects
 - 2026-11-17 — form-button-pins
 - 2026-11-17 — ai-seo-cleanup-noindex
-- 2026-11-17 — form-print-offset
