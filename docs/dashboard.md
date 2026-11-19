@@ -45,7 +45,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `ai-seo-geo-yoast.md` | черновик |
 | `ezfc-form-builder.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
-| `form-canvas.md` | ревью |
+| `form-canvas.md` | выкатка |
 | `form-heat-press.md` | черновик |
 | `form-milling.md` | черновик |
 | `form-pad-print.md` | черновик |
