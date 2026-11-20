@@ -1,12 +1,12 @@
 # ai-seo-geo-yoast
 
-Статус: черновик
+Статус: заблокировано: ждёт todo/wt-geotargeting-update.md
 Сложность: высокая
 Implementer: не нужен
 Reviewer: Grok 4.7
 Site ops: Opus 5.5
 Почему: правка глобальных SEO-шаблонов Yoast и геоплагина `wt_geotargeting_pro` на проде впервые (задачи `T01` и `T11` аудита).
-Чат: новая сессия Site ops (Opus 5.5) с захватом `lock acquire prod ai-seo-geo-yoast`.
+Чат: после закрытия `wt-geotargeting-update` и возврата статуса `черновик` — новая сессия Site ops (Opus 5.5), `lock acquire prod ai-seo-geo-yoast`.
 
 ## Цель
 
@@ -14,6 +14,7 @@ Site ops: Opus 5.5
 
 ## Контекст и ссылки
 
+- Предпосылка: `todo/wt-geotargeting-update.md` (1.7.6 → 1.18.1). Критерии ниже написаны под 1.7.6 (`WtLocation`, cookie `wt_geo_data`). После закрытия предпосылки первая сессия сверяет имена класса и cookie с установленной версией и правит критерии, если они сменились. Диагноз T01/T11 переснимается: в 1.8+ вендор дописывал description и Schema Graph.
 - `insain-ru-ai-audit.md` — задачи `T01` и `T11`, «План правок → п. 1».
 - `todo/EPIC-ai-seo.md`.
 - `.cursor/rules/insain-site-autonomous.mdc` — целиком до первого действия на сервере.
@@ -94,6 +95,7 @@ Site ops: Opus 5.5
 
 Строка на сессию: `<дата> — <роль>, <модель> — <итог> — дальше <роль>`. Блокер — по формату [docs/agents/workflow.md](../docs/agents/workflow.md).
 
+- 21.11.2026 — Analyst, Grok 4.7 — обновление плагина вынесено в `todo/wt-geotargeting-update.md`; диагноз T01/T11 снят с 1.7.6 и после установки переснимается — дальше Site ops по `wt-geotargeting-update`
 - 18.11.2026 — Analyst — диагностирован баг переключения города со 2-го раза (`region-selection-generate.php`, `wt-location.js`), добавлен в scope задачи — дальше Site ops
 - 18.11.2026 — Analyst — диагностирована причина >10 000 запросов/сут к DaData (отсутствие page-кэша под nginx, устаревший `isBot()` 2017 г. без ИИ-ботов/краулеров, нет кэша IP и проверка только IPv4) и утечка токена в `Set-Cookie: wt_geo_data` при 403; уточнён scope `T11` с учётом планируемого обновления `wt_geotargeting_pro` — дальше Site ops
 
