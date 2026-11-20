@@ -106,6 +106,8 @@
 
 Правится в админке Yoast (метабокс записи и раздел «Отображение в поиске») и через `wp post meta` / `wp option`.
 
+21.11.2026 (`ai-seo-geo-yoast`): маски `{region_*}` в OG, Twitter и JSON-LD закрывает `wp-content/mu-plugins/insain-geo-yoast-fix.php` (там же отсечение ботов и запросов без публичного IPv4 от DaData). Кэш геолокации — таблица `wp_insain_wt_gt_geolocation_cache`, 6 месяцев, cron `wt_geotargeting_pro_geolocation_delete_old_cache`. Выбор города в шапке — `wp-content/themes/insain/modal/region-selection-generate.php`.
+
 ## Медиатека
 
 В библиотеке 5 054 вложения (`attachment`), все в этом числе, без отдельного статуса «корзина».

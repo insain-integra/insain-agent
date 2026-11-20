@@ -164,6 +164,8 @@ Nginx, активный файл `/etc/nginx/sites-enabled/insain.ru` (`ls -l`: 
 
 После обновления `wt_geotargeting_pro` до 1.18.1 (21.11.2026) PHP warning `Wt::__wakeup()` в `/var/www/insain.ru/wp-content/plugins/wt_geotargeting_pro/includes/WtKit.php` пропал из вывода `wp plugin list`.
 
+21.11.2026 (`ai-seo-geo-yoast`): `wp-content/mu-plugins/insain-geo-yoast-fix.php` подставляет маски `{region_*}` в Yoast OG/Twitter/JSON-LD и отсекает ботов и запросы без публичного IPv4 от DaData. Таблица кэша `wp_insain_wt_gt_geolocation_cache` (6 месяцев, cron `wt_geotargeting_pro_geolocation_delete_old_cache`). Модалка города: `wp-content/themes/insain/modal/region-selection-generate.php`, первый клик без гонки `href`.
+
 ## Бот
 
 Бот на VDS не запущен: на проде поднят только calc-api. Снимок 25–26.10.2026 это фиксирует.
