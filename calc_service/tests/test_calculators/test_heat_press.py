@@ -255,3 +255,176 @@ def test_film_multifilms_and_density(calc):
     assert r["time_ready"] == pytest.approx(32.74111111111111, rel=JS_REL_TOL)
     assert r["weight_kg"] == pytest.approx(0.11, rel=JS_REL_TOL)
 
+
+# ── Эталоны 21.11.2026: Изделие заказчика (+25%) и три ветки печати ──────
+
+def test_customer_material_markup(calc):
+    """JS формы 40 (cjsCalc 1570, 21.11.2026): is_customer_material умножает price на 1.25, cost не меняет."""
+    base = calc.execute(REF_FORM_DEFAULT)
+    cust = calc.execute({**REF_FORM_DEFAULT, "is_customer_material": True})
+    assert cust["cost"] == pytest.approx(EXPECTED_FORM_DEFAULT["cost"], rel=JS_REL_TOL)
+    assert cust["cost"] == pytest.approx(base["cost"], rel=1e-9)
+    assert cust["price"] == pytest.approx(EXPECTED_FORM_DEFAULT["price"] * 1.25, rel=JS_REL_TOL)
+    assert cust["unit_price"] == pytest.approx(cust["price"] / REF_FORM_DEFAULT["quantity"], rel=1e-9)
+    assert cust["time_ready"] == pytest.approx(base["time_ready"], rel=1e-9)
+
+
+# JS, 21.11.2026 — filmSublimation:
+# node scripts/run_js_calc.mjs calcHeatPress --data current --args '[100,[50,50],"filmSublimation","bag",{},0|1|2]'
+EXPECTED_FILM_SUBLIMATION_MODES = {
+    0: {
+        "cost": 13258.246319444444,
+        "price": 21229.27389027778,
+        "time_hours": 8.60138888888889,
+        "time_ready": 65.76027777777779,
+        "weight_kg": 0.06386688,
+    },
+    1: {
+        "cost": 13735.346319444445,
+        "price": 21993.889890277776,
+        "time_hours": 8.851388888888888,
+        "time_ready": 34.86027777777778,
+        "weight_kg": 0.06386688,
+    },
+    2: {
+        "cost": 14364.418194444444,
+        "price": 23002.004202777778,
+        "time_hours": 9.163888888888888,
+        "time_ready": 14.522777777777776,
+        "weight_kg": 0.06386688,
+    },
+}
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_film_sublimation_modes(calc, mode):
+    """JS, 21.11.2026: filmSublimation на bag, 100 шт, 50x50, режимы 0, 1, 2."""
+    r = calc.execute({
+        "quantity": 100,
+        "width": 50,
+        "height": 50,
+        "transfer_type": "filmSublimation",
+        "item_type": "bag",
+        "mode": mode,
+    })
+    e = EXPECTED_FILM_SUBLIMATION_MODES[mode]
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    # В cut_plotter.py round вместо ceil даёт -0.01 ч (0.11%)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL, abs=0.02)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=JS_REL_TOL)
+    materials = r.get("materials") or []
+    assert materials and materials[0].get("code") == "PaperSublimation128"
+
+
+# JS, 21.11.2026 — filmEcosolvent:
+# node scripts/run_js_calc.mjs calcHeatPress --data current --args '[100,[50,50],"filmEcosolvent","bag",{},0|1|2]'
+EXPECTED_FILM_ECOSOLVENT_MODES = {
+    0: {
+        "cost": 9904.944791666667,
+        "price": 15899.953354166666,
+        "time_hours": 5.910833333333334,
+        "time_ready": 45.97083333333333,
+        "weight_kg": 0.06,
+    },
+    1: {
+        "cost": 10317.944791666667,
+        "price": 16559.953354166668,
+        "time_hours": 6.160833333333333,
+        "time_ready": 30.520833333333332,
+        "weight_kg": 0.06,
+    },
+    2: {
+        "cost": 10866.99375,
+        "price": 17441.279625,
+        "time_hours": 6.465,
+        "time_ready": 16.125,
+        "weight_kg": 0.06,
+    },
+}
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_film_ecosolvent_modes(calc, mode):
+    """JS, 21.11.2026: filmEcosolvent на bag, 100 шт, 50x50, режимы 0, 1, 2."""
+    r = calc.execute({
+        "quantity": 100,
+        "width": 50,
+        "height": 50,
+        "transfer_type": "filmEcosolvent",
+        "item_type": "bag",
+        "mode": mode,
+    })
+    e = EXPECTED_FILM_ECOSOLVENT_MODES[mode]
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL, abs=0.02)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=JS_REL_TOL)
+    materials = r.get("materials") or []
+    assert materials and materials[0].get("code") == "POLIFLEX4030"
+
+
+# JS, 21.11.2026 — paperLaser:
+# node scripts/run_js_calc.mjs calcHeatPress --data current --args '[100,[50,50],"paperLaser","bag",{},0|1|2]'
+EXPECTED_PAPER_LASER_MODES = {
+    0: {
+        "cost": 10460.185775,
+        "price": 16784.2313865,
+        "time_hours": 6.4525,
+        "time_ready": 46.5925,
+    },
+    1: {
+        "cost": 10789.725774999999,
+        "price": 17312.8177865,
+        "time_hours": 6.6025,
+        "time_ready": 22.9625,
+    },
+    2: {
+        "cost": 11233.73765,
+        "price": 18024.830499,
+        "time_hours": 6.8149999999999995,
+        "time_ready": 9.375,
+    },
+}
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_paper_laser_modes(calc, mode):
+    """JS, 21.11.2026: paperLaser на bag, 100 шт, 50x50, режимы 0, 1, 2."""
+    r = calc.execute({
+        "quantity": 100,
+        "width": 50,
+        "height": 50,
+        "transfer_type": "paperLaser",
+        "item_type": "bag",
+        "mode": mode,
+    })
+    e = EXPECTED_PAPER_LASER_MODES[mode]
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+    materials = r.get("materials") or []
+    assert materials and materials[0].get("code") == "PaperFOREVERLASERTRANSPARENT"
+    assert materials[0].get("size_mm") == [297.0, 420.0]
+
+
+@pytest.mark.parametrize("transfer_type", ["filmSublimation", "filmEcosolvent", "paperLaser"])
+def test_new_transfer_types_mode_order(calc, transfer_type):
+    """Собственное производство: price(0) < price(1) < price(2), time_ready(2) < time_ready(1) < time_ready(0)."""
+    res = {
+        m: calc.execute({
+            "quantity": 100,
+            "width": 50,
+            "height": 50,
+            "transfer_type": transfer_type,
+            "item_type": "bag",
+            "mode": m,
+        })
+        for m in (0, 1, 2)
+    }
+    assert res[0]["price"] < res[1]["price"] < res[2]["price"]
+    assert res[2]["time_ready"] < res[1]["time_ready"] < res[0]["time_ready"]
+

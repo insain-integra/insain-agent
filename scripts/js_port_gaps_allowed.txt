@@ -15,9 +15,6 @@ calcCalendarFlip option isLamination
 calcCanvas call calcBaguette
 calcBaguette module
 calcPlasticCards option isMagneticStripeHiCo
-calcHeatPress call calcLayoutOnSheet
-calcHeatPress call calcCutPlotter
-calcHeatPress call calcPrintRoll
 calcHeatPress call calcCutSaber
 calcMagnetLamination option isLamination
 calcMagnetLamination option isBarcode

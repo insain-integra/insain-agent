@@ -1,7 +1,7 @@
 // Форма 40 CalcHeatPress, элемент cjsCalc (1570). Id полей — боевой формы 40.
 // numDensity (1562) скрыт, пока сложность не 1.7: calculate_when_hidden=0, на дефолте в расчёт уходит 0.
 // {{numDensity}} — factor 0.01 уже внутри, скрытое поле даёт 0.
-// ckbMaterialCostomer (2283) в API heat_press нет: в URL пишется, в calcApi не уходит.
+// ckbMaterialCostomer (2283) передаётся в API как is_customer_material (+25% к цене).
 var qty = {{numN}};
 var width = {{numW}};
 var height = {{numH}};
@@ -36,9 +36,11 @@ var tShirtColorRaw = ezfc_functions.get_value_from(1591, true)[0];
 var tShirtColorIndex = ezfc_functions.get_value_from(1591, true, false, { return_value: 'index' })[0];
 var addWhite = Number(tShirtColorRaw) || 0;
 
-// Изделие заказчика (в API не уходит, только в URL)
+// Изделие заказчика (+25% к итоговой цене в cjsCalc формы 40, элемент 2283)
 var customerRaw = ezfc_functions.get_value_from(2283, true);
-var isCustomerMaterial = (Array.isArray(customerRaw) && customerRaw[0] === 'isMaterialCustomer') || customerRaw == 'true';
+var isCustomerMaterial = (Array.isArray(customerRaw) && customerRaw[0] === 'isMaterialCustomer')
+    || customerRaw === 'isMaterialCustomer'
+    || customerRaw == 'true';
 
 // 0 — «дешевле» (на форме 40 опций 0 нет). Пустое поле → 1; ноль нельзя отбрасывать через ||.
 var modeRaw = ezfc_functions.get_value_from(3182, true)[0];
@@ -69,6 +71,7 @@ var params = {
     height: Number(height) || 1,
     transfer_type: transferType,
     item_type: itemType,
+    is_customer_material: isCustomerMaterial,
     mode: mode
 };
 
