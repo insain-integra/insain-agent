@@ -154,7 +154,7 @@ Nginx, активный файл `/etc/nginx/sites-enabled/insain.ru` (`ls -l`: 
 | wp-media-folder | 6.2.2 | available |
 | wp-media-folder-addon | 4.1.5 | available |
 | wp-media-folder-gallery-addon | 2.6.13 | available |
-| wt_geotargeting_pro | 1.7.6 | none |
+| wt_geotargeting_pro | 1.18.1 | none |
 | counter-yandex-metrica | 1.4.3 | none |
 | yith-woocommerce-ajax-navigation | 5.19.0 | available |
 | yith-woocommerce-ajax-search | 2.23.0 | available |
@@ -162,7 +162,7 @@ Nginx, активный файл `/etc/nginx/sites-enabled/insain.ru` (`ls -l`: 
 | wordpress-seo | 27.5 | available |
 | tinkoff-woocommerce | 2.2.0 | none |
 
-Та же команда печатает PHP warning: `Wt::__wakeup()` в `/var/www/insain.ru/wp-content/plugins/wt_geotargeting_pro/includes/WtKit.php`, строка 36.
+После обновления `wt_geotargeting_pro` до 1.18.1 (21.11.2026) PHP warning `Wt::__wakeup()` в `/var/www/insain.ru/wp-content/plugins/wt_geotargeting_pro/includes/WtKit.php` пропал из вывода `wp plugin list`.
 
 ## Бот
 

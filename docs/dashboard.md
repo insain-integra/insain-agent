@@ -2,7 +2,7 @@
 
 # Дашборд insain.ru
 
-Состояние на последнюю запись журнала: **20.11.2026**.
+Состояние на последнюю запись журнала: **21.11.2026**.
 
 Собрано из `docs/vision.md`, `todo/`, `docs/site/forms.md`, `docs/history/log.md`. Обновляет
 `python scripts/dev.py dashboard` и `python scripts/dev.py close <задача>`.
@@ -37,12 +37,12 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **24**. В работе/ревью: нет. Заблокировано: `ai-seo-geo-yoast.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **23**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `ai-calc-authoring-skill.md` | черновик |
-| `ai-seo-geo-yoast.md` | заблокировано: ждёт todo/wt-geotargeting-update.md |
+| `ai-seo-geo-yoast.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
 | `form-heat-press.md` | черновик |
 | `form-milling.md` | черновик |
@@ -64,7 +64,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `supplier-catalog-load.md` | заблокировано: ждёт todo/supplier-parser.md |
 | `supplier-old-cleanup.md` | черновик |
 | `supplier-parser.md` | черновик |
-| `wt-geotargeting-update.md` | черновик |
 
 ## Репозиторий
 
@@ -74,8 +73,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-21 — wt-geotargeting-update
 - 2026-11-20 — ezfc-form-builder
 - 2026-11-20 — form-canvas
 - 2026-11-20 — mode-logic-and-checks
 - 2026-11-19 — form-notebook
-- 2026-11-19 — print-sheet-mode2-defects

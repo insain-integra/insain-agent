@@ -4,7 +4,7 @@
 
 Три канала:
 
-- **wp-cli** — `ssh insain-prod`, затем `sudo -u www-data wp … --path=/var/www/insain.ru`. WP-CLI 2.12.0. Есть команды `post`, `menu`, `media`, `option`, `term`, `db`, `wc`, `yoast`, `export`/`import`, `search-replace`. Пакеты не ставятся: `/var/www/.wp-cli/packages` не создаётся (`Permission denied`). Каждая команда печатает PHP Warning от `wt_geotargeting_pro` (`Wt::__wakeup()`), это шум, его отфильтровывать.
+- **wp-cli** — `ssh insain-prod`, затем `sudo -u www-data wp … --path=/var/www/insain.ru`. WP-CLI 2.12.0. Есть команды `post`, `menu`, `media`, `option`, `term`, `db`, `wc`, `yoast`, `export`/`import`, `search-replace`. Пакеты не ставятся: `/var/www/.wp-cli/packages` не создаётся (`Permission denied`). PHP Warning `Wt::__wakeup()` от `wt_geotargeting_pro` пропал после обновления плагина до 1.18.1 (21.11.2026).
 - **REST API** — `https://insain.ru/wp-json/`. Пространства имён `wp/v2`, `wc/v3`, `wc/store/v1`, `yoast/v1`, `contact-form-7/v1`, `jetpack/v4`, `litespeed/v3` и другие. Аутентификация: в корне объявлены только Application Passwords. У пользователя 1 (`admin`) паролей приложений 0, ключей в `wp_insain_woocommerce_api_keys` 0. Анонимно доступно только публичное чтение. Своих маршрутов у ezFC в REST нет.
 - **Browser MCP** — реальный Chrome с админ-сессией WP. В этой сессии не подключён: `No connection to browser extension`. Перед работой нужно нажать Connect в расширении.
 

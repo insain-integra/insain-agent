@@ -16,8 +16,8 @@
 ## Задачи Волны 0 (в работе сейчас)
 
 - `site-content-guardrails` (закрыто 2026-11-16, `docs/history/log.md`) — правила безопасности правок WP/WPBakery/Yoast, дополнение `docs/site/access-tools.md`, каркас skill контура сайта (G2, предпосылка `T03`).
-- `todo/wt-geotargeting-update.md` — предпосылка `T01`/`T11`: WT Geotargeting Pro 1.7.6 → 1.18.1 на проде, шапка и лицензия живы. Пока она не закрыта, `ai-seo-geo-yoast` не стартует.
-- `todo/ai-seo-geo-yoast.md` — `T01` + `T11`: убрать `{region_name_prepositional}` из title/description/JSON-LD в Yoast; решить проблему токена DaData / cookie геоплагина. Ждёт `todo/wt-geotargeting-update.md`.
+- `wt-geotargeting-update` (закрыто 2026-11-21, `docs/history/log.md`) — предпосылка `T01`/`T11`: WT Geotargeting Pro 1.7.6 → 1.18.1 на проде, шапка и лицензия живы.
+- `todo/ai-seo-geo-yoast.md` — `T01` + `T11`: убрать `{region_name_prepositional}` из title/description/JSON-LD в Yoast; решить проблему токена DaData / cookie геоплагина. Предпосылка `wt-geotargeting-update` закрыта (2026-11-21, `docs/history/log.md`), статус задачи `черновик`.
 - `ai-seo-cleanup-noindex` (закрыто 2026-11-17, `docs/history/log.md`) — `T02`: выставить `noindex` и убрать из sitemap служебные Woo, технические CPT (`porto_builder`, `faq`) и страницы-заглушки; перевод заглушек в 410/301 перенесён в Волну 2 (`ai-seo-redirects-indexation`).
 - `ai-seo-h1-structure` (закрыто 2026-11-16, `docs/history/log.md`) — `T03`: один `<h1>` на главной, категориях и карточках. Предпосылка `site-content-guardrails` закрыта (2026-11-16, `docs/history/log.md`).
 
@@ -41,7 +41,7 @@
 
 ## Порядок
 
-1. `site-content-guardrails` закрыта (2026-11-16, `docs/history/log.md`). Дальше `todo/wt-geotargeting-update.md` (прод, `lock prod`), затем `todo/ai-seo-geo-yoast.md` (прод, `lock prod`). `ai-seo-cleanup-noindex` закрыта 2026-11-17 (`docs/history/log.md`).
+1. `site-content-guardrails` закрыта (2026-11-16, `docs/history/log.md`). `wt-geotargeting-update` закрыта (2026-11-21, `docs/history/log.md`). Дальше `todo/ai-seo-geo-yoast.md` (прод, `lock prod`). `ai-seo-cleanup-noindex` закрыта 2026-11-17 (`docs/history/log.md`).
 2. `ai-seo-h1-structure` (закрыто 2026-11-16, `docs/history/log.md`) можно стартовать: предпосылка закрыта.
 3. Перед стартом Волны 1 владелец передаёт подтверждённый факт-лист (адреса, телефоны, ИНН, ссылки `sameAs`, цифры заказов/сроков и ответы для FAQ).
 4. После `todo/supplier-old-cleanup.md` заводятся задачи Волны 2; после G1 — задачи Волны 3.
