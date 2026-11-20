@@ -2,10 +2,9 @@
 Калькулятор термопереноса.
 
 Мигрировано из js_legacy/calc/calcHeatPress.js.
-Типы трансфера: сублимация, DTF, шелкотрансфер.
+Типы трансфера: сублимация, DTF, шелкотрансфер, плёнка (film).
 
 Не перенесено (ветки JS):
-- transfer film → calcSticker
 - transfer filmSublimation → calcLayoutOnSheet, рекурсивный calcHeatPress, calcCutPlotter
 - transfer filmEcosolvent → calcPrintRoll, calcCutPlotter
 - transfer paperLaser
@@ -22,6 +21,7 @@ import json5
 
 from calculators.base import BaseCalculator, ProductionMode
 from calculators.print_sheet import PrintSheetCalculator
+from calculators.sticker import StickerCalculator
 from common.markups import MARGIN_MATERIAL, MARGIN_OPERATION, get_margin
 from common.process_tools import calc_silk_print
 from equipment import heatpress as heatpress_catalog
@@ -31,12 +31,14 @@ SUBLIMATION_MATERIAL = "PaperSublimation128"
 SUBLIMATION_PRINTER = "EPSONWF7610"
 DTF_MATERIAL = "PaperDTFTransfer"
 DTF_PRINTER = "DTFTransfer"
+FILM_DEFAULT_MATERIAL = "POLIFLEXPREMIUMBW"
 ITEM_HEATPRESS_MAP = {
     "hat": "Grafalex",
     "mug": "EconopressMUGH",
     "tshirt": "SahokSH49BD",
     "clothes": "SahokSH49BD",
     "bag": "SahokSH49BD",
+    "ambrella": "SahokSH49BD",
     "metal": "SahokSH49BD",
 }
 ITEM_DIFFICULTY = {"clothes": 1, "bag": 1}
@@ -49,11 +51,11 @@ def _load_heatpress_raw(code: str) -> Dict[str, Any]:
 
 
 class HeatPressCalculator(BaseCalculator):
-    """Термоперенос: сублимация, DTF, шелкотрансфер."""
+    """Термоперенос: сублимация, DTF, шелкотрансфер, плёнка."""
 
     slug = "heat_press"
     name = "Термоперенос"
-    description = "Расчёт термопереноса на ткани и изделия: сублимация, DTF, шелкотрансфер."
+    description = "Расчёт термопереноса на ткани и изделия: сублимация, DTF, шелкотрансфер, плёнка."
 
     def get_param_schema(self) -> Dict[str, Any]:
         return {
@@ -68,6 +70,7 @@ class HeatPressCalculator(BaseCalculator):
                      {"id": "sublimation", "title": "Сублимация"},
                      {"id": "dtf", "title": "DTF"},
                      {"id": "silk", "title": "Шелкотрансфер"},
+                     {"id": "film", "title": "Плёнка (плоттерная резка)"},
                  ]}},
                 {"name": "item_type", "type": "enum", "required": False, "default": "tshirt", "title": "Тип изделия",
                  "choices": {"inline": [
@@ -76,14 +79,20 @@ class HeatPressCalculator(BaseCalculator):
                      {"id": "tshirt", "title": "Футболка"},
                      {"id": "clothes", "title": "Плотная одежда"},
                      {"id": "bag", "title": "Сумка/рюкзак"},
+                     {"id": "ambrella", "title": "Зонт"},
                      {"id": "metal", "title": "Металл"},
                  ]}},
                 {"name": "silk_colors", "type": "integer", "required": False, "default": 1, "title": "Кол-во цветов (шелк)"},
+                {"name": "material_id", "type": "string", "required": False, "default": FILM_DEFAULT_MATERIAL, "title": "Термоплёнка (film)"},
+                {"name": "film_colors", "type": "integer", "required": False, "default": 1, "title": "Кол-во цветов/плёнок (film)"},
+                {"name": "size_item", "type": "number", "required": False, "default": 0, "title": "Размер элемента резки (film)", "unit": "мм"},
+                {"name": "density", "type": "number", "required": False, "default": 0, "title": "Плотность заполнения 0..1 (film)"},
+                {"name": "difficulty", "type": "number", "required": False, "default": 1, "title": "Сложность резки (film)"},
                 {"name": "mode", "type": "integer", "required": False, "default": 1, "title": "Режим"},
             ],
             "param_groups": {
                 "main": ["quantity", "width", "height"],
-                "processing": ["transfer_type", "item_type", "silk_colors"],
+                "processing": ["transfer_type", "item_type", "silk_colors", "material_id", "film_colors", "size_item", "density", "difficulty"],
                 "mode": ["mode"],
             },
         }
@@ -97,7 +106,7 @@ class HeatPressCalculator(BaseCalculator):
             pass
         return {
             "heatpresses": heatpresses,
-            "transfer_types": ["sublimation", "dtf", "silk"],
+            "transfer_types": ["sublimation", "dtf", "silk", "film"],
             "item_types": list(ITEM_HEATPRESS_MAP.keys()),
             "modes": [
                 {"value": ProductionMode.ECONOMY, "label": "Экономичный"},
@@ -116,9 +125,14 @@ class HeatPressCalculator(BaseCalculator):
                     "quantity": {"type": "integer", "minimum": 1, "description": "Тираж"},
                     "width": {"type": "number", "minimum": 1, "description": "Ширина нанесения, мм"},
                     "height": {"type": "number", "minimum": 1, "description": "Высота нанесения, мм"},
-                    "transfer_type": {"type": "string", "enum": ["sublimation", "dtf", "silk"], "description": "Тип трансфера"},
+                    "transfer_type": {"type": "string", "enum": ["sublimation", "dtf", "silk", "film"], "description": "Тип трансфера"},
                     "item_type": {"type": "string", "enum": list(ITEM_HEATPRESS_MAP.keys()), "default": "tshirt"},
                     "silk_colors": {"type": "integer", "default": 1, "description": "Кол-во цветов для шелка"},
+                    "material_id": {"type": "string", "default": FILM_DEFAULT_MATERIAL, "description": "Код термоплёнки (film)"},
+                    "film_colors": {"type": "integer", "default": 1, "description": "Кол-во плёнок/цветов (film)"},
+                    "size_item": {"type": "number", "default": 0, "description": "Размер элемента для резки (film), мм"},
+                    "density": {"type": "number", "default": 0, "description": "Плотность заполнения 0..1 (film)"},
+                    "difficulty": {"type": "number", "default": 1, "description": "Сложность формы резки (film)"},
                     "mode": {"type": "integer", "enum": [0, 1, 2], "default": 1},
                 },
                 "required": ["quantity", "width", "height", "transfer_type"],
@@ -133,6 +147,11 @@ class HeatPressCalculator(BaseCalculator):
         transfer_type = str(params.get("transfer_type", "sublimation")).strip().lower()
         item_type = str(params.get("item_type", "tshirt") or "tshirt").strip().lower()
         silk_colors = int(params.get("silk_colors", 1) or 1)
+        material_id = str(params.get("material_id") or FILM_DEFAULT_MATERIAL).strip() or FILM_DEFAULT_MATERIAL
+        film_colors = int(params.get("film_colors", 1) or 1)
+        size_item = float(params.get("size_item", 0) or 0)
+        density = float(params.get("density", 0) or 0)
+        difficulty = float(params.get("difficulty", 1) or 1)
         mode = ProductionMode(int(params.get("mode", 1)))
 
         heatpress_code = ITEM_HEATPRESS_MAP.get(item_type, "SahokSH49BD")
@@ -228,6 +247,28 @@ class HeatPressCalculator(BaseCalculator):
             time_ready_transfer = silk_result.time_ready
             materials_out = list(silk_result.materials)
             time_press_per_item = 10 / 3600.0
+
+        elif transfer_type == "film":
+            sticker_calc = StickerCalculator()
+            sticker_params = {
+                "quantity": num_with_defects * max(1, film_colors),
+                "width": size[0],
+                "height": size[1],
+                "size_item": size_item,
+                "density": density,
+                # В JS: difficulty * 2 (термоплёнка сложнее для выборки)
+                "difficulty": difficulty * 2.0,
+                "material_id": material_id,
+                "mode": mode.value,
+            }
+            sticker_result = sticker_calc.calculate(sticker_params)
+            cost_transfer = float(sticker_result.get("cost", 0))
+            price_transfer = float(sticker_result.get("price", 0))
+            time_transfer = float(sticker_result.get("time_hours", 0))
+            time_ready_transfer = float(sticker_result.get("time_ready", 0))
+            weight_transfer = float(sticker_result.get("weight_kg", 0))
+            materials_out = list(sticker_result.get("materials") or [])
+            time_press_per_item = 20 / 3600.0
 
         else:
             raise ValueError(f"Неизвестный тип трансфера: {transfer_type!r}")

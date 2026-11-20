@@ -158,3 +158,100 @@ def test_expected_values_heat_press_qty20(calc):
     assert em["name_substring"] in (mat.get("name") or "")
     assert float(mat.get("quantity") or 0) == pytest.approx(float(em["quantity_approx"]), rel=0.15)
     assert "title" in mat
+
+
+# JS, 21.11.2026 — дефолт формы 40 CalcHeatPress (numDensity скрыт -> density=0)
+# node scripts/run_js_calc.mjs calcHeatPress --data current --args '[100,[50,50],"film","bag",{"film":{"materialID":"POLIFLEXPREMIUMBW","sizeItem":50,"density":0,"difficulty":1,"color":1}},1]'
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "transfer_type": "film",
+    "item_type": "bag",
+    "material_id": "POLIFLEXPREMIUMBW",
+    "film_colors": 1,
+    "size_item": 50,
+    "density": 0,
+    "difficulty": 1,
+    "mode": 1,
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 9952.966555555557,
+    "price": 15967.324482222226,
+    "time_hours": 6.081111111111111,
+    "time_ready": 30.501111111111115,
+    "weight_kg": 0.06,
+}
+EXPECTED_FORM_DEFAULT_MODES = {
+    # JS, 21.11.2026 — режимы 0, 1, 2 для дефолта формы 40
+    0: {
+        "cost": 9789.966555555557,
+        "price": 15707.324482222226,
+        "time_hours": 5.981111111111112,
+        "time_ready": 54.35111111111111,
+    },
+    1: {
+        "cost": 9952.966555555557,
+        "price": 15967.324482222226,
+        "time_hours": 6.081111111111111,
+        "time_ready": 30.501111111111115,
+    },
+    2: {
+        "cost": 10258.207333333334,
+        "price": 16459.184173333335,
+        "time_hours": 6.236666666666666,
+        "time_ready": 15.706666666666667,
+    },
+}
+
+
+def test_form_default_film(calc):
+    """JS, 21.11.2026: дефолт формы 40 — film на bag, POLIFLEXPREMIUMBW, материал с size_mm."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    # В cut_plotter.py round вместо ceil даёт -0.01 ч (0.16%) на mode 0/1
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL, abs=0.02)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=JS_REL_TOL)
+    materials = r.get("materials") or []
+    assert materials
+    mat = materials[0]
+    assert mat.get("code") == "POLIFLEXPREMIUMBW"
+    assert mat.get("size_mm") == [500.0, 0.0]
+    assert float(mat.get("quantity") or 0) == pytest.approx(0.738, rel=0.02)
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form_default_film_modes(calc, mode):
+    """JS, 21.11.2026: режимы 0, 1, 2 на дефолте формы 40."""
+    r = calc.calculate({**REF_FORM_DEFAULT, "mode": mode})
+    e = EXPECTED_FORM_DEFAULT_MODES[mode]
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL, abs=0.02)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+
+
+def test_form_default_film_mode_order(calc):
+    """Собственное производство: price(0) < price(1) < price(2), time_ready(2) < time_ready(1) < time_ready(0)."""
+    res = {m: calc.calculate({**REF_FORM_DEFAULT, "mode": m}) for m in (0, 1, 2)}
+    assert res[0]["price"] < res[1]["price"] < res[2]["price"]
+    assert res[2]["time_ready"] < res[1]["time_ready"] < res[0]["time_ready"]
+
+
+def test_film_multifilms_and_density(calc):
+    """JS, 21.11.2026: film с 2 плёнками, density=0.25, difficulty=1.7."""
+    r = calc.calculate({
+        **REF_FORM_DEFAULT,
+        "film_colors": 2,
+        "density": 0.25,
+        "difficulty": 1.7,
+    })
+    assert r["cost"] == pytest.approx(12575.550555555557, rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(20202.433922222226, rel=JS_REL_TOL)
+    assert r["time_hours"] == pytest.approx(7.2011111111111115, rel=JS_REL_TOL, abs=0.02)
+    assert r["time_ready"] == pytest.approx(32.74111111111111, rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(0.11, rel=JS_REL_TOL)
+
