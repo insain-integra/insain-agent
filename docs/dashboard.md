@@ -37,14 +37,13 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **16**. В работе/ревью: `form-pad-print.md`. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **15**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `ai-calc-authoring-skill.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
 | `form-milling.md` | черновик |
-| `form-pad-print.md` | закрытие |
 | `form-poly-sticker-pack.md` | черновик |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
@@ -66,8 +65,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-22 — form-pad-print
 - 2026-11-22 — form-vizitki-promo
 - 2026-11-21 — print-sheet-copy-result
 - 2026-11-21 — print-sheet-big-sheet
 - 2026-11-21 — form-vizitki
-- 2026-11-21 — form-sticker-pack

@@ -23,7 +23,7 @@
 - `form-poly-sticker` (закрыто 2026-11-21, `docs/history/log.md`) — копия формы 30, slug `poly_sticker`
 - `todo/form-poly-sticker-pack.md` — копия формы 70, slug `poly_sticker_pack`
 - `todo/form-milling.md` — копия формы 35, slug `milling`
-- `todo/form-pad-print.md` — копия формы 38, slug `pad_print`
+- `form-pad-print` (закрыто 2026-11-22, `docs/history/log.md`) — копия формы 38, slug `pad_print`
 - `form-heat-press` (закрыто 2026-11-21, `docs/history/log.md`) — копия формы 40, slug `heat_press`
 - `form-canvas` (закрыто 2026-11-20, `docs/history/log.md`) — копия формы 80, slug `canvas`
 

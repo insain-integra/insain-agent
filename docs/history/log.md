@@ -6,6 +6,15 @@
 `docs/archive/`. Число сессий агентов — файлы чатов Cursor за период, включая субагентов.
 Часы человека — оценка по правилу 1 ч на коммит. Вне этапов — 1 коммит (`cd640ec`, правило ролей, 1 ч).
 
+## 2026-11-22 — form-pad-print
+
+- Период: 2026-11-22 — 2026-11-22 (1 дн.)
+- Часы человека: 6 сообщ. в чатах Cursor; активно 0.9 ч (ходы агента > 30 мин — с коэфф. 0.5)
+- Работа агентов: 4 чатов Cursor, 6 сообщ. человека, 0.9 ч активных; Implementer — Gemini 4 Hydrogen High; Reviewer — Grok 4.7; Site ops — Grok 4.7
+- Было / стало: не было `wp-plugin/forms/pad_print.js` и `REF_FORM_DEFAULT`; `calcPadPrint option Material` числился в `js_port_gaps_allowed.txt` / добавлен `wp-plugin/forms/pad_print.js` (id боевой формы 38), в docstring `pad_print.py` зафиксирован перенос `Material` → `material_mode` и убрана строка из `scripts/js_port_gaps_allowed.txt` (логика и ответы `pad_print.py` не менялись, `deploy-api` не требуется), в `test_pad_print.py` добавлены `REF_FORM_DEFAULT`, режимы `0/1/2` и тест опций. Строка для будущего `forms-batch-2` (не в текущий пакет): форма 38 CalcPadPrint → `pad_print`, копия 110, черновик 2586906, превью https://insain.ru/?post_type=product&p=2586906&preview=true . Боевая https://insain.ru/catalog/tampopechat/ остаётся на `insaincalc.calcPadPrint`.
+- Эффект: —
+- Источник: задача `todo/form-pad-print.md`, коммиты 4e5a74f 22a14ba
+
 ## 2026-11-22 — form-vizitki-promo
 
 - Период: 2026-11-22 — 2026-11-22 (1 дн.)
