@@ -21,7 +21,6 @@ calcMagnetLamination option isBarcode
 calcMagnetLamination option isVariables
 calcMetalPins option isPacking
 calcMilling option isCutMilling
-calcPadPrint option Material
 calcPrintSheet call calcPrintLaser
 calcPuzzle call calcTablets
 calcPuzzle call calcHeatPress

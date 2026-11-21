@@ -3,6 +3,7 @@
 
 Перенесено из js_legacy/calc/calcPadPrint.js.
 Тампопечать на изделиях: клише + краски + тампоны + УФ-сушка.
+Опция JS `Material` (`isMaterial` / `isMaterialCustomer`) перенесена как `material_mode`.
 """
 
 from __future__ import annotations

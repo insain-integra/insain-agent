@@ -172,3 +172,71 @@ def test_pad_print_modes(calc):
     assert r0["price"] < r1["price"] < r2["price"]
     assert r0["time_hours"] < r1["time_hours"] < r2["time_hours"]
     assert r2["time_ready"] < r1["time_ready"] < r0["time_ready"]
+
+
+# Дефолт формы 38 CalcPadPrint: 100 шт, «Ручка, брелок, зажигалка» (isSmallItems),
+# 1 цвет, материал наш, без Pantone и упаковки, режим 1.
+# JS, 22.11.2026 (calcPadPrint на calc_service/data/common.json и equipment/tools.json; в run_js_calc.mjs не подключён).
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "size_item": "isSmallItems",
+    "color": 1,
+    "is_pantone": False,
+    "is_packing": False,
+    "material_mode": "isMaterial",
+    "mode": 1,
+}
+
+EXPECTED_FORM_DEFAULT = {
+    "cost": 1878.45,
+    "price": 3436,
+    "time_hours": 1.26,
+    "time_ready": 9.26,
+}
+
+EXPECTED_FORM_DEFAULT_MODES = {
+    0: {"cost": 1638.0, "price": 3001, "time_hours": 1.11, "time_ready": 25.11},
+    1: EXPECTED_FORM_DEFAULT,
+    2: {"cost": 2219.8, "price": 3972, "time_hours": 1.41, "time_ready": 2.41},
+}
+
+
+def test_form_default_pad_print(calc):
+    """Дефолт формы 38: 100 шт, малые, 1 цвет, стандарт. Эталон JS, rel ≤ 0.001."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    assert r["cost"] == pytest.approx(e["cost"], rel=0.001)
+    assert r["price"] == pytest.approx(e["price"], rel=0.001)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=0.001)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=0.001)
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form_default_pad_print_modes(calc, mode):
+    """Дефолт формы 38 в режимах 0/1/2: сходится с JS, цена растёт, срок падает."""
+    r = calc.execute({**REF_FORM_DEFAULT, "mode": mode})
+    e = EXPECTED_FORM_DEFAULT_MODES[mode]
+    assert r["cost"] == pytest.approx(e["cost"], rel=0.001)
+    assert r["price"] == pytest.approx(e["price"], rel=0.001)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=0.001)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=0.001)
+
+
+def test_form_options_pad_print(calc):
+    """Опции формы 38: крупные, 2 цвета, Pantone, упаковка, материал заказчика. JS, 22.11.2026."""
+    r = calc.execute(
+        {
+            "quantity": 100,
+            "size_item": "isLargeItems",
+            "color": 2,
+            "is_pantone": True,
+            "is_packing": True,
+            "material_mode": "isMaterialCustomer",
+            "mode": 1,
+        }
+    )
+    assert r["cost"] == pytest.approx(8659.3, rel=0.001)
+    assert r["price"] == pytest.approx(14396, rel=0.001)
+    assert r["time_hours"] == pytest.approx(4.04, rel=0.001)
+    assert r["time_ready"] == pytest.approx(12.04, rel=0.001)
+
