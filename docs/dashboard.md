@@ -2,7 +2,7 @@
 
 # Дашборд insain.ru
 
-Состояние на последнюю запись журнала: **21.11.2026**.
+Состояние на последнюю запись журнала: **22.11.2026**.
 
 Собрано из `docs/vision.md`, `todo/`, `docs/site/forms.md`, `docs/history/log.md`. Обновляет
 `python scripts/dev.py dashboard` и `python scripts/dev.py close <задача>`.
@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **17**. В работе/ревью: `form-vizitki-promo.md`. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **16**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -46,7 +46,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-milling.md` | черновик |
 | `form-pad-print.md` | черновик |
 | `form-poly-sticker-pack.md` | черновик |
-| `form-vizitki-promo.md` | в работе |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
@@ -67,8 +66,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-22 — form-vizitki-promo
 - 2026-11-21 — print-sheet-copy-result
 - 2026-11-21 — print-sheet-big-sheet
 - 2026-11-21 — form-vizitki
 - 2026-11-21 — form-sticker-pack
-- 2026-11-21 — form-poly-sticker
