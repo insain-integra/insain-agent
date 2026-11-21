@@ -60,6 +60,23 @@ def test_sticker_js_posts_wide_print():
     assert not re.search(r"\bprice\s*=", text)
 
 
+def test_sticker_pack_js_branches_on_format_field():
+    """Форма 29: свои id и ветка по полю dpdFormat, id формы 22 не подменяют её."""
+    text = (FORMS / "sticker.js").read_text(encoding="utf-8")
+    assert "get_element_id_by_name(__form_id__, 'dpdFormat')" in text
+    assert "/* form 29 */" in text
+    assert "/* form 22 */" in text
+    assert "ezfc_functions.get_value_from(1062, true)[0]" in text
+    assert "ezfc_functions.get_value_from(1039, true)[0]" in text
+    assert "ezfc_functions.get_value_from(1056, true)[0]" in text
+    assert "is_find_mark: true" in text
+    assert "size_item: 50" in text
+    assert "density: 1" in text
+    assert "var wideLaminat = ezfc_functions.get_value_from(1064, true)[0];" in text
+    assert "querySelector" not in text
+    assert not re.search(r"\bprice\s*=", text)
+
+
 def test_laser_js_calls_laser_api():
     """Форма 28: материал, резка и режим уходят в calcApi('laser'), без своей цены."""
     text = (FORMS / "laser.js").read_text(encoding="utf-8")

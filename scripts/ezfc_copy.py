@@ -19,6 +19,11 @@ import sys
 from pathlib import Path
 
 GET_VALUE_FROM = re.compile(r"get_value_from\(\s*(\d+)")
+# Вторая форма того же slug: /* form 29 */ … /* /form */. Чужая ветка не переписывается.
+FORM_BLOCK = re.compile(
+    r"/\*\s*form\s+(\d+)\s*\*/(.*?)/\*\s*/form\s*\*/",
+    re.DOTALL,
+)
 GET_CHECKS = ("index", "value")
 
 
@@ -43,13 +48,51 @@ def parse_id_map(text: str) -> dict[str, tuple[int, int]]:
     return result
 
 
-def build_copy_js(js: str, id_map: dict[str, tuple[int, int]]) -> str:
-    """Id боевой формы в get_value_from(N) → id копии. Неизвестный id — ошибка."""
-    live_to_copy = {live: copy for live, copy in id_map.values()}
-    unknown = sorted({int(n) for n in GET_VALUE_FROM.findall(js)} - live_to_copy.keys())
-    if unknown:
+def _rewrite_known_ids(js: str, live_to_copy: dict[int, int], *, enforce: bool) -> str:
+    """Числовые get_value_from → id копии. Чужой блок (enforce=False) не трогаем."""
+    found = {int(n) for n in GET_VALUE_FROM.findall(js)}
+    unknown = sorted(found - live_to_copy.keys())
+    if unknown and enforce:
         raise ValueError(f"get_value_from с id не из боевой формы: {unknown}")
-    return GET_VALUE_FROM.sub(lambda m: f"get_value_from({live_to_copy[int(m.group(1))]}", js)
+    if not enforce:
+        return js
+
+    def repl(match: re.Match) -> str:
+        return f"get_value_from({live_to_copy[int(match.group(1))]}"
+
+    return GET_VALUE_FROM.sub(repl, js)
+
+
+def build_copy_js(
+    js: str,
+    id_map: dict[str, tuple[int, int]],
+    live: int | None = None,
+) -> str:
+    """Id боевой формы в get_value_from(N) → id копии.
+
+    Без блоков /* form N */ неизвестный id — ошибка.
+    С блоками переписывается только ветка этой формы и код вне блоков.
+    Id другой формы остаются: на копии эта ветка не выполняется.
+    """
+    live_to_copy = {live_id: copy for live_id, copy in id_map.values()}
+    blocks = list(FORM_BLOCK.finditer(js))
+    if not blocks:
+        return _rewrite_known_ids(js, live_to_copy, enforce=True)
+    if live is None:
+        raise ValueError("в JS есть блоки /* form N */ — нужен id боевой формы")
+    if live not in {int(block.group(1)) for block in blocks}:
+        raise ValueError(f"в JS нет блока /* form {live} */")
+    parts: list[str] = []
+    cursor = 0
+    for block in blocks:
+        parts.append(_rewrite_known_ids(js[cursor:block.start()], live_to_copy, enforce=True))
+        inner = block.group(2)
+        if int(block.group(1)) == live:
+            inner = _rewrite_known_ids(inner, live_to_copy, enforce=True)
+        parts.append(js[block.start() : block.start(2)] + inner + js[block.end(2) : block.end()])
+        cursor = block.end()
+    parts.append(_rewrite_known_ids(js[cursor:], live_to_copy, enforce=True))
+    return "".join(parts)
 
 
 def build_package(
@@ -67,7 +110,7 @@ def build_package(
         raise ValueError(f"элемента расчёта {calc_name} нет в таблице id")
     elements: dict[str, dict[str, str]] = {
         str(id_map[calc_name][1]): {
-            "custom_calculation": build_copy_js(js, id_map),
+            "custom_calculation": build_copy_js(js, id_map, live),
             "custom_calculation_function_read_file": "0",
         }
     }

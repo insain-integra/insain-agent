@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -69,3 +70,39 @@ def test_same_form_or_bad_check_stops():
         ezfc_copy.build_package("", 78, 78, id_map, "cjsCalc", [])
     with pytest.raises(ValueError, match="GET_check"):
         ezfc_copy.build_package("", 78, 91, id_map, "cjsCalc", ["numN:idx"])
+
+
+def _form_block(js: str, form_id: int) -> str:
+    match = re.search(rf"/\*\s*form\s+{form_id}\s*\*/(.*?)/\*\s*/form\s*\*/", js, re.DOTALL)
+    assert match, form_id
+    return match.group(1)
+
+
+def _id_map_for(ids: set[int], copy_base: int) -> dict:
+    lines = [f"cjsCalc\t1042\t{copy_base}"]
+    for offset, live in enumerate(sorted(ids), start=1):
+        lines.append(f"el{offset}\t{live}\t{copy_base + offset}")
+    return ezfc_copy.parse_id_map("\n".join(lines) + "\n")
+
+
+def test_sticker_copy_rewrites_only_live_form_block():
+    """Форма 29 и форма 22 в одном файле: копия переписывает id только своей ветки."""
+    js = (ROOT / "wp-plugin" / "forms" / "sticker.js").read_text(encoding="utf-8")
+    ids_29 = {int(n) for n in re.findall(r"get_value_from\(\s*(\d+)", _form_block(js, 29))}
+    ids_22 = {int(n) for n in re.findall(r"get_value_from\(\s*(\d+)", _form_block(js, 22))}
+    assert {1039, 1056, 1062} <= ids_29
+    assert 1064 in ids_22
+    assert ids_29.isdisjoint(ids_22)
+
+    out_29 = ezfc_copy.build_copy_js(js, _id_map_for(ids_29, 29000), live=29)
+    assert "get_value_from(1064, true)" in out_29
+    assert "get_value_from(1039" not in _form_block(out_29, 29)
+    assert "get_value_from(29001" in _form_block(out_29, 29)
+
+    out_22 = ezfc_copy.build_copy_js(js, _id_map_for(ids_22, 22000), live=22)
+    assert "get_value_from(1039, true)" in out_22
+    assert "get_value_from(1064" not in _form_block(out_22, 22)
+
+    broken = js.replace("get_value_from(1039, true)", "get_value_from(3999, true)", 1)
+    with pytest.raises(ValueError, match="3999"):
+        ezfc_copy.build_copy_js(broken, _id_map_for(ids_29 - {1039}, 29000), live=29)

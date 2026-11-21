@@ -225,6 +225,56 @@ def test_form_default_raflacoat(calc):
     assert "title" in mat
 
 
+# JS, 21.11.2026 — дефолт формы 29 CalcStickerPack: 10 шт, поле 175×250, RAFLACOAT,
+# size_item 50, density 1, difficulty 1, метки, без печати (isPrint в боевом JS — строка).
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[10,[175,250],50,1,1,"RAFLACOAT",{"isLenCut":0,"isFindMark":true,"isPrint":"KMBizhubC220"},1]'
+# mode 0 и 2 — тот же вызов с последним аргументом 0 и 2.
+# price и cost совпали с раннером. time_hours JS на 0.01 больше (ceil резки):
+# mode 1 — 0.47/16.47 против Python 0.46/16.46. Калькулятор этой задачей не меняется.
+REF_FORM_PACK_DEFAULT = {
+    "quantity": 10,
+    "width": 175,
+    "height": 250,
+    "material_id": "RAFLACOAT",
+    "size_item": 50,
+    "density": 1,
+    "difficulty": 1,
+    "is_find_mark": True,
+    "mode": 1,
+}
+EXPECTED_FORM_PACK = {
+    0: {"cost": 843.8, "price": 1356.268, "time_hours": 0.42, "time_ready": 32.42, "weight_kg": 0.09},
+    1: {"cost": 930.8, "price": 1496.268, "time_hours": 0.47, "time_ready": 16.47, "weight_kg": 0.09},
+    2: {"cost": 1017.8, "price": 1635.268, "time_hours": 0.52, "time_ready": 8.52, "weight_kg": 0.09},
+}
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form_pack_default(calc, mode):
+    """Дефолт формы 29: поле SRA4 175×250, RAFLACOAT, метки, без печати."""
+    result = calc.execute({**REF_FORM_PACK_DEFAULT, "mode": mode})
+    expected = EXPECTED_FORM_PACK[mode]
+    rel = 0.001
+    assert _cmp(result["cost"], expected["cost"], rel), result["cost"]
+    assert _cmp(result["price"], expected["price"], rel), result["price"]
+    assert abs(result["time_hours"] - expected["time_hours"]) <= 0.011, result["time_hours"]
+    assert abs(result["time_ready"] - expected["time_ready"]) <= 0.011, result["time_ready"]
+    assert _cmp(result["weight_kg"], expected["weight_kg"], rel), result["weight_kg"]
+    materials = result["materials"]
+    assert materials, "ожидается материал"
+    mat = materials[0]
+    assert mat["code"] == "RAFLACOAT"
+    assert mat["quantity"] == 6
+    assert mat["unit"] == "лист"
+    assert mat["size_mm"] == [320.0, 450.0]
+    assert "title" in mat
+    if mode == 1:
+        assert result["price"] > EXPECTED_FORM_PACK[0]["price"]
+        assert result["price"] < EXPECTED_FORM_PACK[2]["price"]
+        assert result["time_ready"] < EXPECTED_FORM_PACK[0]["time_ready"]
+        assert result["time_ready"] > EXPECTED_FORM_PACK[2]["time_ready"]
+
+
 # JS, 14.11.2026 — calcSticker → calcCutPlotter, RAFLACOAT, тираж 100, сложность 1, без печати.
 # 400×400, 281×281, 280×431: «Размер изделия больше допустимого».
 # 280×430: price 8417.69, time_ready 17.85. 281×280: price 7965.69, time_ready 17.69.
