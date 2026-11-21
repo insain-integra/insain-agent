@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **21**. В работе/ревью: `form-poly-sticker.md`. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **20**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -46,7 +46,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-milling.md` | черновик |
 | `form-pad-print.md` | черновик |
 | `form-poly-sticker-pack.md` | черновик |
-| `form-poly-sticker.md` | в работе |
 | `form-sticker-pack.md` | черновик |
 | `form-vizitki-promo.md` | черновик |
 | `form-vizitki.md` | черновик |
@@ -71,8 +70,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-21 — form-poly-sticker
 - 2026-11-21 — form-heat-press
 - 2026-11-21 — ai-seo-geo-yoast
 - 2026-11-21 — wt-geotargeting-update
 - 2026-11-20 — ezfc-form-builder
-- 2026-11-20 — form-canvas

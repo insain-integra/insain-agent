@@ -19,7 +19,7 @@
 - `todo/form-vizitki.md` — вторая форма slug `print_sheet`, боевая 19; в пакет 1 не входит
 - `todo/form-vizitki-promo.md` — вторая форма slug `print_offset`, боевая 83
 - `todo/form-sticker-pack.md` — вторая форма slug `sticker`, боевая 29
-- `todo/form-poly-sticker.md` — копия формы 30, slug `poly_sticker`
+- `form-poly-sticker` (закрыто 2026-11-21, `docs/history/log.md`) — копия формы 30, slug `poly_sticker`
 - `todo/form-poly-sticker-pack.md` — копия формы 70, slug `poly_sticker_pack`
 - `todo/form-milling.md` — копия формы 35, slug `milling`
 - `todo/form-pad-print.md` — копия формы 38, slug `pad_print`

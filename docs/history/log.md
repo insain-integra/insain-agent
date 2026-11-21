@@ -6,6 +6,15 @@
 `docs/archive/`. Число сессий агентов — файлы чатов Cursor за период, включая субагентов.
 Часы человека — оценка по правилу 1 ч на коммит. Вне этапов — 1 коммит (`cd640ec`, правило ролей, 1 ч).
 
+## 2026-11-21 — form-poly-sticker
+
+- Период: 2026-11-21 — 2026-11-21 (1 дн.)
+- Часы человека: 6 сообщ. в чатах Cursor; активно 0.9 ч (ходы агента > 30 мин — с коэфф. 0.5)
+- Работа агентов: 4 чатов Cursor, 6 сообщ. человека, 0.9 ч активных; Implementer — Grok 4.7; Site ops — Grok 4.7
+- Было / стало: форма 30 на `insaincalc.calcPolySticker`. В git есть `wp-plugin/forms/poly_sticker.js` (`calcApi`, `syncUrl`, `showResult`) и `REF_FORM_DEFAULT`. Боевая форма и плагин не менялись. На проде копия формы 106 «CalcPolySticker duplicate» на черновике товара 2586902, `ezfc_form_id` 106. URL копии: https://insain.ru/?post_type=product&p=2586902&preview=true&numN=100&numW=50&numH=50&dpdMaterial=0&dpdDifficulty=0&dpdPrint=0&rdoModeProduction=1
+- Эффект: —
+- Источник: задача `todo/form-poly-sticker.md`, коммиты 8fedac2 22a14ba
+
 ## 2026-11-21 — form-heat-press
 
 - Период: 2026-11-21 — 2026-11-21 (1 дн.)
