@@ -185,3 +185,74 @@ def test_expected_values_poly_sticker(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+# JS, 21.11.2026 — дефолт формы 30: 100 шт 50×50 RaflatacMW, сложность 1, без печати, mode 1.
+# node scripts/run_js_calc.mjs calcPolySticker --data current --args '[100,[50,50],1,"RaflatacMW",{},1]'
+# mode=0 и mode=2 — тот же вход, последний аргумент 0 и 2.
+# mode=2 weight: раннер 0.65, Python 0.64 — round веса эпоксидки, в assert не входит.
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "RaflatacMW",
+    "difficulty": 1,
+    "mode": 1,
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 5486,
+    "price": 10224.65,
+    "time_hours": 2.27,
+    "time_ready": 42.27,
+    "weight_kg": 0.56,
+}
+# mode, cost, price, time_hours, time_ready
+_FORM_DEFAULT_MODES = (
+    (0, 5337, 9952.1, 2.19, 58.19),
+    (2, 6363, 11855.35, 2.69, 26.69),
+)
+
+
+def test_form_default_raflatac(calc):
+    """Дефолт формы 30: RaflatacMW без печати."""
+    result = calc.execute(REF_FORM_DEFAULT)
+    expected = EXPECTED_FORM_DEFAULT
+    rel = 0.001
+    assert _cmp(result["cost"], expected["cost"], rel), result["cost"]
+    assert _cmp(result["price"], expected["price"], rel), result["price"]
+    assert _cmp(result["time_hours"], expected["time_hours"], rel), result["time_hours"]
+    assert _cmp(result["time_ready"], expected["time_ready"], rel), result["time_ready"]
+    assert _cmp(result["weight_kg"], expected["weight_kg"], rel), result["weight_kg"]
+    materials = result["materials"]
+    film = materials[0]
+    assert film["code"] == "RaflatacMW"
+    assert film["quantity"] == 4
+    assert film["unit"] == "лист"
+    assert film["size_mm"] == [320.0, 450.0]
+    assert "title" in film
+    epoxy = next(item for item in materials if item.get("code") == "EpoxyPoly")
+    assert epoxy["quantity"] == pytest.approx(0.48, rel=0.001)
+    assert "title" in epoxy
+
+
+@pytest.mark.parametrize("mode,cost,price,time_hours,time_ready", _FORM_DEFAULT_MODES)
+def test_form_default_modes(calc, mode, cost, price, time_hours, time_ready):
+    """Дефолт формы 30 на mode=0 и mode=2: цена и срок как у раннера."""
+    result = calc.execute({**REF_FORM_DEFAULT, "mode": mode})
+    rel = 0.001
+    assert _cmp(result["cost"], cost, rel), result["cost"]
+    assert _cmp(result["price"], price, rel), result["price"]
+    assert _cmp(result["time_hours"], time_hours, rel), result["time_hours"]
+    assert _cmp(result["time_ready"], time_ready, rel), result["time_ready"]
+
+
+def test_form_default_mode_order(calc):
+    """Своё производство: price(0) < price(1) < price(2), срок наоборот."""
+    prices = []
+    ready = []
+    for mode in (0, 1, 2):
+        result = calc.execute({**REF_FORM_DEFAULT, "mode": mode})
+        prices.append(result["price"])
+        ready.append(result["time_ready"])
+    assert prices[0] < prices[1] < prices[2]
+    assert ready[2] < ready[1] < ready[0]
