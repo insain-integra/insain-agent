@@ -15,7 +15,7 @@
 
 - `todo/forms-batch-switch.md` — боевой пакет, 14 принятых копий (список в «Пачки»)
 - `todo/presswall-banner-mode.md` — баннер и чехол `presswall` в режиме формы; до переключения формы 46
-- `todo/print-sheet-copy-result.md` — на копии 96 показать за шт со скидкой (`htmCost`)
+- `print-sheet-copy-result` (закрыто 2026-11-21, `docs/history/log.md`) — на копии 96 показать за шт со скидкой (`htmCost`)
 - `form-vizitki` (закрыто 2026-11-21, `docs/history/log.md`) — вторая форма slug `print_sheet`, боевая 19; в пакет 1 не входит
 - `print-sheet-big-sheet` (закрыто 2026-11-21, `docs/history/log.md`) — лист больше принтера в `print_sheet`: цена Маджестик на API, копия 107 берёт её без записи в ezFC, боевые формы 6 и 19 на старом JS
 - `todo/form-vizitki-promo.md` — вторая форма slug `print_offset`, боевая 83
@@ -50,7 +50,7 @@
 1. `todo/presswall-banner-mode.md` — параллельно пакету: только `presswall.py` и его тест. Форму 46 на бой не переключать, пока новый `price` не на боевом API.
 2. `todo/forms-batch-switch.md` — 14 форм из строки «Пакет 1». Форма 46 последней и только после пункта 1. Состав не расширять: формы 12, 19, 83, 29 и пачка 4 в этот файл не дописывать.
 3. Параллельно пакету, файлы не пересекаются: хвост уже принятых slug (`form-vizitki`, `form-vizitki-promo`, `form-sticker-pack`) и пачка 4. Общие файлы (`docs/site/forms.md`, `todo/forms-batch-switch.md`, `docs/js-runner-cases.md`) в этих ветках не править. JS первой формы slug не ломать: id и `REF_FORM_DEFAULT` формы 6, 82 и 22 остаются.
-4. `todo/print-sheet-copy-result.md` — только блок результата копии 96. Форму 19 и `print_sheet.js` не трогает.
+4. `print-sheet-copy-result` (закрыто 2026-11-21, `docs/history/log.md`) — только блок результата копии 96. Форму 19 и `print_sheet.js` не трогает.
 5. Следующий боевой пакет (`forms-batch-2`) заводить после закрытия `forms-batch-switch`: оба правят `docs/site/forms.md`. Туда входят уже готовая копия 12 и те копии пунктов 3, которые человек принял. Файл заранее не создавать.
 6. Пачки 5–7 — задачи не заведены. У `badge`, `tablets`, `shild`, `calendar` (ламинация перекидного), `magnet_laminated` в `scripts/js_port_gaps_allowed.txt` длинные пропуски; форма 68 в реестре вызывает `calcTablets`, в эпике указан slug `shild`. Ставить лид-форму slug после сверки порта, не пачкой заранее. `metal_pins`, `cards`, `keychain`, `magnet_acrylic` ближе к готовым — их задачи писать следующей волной, не сейчас.
 
