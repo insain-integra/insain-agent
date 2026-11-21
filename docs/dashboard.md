@@ -52,7 +52,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `metrics-baseline.md` | заблокировано: человек |
 | `pilot-acrylic-medals-calc.md` | заблокировано: ждёт todo/ai-calc-authoring-skill.md |
 | `presswall-banner-mode.md` | черновик |
-| `print-sheet-big-sheet.md` | ревью |
+| `print-sheet-big-sheet.md` | выкатка |
 | `print-sheet-copy-result.md` | черновик |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
 | `smartcaptcha-replace.md` | черновик |
