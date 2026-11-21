@@ -933,3 +933,69 @@ def test_print_sheet_cover_a4_lam_mode2(calc):
     assert r["cost"] == pytest.approx(e["cost"], rel=REF_REL_TOL)
     assert r["price"] == pytest.approx(e["price"], rel=REF_REL_TOL)
     assert r["time_ready"] == pytest.approx(e["time_ready"], rel=REF_REL_TOL)
+
+
+# ── Большой лист (не помещается в принтер, предварительная резка) ──
+
+# JS, 21.11.2026 — лист MAJESTIC 1020×720 > maxSize KMBizhubC220 320×450 и > гильотины KWTrio3971 475×650.
+# Раскладка 4 печатных листа на листе материала, предварительный рез на роликовом KWTrio3026.
+# node scripts/run_js_calc.mjs calcPrintSheet --data current --args '[100,[90,50],"4+0",[2,2,2,2],4,"MAJESTIC",{},1]'
+# weight_kg — вес изделий (0.1305 кг); в JS 0.2088 (лист). Верный вес — Python, решение 11.11.2026.
+REF_MAJESTIC_BIG_SHEET = {
+    "quantity": 100,
+    "width": 90,
+    "height": 50,
+    "color": "4+0",
+    "margins": [2, 2, 2, 2],
+    "interval": 4,
+    "material_id": "MAJESTIC",
+    "mode": 1,
+}
+EXPECTED_MAJESTIC_BIG_SHEET = {
+    "cost": 1202.0618181818181,
+    "price": 1962.9526181818183,
+    "time_hours": 0.34,
+    "time_ready": 8.5,
+    "weight_kg": 0.1305,
+    "material_qty": 2,
+    "material_size_mm": [1020.0, 720.0],
+}
+
+
+def test_print_sheet_big_sheet_majestic(calc):
+    """JS, 21.11.2026: MAJESTIC 1020×720 — раскладка 320×450 на материал + рез KWTrio3026."""
+    r = calc.execute(REF_MAJESTIC_BIG_SHEET)
+    e = EXPECTED_MAJESTIC_BIG_SHEET
+    assert r["cost"] == pytest.approx(e["cost"], rel=REF_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=REF_REL_TOL)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=REF_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=REF_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=REF_REL_TOL)
+    mats = r["materials"]
+    assert mats, "ожидается материал в результате"
+    mat = mats[0]
+    assert mat["code"] == "MAJESTIC"
+    assert mat["size_mm"] == e["material_size_mm"]
+    assert mat["quantity"] == e["material_qty"]
+
+
+def test_print_sheet_big_sheet_guillotine_precut(calc):
+    """Лист больше принтера EPSONWF7610 (297×420), но входит в гильотину KWTrio3971 (475×650)."""
+    base = {
+        "quantity": 100,
+        "width": 90,
+        "height": 50,
+        "color": "4+0",
+        "margins": [2, 2, 2, 2],
+        "interval": 4,
+        "material_id": "PaperCoated300M",
+        "printer_code": "EPSONWF7610",
+        "mode": 1,
+    }
+    r_cut = calc.execute(base)
+    r_nocut = calc.execute({**base, "no_cut": True})
+    # no_cut отключает резку изделий с печатного листа, но предварительная резка листа в гильотине остаётся.
+    assert r_cut["cost"] > r_nocut["cost"] > 0
+    assert r_nocut["materials"][0]["size_mm"] == [320.0, 450.0]
+    assert r_nocut["materials"][0]["quantity"] > 0
+

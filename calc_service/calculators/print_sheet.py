@@ -15,7 +15,8 @@ import math
 from typing import Any, Dict, List, Mapping, Optional
 
 from calculators.base import BaseCalculator, ProductionMode
-from calculators.cut_guillotine import CutGuillotineCalculator
+from calculators.cut_guillotine import CUTTER_CODE as GUILLOTINE_CUTTER_CODE, CutGuillotineCalculator
+from calculators.cut_roller import CUTTER_CODE as ROLLER_CUTTER_CODE, CutRollerCalculator
 from calculators.lamination import LaminationCalculator, LAMINATOR_CODE
 from calculators.print_inkjet import PrintInkjetCalculator
 from common.helpers import calc_weight
@@ -28,6 +29,7 @@ from common.markups import (
     get_margin,
     get_time_ready,
 )
+from equipment import cutter as cutter_catalog
 from equipment import printer as printer_catalog
 from equipment import laminator as laminator_catalog
 from materials import sheet as sheet_catalog
@@ -510,15 +512,63 @@ class PrintSheetCalculator(BaseCalculator):
         if len(sum_margins) < 4:
             sum_margins = sum_margins + [0] * (4 - len(sum_margins))
 
-        layout_on_printer = layout_on_sheet(size_sheet, max_printer, None, 0.0)
+        material_size = list(size_sheet)
+        cost_cut = 0.0
+        price_cut = 0.0
+        time_cut = 0.0
+        layout_on_printer = layout_on_sheet(material_size, max_printer, None, 0.0)
         if layout_on_printer["num"] == 0:
-            size_sheet = list(max_printer)
-            layout_on_material = layout_on_sheet(size_sheet, size_sheet, None, 0.0)
+            size_sheet = [float(max_printer[0]), float(max_printer[1])]
+            layout_on_material = layout_on_sheet(size_sheet, material_size, None, 0.0)
+            if layout_on_material["num"] == 0:
+                return self._empty_result(size, quantity, mode)
             layout_sheet = layout_on_sheet(size, size_sheet, sum_margins, interval)
             if layout_sheet["num"] == 0:
                 return self._empty_result(size, quantity, mode)
             num_sheet = math.ceil(quantity / layout_sheet["num"])
-            # TODO: доп. резка (гильотина/роликовый) — не реализовано
+
+            # Предварительная резка большого листа до размера печати принтера (как в calcPrintSheet.js):
+            # лист входит в гильотину → CutGuillotineCalculator, иначе → CutRollerCalculator (KWTrio3026).
+            try:
+                guillotine = cutter_catalog.get(GUILLOTINE_CUTTER_CODE)
+                guillotine_max = guillotine.max_size or [475, 650]
+            except Exception:
+                guillotine_max = [475, 650]
+            layout_on_cutter = layout_on_sheet(material_size, guillotine_max, None, 0.0)
+            if layout_on_cutter["num"] > 0:
+                cut_pre = CutGuillotineCalculator().calculate(
+                    {
+                        "num_sheet": num_sheet,
+                        "width": size_sheet[0],
+                        "height": size_sheet[1],
+                        "sheet_width": material_size[0],
+                        "sheet_height": material_size[1],
+                        "material_id": material_id,
+                        "material_category": "sheet",
+                        "margins": [0, 0, 0, 0],
+                        "interval": 0,
+                        "mode": mode.value,
+                    }
+                )
+            else:
+                try:
+                    cut_pre = CutRollerCalculator().calculate(
+                        {
+                            "quantity": num_sheet,
+                            "width": size_sheet[0],
+                            "height": size_sheet[1],
+                            "material_id": material_id,
+                            "material_category": "sheet",
+                            "cutter_code": ROLLER_CUTTER_CODE,
+                            "material_mode": "noMaterial",
+                            "mode": mode.value,
+                        }
+                    )
+                except ValueError:
+                    raise ValueError("Материал не помещается в резак") from None
+            cost_cut = float(cut_pre.get("cost", 0.0))
+            price_cut = float(cut_pre.get("price", 0.0))
+            time_cut = float(cut_pre.get("time_hours", 0.0))
         else:
             layout_sheet = layout_on_sheet(size, size_sheet, sum_margins, interval)
             if layout_sheet["num"] == 0:
@@ -613,16 +663,19 @@ class PrintSheetCalculator(BaseCalculator):
             print_time_ready = time_print + float(printer_base_list[idx_printer])
 
         # Материал: costMaterial = material.cost * ceil(numSheetToPrint*(1+defectsPrinter)) / layoutOnMaterial.num
+        # В materials отдаём целое число листов материала: ceil(numSheetToPrint*(1+defectsPrinter)/layoutOnMaterial.num).
         layout_num = max(1, layout_on_material.get("num", 1))
         num_sheets_physical = math.ceil(num_sheet_to_print * (1 + defects_printer) / layout_num)
-        cost_material = float(material.get_cost(1)) * num_sheets_physical
+        cost_material = (
+            float(material.get_cost(1))
+            * math.ceil(num_sheet_to_print * (1 + defects_printer))
+            / layout_num
+        )
 
-        cost_cut = 0.0
         cost_lamination = 0.0
         cost_cut_guillotine = 0.0
         price_cut_guillotine = 0.0
         price_lamination = 0.0
-        time_cut = 0.0
         time_lamination = 0.0
         time_cut_guillotine = 0.0
 
@@ -710,6 +763,7 @@ class PrintSheetCalculator(BaseCalculator):
         # JS calcPrintSheet: без Math.ceil на price (лазер и струйная).
         price = (
             price_material
+            + price_cut
             + price_print
             + price_cut_guillotine
             + price_lamination
