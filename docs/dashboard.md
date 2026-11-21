@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **17**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **17**. В работе/ревью: `form-vizitki-promo.md`. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -46,7 +46,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-milling.md` | черновик |
 | `form-pad-print.md` | черновик |
 | `form-poly-sticker-pack.md` | черновик |
-| `form-vizitki-promo.md` | черновик |
+| `form-vizitki-promo.md` | в работе |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |

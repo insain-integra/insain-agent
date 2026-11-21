@@ -250,6 +250,87 @@ def test_form_default_print_offset_promo(calc):
     assert r["time_ready"] == pytest.approx(e["time_ready"], rel=0.001)
 
 
+# JS, 22.11.2026 — дефолт боевой формы 83 CalcCardPromo: тираж 1000,
+# сборник OffsetPromoViz1000 зашит в cjsCalc, режим «стандарт» (data-value 1).
+# node scripts/run_js_calc.mjs calcPrintOffsetPromo --data current --args '[1000,"OffsetPromoViz1000",1]'
+# mode 0 и 2 — тот же вход. Цена от mode не зависит. Боевой API совпал 22.11.2026.
+VIZ_CODE = "OffsetPromoViz1000"
+REF_FORM83_DEFAULT = {
+    "num_sheet": 1000,
+    "material_id": VIZ_CODE,
+    "mode": 1,
+}
+EXPECTED_FORM83_DEFAULT = {
+    "cost": 1200.0,
+    "price": 2284.8,
+    "time_hours": 0.0,
+    "time_ready": 48.0,
+}
+EXPECTED_FORM83_MODE0 = {
+    "cost": 1200.0,
+    "price": 2284.8,
+    "time_hours": 0.0,
+    "time_ready": 56.0,
+}
+EXPECTED_FORM83_MODE2 = {
+    "cost": 1200.0,
+    "price": 2284.8,
+    "time_hours": 0.0,
+    "time_ready": 40.0,
+}
+
+
+def test_form83_default_print_offset_promo(calc):
+    """JS, 22.11.2026: дефолт формы 83, визитки сборным тиражом, режим data-value 1."""
+    r = calc.execute(REF_FORM83_DEFAULT)
+    e = EXPECTED_FORM83_DEFAULT
+    assert r["cost"] == pytest.approx(e["cost"], rel=0.001)
+    assert r["price"] == pytest.approx(e["price"], rel=0.001)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=0.001)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=0.001)
+    mat = r["materials"][0]
+    assert mat["code"] == VIZ_CODE
+    assert mat["name"] and mat["title"] and mat["name"] != VIZ_CODE
+
+
+def test_form83_default_print_offset_promo_modes(calc):
+    """JS, 22.11.2026: тот же дефолт формы 83, mode 0 и 2. Ноль не поднимается до 1."""
+    base = dict(REF_FORM83_DEFAULT)
+    r0 = calc.execute({**base, "mode": 0})
+    r2 = calc.execute({**base, "mode": 2})
+    e0 = EXPECTED_FORM83_MODE0
+    e2 = EXPECTED_FORM83_MODE2
+    assert r0["cost"] == pytest.approx(e0["cost"], rel=0.001)
+    assert r0["price"] == pytest.approx(e0["price"], rel=0.001)
+    assert r0["time_hours"] == pytest.approx(e0["time_hours"], rel=0.001)
+    assert r0["time_ready"] == pytest.approx(e0["time_ready"], rel=0.001)
+    assert r2["cost"] == pytest.approx(e2["cost"], rel=0.001)
+    assert r2["price"] == pytest.approx(e2["price"], rel=0.001)
+    assert r2["time_hours"] == pytest.approx(e2["time_hours"], rel=0.001)
+    assert r2["time_ready"] == pytest.approx(e2["time_ready"], rel=0.001)
+
+
+def test_form83_js_keeps_form82_ids_and_branches_by_format():
+    """Форма 83 — своя ветка по отсутствию dpdFormat. Id формы 82 остаются."""
+    text = (
+        Path(__file__).resolve().parents[3] / "wp-plugin" / "forms" / "print_offset.js"
+    ).read_text(encoding="utf-8")
+    assert "get_element_id_by_name(__form_id__, 'dpdFormat')" in text
+    assert "get_element_id_by_name(null," not in text
+    assert "/* form 82 */" in text
+    assert "/* form 83 */" in text
+    assert "__form_id__ == 83" not in text and "__form_id__ === 83" not in text
+    assert "ezfc_functions.get_value_from(3189, true)[0]" in text
+    assert "ezfc_functions.get_value_from(3221, true)[0]" in text
+    assert "ezfc_functions.get_value_from(3242, true)[0]" in text
+    assert "3208" in text
+    assert "OffsetPromoViz1000" in text
+    assert "insaincalc.calcApi('print_offset'" in text
+    assert "insaincalc.syncUrl(" in text
+    assert "insaincalc.showResult(" in text
+    assert "querySelector" not in text
+
+
 # JS, 20.11.2026 — сверка mode=0, 1, 2 с run_js_calc.mjs calcPrintOffset --data current:
 # node scripts/run_js_calc.mjs calcPrintOffset --data current --args '[1000,[210,297],"4+0","PaperCoated115M",0]'
 # node scripts/run_js_calc.mjs calcPrintOffset --data current --args '[1000,[210,297],"4+0","PaperCoated115M",2]'
