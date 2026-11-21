@@ -17,7 +17,7 @@
 - `todo/presswall-banner-mode.md` — баннер и чехол `presswall` в режиме формы; до переключения формы 46
 - `todo/print-sheet-copy-result.md` — на копии 96 показать за шт со скидкой (`htmCost`)
 - `form-vizitki` (закрыто 2026-11-21, `docs/history/log.md`) — вторая форма slug `print_sheet`, боевая 19; в пакет 1 не входит
-- `todo/print-sheet-big-sheet.md` — лист больше принтера в `print_sheet` (Маджестик); копия 107 ждёт эту цену
+- `print-sheet-big-sheet` (закрыто 2026-11-21, `docs/history/log.md`) — лист больше принтера в `print_sheet`: цена Маджестик на API, копия 107 берёт её без записи в ezFC, боевые формы 6 и 19 на старом JS
 - `todo/form-vizitki-promo.md` — вторая форма slug `print_offset`, боевая 83
 - `form-sticker-pack` (закрыто 2026-11-21, `docs/history/log.md`) — вторая форма slug `sticker`, боевая 29
 - `form-poly-sticker` (закрыто 2026-11-21, `docs/history/log.md`) — копия формы 30, slug `poly_sticker`
