@@ -110,6 +110,21 @@ def test_print_roll_js_writes_eyelet_step_cm_and_reads_radio_zero():
     assert not re.search(r"\bprice\s*=", text)
 
 
+def test_print_sheet_js_branches_by_dpd_laminat_with_form_id():
+    """Форма 19/копия 107 определяется через __form_id__ и dpdLaminat, без null и без хардкода id формы."""
+    text = (FORMS / "print_sheet.js").read_text(encoding="utf-8")
+    assert "ezfc_functions.get_element_id_by_name(__form_id__, 'dpdLaminat')" in text
+    assert "get_element_id_by_name(null," not in text
+    assert "__form_id__ == 19" not in text and "__form_id__ === 19" not in text
+    assert "__form_id__ == 107" not in text and "__form_id__ === 107" not in text
+    assert "{{numCrease}}" not in text
+    for el_id in (99, 100, 101, 102, 103, 400, 401, 402, 419, 519, 661, 663, 664, 665, 666, 667, 668):
+        assert f"get_value_from({el_id}" in text
+    assert "insaincalc.calcApi('print_sheet'" in text
+    assert "insaincalc.syncUrl(" in text
+    assert "insaincalc.showResult(" in text
+
+
 def test_forms_keep_mode_zero():
     """Режим 0 («дешевле») не превращается в 1 через ||, даже если сейчас в форме его нет."""
     bad = []

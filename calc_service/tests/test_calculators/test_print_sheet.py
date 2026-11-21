@@ -214,6 +214,42 @@ EXPECTED_FORM_DEFAULT = {
     "time_ready": 8.6,
     "weight_kg": 0.4989599999999999,
 }
+
+# JS, 21.11.2026 — дефолт боевой формы 19 CalcCards: 100 шт, 90×50, 4+0,
+# PaperCoated300M, поля [2,2,2,2], интервал 4, без ламинации и опций, mode 1.
+# node scripts/run_js_calc.mjs calcPrintSheet --data current --args
+# '[100,[90,50],"4+0",[2,2,2,2],4,"PaperCoated300M",{},1]'
+# price и time_ready совпали с боевым API. mode 0 и 2 — тот же вход.
+# weight_kg — вес изделий. JS 0.216 (лист с обрезью). Верный вес — Python, решение 11.11.2026.
+REF_FORM19_DEFAULT = {
+    "quantity": 100,
+    "width": 90,
+    "height": 50,
+    "material_id": "PaperCoated300M",
+    "color": "4+0",
+    "margins": [2, 2, 2, 2],
+    "interval": 4,
+    "mode": 1,
+}
+EXPECTED_FORM19_DEFAULT = {
+    "cost": 625.4418181818182,
+    "price": 1011.4034181818182,
+    "time_hours": 0.27,
+    "time_ready": 8.43,
+    "weight_kg": 0.135,
+}
+EXPECTED_FORM19_MODE0 = {
+    "cost": 370.90181818181816,
+    "price": 602.8170181818182,
+    "time_hours": 0.17,
+    "time_ready": 24.17,
+}
+EXPECTED_FORM19_MODE2 = {
+    "cost": 905.0727272727273,
+    "price": 1460.4952727272728,
+    "time_hours": 0.37,
+    "time_ready": 1.63,
+}
 EXPECTED_MATERIAL = {
     "code": "PaperCoated300M",
     "name_substring": "Титан DIGITAL мелованная",  # часть названия
@@ -435,6 +471,56 @@ def test_form_default_print_sheet(calc):
     assert "Снегурочка" in mat["name"], mat["name"]
     assert mat["size_mm"] == [297.0, 420.0], mat.get("size_mm")
     assert mat["quantity"] == pytest.approx(105), mat.get("quantity")
+
+
+def test_form19_default_print_sheet(calc):
+    """JS, 21.11.2026: дефолт формы 19, 100 шт, 90×50, PaperCoated300M, интервал 4."""
+    r = calc.execute(REF_FORM19_DEFAULT)
+    e = EXPECTED_FORM19_DEFAULT
+    rel = REF_REL_TOL
+    assert r["cost"] == pytest.approx(e["cost"], rel=rel), (
+        f"cost: got {r['cost']}, expected ~{e['cost']}"
+    )
+    assert r["price"] == pytest.approx(e["price"], rel=rel), (
+        f"price: got {r['price']}, expected ~{e['price']}"
+    )
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=rel), (
+        f"time_hours: got {r['time_hours']}, expected ~{e['time_hours']}"
+    )
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=rel), (
+        f"time_ready: got {r['time_ready']}, expected ~{e['time_ready']}"
+    )
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=rel), (
+        f"weight_kg: got {r['weight_kg']}, expected ~{e['weight_kg']}"
+    )
+    mats = r["materials"]
+    assert mats, "ожидается материал в результате"
+    mat = mats[0]
+    assert mat.get("code") and mat.get("name") and mat.get("title")
+    assert "Титан DIGITAL мелованная (матовая)" in mat["name"], mat["name"]
+    assert mat["size_mm"] == [320.0, 450.0], mat.get("size_mm")
+    assert mat["quantity"] == pytest.approx(6), mat.get("quantity")
+
+
+def test_form19_default_print_sheet_modes(calc):
+    """JS, 21.11.2026: тот же дефолт формы 19, mode 0 и 2. Ноль не поднимается до 1."""
+    rel = REF_REL_TOL
+    base = dict(REF_FORM19_DEFAULT)
+    r0 = calc.execute({**base, "mode": 0})
+    r2 = calc.execute({**base, "mode": 2})
+    r1 = calc.execute(base)
+    e0 = EXPECTED_FORM19_MODE0
+    e2 = EXPECTED_FORM19_MODE2
+    assert r0["cost"] == pytest.approx(e0["cost"], rel=rel)
+    assert r0["price"] == pytest.approx(e0["price"], rel=rel)
+    assert r0["time_hours"] == pytest.approx(e0["time_hours"], rel=rel)
+    assert r0["time_ready"] == pytest.approx(e0["time_ready"], rel=rel)
+    assert r2["cost"] == pytest.approx(e2["cost"], rel=rel)
+    assert r2["price"] == pytest.approx(e2["price"], rel=rel)
+    assert r2["time_hours"] == pytest.approx(e2["time_hours"], rel=rel)
+    assert r2["time_ready"] == pytest.approx(e2["time_ready"], rel=rel)
+    assert r0["price"] < r1["price"] < r2["price"]
+    assert r2["time_ready"] < r1["time_ready"] < r0["time_ready"]
 
 
 @pytest.fixture(scope="module")
