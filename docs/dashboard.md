@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **19**. В работе/ревью: `form-vizitki.md`. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **18**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -47,7 +47,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-pad-print.md` | черновик |
 | `form-poly-sticker-pack.md` | черновик |
 | `form-vizitki-promo.md` | черновик |
-| `form-vizitki.md` | в работе |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
@@ -69,8 +68,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-21 — form-vizitki
 - 2026-11-21 — form-sticker-pack
 - 2026-11-21 — form-poly-sticker
 - 2026-11-21 — form-heat-press
 - 2026-11-21 — ai-seo-geo-yoast
-- 2026-11-21 — wt-geotargeting-update
