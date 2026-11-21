@@ -47,7 +47,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-pad-print.md` | черновик |
 | `form-poly-sticker-pack.md` | черновик |
 | `form-vizitki-promo.md` | черновик |
-| `form-vizitki.md` | закрытие |
+| `form-vizitki.md` | в работе |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |

@@ -5,6 +5,7 @@
 // Первый аргумент __form_id__: с null селектор по data-elementname чувствителен к регистру (в DOM dpdlaminat) и возвращает false.
 var isCards = ezfc_functions.get_element_id_by_name(__form_id__, 'dpdLaminat');
 if (isCards) {
+/* form 19 */
     var qty = {{numN}};
     var formatRaw = ezfc_functions.get_value_from(432, true);
     var formatIndex = ezfc_functions.get_value_from(432, true, false, { return_value: 'index' })[0];
@@ -67,7 +68,9 @@ if (isCards) {
     if (laminatId && String(laminatId) !== '0') {
         params.lamination_id = laminatId;
     }
+/* /form */
 } else {
+/* form 6 */
     var qty = {{numN}};
     var formatRaw = ezfc_functions.get_value_from(99, true);
     var formatIndex = ezfc_functions.get_value_from(99, true, false, { return_value: 'index' })[0];
@@ -160,6 +163,7 @@ if (isCards) {
     if (laminatId && String(laminatId) !== '0') {
         params.lamination_id = laminatId;
     }
+/* /form */
 }
 
 insaincalc.calcApi('print_sheet', params).then(function (calcCost) {
