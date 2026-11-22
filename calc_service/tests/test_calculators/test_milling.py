@@ -405,3 +405,42 @@ def test_nocut_floor_unchanged_without_difficulty(calc):
         "mode": 1,
     })
     assert r_nomat["price"] == pytest.approx(1600.0, rel=1e-6)
+
+
+def test_pet_uses_acryl_cut_rate_and_inner_density(calc):
+    """ПЭТ берёт ступени Acryl: 0.3–2 мм → 40 ₽/м. Плотность 0.25, не 25, удлиняет рез."""
+    simple = calc.execute({
+        "quantity": 100,
+        "width": 50,
+        "height": 50,
+        "material_id": "PET03",
+        "material_mode": "isMaterial",
+        "is_cut_milling": {"size_item": 50, "density": 0, "difficulty": 1, "len_cut": 0},
+        "mode": 1,
+    })
+    # Без группы PET рез был 0 и цена схлопывалась в порог 1360.
+    assert simple["price"] == pytest.approx(2107.2742346938776, rel=1e-9)
+    assert simple["price"] > 1360.0
+
+    inner = calc.execute({
+        "quantity": 100,
+        "width": 50,
+        "height": 50,
+        "material_id": "PET03",
+        "material_mode": "isMaterial",
+        "is_cut_milling": {"size_item": 50, "density": 0.25, "difficulty": 1.7, "len_cut": 0},
+        "mode": 1,
+    })
+    assert inner["price"] == pytest.approx(3549.3742346938775, rel=1e-9)
+    assert inner["price"] > simple["price"]
+
+    thick = calc.execute({
+        "quantity": 100,
+        "width": 50,
+        "height": 50,
+        "material_id": "PET20",
+        "material_mode": "isMaterial",
+        "is_cut_milling": {"size_item": 50, "density": 0, "difficulty": 1, "len_cut": 0},
+        "mode": 1,
+    })
+    assert thick["price"] == pytest.approx(2876.338010204082, rel=1e-9)
