@@ -74,28 +74,39 @@ insaincalc.calcMilling = function calcMilling(n,size,materialID,options,modeProd
         let costMaterial = 0;
         let costCut = 0;
         let minCostMaterial = -1;
+        let hasCut = false;
+        let difficulty = 1;
 
-        // считаем резку и расход материала на изделия
-        if (materialID != "") {
-            if (options.has('isCutMilling')) {
-                //  lenCut - длинна реза одного изделия, если 0, то рассчитывается на основании размеров
-                let paramCut = options.get('isCutMilling');
-                lenCut = paramCut.lenCut;
+        // считаем резку (в том числе при пустом materialID и при noMaterial)
+        if (options.has('isCutMilling')) {
+            let paramCut = options.get('isCutMilling');
+            if (paramCut && paramCut !== 'noCut') {
+                hasCut = true;
+                // lenCut - длинна реза одного изделия, если 0, то рассчитывается на основании размеров
+                lenCut = Number(paramCut.lenCut) || 0;
+                difficulty = Number(paramCut.difficulty) || 1;
                 if (lenCut == 0) { // если общая длинна реза не задана тогда вычисляем ее
-                    let sizeItem = paramCut.sizeItem;
-                    let density = paramCut.density;
-                    let difficulty = paramCut.difficulty;
+                    let sizeItem = Number(paramCut.sizeItem) || 0;
+                    let density = Number(paramCut.density) || 0;
                     lenCut = (size[0] + size[1]) * 2; // длинна внешнего периметр резки одного элемента
-                    lenCut += 4 * size[0] * size[1] * density / sizeItem; // длинна внутреннего периметра
+                    if (sizeItem > 0) {
+                        lenCut += 4 * size[0] * size[1] * density / sizeItem; // длинна внутреннего периметра
+                    }
                     lenCut = lenCut * difficulty; // умножаем на коэфф. изогнутости
                 }
                 // определение стоимости резки материала
-                let len = Math.ceil(n * lenCut / 1000);
-                let idx = (milling.discountCostCut.findIndex(item => item[0] > len)) - 1;
-                let discount = 0;
-                if (idx >= 0) {discount = milling.discountCostCut[idx][1]}
-                costCut = len * costCutPerMeter * (1-discount);
+                if (costCutPerMeter > 0 && lenCut > 0) {
+                    let len = Math.ceil(n * lenCut / 1000);
+                    let idx = (milling.discountCostCut.findIndex(item => item[0] > len)) - 1;
+                    let discount = 0;
+                    if (idx >= 0) {discount = milling.discountCostCut[idx][1]}
+                    costCut = len * costCutPerMeter * (1-discount);
+                }
             }
+        }
+
+        // считаем расход материала на изделия
+        if (materialID != "") {
             let layoutOnMilling = insaincalc.calcLayoutOnSheet(size, milling.maxSize, margins, interval);
             if (layoutOnMilling.num == 0) {
                 throw (new ICalcError('Изделие не помещается во фрезер'))
@@ -204,8 +215,14 @@ insaincalc.calcMilling = function calcMilling(n,size,materialID,options,modeProd
             result.price = (costMaterial * (1 + defects + insaincalc.common.marginMaterial) +
                 (costCut + costShipment + costOperator) * (1 + defects + insaincalc.common.marginOperation + insaincalc.common.marginMilling));
         } else {
-            result.cost = (500 + costShipment) * (1 + milling.margin);//полная себестоимость резки
-            result.price = (500 + costShipment) * (1 + insaincalc.common.marginOperation + insaincalc.common.marginMilling);
+            let baseCost = 500;
+            if (hasCut && costCut > 0) {
+                baseCost = 500 + costCut;
+            } else if (hasCut && materialID == "" && costCut == 0) {
+                baseCost = 500 * difficulty;
+            }
+            result.cost = (baseCost + costShipment) * (1 + milling.margin);//полная себестоимость резки
+            result.price = (baseCost + costShipment) * (1 + insaincalc.common.marginOperation + insaincalc.common.marginMilling);
         }
         result.time = Math.ceil((timeCut + timePrepare) * 100) / 100;
         result.timeReady = result.time + baseTimeReady; // время готовности

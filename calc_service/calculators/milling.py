@@ -276,6 +276,9 @@ class MillingCalculator(BaseCalculator):
 
         cost_material = 0.0
         cost_cut = 0.0
+        cost_cut_per_m = 0.0
+        has_cut = False
+        difficulty = 1.0
         num_sheet = 0.0
         best_size_mat = None
         material = None
@@ -289,28 +292,6 @@ class MillingCalculator(BaseCalculator):
             if material:
                 thickness_mm = float(material.thickness or 0 or 3)
                 cost_cut_per_m = _cost_cut_per_meter(material_id, thickness_mm, raw)
-                if isinstance(is_cut_milling, Mapping):
-                    len_cut_mm = float(is_cut_milling.get("len_cut", 0.0) or 0.0)
-                    if len_cut_mm == 0.0:
-                        size_item = float(is_cut_milling.get("size_item", 0.0) or 0.0)
-                        density = float(is_cut_milling.get("density", 0.0) or 0.0)
-                        difficulty = float(is_cut_milling.get("difficulty", 1.0) or 1.0)
-                        len_cut_mm = (size[0] + size[1]) * 2.0
-                        if size_item > 0.0:
-                            len_cut_mm += 4.0 * size[0] * size[1] * density / size_item
-                        len_cut_mm *= difficulty
-                    if cost_cut_per_m > 0 and len_cut_mm > 0:
-                        length_m = math.ceil(quantity * len_cut_mm / 1000.0)
-                        discount = _discount_for_length(length_m, raw)
-                        cost_cut = length_m * cost_cut_per_m * (1.0 - discount)
-                elif cost_cut_per_m > 0 and len_cut > 0:
-                    # Обратная совместимость для плоского len_cut (<=100 — в метрах, >100 — в мм).
-                    if 0 < len_cut <= 100:
-                        length_m = math.ceil(quantity * len_cut)
-                    else:
-                        length_m = math.ceil(quantity * len_cut / 1000.0)
-                    discount = _discount_for_length(length_m, raw)
-                    cost_cut = length_m * cost_cut_per_m * (1.0 - discount)
 
                 max_size = milling.max_size or [4000, 2000]
                 layout_milling = layout_on_sheet(size, max_size, margins, interval)
@@ -367,8 +348,36 @@ class MillingCalculator(BaseCalculator):
                     num_sheet = best_sheets
                 else:
                     cost_material = 0.0
-                    if material_mode == "isMaterialCustomer":
-                        cost_cut *= 1.25
+
+        # Резку и коэффициент формы считаем и при пустом material_id, и при noMaterial.
+        if isinstance(is_cut_milling, Mapping):
+            has_cut = True
+            difficulty = float(is_cut_milling.get("difficulty", 1.0) or 1.0)
+            len_cut_mm = float(is_cut_milling.get("len_cut", 0.0) or 0.0)
+            if len_cut_mm == 0.0:
+                size_item = float(is_cut_milling.get("size_item", 0.0) or 0.0)
+                density = float(is_cut_milling.get("density", 0.0) or 0.0)
+                len_cut_mm = (size[0] + size[1]) * 2.0
+                if size_item > 0.0:
+                    len_cut_mm += 4.0 * size[0] * size[1] * density / size_item
+                len_cut_mm *= difficulty
+            if cost_cut_per_m > 0 and len_cut_mm > 0:
+                length_m = math.ceil(quantity * len_cut_mm / 1000.0)
+                discount = _discount_for_length(length_m, raw)
+                cost_cut = length_m * cost_cut_per_m * (1.0 - discount)
+        elif len_cut > 0:
+            has_cut = True
+            if cost_cut_per_m > 0:
+                # Обратная совместимость для плоского len_cut (<=100 — в метрах, >100 — в мм).
+                if 0 < len_cut <= 100:
+                    length_m = math.ceil(quantity * len_cut)
+                else:
+                    length_m = math.ceil(quantity * len_cut / 1000.0)
+                discount = _discount_for_length(length_m, raw)
+                cost_cut = length_m * cost_cut_per_m * (1.0 - discount)
+
+        if material_id and material_mode == "isMaterialCustomer":
+            cost_cut *= 1.25
 
         # В JS: timePrepare * modeProduction (0, 1, 2)
         time_prepare = calc_time_prepare(milling.time_prepare or 0.05, mode)
@@ -395,8 +404,14 @@ class MillingCalculator(BaseCalculator):
                 + (cost_cut + cost_ship + cost_operator) * (1 + defects + effective_margin)
             )
         else:
-            cost_total = (MIN_COST + cost_ship) * (1 + equipment_margin)
-            price = (MIN_COST + cost_ship) * (1 + effective_margin)
+            if has_cut and cost_cut > 0:
+                base_cost = MIN_COST + cost_cut
+            elif has_cut and not material_id and cost_cut == 0:
+                base_cost = MIN_COST * difficulty
+            else:
+                base_cost = MIN_COST
+            cost_total = (base_cost + cost_ship) * (1 + equipment_margin)
+            price = (base_cost + cost_ship) * (1 + effective_margin)
 
         base_ready = milling.base_time_ready or BASE_TIME_READY
         idx = max(0, min(len(base_ready) - 1, mode.value))

@@ -1,6 +1,6 @@
 # milling-cut-floor
 
-Статус: черновик
+Статус: закрытие
 Сложность: высокая
 Implementer: Gemini 4 Hydrogen High
 Reviewer: Grok 4.7
@@ -53,15 +53,15 @@ Site ops: не нужен
 
 ## Критерии приёмки
 
-- [ ] `python -m pytest calc_service/tests/test_calculators/test_milling.py -q` — `passed`. Есть тест: пустой материал, 100 шт, 50×50, `mode=1`, сложности 1 / 1.3 / 1.7 дают `1360` / `1600` / `1920`.
-- [ ] В том же файле тест: ПВХ 3 мм, `noMaterial`, 1 шт, 1000×500, плотность 0, сложности 1 / 1.3 / 1.7 — цены строго возрастают, цена при сложности 1 больше `1600`.
-- [ ] Существующий эталон «учитывать материал», ПВХ 3 мм, 100 шт, 50×50, сложность 1, не сдвинулся (`price=2302.64` на `mode=1`).
-- [ ] `python scripts/js_port_gaps.py calcMilling` — новых непустых `нет в Python` нет. `python scripts/js_port_gaps.py --check` печатает `ok`.
+- [x] `python -m pytest calc_service/tests/test_calculators/test_milling.py -q` — `passed`. Есть тест: пустой материал, 100 шт, 50×50, `mode=1`, сложности 1 / 1.3 / 1.7 дают `1360` / `1600` / `1920`.
+- [x] В том же файле тест: ПВХ 3 мм, `noMaterial`, 1 шт, 1000×500, плотность 0, сложности 1 / 1.3 / 1.7 — цены строго возрастают, цена при сложности 1 больше `1600`.
+- [x] Существующий эталон «учитывать материал», ПВХ 3 мм, 100 шт, 50×50, сложность 1, не сдвинулся (`price=2302.64` на `mode=1`).
+- [x] `python scripts/js_port_gaps.py calcMilling` — новых непустых `нет в Python` нет. `python scripts/js_port_gaps.py --check` печатает `ok`.
 
 ## Проверки
 
-- [ ] `python scripts/dev.py check` — код выхода 0
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `python scripts/dev.py check` — код выхода 0
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
 ## Риски
 
@@ -77,6 +77,24 @@ Site ops: не нужен
 
 22.11.2026 — человек — резка без материала, сложность не схлопывать порогом 500 ₽, ставки и прод не трогать — дальше Analyst
 22.11.2026 — Analyst, Grok 4.7 — задача заведена, формула нижнего порога зафиксирована числами — дальше Implementer
+22.11.2026 — Implementer, Gemini 4 Hydrogen High — вынес расчёт резки и difficulty из-под ветки материала, обновил нижнюю ветку порога 500 ₽ в JS и Python, добавил тесты; `make check` зелёный — дальше Reviewer
+22.11.2026 — человек — чужая правка `todo/form-poly-sticker-pack.md` в main не блокирует эту задачу — дальше Reviewer
+22.11.2026 — Reviewer, Grok 4.7 — принято: нижний порог в JS и Python совпадает с критериями, pytest 24 passed, js_port_gaps ok — дальше человек
+22.11.2026 — человек — принято — закрытие
+
+## Ревью 1
+
+принято
+
+Diff `task/milling-cut-floor` относительно `main` — только `calcMilling.js`, `milling.py`, `test_milling.py` и этот файл. JSON, формы и прод не менялись.
+
+- `python -m pytest calc_service/tests/test_calculators/test_milling.py -q` — `24 passed`. Пустой материал, 100 шт, 50×50, `mode=1`: `1360` / `1600` / `1920`.
+- ПВХ 3 мм, `noMaterial`, 1 шт, 1000×500, плотность 0: `1744` / `1792` / `1888` — строго растут, сложность 1 больше `1600`.
+- Эталон «учитывать материал», ПВХ 3 мм, 100 шт, 50×50, сложность 1, на месте: `price=2302.6426854395604`.
+- `python scripts/js_port_gaps.py calcMilling` — `нет в Python:` пусто. `python scripts/js_port_gaps.py --check` — `ok`.
+- Тот же прогон `calcMilling.js`: те же цены. Длинный рез `noMaterial` (100 шт, 50×50) остался `1641.75`. Наценка 1.25 только у `isMaterialCustomer`, оператор в нижнюю ветку не входит, верхняя ветка не сдвинулась.
+
+Дальше человек: слияние. Выкатка API — отдельное решение, не эта задача.
 
 ## Найдено вне scope
 
@@ -84,12 +102,12 @@ Site ops: не нужен
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Период: 2026-11-22 —
+- Ветка, PR или коммит: `task/milling-cut-floor`
+- Период: 2026-11-22 — 2026-11-22
 - Часы человека: оценка 1 ч
-- Работа агентов:
-- Было / стало:
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение: выкатывать новые числа на боевой API только после приёмки этой задачи.
+- Работа агентов: Analyst (Grok 4.7), Implementer (Gemini 4 Hydrogen High), Reviewer (Grok 4.7)
+- Было / стало: при `cost_cut + cost_material + cost_operator <= 500` нижняя ветка возвращала `(500 + доставка)`, из-за чего пустой материал и короткий рез при `noMaterial` не зависели от длины реза и `difficulty`. Теперь резка и `difficulty` считаются независимо от наличия `material_id`, при `has_cut and cost_cut > 0` нижняя ветка считает `(500 + cost_cut + доставка)`, при `has_cut and not material_id and cost_cut == 0` — `(500 * difficulty + доставка)`, без резки — `(500 + доставка)`. Пустой материал 100 шт 50×50 (`mode=1`): `1360` / `1600` / `1920` для `difficulty` `1` / `1.3` / `1.7`; ПВХ 3 мм `noMaterial` 1 шт 1000×500 (`density=0`): `1744.0` / `1792.0` / `1888.0`.
+- Сделано: обновлена логика расчёта резки и нижней ветки порога в `js_legacy/calc/calcMilling.js` и `calc_service/calculators/milling.py`, добавлены тесты в `calc_service/tests/test_calculators/test_milling.py` (`test_empty_material_difficulty_scales_floor`, `test_nomaterial_short_cut_adds_cost_cut_to_floor`, `test_nocut_floor_unchanged_without_difficulty`). Побочная пересборка `docs/dashboard.md` от `scripts/dev.py check` откатана в рабочем дереве (общие файлы не правлены).
+- Чем проверено: `python -m pytest calc_service/tests/test_calculators/test_milling.py -q` (`24 passed`), `python scripts/js_port_gaps.py calcMilling` (`нет в Python: ` пусто), `python scripts/js_port_gaps.py --check` (`ok`), `node -e` проверка паритета `calcMilling.js` (`1360 / 1600 / 1920`, `1744 / 1792 / 1888`, `2302.6426854395604`), `python scripts/dev.py check` (`804 passed`, `81 passed`, exit code `0`).
+- Не сделано и почему: коммит, push, деплой на прод, правки JSON ставок и форм ezFC 35/111 не выполнялись по условиям задачи и роли Implementer.
+- Требуется решение: человеку слить ветку. Выкатка новых чисел на боевой API — отдельным решением, не в этой задаче.

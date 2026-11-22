@@ -330,3 +330,78 @@ def test_is_cut_milling_branches_and_half_sheet(calc):
     assert r_half["price"] == pytest.approx(5502.665625, rel=0.001)
     assert r_half["materials"][0]["quantity"] == 0.5
     assert r_half["materials"][0]["size_mm"] == [3050.0, 2050.0]
+
+
+def test_empty_material_difficulty_scales_floor(calc):
+    """Пустой материал при наличии резки: порог 500 ₽ умножается на difficulty (1 / 1.3 / 1.7)."""
+    expected = {
+        1: (1105.0, 1360.0),
+        1.3: (1300.0, 1600.0),
+        1.7: (1560.0, 1920.0),
+    }
+    for diff, (exp_cost, exp_price) in expected.items():
+        res = calc.execute({
+            **REF_FORM_DEFAULT,
+            "is_cut_milling": {
+                "size_item": 50,
+                "density": 0,
+                "difficulty": diff,
+                "len_cut": 0,
+            },
+            "mode": 1,
+        })
+        assert res["cost"] == pytest.approx(exp_cost, rel=1e-6)
+        assert res["price"] == pytest.approx(exp_price, rel=1e-6)
+        assert res["materials"] == []
+
+
+def test_nomaterial_short_cut_adds_cost_cut_to_floor(calc):
+    """ПВХ 3 мм, noMaterial, 1 шт, 1000×500, плотность 0: (500 + cost_cut + доставка), рост с difficulty и > 1600."""
+    prices = []
+    for diff in (1.0, 1.3, 1.7):
+        res = calc.execute({
+            "quantity": 1,
+            "width": 1000,
+            "height": 500,
+            "material_id": "PVC3",
+            "material_mode": "noMaterial",
+            "is_cut_milling": {
+                "size_item": 0,
+                "density": 0,
+                "difficulty": diff,
+                "len_cut": 0,
+            },
+            "mode": 1,
+        })
+        assert res["materials"] == []
+        prices.append(res["price"])
+
+    assert prices[0] > 1600.0
+    assert prices[0] == pytest.approx(1744.0, rel=1e-6)
+    assert prices[1] == pytest.approx(1792.0, rel=1e-6)
+    assert prices[2] == pytest.approx(1888.0, rel=1e-6)
+    assert prices[0] < prices[1] < prices[2]
+
+
+def test_nocut_floor_unchanged_without_difficulty(calc):
+    """Без резки (is_cut_milling не передан или 'noCut') нижняя ветка остаётся (500 + доставка)."""
+    r_empty = calc.execute({
+        "quantity": 100,
+        "width": 50,
+        "height": 50,
+        "material_id": "",
+        "material_mode": "isMaterial",
+        "mode": 1,
+    })
+    assert r_empty["price"] == pytest.approx(1360.0, rel=1e-6)
+
+    r_nomat = calc.execute({
+        "quantity": 1,
+        "width": 1000,
+        "height": 500,
+        "material_id": "PVC3",
+        "material_mode": "noMaterial",
+        "is_cut_milling": "noCut",
+        "mode": 1,
+    })
+    assert r_nomat["price"] == pytest.approx(1600.0, rel=1e-6)
