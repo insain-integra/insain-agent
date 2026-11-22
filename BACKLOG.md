@@ -174,3 +174,6 @@
 - Из `form-milling`: `calcMilling` не подключён в `scripts/run_js_calc.mjs` (эталон снят в консоли боевой страницы).
 - Из `form-milling`: Для материалов `PET03`–`PET20` из `dpdMaterial` в `calc_service/data/equipment/milling.json` отсутствует группа в `costCut` (ставка резки 0 руб/м, как и в JS).
 - Из `form-milling`: 100 шт 50×50 мм PVC3: и JS, и API отдают в материалах 0 листов (доля листа только в себестоимости). На дефолте без материала список пуст. В JS имя материала пустое (в JSON нет `name`), API пишет `description`.
+- Из `form-poly-sticker-pack`: У эпоксидки в JS размер 0, в API у EpoxyPoly нет size_mm. Плёнка 320×450 и ламинация 330×0 в ответе есть.
+- Из `form-poly-sticker-pack`: Ряды наклеек формы 71 в share-URL не пишутся: numW и numH совпадают с размером пака.
+- Из `form-poly-sticker-pack`: Боевая страница на старом прайсе: cost 3721, раннер current 3734. Оба округляются до 7000.

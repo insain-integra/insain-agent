@@ -21,7 +21,7 @@
 - `form-vizitki-promo` (закрыто 2026-11-22, `docs/history/log.md`) — вторая форма slug `print_offset`, боевая 83
 - `form-sticker-pack` (закрыто 2026-11-21, `docs/history/log.md`) — вторая форма slug `sticker`, боевая 29
 - `form-poly-sticker` (закрыто 2026-11-21, `docs/history/log.md`) — копия формы 30, slug `poly_sticker`
-- `todo/form-poly-sticker-pack.md` — копия формы 70, slug `poly_sticker_pack`
+- `form-poly-sticker-pack` (закрыто 2026-11-22, `docs/history/log.md`) — копия формы 70, slug `poly_sticker_pack`
 - `todo/milling-cut-floor.md` — резка фрезеровки без материала и сложность, которую не съедает порог 500 ₽; ставки JSON и прод не трогать
 - `form-milling` (закрыто 2026-11-22, `docs/history/log.md`) — копия формы 35 CalcMilling (111 / 2586907 draft), slug `milling`; боевая 35 на старом JS, в `forms-batch-2`, не в текущий пакет
 - `form-pad-print` (закрыто 2026-11-22, `docs/history/log.md`) — копия формы 38, slug `pad_print`

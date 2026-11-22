@@ -6,6 +6,15 @@
 `docs/archive/`. Число сессий агентов — файлы чатов Cursor за период, включая субагентов.
 Часы человека — оценка по правилу 1 ч на коммит. Вне этапов — 1 коммит (`cd640ec`, правило ролей, 1 ч).
 
+## 2026-11-22 — form-poly-sticker-pack
+
+- Период: 2026-11-22 — 2026-11-22 (1 дн.)
+- Часы человека: 2 сообщ. в чатах Cursor; активно 0.4 ч (ходы агента > 30 мин — с коэфф. 0.5)
+- Работа агентов: 2 чатов Cursor, 2 сообщ. человека, 0.4 ч активных; Implementer — Grok 4.7; Site ops — Grok 4.7
+- Было / стало: боевая форма 70 и страница https://insain.ru/catalog/stikerpaki-s-polimernoj-zalivkoj/ остаются на `insaincalc.calcPolyStickerPack`. Копия формы 112 `CalcPolyStickerPack duplicate` на черновике товара 2586908 «Стикерпаки с полимерной заливкой (Копировать)», `ezfc_form_id` 112, `post_status` draft. URL: https://insain.ru/?post_type=product&p=2586908&preview=true&numN=100&numW=50&numH=50&dpdMaterial=0&dpdPrint=1&chkBackground=0&rdoModeProduction=1
+- Эффект: —
+- Источник: задача `todo/form-poly-sticker-pack.md`, коммиты 21b98fd 22a14ba
+
 ## 2026-11-22 — form-milling
 
 - Период: 2026-11-22 — 2026-11-22 (1 дн.)
