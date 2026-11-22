@@ -286,3 +286,21 @@ def test_get_tool_schema(calc):
     schema = calc.get_tool_schema()
     assert schema.get("name") == "calc_lamination"
     assert "parameters" in schema
+
+
+def test_roll_single_side_defect_by_half_count(calc):
+    """Односторонняя рулонная: брак по ceil(n/2), как calcLamination.js.
+
+    4 листа — порог 2 (брак 0.5), не порог 5 (брак 0.2). Без этого расход 2.256 м.
+    """
+    result = calc.calculate({
+        "quantity": 4,
+        "width": 320,
+        "height": 450,
+        "material_id": "Laminat32G",
+        "double_side": False,
+        "mode": 1,
+    })
+    mat = result["materials"][0]
+    assert mat["code"] == "Laminat32G"
+    assert mat["quantity"] == pytest.approx(2.82, rel=0.001)

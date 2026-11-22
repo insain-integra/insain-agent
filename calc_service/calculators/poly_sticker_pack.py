@@ -56,6 +56,15 @@ class PolyStickerPackCalculator(BaseCalculator):
                         "default": "KMBizhubC220",
                         "description": "Способ печати",
                     },
+                    "lamination_id": {
+                        "type": "string",
+                        "description": "Код ламинации. Форма 70 задаёт его из принтера, отдельного поля нет",
+                    },
+                    "is_find_mark": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": "Резка по меткам. Форма 70 включает её, если принтер не No",
+                    },
                     "mode": {"type": "integer", "enum": [0, 1, 2], "default": 1},
                 },
                 "required": ["quantity", "width", "height", "material_id"],
@@ -82,13 +91,15 @@ class PolyStickerPackCalculator(BaseCalculator):
                      {"id": "Technojet160ECO", "title": "УФ-печать Technojet"},
                      {"id": "HPLatex335", "title": "Латексная печать HP"},
                  ]}},
+                {"name": "lamination_id", "type": "string", "required": False, "title": "Ламинация"},
+                {"name": "is_find_mark", "type": "boolean", "required": False, "default": False, "title": "Резка по меткам"},
                 {"name": "mode", "type": "enum", "required": False, "default": 1, "title": "Режим",
                  "choices": {"inline": [{"id": 0, "title": "Эконом"}, {"id": 1, "title": "Стандарт"}, {"id": 2, "title": "Экспресс"}]}},
             ],
             "param_groups": {
                 "main": ["quantity", "width", "height"],
                 "stickers": ["num_stickers", "sticker_size", "sticker_difficulty", "is_background"],
-                "processing": ["print_method"],
+                "processing": ["print_method", "lamination_id", "is_find_mark"],
                 "material": ["material_id"],
                 "mode": ["mode"],
             },
@@ -110,6 +121,8 @@ class PolyStickerPackCalculator(BaseCalculator):
         sticker_difficulty = float(params.get("sticker_difficulty", 1.0) or 1.0)
         is_background = bool(params.get("is_background", False))
         print_method = str(params.get("print_method", "KMBizhubC220") or "KMBizhubC220").strip()
+        lamination_id = str(params.get("lamination_id", "") or "").strip()
+        is_find_mark = bool(params.get("is_find_mark", False))
 
         # --- Агрегированные метрики наклеек (аналог JS-цикла по stickers[]) ---
         # sizeItem — средний размер элемента для резки
@@ -165,6 +178,11 @@ class PolyStickerPackCalculator(BaseCalculator):
             "printer_code": print_method if print_method != "No" else "",
             "mode": mode.value,
         }
+        # Форма 70: ламинация и метки зашиты в принтер, отдельных полей нет.
+        if lamination_id:
+            sticker_params["lamination_id"] = lamination_id
+        if is_find_mark:
+            sticker_params["is_find_mark"] = True
         sticker_result = sticker_calc.calculate(sticker_params)
 
         # --- 2. Нарезка на отдельные стикерпаки (сабельный резак) ---

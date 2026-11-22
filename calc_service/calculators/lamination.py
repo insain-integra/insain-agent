@@ -203,6 +203,10 @@ class LaminationCalculator(BaseCalculator):
 
         if laminat_h == 0:
             num = quantity if double_side else math.ceil(quantity / 2)
+            # JS ищет брак по num (односторонняя — ceil(тиража/2)), не по числу листов.
+            defects = laminator.get_defect_rate(float(num))
+            if mode.value >= 2:
+                defects += defects * (mode.value - 1)
             layout_roll = layout_on_roll(1, size, [laminat_w, 0], 20)
             length_one_m = (layout_roll.get("length", 0) + 20) / 1000.0
             length_m = length_one_m * num * (1 + defects)
