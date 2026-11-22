@@ -123,12 +123,12 @@ REF_PARAMS = {
     "printer_code": "",
     "mode": 1,
 }
-# JS, 05.11.2026 — ceil снят, как в JS. calcPrintLaser --data current.
+# JS, 23.11.2026 — Math.ceil времени. price в Python int(), JS 4060.93, rel < 0.001.
 EXPECTED_REF = {
     "cost": 2482.039090909091,
     "price": 4060,
-    "time_hours": 1.06,
-    "time_ready": 9.06,
+    "time_hours": 1.07,
+    "time_ready": 9.07,
     "weight_kg": 2.16,
 }
 

@@ -1,6 +1,6 @@
 # form-keychain
 
-Статус: черновик
+Статус: выкатка
 Сложность: низкая
 Implementer: Grok 4.7
 Reviewer: не нужен
@@ -80,18 +80,38 @@ Site ops: Grok 4.7
 
 22.11.2026 — человек — завести 8 лид-копий, боевые формы не переключать, форма 68 через tablets — дальше Implementer
 
+23.11.2026 — Implementer, Grok 4.7 — дефолт формы локально совпал с JS, JS копии в ветке; боевой API ещё старый (5715.6 / 17.61 ч) — дальше человек
+
+Блокер: боевой `POST /api/v1/calc/keychain` на дефолте формы отдаёт старый расчёт (price 5715.6, time_ready 17.61). JS и локальный код после правки: price 5743.30 (Python 5742.6, rel 0.00012), time_ready 17.65. Копию до выкатки принимать нельзя.
+Пробовал: Node vm `calcAcrylicKeychain(100, KeychainAcrylic3939, "4+4", {}, mode)` на прайсе `calc_service/data`; локальный `KeychainCalculator`; боевой API тем же телом `REF_FORM_DEFAULT` и mode 0/2.
+Гипотеза: правка `keychain.py` и `print_laser.py` есть только в `task/form-keychain`, на прод не выкатана.
+Вопрос: сливать ветку в `main` и выкатывать API до дубля формы 74?
+Варианты:
+1. Слить `task/form-keychain` в `main`, выкатить API (`deploy-api`), затем Site ops делает черновик-копию формы 74 (Рекомендуется).
+2. Ветку не сливать и API не выкатывать; копию не создавать.
+3. Откатить правки калькуляторов и оставить только `wp-plugin/forms/keychain.js` — копия пойдёт в старый API и не пройдёт допуск цены и срока.
+Следующая сессия: человек, затем Site ops (после выкатки)
+
+23.11.2026 — человек — слить task/form-keychain в main, выкатить API, затем черновик-копия формы 74 — дальше Site ops
+
 ## Найдено вне scope
 
-- —
+- Подпись `PaperCoated115M`: legacy «113г/м», текущий каталог «115г/м». Код, лист 320×450 и количество совпадают.
+- Тираж 50, цветность «4+0»: срок Python 16.95 ч против JS 16.97 ч — `cut_plotter` округляет время через `round`, JS через `ceil`. Дефолт формы (100 шт, «4+4») по сроку совпал.
+- Вес JS на дефолте 0.12 кг без заготовки; API 1.27 кг с заготовкой.
+- `print_laser` по-прежнему отдаёт `price` как `int()`: на дефолте формы 5742.6 против JS 5743.30, rel 0.00012.
 
 ## Результат
 
-- Ветка, PR или коммит:
-- Период: <ГГГГ-ММ-ДД — ГГГГ-ММ-ДД>
-- Часы человека: <оценка N ч — 1 ч на коммит задачи | N ч факт>
-- Работа агентов: <N сессий; модели>
-- Было / стало: <одна строка с числами — для docs/history/log.md>
-- Сделано:
-- Чем проверено:
-- Не сделано и почему:
-- Требуется решение:
+- Ветка, PR или коммит: `task/form-keychain` сливается в `main` по решению человека 23.11.2026; в коммите порт дефолта и `wp-plugin/forms/keychain.js`. `print_laser.py` входит в тот же коммит: без округления срока вверх дефолт не совпадает с JS.
+- Период: 2026-11-23 — 2026-11-23
+- Часы человека: оценка 1 ч — 1 ч на коммит задачи | факт: человек не коммитил
+- Работа агентов: 1 сессия Implementer; Grok 4.7
+- Было / стало: дефолт формы 74 локально price 5715.6 → 5742.6 (JS 5743.30), time_ready 17.61 → 17.65; боевой API ещё 5715.6 / 17.61; дубля формы нет
+- Сделано: шаги 0–5б. Порт `calcAcrylicKeychain` без пустых «нет в Python». Дефолт формы 74: тираж 100, `KeychainAcrylic3939`, цветность «4+4» → API `color: 2`, упаковка всегда, mode 1. В `keychain.py` резка вставки с `is_find_mark`, у заготовки и зиплока есть `size_mm`. Срок лазерной печати — `ceil`, как в JS. `REF_FORM_DEFAULT` и mode 0/2 в `test_keychain.py`. `wp-plugin/forms/keychain.js` на id боевой 74: `syncUrl` именами `numN`, `dpdBlank`, `dpdColor`, `rdoModeProduction`; `calcApi('keychain')`; `showResult`. Боевая страница по-прежнему на `calcAcrylicKeychain`, без `calcApi`.
+- Поля не в API: `fluAtrwork` (файл) — не в `syncUrl` и не в `calcApi`. `is_packing` поля нет, в запрос уходит `true` (старый JS всегда пакует). Параметр не обязателен.
+- Строка будущего боевого пакета: форма 74, slug `keychain`, страница https://insain.ru/catalog/kalkulyator-akrilovyh-brelokov/ — копия ещё не создана, боевая на `insaincalc.calcAcrylicKeychain`.
+- Дописка для `docs/js-runner-cases.md`: `calcKeychain.js` в `scripts/run_js_calc.mjs` не подключён. Эталон — тот же раннер после добавления `js_legacy/calc/calcKeychain.js`, `js_legacy/material/keychain.json` и `calc_service/data/materials/keychain.json` (файл раннера не менять): `node scripts/run_js_calc.mjs calcAcrylicKeychain --data current --args '[100,"KeychainAcrylic3939","4+4",{},1]'`. mode 0 и 2 — последний аргумент `0` и `2`. В JS цветность строка «4+4», не число 2.
+- Чем проверено: `python scripts/js_port_gaps.py calcAcrylicKeychain` — пустых «нет в Python» нет; `python scripts/js_port_gaps.py --check` — `ok`. `python -m pytest calc_service/tests/test_calculators/test_keychain.py calc_service/tests/test_calculators/test_print_laser.py calc_service/tests/test_wp_plugin_forms.py calc_service/tests/test_mode_contract.py calc_service/tests/test_calculators/test_sticker.py -q` — 114 passed. `python scripts/dev.py check` — exit 0, 813 passed и 81 passed. `Select-String` по `keychain.js` — есть `calcApi('keychain'`, `syncUrl(`, `showResult(`; `querySelector` и `price =` нет. Боевой API дефолта: price 5715.6, time_ready 17.61 (mode 0: 4927.6 / 33.23; mode 2: 6539.6 / 10.01). `curl` страницы брелоков: в HTML есть `calcAcrylicKeychain`, нет `calcApi`.
+- Не сделано и почему: дубль формы, черновик товара, запись JS в копию и приёмка URL — Site ops, шаги 6–16. До них нужна выкатка API с `main`: локальный дефолт с JS сошёлся, боевой API ещё старый. Плагин не выкладывался. Боевая форма 74 не переключалась. Коммита нет.
+- Требуется решение: см. варианты в журнале. Без выкатки копию не принимать.

@@ -262,7 +262,8 @@ class PrintLaserCalculator(BaseCalculator):
         price_operator = cost_operator * (1 + MARGIN_OPERATION + margin_extra)
         price = price_print + price_operator
 
-        time_hours = round(time_print * 100) / 100.0
+        # JS: Math.ceil(timePrint * 100) / 100. round к ближайшему короче на 0.01 ч.
+        time_hours = math.ceil(time_print * 100) / 100.0
         time_ready = time_hours + pick_time_ready(printer.base_time_ready, mode, [16, 8, 1])
 
         weight_kg = 0.0

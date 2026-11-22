@@ -163,6 +163,7 @@ class KeychainCalculator(BaseCalculator):
             "title": keychain.title,
             "quantity": quantity,
             "unit": "шт",
+            "size_mm": [float(size[0]), float(size[1])],
         }
 
         # 2. Печать вставки (стикер)
@@ -178,6 +179,8 @@ class KeychainCalculator(BaseCalculator):
             "color": color_str,
             "printer_code": "KMBizhubC220",
             "mode": mode,
+            # calcAcrylicKeychain всегда ставит isFindMark на резку вставки.
+            "is_find_mark": True,
         }
         sticker_result = sticker_calc.calculate(sticker_params)
 
@@ -211,7 +214,18 @@ class KeychainCalculator(BaseCalculator):
             time_pack = pack_result.time_hours
             time_ready_pack = pack_result.time_ready
             weight_pack = pack_result.weight_kg
-            materials_pack = pack_result.materials
+            materials_pack = []
+            for row in pack_result.materials:
+                item = dict(row)
+                if not item.get("size_mm"):
+                    try:
+                        raw_pack = _get_raw_material("pack", str(item.get("code") or ""))
+                    except KeyError:
+                        raw_pack = {}
+                    pack_dims = raw_pack.get("size") if isinstance(raw_pack, dict) else None
+                    if isinstance(pack_dims, (list, tuple)) and len(pack_dims) >= 2:
+                        item["size_mm"] = [float(pack_dims[0]), float(pack_dims[1])]
+                materials_pack.append(item)
 
         # Итог
         cost = cost_insert + cost_set + cost_blank + cost_pack
