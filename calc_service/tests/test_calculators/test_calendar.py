@@ -101,13 +101,16 @@ REF_PARAMS = {
     "bottom_color": "4+0",
     "mode": 1,
 }
-# JS, 05.11.2026 — ceil снят, как в JS. Топ и подложки через print_sheet.
+# JS, 23.11.2026 — подложки 0+0 снова тратят бумагу и резку, как calcPrintSheet.
+# Прогон: node vm calcCalendar.js, прайс current. Раннер calcCalendar не подключает.
+# price JS 42047.154337458756, Python ceil 42048.
+# weight_kg 30.82 — вес изделий (Python). JS 31.12692 — лист с обрезью. Решение 11.11.2026.
 EXPECTED_REF = {
-    "cost": 20905.77,
-    "price": 40723,
-    "time_hours": 8.41,
-    "time_ready": 31.46,
-    "weight_kg": 29.33,
+    "cost": 21575.371554949168,
+    "price": 42047.154337458756,
+    "time_hours": 8.53,
+    "time_ready": 31.58,
+    "weight_kg": 30.82,
 }
 EXPECTED_MATERIAL = {
     "code": "PaperCoated115M",
@@ -180,3 +183,84 @@ def test_expected_values_calendar(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+# JS, 23.11.2026 — дефолт боевой формы 50: 100 шт., QuarterlyMini, MiniOffset,
+# PaperCoated300M, без ламинации, 4+0, mode 1.
+# Прогон node vm calcCalendar.js (scripts/run_js_calc.mjs календарь не грузит).
+# price JS без ceil; Python отдаёт ceil. Допуск rel=0.001.
+# weight_kg — изделие (Python), не лист JS (35.1762). Решение 11.11.2026.
+# Бумага подложек 0+0 в таблицу не входит: старый JS не мержит costBottom.material.
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "calendar_type": "quarterly",
+    "calendar_id": "QuarterlyMini",
+    "block_id": "MiniOffset",
+    "top_material_id": "PaperCoated300M",
+    "top_color": "4+0",
+    "bottom_material_id": "PaperCoated300M",
+    "bottom_color": "4+0",
+    "mode": 1,
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 23099.901300403715,
+    "price": 45068.71889949512,
+    "time_hours": 8.8,
+    "time_ready": 31.85,
+    "weight_kg": 34.36,
+}
+EXPECTED_FORM_DEFAULT_MODES = {
+    0: {
+        "cost": 22547.286300403717,
+        "price": 44006.11121949512,
+        "time_hours": 8.5,
+        "time_ready": 47.5,
+    },
+    2: {
+        "cost": 23736.59539131281,
+        "price": 46295.351219495125,
+        "time_hours": 9.12,
+        "time_ready": 24.22,
+    },
+}
+
+
+def test_form_default_quarterly(calc):
+    """JS, 23.11.2026: дефолт формы 50. Вес — изделие, не лист JS."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    assert r["cost"] == pytest.approx(e["cost"], rel=0.001)
+    assert r["price"] == pytest.approx(e["price"], rel=0.001)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=0.001)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=0.001)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=0.001)
+    by_code = {m["code"]: m for m in r["materials"]}
+    assert by_code["PaperCoated300M"]["quantity"] == 53
+    assert by_code["PaperCoated300M"]["size_mm"] == [320.0, 450.0]
+    assert by_code["MiniOffset"]["size_mm"] == [297.0, 145.0]
+    assert by_code["Cursor"]["size_mm"] == [30.0, 38.0]
+    assert by_code["MetallBindindWire1_4"]["size_mm"] == [6.4, 89000.0]
+    assert "size_mm" not in by_code["Люверсы4мм"]
+
+
+@pytest.mark.parametrize("mode", [0, 2])
+def test_form_default_modes(calc, mode):
+    """JS, 23.11.2026: дефолт формы 50 в режимах 0 и 2."""
+    r = calc.execute({**REF_FORM_DEFAULT, "mode": mode})
+    e = EXPECTED_FORM_DEFAULT_MODES[mode]
+    assert r["cost"] == pytest.approx(e["cost"], rel=0.001)
+    assert r["price"] == pytest.approx(e["price"], rel=0.001)
+    assert r["time_hours"] == pytest.approx(e["time_hours"], rel=0.001)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=0.001)
+
+
+def test_form_default_mode_order(calc):
+    """Своё производство: цена растёт с режимом, срок готовности падает."""
+    prices = []
+    ready = []
+    for mode in (0, 1, 2):
+        r = calc.execute({**REF_FORM_DEFAULT, "mode": mode})
+        prices.append(r["price"])
+        ready.append(r["time_ready"])
+    assert prices[0] < prices[1] < prices[2]
+    assert ready[2] < ready[1] < ready[0]
