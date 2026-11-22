@@ -4,6 +4,10 @@
 Мигрировано из js_legacy/calc/calcMetalPins.js.
 Металлические значки со штамповкой: заготовка, штамп, эмали, покрытие, эпоксидная смола.
 Включает доставку из Китая, крепления и упаковку.
+
+Список «не перенесено»: option_isPacking (scripts/js_port_gaps_allowed.txt).
+Код пакета форма передаёт как pack_id. Дефолт формы 34 — PolyBag с ценой 0:
+price и time_ready те же и без пакета, вес отличается на 0.01 кг.
 """
 
 from __future__ import annotations
