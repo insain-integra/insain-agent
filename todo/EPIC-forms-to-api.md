@@ -17,7 +17,7 @@
 - `todo/presswall-banner-mode.md` — баннер и чехол `presswall` в режиме формы; правит калькулятор, форму 46 не переключает
 - `form-metal-pins` (закрыто 2026-11-23, `docs/history/log.md`) — копия формы 34, slug `metal_pins`
 - `todo/form-plastic-cards.md` — копия формы 56, slug `cards`
-- `todo/form-keychain.md` — копия формы 74, slug `keychain`
+- `form-keychain` (закрыто 2026-11-23, `docs/history/log.md`) — копия формы 74, slug `keychain`
 - `todo/form-magnet-acrylic.md` — копия формы 75, slug `magnet_acrylic`
 - `todo/form-magnet-laminated.md` — лид-копия 54, slug `magnet_laminated`; ждёт `form-magnet-acrylic` (общий `magnets.py`), форма 57 позже
 - `form-calendar` (закрыто 2026-11-23, `docs/history/log.md`) — лид-копия 50 (квартальный), slug `calendar`; формы 52 и 66 позже
@@ -51,7 +51,7 @@
 
 1. `todo/presswall-banner-mode.md` — в любой момент: только `presswall.py` и его тест. Это не переключение формы 46, задача не отменяется.
 2. Параллельно, лид-копии пачек 5–7:
-   - `todo/form-plastic-cards.md`, `todo/form-keychain.md`, `todo/form-magnet-acrylic.md`, `form-calendar` (закрыто 2026-11-23, `docs/history/log.md`)
+   - `todo/form-plastic-cards.md`, `form-keychain` (закрыто 2026-11-23, `docs/history/log.md`), `todo/form-magnet-acrylic.md`, `form-calendar` (закрыто 2026-11-23, `docs/history/log.md`)
    - `form-badge` (закрыто 2026-11-23, `docs/history/log.md`), `todo/form-tablets.md` — сначала сверка дефолтов всех форм slug, потом лид
    - `todo/form-magnet-laminated.md` — после `form-magnet-acrylic`: общий `magnets.py`
    Запись на проде (дубли форм) — последовательно под `lock prod`.

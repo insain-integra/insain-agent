@@ -187,3 +187,7 @@
 - Из `form-badge`: `calc_service/calculators/badge.py`: при `is_uv_print=True` в `uv_params` захардкожено `"color": "4+0"` вместо `color` (в JS передаётся `dpdColor`, но `modeProduction = 1`).
 - Из `form-badge`: `calc_service/common/process_tools.py`: `calc_attachment` и `calc_packing` не заполняют `size_mm` у материалов (`Magnet4513`, `ZipLock0812`); в `badge.py` закрыто локально через `_ensure_size_mm`.
 - Из `form-badge`: Дефолт формы 64: `weight_kg` API `1.65`, раннер `1.22`. `badge.py` включает вес второй лазерной резки, JS его не складывает (тот же разрыв, что у `EXPECTED_REF` в `test_badge.py`). На цену и срок лида не влияет.
+- Из `form-keychain`: Подпись `PaperCoated115M`: legacy «113г/м», текущий каталог «115г/м». Код, лист 320×450 и количество совпадают.
+- Из `form-keychain`: Тираж 50, цветность «4+0»: срок Python 16.95 ч против JS 16.97 ч — `cut_plotter` округляет время через `round`, JS через `ceil`. Дефолт формы (100 шт, «4+4») по сроку совпал.
+- Из `form-keychain`: Вес JS на дефолте 0.12 кг без заготовки; API 1.27 кг с заготовкой.
+- Из `form-keychain`: `print_laser` по-прежнему отдаёт `price` как `int()`: на дефолте формы 5742.6 против JS 5743.30, rel 0.00012.

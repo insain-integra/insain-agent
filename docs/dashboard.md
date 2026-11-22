@@ -37,13 +37,12 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **18**. В работе/ревью: `form-keychain.md`. Заблокировано: `form-magnet-laminated.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **17**. В работе/ревью: нет. Заблокировано: `form-magnet-laminated.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `ai-calc-authoring-skill.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
-| `form-keychain.md` | выкатка |
 | `form-magnet-acrylic.md` | черновик |
 | `form-magnet-laminated.md` | заблокировано: ждёт todo/form-magnet-acrylic.md |
 | `form-plastic-cards.md` | черновик |
@@ -68,8 +67,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-23 — form-keychain
 - 2026-11-23 — form-badge
 - 2026-11-23 — form-calendar
 - 2026-11-23 — form-metal-pins
 - 2026-11-22 — milling-cut-floor
-- 2026-11-22 — form-poly-sticker-pack
