@@ -22,7 +22,7 @@
 - `form-sticker-pack` (закрыто 2026-11-21, `docs/history/log.md`) — вторая форма slug `sticker`, боевая 29
 - `form-poly-sticker` (закрыто 2026-11-21, `docs/history/log.md`) — копия формы 30, slug `poly_sticker`
 - `todo/form-poly-sticker-pack.md` — копия формы 70, slug `poly_sticker_pack`
-- `todo/form-milling.md` — копия формы 35, slug `milling`
+- `form-milling` (закрыто 2026-11-22, `docs/history/log.md`) — копия формы 35 CalcMilling (111 / 2586907 draft), slug `milling`; боевая 35 на старом JS, в `forms-batch-2`, не в текущий пакет
 - `form-pad-print` (закрыто 2026-11-22, `docs/history/log.md`) — копия формы 38, slug `pad_print`
 - `form-heat-press` (закрыто 2026-11-21, `docs/history/log.md`) — копия формы 40, slug `heat_press`
 - `form-canvas` (закрыто 2026-11-20, `docs/history/log.md`) — копия формы 80, slug `canvas`
@@ -56,13 +56,13 @@
 
 ## Пачки
 
-Боевая на API: **79 puzzle**. Копии приняты и входят в текущий боевой пакет (14): **69 plaque, 26 uv_print, 41 mug, 85 embossing, 78 acrylic_prizes, 46 presswall, 49 rollup, 73 pennant, 55 flag, 6 print_sheet, 22 sticker, 28 laser, 23 print_roll, 82 print_offset**. Копия готова, в пакет 1 не входит: **12 button_pins** (101 / 2586896), **45 notebook** (102 / 2586897).
+Боевая на API: **79 puzzle**. Копии приняты и входят в текущий боевой пакет (14): **69 plaque, 26 uv_print, 41 mug, 85 embossing, 78 acrylic_prizes, 46 presswall, 49 rollup, 73 pennant, 55 flag, 6 print_sheet, 22 sticker, 28 laser, 23 print_roll, 82 print_offset**. Копия готова, в пакет 1 не входит: **12 button_pins** (101 / 2586896), **45 notebook** (102 / 2586897), **35 milling** (111 / 2586907, `forms-batch-2`).
 
 | Пачка | Формы (id, slug) | Статус 19.11.2026 |
 | --- | --- | --- |
 | 1 бой | 69 `plaque`, 26 `uv_print`, 41 `mug`, 85 `embossing`, 78 `acrylic_prizes`, 49 `rollup`, 73 `pennant`, 55 `flag`, 6 `print_sheet`, 22 `sticker`, 28 `laser`, 46 `presswall`, 23 `print_roll`, 82 `print_offset` | 14 копий приняты, живые формы на старом JS. `forms-batch-switch`. 46 — после `presswall-banner-mode` на проде |
 | Хвост slug | 19 `print_sheet`, 83 `print_offset`, 29 `sticker` | задачи `form-vizitki`, `form-vizitki-promo`, `form-sticker-pack`. В пакет 1 не входят |
-| 4 копии | 30 `poly_sticker`, 70 `poly_sticker_pack`, 45 `notebook`, 35 `milling`, 38 `pad_print`, 40 `heat_press`, 80 `canvas` | задачи заведены. У milling, pad_print, heat_press, canvas есть пропуски порта — чинить в той же задаче, если дефолт формы в них упирается |
+| 4 копии | 30 `poly_sticker`, 70 `poly_sticker_pack`, 45 `notebook`, 35 `milling`, 38 `pad_print`, 40 `heat_press`, 80 `canvas` | milling закрыт: копия 111 / 2586907, пропуск isCutMilling снят, в `forms-batch-2`. У pad_print, heat_press, canvas пропуски порта — чинить в той же задаче, если дефолт формы в них упирается |
 | 5 копии | 31 60 61 64 84 `badge`, 34 `metal_pins`, 12 `button_pins` | копия 12 готова, бой не в пакете 1. Задач на badge и metal_pins нет |
 | 6 копии | 36 48 51 76 `tablets`, 68 `shild`, 50 52 66 `calendar` | задач нет. Форма 68 в реестре — `calcTablets` |
 | 7 копии | 54 57 `magnet_laminated`, 56 `cards`, 74 `keychain`, 75 `magnet_acrylic` | задач нет |
