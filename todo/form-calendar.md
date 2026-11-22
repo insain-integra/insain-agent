@@ -83,6 +83,8 @@ Site ops: Grok 4.7
 23.11.2026 — Implementer, Grok 4.7 — git-scope шагов 0–5б и `calendar.js` формы 50; дефолт квартального совпал с JS после учёта подложек 0+0 — дальше Site ops (сначала `deploy-api` с `main`, дубль до выкатки не делать)
 23.11.2026 — Site ops, Grok 4.7 — дубль формы 50 не делал: коммита нет, HEAD = main `b31857d`, боевой POST price 42071 и time_ready 31.73 — дальше человек
 23.11.2026 — человек — закоммитить task/form-calendar, слить в main, выкатить API и сделать дубль формы 50 — дальше Site ops
+23.11.2026 — Site ops, Grok 4.7 — коммит 5be7b79 на task/form-calendar; слияние в main не сделано, lock merge занят form-badge — дальше человек
+23.11.2026 — человек — подождать освобождения lock merge у form-badge, затем rebase, слияние, выкатка и дубль формы 50 — дальше Site ops
 
 ```text
 Блокер: правка квартального календаря не в main, боевой API отдаёт старую цену, дубль формы 50 до deploy-api нельзя
@@ -92,13 +94,21 @@ Site ops: Grok 4.7
 Следующая сессия: человек; после варианта (1) — коммит, слияние, Site ops по skill deploy-api, затем copy.md шаги 6–16
 ```
 
+```text
+Блокер: lock merge занят задачей form-badge с 2026-11-22T18:05:36Z, fast-forward task/form-calendar в main не делался
+Пробовал: коммит 5be7b7970f46a879cbf3e036da91f070317647cb на task/form-calendar (calendar.py, test_calendar.py, wp-plugin/forms/calendar.js, todo/form-calendar.md, docs/dashboard.md). Основная папка осталась на main 6ae6cb7, origin/main позади на 1 коммит (form-badge ещё не запушен). lock acquire merge form-calendar отказал: ресурс занят form-badge. git pull --ff-only — Already up to date. git merge --ff-only task/form-calendar не прошёл (ветки разошлись: на main есть 6ae6cb7, которого нет в task/form-calendar) и откатился сам. Rebase, check, push, deploy-api, дубль формы 50, плагин и боевую 50 не делал. Формы 52 и 66 не трогал. Незакоммиченную строку дашборда form-badge на main вернул как была.
+Гипотеза: form-badge сейчас сливает или пушит main и держит lock; после release нужен rebase task/form-calendar на main (расхождение не только в lock), затем ff-merge, check, push, CI, deploy-api и шаги 6–16 copy.md.
+Вопрос: (1) дождаться release merge form-badge и повторить rebase, слияние, push, deploy-api и дубль формы 50; (2) если form-badge завис — снять lock merge form-badge --force и сразу продолжить form-calendar; (3) оставить коммит 5be7b79 локально на task/form-calendar, main и прод не трогать.
+Следующая сессия: человек; после варианта (1) или (2) — Site ops, та же ветка task/form-calendar
+```
+
 ## Найдено вне scope
 
 - В цепочке `js_port_gaps` у `calcPrintSheet` строка `call calcPrintLaser` уже лежит в `scripts/js_port_gaps_allowed.txt`; к квартальному калькулятору не относится, строку не добавлял.
 
 ## Результат
 
-- Ветка, PR или коммит: `task/form-calendar`, worktree `D:\Projects\insain-agent-form-calendar`, коммита нет
+- Ветка, PR или коммит: `task/form-calendar` `5be7b7970f46a879cbf3e036da91f070317647cb`, worktree `D:\Projects\insain-agent-form-calendar`. В main не слито. Локальный main — `6ae6cb7`, впереди origin/main на 1 коммит form-badge.
 - Период: 2026-11-23 — 2026-11-23
 - Часы человека: оценка 1 ч — коммит задачи ещё впереди
 - Работа агентов: 1 сессия Implementer; Grok 4.7
@@ -117,3 +127,8 @@ Site ops: Grok 4.7
 - Не сделано и почему: ветки с правкой в main нет (коммита нет). Дубль до `deploy-api` с main запрещён задачей. Шаги 6–16 `copy.md` не выполнены.
 - Как откатить: на проде изменений нет, откат не нужен.
 - Требуется решение: (1) закоммитить `task/form-calendar`, слить в main, `deploy-api`, затем дубль формы 50; (2) только коммит, слияние и выкатку не делать; (3) прод не трогать и подождать.
+- Site ops 23.11.2026, второй заход. Сделано: коммит `5be7b79` на `task/form-calendar`. Слияние, push, CI, deploy-api и дубль не делались: `lock merge` занят `form-badge`.
+- Чем проверено: `git log -1` на ветке — `5be7b7970f46a879cbf3e036da91f070317647cb`. `lock acquire merge form-calendar` — отказ, держатель `form-badge` с 2026-11-22T18:05:36Z. `git merge --ff-only` — abort, main остался `6ae6cb7`. Боевой POST и curl страницы в этом заходе не повторялись.
+- Не сделано и почему: rebase, check, push, выкатка API, шаги 6–16. Lock merge чужой, снимать его нельзя.
+- Как откатить: прод не менялся. Коммит только локальный на `task/form-calendar`. Worktree не удалялся; в нём незакоммичена эта запись блокера.
+- Требуется решение: (1) дождаться `lock release merge form-badge`, затем rebase `task/form-calendar` на main, ff-merge, check, push, CI, deploy-api и дубль формы 50; (2) если form-badge завис — `lock release merge form-badge --force` и тот же продолженный путь; (3) оставить `5be7b79` локально, main и прод не трогать.
