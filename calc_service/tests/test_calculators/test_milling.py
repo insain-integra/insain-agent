@@ -208,3 +208,125 @@ def test_get_tool_schema(calc):
     schema = calc.get_tool_schema()
     assert schema.get("name") == "calc_milling"
     assert "parameters" in schema
+    props = schema["parameters"]["properties"]
+    assert "is_cut_milling" in props
+
+
+# JS, 22.11.2026 (консоль боевой страницы: форма 35 на открытии по умолчанию)
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "",
+    "material_mode": "isMaterial",
+    "is_cut_milling": {
+        "size_item": 50,
+        "density": 0,
+        "difficulty": 1,
+        "len_cut": 0,
+    },
+    "mode": 1,
+}
+
+EXPECTED_FORM_DEFAULT = {
+    0: {"cost": 877.5, "price": 1080.0, "time_hours": 0.0, "time_ready": 72.0},
+    1: {"cost": 1105.0, "price": 1360.0, "time_hours": 0.05, "time_ready": 56.05},
+    2: {"cost": 1560.0, "price": 1920.0, "time_hours": 0.1, "time_ready": 40.1},
+}
+
+# JS, 22.11.2026 (консоль боевой страницы: форма 35 с материалом PVC3)
+EXPECTED_FORM_PVC3_MODES = {
+    0: {"cost": 1470.9330357142858, "price": 1890.1426854395604, "time_hours": 0.0, "time_ready": 72.0},
+    1: {"cost": 1795.9330357142858, "price": 2302.6426854395604, "time_hours": 0.05, "time_ready": 56.05},
+    2: {"cost": 2348.433035714286, "price": 3094.2170329670334, "time_hours": 0.1, "time_ready": 40.1},
+}
+
+# JS, 22.11.2026 (консоль боевой страницы: dpdDifficulty=1.7 с size_item=50, density=0.25)
+EXPECTED_FORM_DIFF_17_MODES = {
+    0: {"cost": 2323.083035714286, "price": 2971.7176854395602, "time_hours": 0.0, "time_ready": 72.0},
+    1: {"cost": 2648.083035714286, "price": 3384.2176854395602, "time_hours": 0.05, "time_ready": 56.05},
+    2: {"cost": 3200.583035714286, "price": 4208.567032967034, "time_hours": 0.1, "time_ready": 40.1},
+}
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form_default_matches_js_modes(calc, mode):
+    """Дефолт формы 35 на открытии (material_id='') сходится с JS на mode=0, 1, 2."""
+    res = calc.execute({**REF_FORM_DEFAULT, "mode": mode})
+    exp = EXPECTED_FORM_DEFAULT[mode]
+    assert res["cost"] == pytest.approx(exp["cost"], rel=0.001)
+    assert res["price"] == pytest.approx(exp["price"], rel=0.001)
+    assert res["time_hours"] == pytest.approx(exp["time_hours"], rel=0.001)
+    assert res["time_ready"] == pytest.approx(exp["time_ready"], rel=0.001)
+    assert res["materials"] == []
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form_pvc3_default_matches_js_modes(calc, mode):
+    """Форма 35 с материалом PVC3 и простой резкой сходится с JS на mode=0, 1, 2."""
+    res = calc.execute({**REF_FORM_DEFAULT, "material_id": "PVC3", "mode": mode})
+    exp = EXPECTED_FORM_PVC3_MODES[mode]
+    assert res["cost"] == pytest.approx(exp["cost"], rel=0.001)
+    assert res["price"] == pytest.approx(exp["price"], rel=0.001)
+    assert res["time_hours"] == pytest.approx(exp["time_hours"], rel=0.001)
+    assert res["time_ready"] == pytest.approx(exp["time_ready"], rel=0.001)
+    assert res["materials"][0]["size_mm"] == [3050.0, 2050.0]
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form_difficulty_17_matches_js_modes(calc, mode):
+    """Опция is_cut_milling (difficulty=1.7, size_item=50, density=0.25) сходится с JS на mode=0, 1, 2."""
+    res = calc.execute({
+        **REF_FORM_DEFAULT,
+        "material_id": "PVC3",
+        "is_cut_milling": {"size_item": 50, "density": 0.25, "difficulty": 1.7, "len_cut": 0},
+        "mode": mode,
+    })
+    exp = EXPECTED_FORM_DIFF_17_MODES[mode]
+    assert res["cost"] == pytest.approx(exp["cost"], rel=0.001)
+    assert res["price"] == pytest.approx(exp["price"], rel=0.001)
+    assert res["time_hours"] == pytest.approx(exp["time_hours"], rel=0.001)
+    assert res["time_ready"] == pytest.approx(exp["time_ready"], rel=0.001)
+
+
+def test_is_cut_milling_branches_and_half_sheet(calc):
+    """Ветки is_cut_milling (len_cut=100, без резки), режимы материала и поллиста."""
+    # Задана длина резки 100 мм на изделие
+    r_len = calc.execute({
+        **REF_FORM_DEFAULT,
+        "material_id": "PVC3",
+        "is_cut_milling": {"size_item": 50, "density": 0, "difficulty": 1, "len_cut": 100},
+    })
+    assert r_len["cost"] == pytest.approx(1444.9330357142858, rel=0.001)
+    assert r_len["price"] == pytest.approx(1857.1426854395604, rel=0.001)
+
+    # Без резки (is_cut_milling не передан)
+    r_nocut = calc.execute({
+        "quantity": 100,
+        "width": 50,
+        "height": 50,
+        "material_id": "PVC3",
+        "material_mode": "isMaterial",
+        "mode": 1,
+    })
+    assert r_nocut["cost"] == pytest.approx(1105.0, rel=0.001)
+    assert r_nocut["price"] == pytest.approx(1360.0, rel=0.001)
+
+    # Материал заказчика (+25% к резке, без стоимости материала и списка материалов)
+    r_cust = calc.execute({**REF_FORM_DEFAULT, "material_id": "PVC3", "material_mode": "isMaterialCustomer"})
+    assert r_cust["cost"] == pytest.approx(1478.75, rel=0.001)
+    assert r_cust["price"] == pytest.approx(1876.875, rel=0.001)
+    assert r_cust["materials"] == []
+
+    # Поллиста (8 шт 500x500 на 3050x2050 -> 0.5 листа)
+    r_half = calc.execute({
+        **REF_FORM_DEFAULT,
+        "quantity": 8,
+        "width": 500,
+        "height": 500,
+        "material_id": "PVC3",
+    })
+    assert r_half["cost"] == pytest.approx(4435.8234375, rel=0.001)
+    assert r_half["price"] == pytest.approx(5502.665625, rel=0.001)
+    assert r_half["materials"][0]["quantity"] == 0.5
+    assert r_half["materials"][0]["size_mm"] == [3050.0, 2050.0]

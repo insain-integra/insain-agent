@@ -2,7 +2,7 @@
 Калькулятор фрезеровки.
 
 Перенесено из js_legacy/calc/calcMilling.js.
-Параметры: количество, размер изделия, материал (hardsheet), опции (резка, материал наш/заказчика).
+Параметры: количество, размер изделия, материал (hardsheet), опции (резка is_cut_milling, материал наш/заказчика).
 Результат: себестоимость и цена с учётом материала, резки, доставки; мин. сумма 500 руб.
 """
 
@@ -14,7 +14,13 @@ from typing import Any, Dict, List, Mapping
 
 import json5
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import (
+    BaseCalculator,
+    ProductionMode,
+    apply_mode_defects,
+    calc_time_prepare,
+    parse_mode,
+)
 from common.helpers import calc_weight, find_in_table
 from common.layout import layout_on_sheet
 from common.markups import (
@@ -210,12 +216,38 @@ class MillingCalculator(BaseCalculator):
                     "quantity": {"type": "integer", "minimum": 1},
                     "width": {"type": "number", "minimum": 1},
                     "height": {"type": "number", "minimum": 1},
-                    "material_id": {"type": "string"},
+                    "material_id": {"type": "string", "default": ""},
                     "material_mode": {"type": "string", "enum": ["isMaterial", "isMaterialCustomer", "noMaterial"]},
-                    "len_cut": {"type": "number"},
+                    "is_cut_milling": {
+                        "type": "object",
+                        "description": "Параметры фрезерной резки (если не задано — без резки).",
+                        "properties": {
+                            "len_cut": {
+                                "type": "number",
+                                "description": "Общая длина реза одного изделия, мм. Если 0 — считается автоматически.",
+                                "default": 0,
+                            },
+                            "size_item": {
+                                "type": "number",
+                                "description": "Размер элемента, мм, для расчёта внутреннего периметра.",
+                                "default": 0,
+                            },
+                            "density": {
+                                "type": "number",
+                                "description": "Плотность заполнения (0..1).",
+                                "default": 0,
+                            },
+                            "difficulty": {
+                                "type": "number",
+                                "description": "Коэффициент изогнутости контура.",
+                                "default": 1,
+                            },
+                        },
+                    },
+                    "len_cut": {"type": "number", "description": "Устаревший плоский параметр длины реза."},
                     "mode": {"type": "integer", "enum": [0, 1, 2]},
                 },
-                "required": ["quantity", "width", "height", "material_id"],
+                "required": ["quantity", "width", "height"],
             },
         }
 
@@ -226,8 +258,9 @@ class MillingCalculator(BaseCalculator):
         size = [w, h]
         material_id = str(params.get("material_id", "") or "").strip()
         material_mode = str(params.get("material_mode", "isMaterial") or "isMaterial")
+        is_cut_milling = params.get("is_cut_milling")
         len_cut = float(params.get("len_cut", 0) or 0)
-        mode = ProductionMode(int(params.get("mode", 1)))
+        mode = parse_mode(params.get("mode"))
 
         try:
             milling = milling_catalog.get(MILLING_CODE)
@@ -239,71 +272,107 @@ class MillingCalculator(BaseCalculator):
         if len(margins) < 4:
             margins = [10, 10, 10, 10]
         interval = INTERVAL_DEFAULT
-        defects = milling.get_defect_rate(float(quantity))
-        if mode.value >= 2:
-            defects += defects * (mode.value - 1)
+        defects = apply_mode_defects(milling.get_defect_rate(float(quantity)), mode)
 
         cost_material = 0.0
         cost_cut = 0.0
-        num_sheet = 0
+        num_sheet = 0.0
+        best_size_mat = None
         material = None
         time_cut = 0.0
 
         if material_id:
             try:
                 material = get_material("hardsheet", material_id)
-            except Exception:
-                material = None
+            except KeyError as exc:
+                raise ValueError(f"Параметры материала не найдены: {material_id}") from exc
             if material:
                 thickness_mm = float(material.thickness or 0 or 3)
                 cost_cut_per_m = _cost_cut_per_meter(material_id, thickness_mm, raw)
-                if cost_cut_per_m > 0 and len_cut > 0:
-                    # В JS lenCut в мм: len = ceil(n * lenCut / 1000). Если len_cut < 100 — считаем в метрах (периметр 3 м → len_cut=3).
+                if isinstance(is_cut_milling, Mapping):
+                    len_cut_mm = float(is_cut_milling.get("len_cut", 0.0) or 0.0)
+                    if len_cut_mm == 0.0:
+                        size_item = float(is_cut_milling.get("size_item", 0.0) or 0.0)
+                        density = float(is_cut_milling.get("density", 0.0) or 0.0)
+                        difficulty = float(is_cut_milling.get("difficulty", 1.0) or 1.0)
+                        len_cut_mm = (size[0] + size[1]) * 2.0
+                        if size_item > 0.0:
+                            len_cut_mm += 4.0 * size[0] * size[1] * density / size_item
+                        len_cut_mm *= difficulty
+                    if cost_cut_per_m > 0 and len_cut_mm > 0:
+                        length_m = math.ceil(quantity * len_cut_mm / 1000.0)
+                        discount = _discount_for_length(length_m, raw)
+                        cost_cut = length_m * cost_cut_per_m * (1.0 - discount)
+                elif cost_cut_per_m > 0 and len_cut > 0:
+                    # Обратная совместимость для плоского len_cut (<=100 — в метрах, >100 — в мм).
                     if 0 < len_cut <= 100:
                         length_m = math.ceil(quantity * len_cut)
                     else:
                         length_m = math.ceil(quantity * len_cut / 1000.0)
                     discount = _discount_for_length(length_m, raw)
-                    cost_cut = length_m * cost_cut_per_m * (1 - discount)
+                    cost_cut = length_m * cost_cut_per_m * (1.0 - discount)
 
                 max_size = milling.max_size or [4000, 2000]
                 layout_milling = layout_on_sheet(size, max_size, margins, interval)
                 if layout_milling.get("num", 0) == 0:
-                    return self._empty_result(mode)
+                    raise ValueError("Изделие не помещается во фрезер")
 
                 sizes = material.sizes or []
                 if not sizes:
                     sizes = [[2100, 1400]]
                 best_cost = None
-                best_sheets = 0
-                best_size_mat = None
+                best_sheets = 0.0
                 for sz in sizes:
                     if len(sz) < 2:
                         continue
-                    sheet_w, sheet_h = sz[0], sz[1]
+                    sheet_w, sheet_h = float(sz[0]), float(sz[1])
                     layout_sheet = layout_on_sheet(size, [sheet_w, sheet_h], margins, interval)
-                    if layout_sheet.get("num", 0) == 0:
+                    per_sheet = layout_sheet.get("num", 0)
+                    if per_sheet == 0:
                         continue
-                    n_sheet = quantity // layout_sheet["num"]
-                    frac = quantity / layout_sheet["num"] - n_sheet
-                    if frac > 0:
-                        n_sheet += 1
+                    if sheet_w > sheet_h:
+                        half_size = [sheet_w / 2.0, sheet_h]
+                    else:
+                        half_size = [sheet_w, sheet_h / 2.0]
+                    layout_half = layout_on_sheet(size, half_size, margins, interval)
+
+                    n_sheet = float(quantity // per_sheet)
+                    frac_sheet = quantity / per_sheet - n_sheet
+                    frac_num = quantity - int(n_sheet) * per_sheet
+                    if layout_half.get("num", 0) >= frac_num:
+                        if frac_sheet * 1.5 >= 0.5:
+                            n_sheet += 0.5
+                            frac_sheet = 0.0
+                    else:
+                        n_sheet += 1.0
+                        frac_sheet = 0.0
+
                     cost_per_sheet = material.get_cost(n_sheet)
-                    cost_mat = cost_per_sheet * n_sheet * (sheet_w * sheet_h) / 1_000_000.0
+                    cost_mat = (
+                        cost_per_sheet
+                        * (n_sheet + frac_sheet * 1.5)
+                        * (sheet_w * sheet_h)
+                        / 1_000_000.0
+                    )
                     if best_cost is None or cost_mat < best_cost:
                         best_cost = cost_mat
                         best_sheets = n_sheet
                         best_size_mat = [sheet_w, sheet_h]
 
-                if best_cost is not None and material_mode == "isMaterial":
+                if best_cost is None:
+                    raise ValueError("Изделие не помещается на материал")
+
+                if material_mode == "isMaterial":
                     cost_material = best_cost
                     num_sheet = best_sheets
-                elif material_mode == "isMaterialCustomer":
-                    cost_cut *= 1.25
+                else:
+                    cost_material = 0.0
+                    if material_mode == "isMaterialCustomer":
+                        cost_cut *= 1.25
 
         # В JS: timePrepare * modeProduction (0, 1, 2)
-        time_prepare = (milling.time_prepare or 0.05) * mode.value
-        time_hours = round((time_cut + time_prepare) * 100) / 100.0
+        time_prepare = calc_time_prepare(milling.time_prepare or 0.05, mode)
+        time_hours = math.ceil((time_cut + time_prepare) * 100.0) / 100.0
         cost_operator = time_prepare * milling.operator_cost_per_hour
         cost_ship = _cost_shipment(size, raw)
         if mode.value == 0:
@@ -312,23 +381,22 @@ class MillingCalculator(BaseCalculator):
             cost_ship *= max(1, mode.value)
 
         equipment_margin = float(raw.get("margin", 0) or 0)
-        cost_total = (cost_cut + cost_material + cost_operator + cost_ship) * (1 + equipment_margin)
-        # В JS: Math.round(n*(1+defects)) == n → учёт брака в цене. Python round(10.5)=10, JS Math.round(10.5)=11 → совпадаем через round half up.
-        rounded_with_defects = int(quantity * (1 + defects) + 0.5)
-        if rounded_with_defects == quantity and defects > 0:
-            cost_total *= 1 + defects
-        if cost_total < MIN_COST:
-            cost_total = (MIN_COST + cost_ship) * (1 + equipment_margin)
-            margin_extra = get_margin("marginMilling")
-            price = math.ceil((MIN_COST + cost_ship) * (1 + MARGIN_OPERATION + margin_extra))
-        else:
-            margin_extra = get_margin("marginMilling")
+        margin_extra = get_margin("marginMilling")
+        effective_margin = max(MARGIN_OPERATION + margin_extra, MARGIN_MIN)
+
+        if cost_cut + cost_material + cost_operator > MIN_COST:
+            cost_total = (cost_cut + cost_material + cost_ship + cost_operator) * (1 + equipment_margin)
+            # В JS: Math.round(n*(1+defects)) == n → учёт брака в цене.
+            rounded_with_defects = int(quantity * (1 + defects) + 0.5)
+            if rounded_with_defects == quantity and defects > 0:
+                cost_total *= 1 + defects
             price = (
                 cost_material * (1 + defects + MARGIN_MATERIAL)
-                + (cost_cut + cost_ship + cost_operator) * (1 + defects + MARGIN_OPERATION + margin_extra)
+                + (cost_cut + cost_ship + cost_operator) * (1 + defects + effective_margin)
             )
-            price = max(price, cost_total * (1 + MARGIN_MIN))
-            price = math.ceil(price)
+        else:
+            cost_total = (MIN_COST + cost_ship) * (1 + equipment_margin)
+            price = (MIN_COST + cost_ship) * (1 + effective_margin)
 
         base_ready = milling.base_time_ready or BASE_TIME_READY
         idx = max(0, min(len(base_ready) - 1, mode.value))
@@ -336,7 +404,7 @@ class MillingCalculator(BaseCalculator):
 
         weight_kg = 0.0
         materials_out: List[Dict[str, Any]] = []
-        if material and material_id and material_mode == "isMaterial":
+        if material and material_id:
             try:
                 weight_kg = calc_weight(
                     quantity=quantity,
@@ -347,15 +415,17 @@ class MillingCalculator(BaseCalculator):
                 )
             except Exception:
                 pass
-            materials_out = [
-                {
-                    "code": material.code,
-                    "name": material.description,
-                    "title": material.title,
-                    "quantity": num_sheet,
-                    "unit": "лист",
-                }
-            ]
+            if material_mode == "isMaterial":
+                materials_out = [
+                    {
+                        "code": material.code,
+                        "name": material.description,
+                        "title": material.title,
+                        "size_mm": best_size_mat,
+                        "quantity": num_sheet,
+                        "unit": "лист",
+                    }
+                ]
 
         return {
             "cost": float(cost_total),
