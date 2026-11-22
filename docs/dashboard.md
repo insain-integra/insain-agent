@@ -43,7 +43,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | --- | --- |
 | `ai-calc-authoring-skill.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
-| `form-badge.md` | ревью |
+| `form-badge.md` | выкатка |
 | `form-calendar.md` | черновик |
 | `form-keychain.md` | черновик |
 | `form-magnet-acrylic.md` | черновик |
