@@ -20,7 +20,7 @@
 - `todo/form-keychain.md` — копия формы 74, slug `keychain`
 - `todo/form-magnet-acrylic.md` — копия формы 75, slug `magnet_acrylic`
 - `todo/form-magnet-laminated.md` — лид-копия 54, slug `magnet_laminated`; ждёт `form-magnet-acrylic` (общий `magnets.py`), форма 57 позже
-- `todo/form-calendar.md` — лид-копия 50 (квартальный), slug `calendar`; формы 52 и 66 позже
+- `form-calendar` (закрыто 2026-11-23, `docs/history/log.md`) — лид-копия 50 (квартальный), slug `calendar`; формы 52 и 66 позже
 - `todo/form-badge.md` — сверка дефолтов 31, 60, 61, 64, 84 и лид-копия (кандидат 64), slug `badge`
 - `todo/form-tablets.md` — сверка дефолтов 36, 48, 51, 76, 68 и лид-копия 36, slug `tablets`
 
@@ -51,7 +51,7 @@
 
 1. `todo/presswall-banner-mode.md` — в любой момент: только `presswall.py` и его тест. Это не переключение формы 46, задача не отменяется.
 2. Параллельно, лид-копии пачек 5–7:
-   - `todo/form-plastic-cards.md`, `todo/form-keychain.md`, `todo/form-magnet-acrylic.md`, `todo/form-calendar.md`
+   - `todo/form-plastic-cards.md`, `todo/form-keychain.md`, `todo/form-magnet-acrylic.md`, `form-calendar` (закрыто 2026-11-23, `docs/history/log.md`)
    - `todo/form-badge.md`, `todo/form-tablets.md` — сначала сверка дефолтов всех форм slug, потом лид
    - `todo/form-magnet-laminated.md` — после `form-magnet-acrylic`: общий `magnets.py`
    Запись на проде (дубли форм) — последовательно под `lock prod`.
