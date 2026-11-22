@@ -1,6 +1,6 @@
 // Форма 64 CalcBadge, элемент cjsCalc (2613). Id полей — боевой формы 64.
-// Поля chkPocket, chkGrave, numGraveW, numGraveH, chkEpoxy и опция AdhesiveLayer50
-// пишутся в syncUrl, но в calcApi не уходят (в API badge эти ветки не портированы).
+// Опция AdhesiveLayer50 в dpdAttachment (2610) пишется в syncUrl,
+// но в calcApi не уходит (ветка isAdhesiveLayer в badge не портирована).
 var qty = {{numN}};
 var width = Number(String({{numW}}).replace(',', '.')) || 0;
 var height = Number(String({{numH}}).replace(',', '.')) || 0;
@@ -11,8 +11,8 @@ var difficultyIndex = optionIndex(ezfc_functions.get_value_from(2599, true, fals
 var difficulty = Number(difficultyRaw) || 1;
 var hasPocket = ezfc_functions.get_value_from(2600, true) == 'Pocket';
 var isGrave = ezfc_functions.get_value_from(2603, true) == 'isGrave';
-var graveW = {{numGraveW}};
-var graveH = {{numGraveH}};
+var graveW = Number(String({{numGraveW}}).replace(',', '.')) || 0;
+var graveH = Number(String({{numGraveH}}).replace(',', '.')) || 0;
 var isUvPrint = ezfc_functions.get_value_from(2607, true) == 'isUVPrint';
 var color = ezfc_functions.get_value_from(2608, true)[0] || '4+0';
 var colorIndex = optionIndex(ezfc_functions.get_value_from(2608, true, false, { return_value: 'index' }));
@@ -59,9 +59,17 @@ var params = {
     is_print: false,
     is_uv_print: isUvPrint,
     color: color,
+    is_epoxy: isEpoxy,
     is_packing: isPacking,
     mode: mode
 };
+if (hasPocket) {
+    params.pocket_id = 'Pocket';
+}
+if (isGrave) {
+    params.is_grave = 2;
+    params.is_grave_fill = [graveW, graveH];
+}
 if (attachmentId && attachmentId !== 'No' && attachmentId !== 'AdhesiveLayer50') {
     params.attachment_id = attachmentId;
 }

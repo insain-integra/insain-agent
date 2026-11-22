@@ -2,13 +2,12 @@
 Калькулятор бейджей.
 
 Мигрировано из js_legacy/calc/calcBadge.js.
-Упрощённая версия: печать + лазерная резка + опционально УФ-печать + крепление + упаковка.
+Поддерживает печать, лазерную резку и гравировку, УФ-печать,
+полимерную заливку смолой, крепление, карман для имени и упаковку.
 
 Список «не перенесено» (scripts/js_port_gaps_allowed.txt):
-- опции: option_isEpoxy, option_isAdhesiveLayer, option_isGrave,
-  option_isGraveFill, option_isGraveContur, option_isMetalBlank,
-  option_isEpoxySticker, option_isPocket;
-- вызовы: calcManualRoll, calcEpoxy, calcPolySticker, calcSetSticker, calcPocket.
+- опции: option_isAdhesiveLayer, option_isMetalBlank, option_isEpoxySticker;
+- вызовы: calcManualRoll, calcPolySticker, calcSetSticker.
 """
 
 from __future__ import annotations
@@ -16,14 +15,21 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List, Mapping
 
-from calculators.base import BaseCalculator, ProductionMode, parse_mode
+from calculators.base import BaseCalculator, ProductionMode, apply_mode_defects, parse_mode
 from calculators.print_sheet import PrintSheetCalculator
 from calculators.laser import LaserCalculator
 from calculators.uv_print import UVPrintCalculator
 from common.helpers import calc_weight
 from common.layout import layout_on_sheet
 from common.markups import BASE_TIME_READY, MARGIN_MATERIAL, MARGIN_OPERATION, get_margin, get_time_ready
-from common.process_tools import calc_attachment, calc_lamination_roll, calc_packing
+from common.process_tools import (
+    calc_attachment,
+    calc_epoxy,
+    calc_lamination_roll,
+    calc_packing,
+    calc_pocket,
+)
+from equipment import tools as tools_catalog
 from materials import get_material, hardsheet as hardsheet_catalog, sheet as sheet_catalog
 
 DEFAULT_PRINT_MATERIAL = "RaflatacMW"
@@ -32,12 +38,12 @@ SIZE_SHEET_BADGE = [320, 450]
 
 
 def _ensure_size_mm(materials: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Дописать size_mm из каталога для креплений и упаковки, если не заполнено."""
+    """Дописать size_mm из каталога для креплений, упаковки и карманов, если не заполнено."""
     out: List[Dict[str, Any]] = []
     for raw in materials:
         item = dict(raw)
         if not item.get("size_mm") and item.get("code"):
-            for category in ("attachment", "pack"):
+            for category in ("attachment", "pack", "pocket"):
                 try:
                     spec = get_material(category, str(item["code"]))
                 except Exception:
@@ -50,7 +56,7 @@ def _ensure_size_mm(materials: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 
 class BadgeCalculator(BaseCalculator):
-    """Бейджи: печать + лазерная резка + опционально УФ-печать + крепление + упаковка."""
+    """Бейджи: печать + лазерная резка/гравировка + УФ-печать + смола + крепление + карман + упаковка."""
 
     slug = "badge"
     name = "Бейджи"
@@ -69,7 +75,13 @@ class BadgeCalculator(BaseCalculator):
                 {"name": "is_print", "type": "boolean", "required": False, "default": True, "title": "Печать"},
                 {"name": "color", "type": "string", "required": False, "default": "4+0", "title": "Цветность печати"},
                 {"name": "is_uv_print", "type": "boolean", "required": False, "default": False, "title": "УФ-печать"},
+                {"name": "is_grave", "type": "integer", "required": False, "title": "Гравировка (индекс детализации 0..2)"},
+                {"name": "is_grave_fill", "type": "array", "required": False, "title": "Область сплошной гравировки [w, h] (мм)"},
+                {"name": "is_grave_contur", "type": "array", "required": False, "title": "Область контурной гравировки [w, l] (мм)"},
+                {"name": "is_epoxy", "type": "boolean", "required": False, "default": False, "title": "Полимерная заливка смолой"},
                 {"name": "attachment_id", "type": "string", "required": False, "title": "Крепление"},
+                {"name": "pocket_id", "type": "string", "required": False, "title": "Карман (окошко для имени)"},
+                {"name": "is_pocket", "type": "boolean", "required": False, "default": False, "title": "Окошко для имени (Pocket)"},
                 {"name": "is_packing", "type": "boolean", "required": False, "default": False, "title": "Упаковка (автоподбор)"},
                 {"name": "packing_id", "type": "string", "required": False, "title": "Упаковка"},
                 {"name": "mode", "type": "integer", "required": False, "default": 1, "title": "Режим"},
@@ -77,7 +89,12 @@ class BadgeCalculator(BaseCalculator):
             "param_groups": {
                 "main": ["quantity", "width", "height"],
                 "material": ["material_id"],
-                "processing": ["is_print", "color", "is_uv_print", "attachment_id", "is_packing", "packing_id"],
+                "processing": [
+                    "is_print", "color", "is_uv_print",
+                    "is_grave", "is_grave_fill", "is_grave_contur",
+                    "is_epoxy", "attachment_id", "pocket_id", "is_pocket",
+                    "is_packing", "packing_id",
+                ],
                 "mode": ["mode"],
             },
         }
@@ -115,7 +132,25 @@ class BadgeCalculator(BaseCalculator):
                     "is_print": {"type": "boolean", "default": True, "description": "Печать"},
                     "color": {"type": "string", "default": "4+0", "description": "Цветность"},
                     "is_uv_print": {"type": "boolean", "default": False, "description": "УФ-печать"},
+                    "is_grave": {"type": "integer", "description": "Индекс детализации гравировки (0, 1, 2)"},
+                    "is_grave_fill": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "description": "Размер области сплошной гравировки [w, h] в мм",
+                    },
+                    "is_grave_contur": {
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "description": "Размер области контурной гравировки [w, l] в мм",
+                    },
+                    "is_epoxy": {"type": "boolean", "default": False, "description": "Полимерная заливка смолой"},
                     "attachment_id": {"type": "string", "description": "Код крепления"},
+                    "pocket_id": {"type": "string", "description": "Код кармана (например, 'Pocket')"},
+                    "is_pocket": {"type": "boolean", "default": False, "description": "Окошко для имени (Pocket)"},
                     "is_packing": {"type": "boolean", "default": False, "description": "Упаковка в зиплок (автоподбор)"},
                     "packing_id": {"type": "string", "description": "Код упаковки"},
                     "mode": {"type": "integer", "enum": [0, 1, 2], "default": 1},
@@ -134,7 +169,17 @@ class BadgeCalculator(BaseCalculator):
         is_print = bool(params.get("is_print", True))
         color = str(params.get("color", "4+0") or "4+0").strip()
         is_uv_print = bool(params.get("is_uv_print", False))
+        raw_grave = params.get("is_grave")
+        is_grave_fill = params.get("is_grave_fill")
+        is_grave_contur = params.get("is_grave_contur")
+        is_epoxy = bool(params.get("is_epoxy", False))
         attachment_id = str(params.get("attachment_id", "") or "").strip()
+        pocket_id = str(params.get("pocket_id", "") or "").strip()
+        if pocket_id == "No":
+            pocket_id = ""
+        is_pocket = bool(params.get("is_pocket", False))
+        if is_pocket and not pocket_id:
+            pocket_id = "Pocket"
         is_packing = bool(params.get("is_packing", False))
         packing_id = str(params.get("packing_id", "") or "").strip()
         if packing_id == "isPacking":
@@ -146,6 +191,13 @@ class BadgeCalculator(BaseCalculator):
             raise ValueError("material_id обязателен")
 
         material = hardsheet_catalog.get(material_id)
+
+        # Брак полимерной заливки увеличивает тираж для печати и лазерной резки/гравировки
+        n_items = n
+        if is_epoxy:
+            tool_ec = tools_catalog.get("EpoxyCoating")
+            epoxy_defects = apply_mode_defects(tool_ec.get_defect_rate(float(n)), mode)
+            n_items = math.ceil(n * (1 + epoxy_defects))
 
         cost_print = 0.0
         price_print = 0.0
@@ -160,7 +212,6 @@ class BadgeCalculator(BaseCalculator):
         cost_roll = 0.0
         price_roll = 0.0
         time_roll = 0.0
-        n_items = n
         num_sheet = 0
 
         materials_out: List[Dict[str, Any]] = []
@@ -169,7 +220,7 @@ class BadgeCalculator(BaseCalculator):
             # Печать (без резки — no_cut)
             print_calc = PrintSheetCalculator()
             print_params = {
-                "quantity": n,
+                "quantity": n_items,
                 "width": size[0],
                 "height": size[1],
                 "color": color,
@@ -197,7 +248,7 @@ class BadgeCalculator(BaseCalculator):
             layout = layout_on_sheet(size, SIZE_SHEET_BADGE, [5, 5, 5, 5], 4)
             if layout["num"] == 0:
                 raise ValueError("Размер изделия больше допустимого")
-            num_sheet = math.ceil(n / layout["num"])
+            num_sheet = math.ceil(n_items / layout["num"])
 
             laser_calc = LaserCalculator()
             laser_params1 = {
@@ -222,9 +273,9 @@ class BadgeCalculator(BaseCalculator):
             price_roll = roll_pr.price
             time_roll = roll_pr.time_hours
 
-        # Лазерная резка изделий
+        # Лазерная резка и гравировка изделий
         laser_calc = LaserCalculator()
-        laser_params2 = {
+        laser_params2: Dict[str, Any] = {
             "quantity": n_items,
             "width": size[0],
             "height": size[1],
@@ -232,6 +283,22 @@ class BadgeCalculator(BaseCalculator):
             "is_cut_laser": {"size_item": size[0] * size[1], "density": 0, "difficulty": difficulty, "len_cut": 0},
             "mode": mode.value,
         }
+        if isinstance(raw_grave, bool):
+            if raw_grave:
+                laser_params2["is_grave"] = 2
+                if is_grave_fill is not None:
+                    laser_params2["is_grave_fill"] = [float(x) for x in is_grave_fill]
+                elif is_grave_contur is None:
+                    laser_params2["is_grave_fill"] = list(size)
+                if is_grave_contur is not None:
+                    laser_params2["is_grave_contur"] = [float(x) for x in is_grave_contur]
+        elif raw_grave is not None and raw_grave != "":
+            laser_params2["is_grave"] = int(raw_grave)
+            if is_grave_fill is not None:
+                laser_params2["is_grave_fill"] = [float(x) for x in is_grave_fill]
+            if is_grave_contur is not None:
+                laser_params2["is_grave_contur"] = [float(x) for x in is_grave_contur]
+
         if is_print:
             laser_params2["material_mode"] = "noMaterial"
         laser_result2 = laser_calc.calculate(laser_params2)
@@ -268,6 +335,21 @@ class BadgeCalculator(BaseCalculator):
             time_ready_uv = float(uv_result.get("time_ready", 0))
             materials_out.extend(uv_result.get("materials") or [])
 
+        # Полимерная заливка смолой
+        cost_epoxy = 0.0
+        price_epoxy = 0.0
+        time_epoxy = 0.0
+        time_ready_epoxy = 0.0
+        weight_epoxy = 0.0
+        if is_epoxy:
+            epoxy_result = calc_epoxy(n, size, difficulty, {"isLayout": True}, mode.value)
+            cost_epoxy = epoxy_result.cost
+            price_epoxy = epoxy_result.price
+            time_epoxy = epoxy_result.time_hours
+            time_ready_epoxy = epoxy_result.time_ready
+            weight_epoxy = epoxy_result.weight_kg
+            materials_out.extend(epoxy_result.materials)
+
         # Крепление
         cost_attach = 0.0
         price_attach = 0.0
@@ -280,6 +362,21 @@ class BadgeCalculator(BaseCalculator):
             time_attach = attach_result.time_hours
             weight_attach = attach_result.weight_kg
             materials_out.extend(attach_result.materials)
+
+        # Карман (окошко для имени)
+        cost_pocket = 0.0
+        price_pocket = 0.0
+        time_pocket = 0.0
+        time_ready_pocket = 0.0
+        weight_pocket = 0.0
+        if pocket_id:
+            pocket_result = calc_pocket(n, pocket_id, mode.value)
+            cost_pocket = pocket_result.cost
+            price_pocket = pocket_result.price
+            time_pocket = pocket_result.time_hours
+            time_ready_pocket = pocket_result.time_ready
+            weight_pocket = pocket_result.weight_kg
+            materials_out.extend(pocket_result.materials)
 
         # Упаковка
         cost_pack = 0.0
@@ -295,23 +392,36 @@ class BadgeCalculator(BaseCalculator):
             materials_out.extend(pack_result.materials)
 
         # Итог
-        cost_total = cost_print + cost_laser1 + cost_roll + cost_laser2 + cost_uv + cost_attach + cost_pack
-        price_total = price_print + price_laser1 + price_roll + price_laser2 + price_uv + price_attach + price_pack
+        cost_total = (
+            cost_print + cost_laser1 + cost_roll + cost_laser2
+            + cost_uv + cost_epoxy + cost_attach + cost_pocket + cost_pack
+        )
+        price_total = (
+            price_print + price_laser1 + price_roll + price_laser2
+            + price_uv + price_epoxy + price_attach + price_pocket + price_pack
+        )
         margin_badge = get_margin("marginBadge")
         price_total = math.ceil(price_total * (1 + margin_badge))
 
-        time_hours = time_print + time_laser1 + time_roll + time_laser2 + time_uv + time_attach + time_pack
+        time_hours = (
+            time_print + time_laser1 + time_roll + time_laser2
+            + time_uv + time_epoxy + time_attach + time_pocket + time_pack
+        )
         time_hours = math.ceil(time_hours * 100) / 100.0
 
         time_ready_list = [
-            time_ready_print, time_ready_laser1, time_ready_laser2, time_ready_uv,
+            time_ready_print, time_ready_laser1, time_ready_laser2,
+            time_ready_uv, time_ready_epoxy, time_ready_pocket,
         ]
         base_ready = get_time_ready("baseTimeReady")
         idx = max(0, min(len(base_ready) - 1, mode.value))
         ready_vals = [t for t in time_ready_list if t > 0]
         time_ready = time_hours + max(ready_vals) if ready_vals else time_hours + float(base_ready[idx])
 
-        weight_kg = weight_print + weight_laser1 + weight_laser2 + weight_attach + weight_pack
+        weight_kg = (
+            weight_print + weight_laser1 + weight_laser2
+            + weight_epoxy + weight_attach + weight_pocket + weight_pack
+        )
         weight_kg = math.ceil(weight_kg * 100) / 100.0
 
         return {

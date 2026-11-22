@@ -1,16 +1,9 @@
-calcBadge option isEpoxy
 calcBadge option isAdhesiveLayer
-calcBadge option isGrave
-calcBadge option isGraveFill
-calcBadge option isGraveContur
 calcBadge option isMetalBlank
 calcBadge option isEpoxySticker
-calcBadge option isPocket
 calcBadge call calcManualRoll
-calcBadge call calcEpoxy
 calcBadge call calcPolySticker
 calcBadge call calcSetSticker
-calcBadge call calcPocket
 calcCalendarFlip option isLamination
 calcCanvas call calcBaguette
 calcBaguette module

@@ -258,3 +258,140 @@ def test_packing_flag_and_legacy_is_packing_string(calc):
     r_explicit = calc.execute({**REF_FORM_DEFAULT, "is_packing": False, "packing_id": "ZipLock0812"})
     assert r_flag["price"] == r_str["price"] == r_explicit["price"]
     assert r_flag["materials"] == r_str["materials"] == r_explicit["materials"]
+
+
+# ── Эталоны опций формы 64 (окошко, гравировка, смола) ───────────────
+
+# JS, 23.11.2026 — форма 64, «Окошко для имени» (chkPocket -> pocket_id='Pocket'):
+# node scripts/run_js_calc.mjs calcBadge --data current --args '[100,[50,50],1,"ROWMARKLASERMAX",{"isAttachment":"Magnet4513","isPacking":"","isPocket":"Pocket","isCutLaser":{"sizeItem":50,"density":0,"difficulty":1,"lenCut":0}},0]'
+EXPECTED_FORM_POCKET_MODES = {
+    0: {"cost": 7685, "price": 14556.7, "time_hours": 1.15, "time_ready": 41.55},
+    1: {"cost": 8435, "price": 15936.7, "time_hours": 1.65, "time_ready": 18.25},
+    2: {"cost": 9357, "price": 17645.6, "time_hours": 2.17, "time_ready": 10.99},
+}
+
+# JS, 23.11.2026 — форма 64, «Гравировка» (chkGrave -> is_grave=2, is_grave_fill=[50, 50]):
+# node scripts/run_js_calc.mjs calcBadge --data current --args '[100,[50,50],1,"ROWMARKLASERMAX",{"isAttachment":"Magnet4513","isPacking":"","isGrave":2,"isGraveFill":[50,50],"isCutLaser":{"sizeItem":50,"density":0,"difficulty":1,"lenCut":0}},0]'
+EXPECTED_FORM_GRAVE_MODES = {
+    0: {"cost": 26005, "price": 48233.3, "time_hours": 22.78, "time_ready": 85.06},
+    1: {"cost": 26605, "price": 49337.3, "time_hours": 23.19, "time_ready": 61.67},
+    2: {"cost": 28292, "price": 52451.5, "time_hours": 24.64, "time_ready": 56.38},
+}
+
+# JS, 23.11.2026 — форма 64, «Полимерная заливка смолой» (chkEpoxy -> is_epoxy=True):
+# node scripts/run_js_calc.mjs calcBadge --data current --args '[100,[50,50],1,"ROWMARKLASERMAX",{"isAttachment":"Magnet4513","isPacking":"","isEpoxy":"","isCutLaser":{"sizeItem":50,"density":0,"difficulty":1,"lenCut":0}},0]'
+EXPECTED_FORM_EPOXY_MODES = {
+    0: {"cost": 11939, "price": 22474.45, "time_hours": 3.09, "time_ready": 61.22},
+    1: {"cost": 12600, "price": 23691.15, "time_hours": 3.53, "time_ready": 45.7},
+    2: {"cost": 14641, "price": 27495.35, "time_hours": 4.39, "time_ready": 30.94},
+}
+
+# JS, 23.11.2026 — форма 64, все три опции включены одновременно (mode=0):
+# node scripts/run_js_calc.mjs calcBadge --data current --args '[100,[50,50],1,"ROWMARKLASERMAX",{"isAttachment":"Magnet4513","isPacking":"","isPocket":"Pocket","isGrave":2,"isGraveFill":[50,50],"isEpoxy":"","isCutLaser":{"sizeItem":50,"density":0,"difficulty":1,"lenCut":0}},0]'
+EXPECTED_FORM_ALL_THREE = {
+    "cost": 35118,
+    "price": 65157.85,
+    "time_hours": 28.76,
+    "time_ready": 94.64,
+}
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form64_pocket_modes(calc, mode):
+    """JS, 23.11.2026: опция «Окошко для имени» (pocket_id='Pocket') сходится с раннером."""
+    r = calc.execute({**REF_FORM_DEFAULT, "pocket_id": "Pocket", "mode": mode})
+    e = EXPECTED_FORM_POCKET_MODES[mode]
+    assert _cmp(r["cost"], e["cost"], 0.001)
+    assert _cmp(r["price"], e["price"], 0.001)
+    assert _cmp(r["time_hours"], e["time_hours"], 0.001)
+    assert _cmp(r["time_ready"], e["time_ready"], 0.001)
+
+
+def test_form64_pocket_alias_and_material_size(calc):
+    """Опция is_pocket=True даёт тот же результат, что pocket_id='Pocket', и заполняет size_mm."""
+    r_id = calc.execute({**REF_FORM_DEFAULT, "pocket_id": "Pocket"})
+    r_flag = calc.execute({**REF_FORM_DEFAULT, "is_pocket": True})
+    assert r_id["price"] == r_flag["price"]
+    assert r_id["time_ready"] == r_flag["time_ready"]
+    by_code = {m["code"]: m for m in r_id["materials"]}
+    assert by_code["Pocket"]["size_mm"] == [80.0, 23.0]
+    assert by_code["Pocket"]["quantity"] == 100
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form64_grave_modes(calc, mode):
+    """JS, 23.11.2026: опция «Гравировка» (is_grave=2, is_grave_fill=[50,50]) сходится с раннером."""
+    r = calc.execute({
+        **REF_FORM_DEFAULT,
+        "is_grave": 2,
+        "is_grave_fill": [50, 50],
+        "mode": mode,
+    })
+    e = EXPECTED_FORM_GRAVE_MODES[mode]
+    assert _cmp(r["cost"], e["cost"], 0.001)
+    assert _cmp(r["price"], e["price"], 0.001)
+    assert _cmp(r["time_hours"], e["time_hours"], 0.001)
+    assert _cmp(r["time_ready"], e["time_ready"], 0.001)
+
+
+def test_form64_grave_bool_default_and_contur(calc):
+    """JS, 23.11.2026: is_grave=True берёт size, а is_grave_contur пробрасывается в лазер."""
+    r_bool = calc.execute({**REF_FORM_DEFAULT, "is_grave": True})
+    r_explicit = calc.execute({**REF_FORM_DEFAULT, "is_grave": 2, "is_grave_fill": [50, 50]})
+    assert r_bool["price"] == r_explicit["price"]
+    assert r_bool["time_ready"] == r_explicit["time_ready"]
+
+    # is_grave=False не должен включать гравировку (в Python isinstance(False, int) == True)
+    r_off = calc.execute({**REF_FORM_DEFAULT, "is_grave": False})
+    r_default = calc.execute(REF_FORM_DEFAULT)
+    assert r_off["price"] == r_default["price"]
+    assert r_off["time_ready"] == r_default["time_ready"]
+
+    # JS, 23.11.2026 — контурная гравировка:
+    # node scripts/run_js_calc.mjs calcBadge --data current --args '[100,[50,50],1,"ROWMARKLASERMAX",{"isAttachment":"Magnet4513","isPacking":"","isGrave":1,"isGraveContur":[5,20],"isCutLaser":{"sizeItem":50,"density":0,"difficulty":1,"lenCut":0}},0]'
+    r_contur = calc.execute({
+        **REF_FORM_DEFAULT,
+        "is_grave": 1,
+        "is_grave_contur": [5, 20],
+    })
+    assert _cmp(r_contur["cost"], 7270, 0.001)
+    assert _cmp(r_contur["price"], 13760.9, 0.001)
+    assert _cmp(r_contur["time_hours"], 1.44, 0.001)
+    assert _cmp(r_contur["time_ready"], 42.37, 0.001)
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form64_epoxy_modes(calc, mode):
+    """JS, 23.11.2026: опция «Полимерная заливка смолой» (is_epoxy=True) сходится с раннером."""
+    r = calc.execute({**REF_FORM_DEFAULT, "is_epoxy": True, "mode": mode})
+    e = EXPECTED_FORM_EPOXY_MODES[mode]
+    assert _cmp(r["cost"], e["cost"], 0.001)
+    assert _cmp(r["price"], e["price"], 0.001)
+    assert _cmp(r["time_hours"], e["time_hours"], 0.001)
+    assert _cmp(r["time_ready"], e["time_ready"], 0.001)
+    codes = {m["code"] for m in r["materials"]}
+    assert "EpoxyPoly" in codes
+
+
+def test_form64_all_three_options_and_print_epoxy(calc):
+    """JS, 23.11.2026: все три опции вместе и ветка is_print + is_epoxy сходятся с раннером."""
+    r_all = calc.execute({
+        **REF_FORM_DEFAULT,
+        "pocket_id": "Pocket",
+        "is_grave": 2,
+        "is_grave_fill": [50, 50],
+        "is_epoxy": True,
+    })
+    e = EXPECTED_FORM_ALL_THREE
+    assert _cmp(r_all["cost"], e["cost"], 0.001)
+    assert _cmp(r_all["price"], e["price"], 0.001)
+    assert _cmp(r_all["time_hours"], e["time_hours"], 0.001)
+    assert _cmp(r_all["time_ready"], e["time_ready"], 0.001)
+
+    # JS, 23.11.2026 — is_print=True + is_epoxy=True (тираж n_items с учётом брака EpoxyCoating):
+    # node scripts/run_js_calc.mjs calcBadge --data current --args '[50,[85,55],1,"PVC3",{"isPrint":"","isEpoxy":"","isCutLaser":""},1]'
+    r_pe = calc.execute({**REF_PARAMS, "is_epoxy": True})
+    assert _cmp(r_pe["cost"], 6226, 0.001)
+    assert _cmp(r_pe["price"], 11465.5, 0.001)
+    assert _cmp(r_pe["time_hours"], 2.44, 0.001)
+    assert _cmp(r_pe["time_ready"], 43.46, 0.001)

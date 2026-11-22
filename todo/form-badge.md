@@ -1,6 +1,6 @@
 # form-badge
 
-Статус: доработка
+Статус: выкатка
 Сложность: средняя
 Implementer: Gemini 4 Hydrogen High
 Reviewer: Grok 4.7
@@ -90,6 +90,9 @@ Site ops: Grok 4.7
 23.11.2026 — Site ops, Grok 4.7 — API `a25f47f` выкачен, боевой POST badge сходится с раннером (price 12913, time_ready 41.3), копия формы 114 на черновике товара 2586910 считает через API, боевые формы не переключены — дальше Reviewer
 23.11.2026 — Reviewer, Grok 4.7 — принято: боевой POST 12913 / 41.3 (rel цены 0.000062), копия 114 на черновике 2586910 (гость 404), страница 13 000 = round(12913, 100), формы 31/60/61/64/84 на calcBadge без calcApi — дальше человек (закрытие)
 23.11.2026 — человек — не закрывать: опции «Окошко для имени», «Гравировка» и «Полимерная заливка смолой» на копии не меняют цену — дальше Implementer
+23.11.2026 — Implementer, Gemini 4 Hydrogen High — добавлены pocket_id/is_pocket (calc_pocket), is_grave/is_grave_fill/is_grave_contur (LaserCalculator) и is_epoxy (calc_epoxy + брак EpoxyCoating) в badge.py и wp-plugin/forms/badge.js; сняты 7 строк calcBadge из allowed; эталоны с раннера в test_badge.py; дефолт 64 не сдвинут (12913 / 41.3); make check зелёный — дальше Reviewer
+23.11.2026 — Reviewer, Grok 4.7 — принято: три опции сходятся с раннером (карман 14557/41.55, гравировка 50×50 48234/85.06, смола 22474/61.22), дефолт 12913/41.3 не сдвинут, js_port_gaps --check ok — дальше человек (слияние и обновление копии 114)
+23.11.2026 — человек — принято: слить в main, выкатить API и записать JS в существующую копию 114 — дальше Site ops
 
 ## Ревью 1
 
@@ -131,6 +134,22 @@ finish-task. todo/form-badge.md, рабочая папка D:\Projects\insain-ag
 Push и удаление origin/task/form-badge — только если человек выбрал вариант с push. Worktree уже нет: wt-rm пропустить; remote ref does not exist игнорировать.
 ```
 
+## Ревью 3
+
+принято
+
+- Diff только в scope: `badge.py`, `test_badge.py`, `wp-plugin/forms/badge.js`, `scripts/js_port_gaps_allowed.txt` (сняты 7 строк `calcBadge`, новых нет), `todo/form-badge.md`, `docs/dashboard.md` (статус `ревью`). `laser.py` и `process_tools.py` в diff нет.
+- Раннер `calcBadge --data current` на дефолте формы 64 и трёх опциях против текущего `badge.py`. Допуск цены rel ≤ 0.001 (тот же, что у дефолта 12913 против 12912.2).
+  - Дефолт mode 0: API `12913` / `41.3`, раннер `12912.2` / `41.3`. Режимы 1 и 2 и `EXPECTED_REF` (`3335` / `6060.5` / `1.35` / `17.9`) не сдвинуты: pytest их держит.
+  - Окошко `pocket_id=Pocket`, mode 0: API `14557` / `41.55`, раннер `14556.7` / `41.55`. Mode 1: `15937` / `18.25` против `15936.7` / `18.25`. Mode 2: `17646` / `10.99` против `17645.6` / `10.99`.
+  - Гравировка `is_grave=2`, `is_grave_fill=[50,50]`, mode 0: API `48234` / `85.06`, раннер `48233.3` / `85.06`. Mode 1: `49338` / `61.67` против `49337.3` / `61.67`. Mode 2: `52452` / `56.38` против `52451.5` / `56.38`. Пустой `isGrave:""` у раннера даёт ту же цену, что заливка на весь размер 50×50. Заливка `[0,0]` цену не меняет (`12912.2`); на форме 64 поля `numGraveW`/`numGraveH` открываются с `50`, и старый `cjsCalc` кладёт в опции `isGrave=2` и `[get_value_from(2604), get_value_from(2605)]` — то же, что `badge.js`.
+  - Смола `is_epoxy`, mode 0: API `22474` / `61.22`, раннер `22474.45` / `61.22` (cost `11938.63` против `Math.ceil` `11939`). Mode 1: `23691` / `45.7` против `23691.15` / `45.7`. Mode 2: `27495` / `30.94` против `27495.35` / `30.94`. Брак `EpoxyCoating` увеличивает тираж печати и лазера; `calc_epoxy` идёт с `isLayout`.
+  - Три опции вместе, mode 0: API `65158` / `94.64`, раннер `65157.85` / `94.64`. Контур `is_grave=1`, `is_grave_contur=[5,20]`: API `13761` / `42.37`, раннер `13760.9` / `42.37`. На форме 64 поля контура нет, старый расчёт его не ставит.
+- `python scripts/js_port_gaps.py calcBadge`: в Python нет ровно шести строк, они названы в docstring (`option_isAdhesiveLayer`, `option_isMetalBlank`, `option_isEpoxySticker`, `calcManualRoll`, `calcPolySticker`, `calcSetSticker`). `python scripts/js_port_gaps.py --check` → `ok`.
+- `wp-plugin/forms/badge.js`: `calcApi('badge')`, `syncUrl(`, `showResult(` есть; `querySelector` и своей `price` нет. `chkPocket` → `pocket_id: 'Pocket'`, `chkGrave` + `numGraveW`/`numGraveH` → `is_grave: 2` и `is_grave_fill`, `chkEpoxy` → `is_epoxy`.
+- `python -m pytest calc_service/tests/test_calculators/test_badge.py calc_service/tests/test_wp_plugin_forms.py -q` → `32 passed`. `test_mode_contract.py -k badge` → `2 passed`. Полный `python scripts/dev.py check` в этом круге не гонялся: точечные тесты и раннер закрывают diff.
+- Боевой API и JS копии 114 этим diff ещё не обновлены. После слияния в `main` нужны `deploy-api` и повторная запись JS в существующую форму 114. Новую копию не создавать.
+
 ## Найдено вне scope
 
 - `calc_service/calculators/badge.py`: при `is_uv_print=True` в `uv_params` захардкожено `"color": "4+0"` вместо `color` (в JS передаётся `dpdColor`, но `modeProduction = 1`).
@@ -139,11 +158,11 @@ Push и удаление origin/task/form-badge — только если чел
 
 ## Результат
 
-- Ветка, PR или коммит: `main` @ `a25f47f` (`task/form-badge` слита; в коммите `6ae6cb7`)
+- Ветка, PR или коммит: `task/form-badge` (поверх `main` @ `58ebe31`, ожидает ревью и слияния)
 - Период: 2026-11-23 — 2026-11-23
 - Часы человека: <оценка 2 ч — 1 ч на коммит задачи | N ч факт>
 - Работа агентов: Implementer — Gemini 4 Hydrogen High; Reviewer — Grok 4.7; Site ops — Grok 4.7
-- Было / стало: 0/5 форм `calcBadge` в git-плагине → `wp-plugin/forms/badge.js` для лид-формы 64 и паритет `badge.py` по цене/сроку/size_mm с JS-раннером
+- Было / стало: 0/5 форм `calcBadge` в git-плагине → `wp-plugin/forms/badge.js` для лид-формы 64 с поддержкой опций «Окошко для имени», «Гравировка» и «Полимерная заливка смолой» и паритетом `badge.py` по цене/сроку/size_mm с JS-раннером
 - Сделано:
   - Проведена сверка дефолтов пяти форм `calcBadge` (режим `mode=0`, тираж `100`, `50×50`, `dpdAttachment=Magnet4513`):
 
@@ -156,20 +175,39 @@ Push и удаление origin/task/form-badge — только если чел
     | `84` (`CalcBadgeLamination`) | `9604.80` / `40.95` | `9606` / `40.23` | `9606` / `40.95` | нет (0 пропусков) |
 
   - Выбрана лид-форма `64` (`CalcBadge`): 0 задетых пропусков на дефолте (как и у `61`/`84`), кандидат задачи.
-  - В `calc_service/calculators/badge.py` добавлен `is_packing` (и совместимость с `packing_id="isPacking"`) для автоподбора упаковки `calc_packing`, исправлен `time_ready = time_hours + max(...)`, добавлен `_ensure_size_mm` для `attachment` (`Magnet4513` `[45.0, 13.0]`) и `pack` (`ZipLock0812` `[80.0, 120.0]`), использован `parse_mode`, а в docstring перечислены все 13 неперенесённых позиций из `scripts/js_port_gaps_allowed.txt`.
-  - В `calc_service/tests/test_calculators/test_badge.py` добавлены `REF_FORM_DEFAULT` / `EXPECTED_FORM_DEFAULT` (`# JS, 23.11.2026`), параметризация `mode = 0, 1, 2` против раннера, проверка `size_mm` материалов и автоподбора упаковки. Сдвиг `EXPECTED_REF["time_ready"]` (`16.55 → 17.9`) объяснён раннером JS 15.11.2026: ранее `badge.py` не прибавлял `time_hours` (`1.35 + 16.55 = 17.9`).
-  - Написан `wp-plugin/forms/badge.js` с привязкой к id боевой формы `64` (`cjsCalc` `2613`), `is_print: false`, `syncUrl` и `calcApi('badge', ...)`. Поля `chkPocket` (`2600`), `chkGrave` (`2603`), `numGraveW` (`2604`), `numGraveH` (`2605`), `chkEpoxy` (`2609`) и опция `AdhesiveLayer50` в `dpdAttachment` (`2610`) пишутся в `syncUrl`, но в `calcApi` не уходят (нет в API `badge`). Все `get_value_from(N)` в старом `cjsCalc` совпадают с элементами формы `64`.
+  - В `calc_service/calculators/badge.py` добавлен `is_packing` (и совместимость с `packing_id="isPacking"`) для автоподбора упаковки `calc_packing`, исправлен `time_ready = time_hours + max(...)`, добавлен `_ensure_size_mm` для `attachment` (`Magnet4513` `[45.0, 13.0]`), `pack` (`ZipLock0812` `[80.0, 120.0]`) и `pocket` (`Pocket` `[80.0, 23.0]`), использован `parse_mode`.
+  - Доработка от 23.11.2026 (три опции формы 64):
+    - **Окошко для имени** (`pocket_id` / `is_pocket`): вызов `calc_pocket(n, pocket_id, mode.value)` из `common/process_tools.py`, учёт `cost`/`price`/`time_hours`/`weight_kg`/`materials`, в `_ensure_size_mm` добавлена категория `"pocket"`.
+    - **Гравировка** (`is_grave`, `is_grave_fill`, `is_grave_contur`): проброс в `LaserCalculator` (`laser_params2`) в том же ключе, что `calcBadge.js` (булево `True` → `is_grave=2`, `is_grave_fill=size` при отсутствии явных размеров; `False` гравировку не включает; целое `0/1/2` передаётся как разрешение). `laser.py` не менялся.
+    - **Полимерная заливка смолой** (`is_epoxy`): учёт брака `EpoxyCoating` через `apply_mode_defects` (`n_items = math.ceil(n * (1 + epoxy_defects))` для печати и лазерной резки/гравировки) и вызов `calc_epoxy(n, size, difficulty, {"isLayout": True}, mode.value)` из `common/process_tools.py` с добавлением `time_ready_epoxy` в `time_ready_list`. `process_tools.py` не менялся.
+    - В docstring `badge.py` оставлены 6 неперенесённых позиций: `option_isAdhesiveLayer`, `option_isMetalBlank`, `option_isEpoxySticker`, `calcManualRoll`, `calcPolySticker`, `calcSetSticker`.
+    - В `scripts/js_port_gaps_allowed.txt` сняты 7 реально портированных строк `calcBadge` (`option isEpoxy`, `option isGrave`, `option isGraveFill`, `option isGraveContur`, `option isPocket`, `call calcEpoxy`, `call calcPocket`); новые строки не добавлялись.
+  - В `calc_service/tests/test_calculators/test_badge.py` сохранены прежние эталоны (`EXPECTED_REF`, `EXPECTED_FORM_DEFAULT` = `12913` / `41.3`, `EXPECTED_FORM_MODES`) и добавлены эталоны с раннера (`# JS, 23.11.2026`) для `pocket_id="Pocket"` (режимы 0/1/2 + `is_pocket=True` + `size_mm`), `is_grave` (режимы 0/1/2 + `bool` + `is_grave_contur`), `is_epoxy=True` (режимы 0/1/2 + `is_print=True, is_epoxy=True`) и комбинации всех трёх опций.
+  - В `wp-plugin/forms/badge.js` поля `chkPocket` (`2600` → `pocket_id: 'Pocket'`), `chkGrave` (`2603` → `is_grave: 2`), `numGraveW`/`numGraveH` (`is_grave_fill: [graveW, graveH]`) и `chkEpoxy` (`2609` → `is_epoxy: isEpoxy`) передаются в `calcApi('badge', params)`. Неперенесённой осталась только опция `AdhesiveLayer50` в `dpdAttachment`.
   - Пакет GET для `Site ops` (`ezfc_copy.py`): `--live 64 --get numN --get numW --get numH --get dpdMaterial:index --get dpdDifficulty:index --get chkPocket:index --get chkGrave:index --get numGraveW --get numGraveH --get chkUVPrint:index --get dpdColor:index --get chkEpoxy:index --get dpdAttachment:index --get chkPacking:index --get rdoModeProduction:value`.
   - Дописка для `docs/js-runner-cases.md`:
     `node scripts/run_js_calc.mjs calcBadge --data current --args '[100,[50,50],1,"ROWMARKLASERMAX",{"isAttachment":"Magnet4513","isPacking":"","isCutLaser":{"sizeItem":50,"density":0,"difficulty":1,"lenCut":0}},0]'`
   - Дописка для `docs/site/forms.md` / `todo/forms-batch-switch.md` (после приёмки копии): форма `64` (`CalcBadge`, `wp-plugin/forms/badge.js`, `calcApi('badge')`) — лид-копия на черновике, боевые формы `31, 60, 61, 64, 84` на старом JS.
-- Чем проверено:
-  - `python scripts/js_port_gaps.py --check` → `ok`
-  - `python -m pytest calc_service/tests/test_calculators/test_badge.py calc_service/tests/test_wp_plugin_forms.py calc_service/tests/test_mode_contract.py calc_service/tests/test_todo_files.py -q` → `passed`
-  - `Select-String -Path wp-plugin\forms\badge.js -Pattern "calcApi\('badge'|syncUrl\(|showResult\("` → все 3 совпадения, `querySelector` и `price =` отсутствуют
-  - `python scripts/dev.py check` → `816 passed` (`calc_service/tests`), `81 passed` (`bot_service/tests`)
-- Не сделано и почему (Implementer): боевой POST и дубль тогда ждали слияния. Сделано Site ops 23.11.2026, см. блок ниже.
-- Требуется решение: человек 23.11.2026 не закрыл задачу. «Окошко для имени» (`chkPocket` / `calc_pocket`), «Гравировка» (`chkGrave` / `is_grave`) и «Полимерная заливка смолой» (`chkEpoxy` / `calc_epoxy`) пишутся в `syncUrl`, в `calcApi` не уходят. Дефолт лида (опции выключены) не сдвигать. Вторую копию не создавать: после правки обновить JS формы 114 и выкатить API.
+- Чем проверено (доработка 23.11.2026):
+  - `python scripts/js_port_gaps.py --check` → `ok` (6 оставшихся строк `calcBadge`)
+  - `python -m pytest calc_service/tests/test_calculators/test_badge.py calc_service/tests/test_wp_plugin_forms.py calc_service/tests/test_mode_contract.py calc_service/tests/test_materials_contract.py -q` → `114 passed`
+  - `Select-String -Path wp-plugin\forms\badge.js -Pattern "calcApi\('badge'|syncUrl\(|showResult\(|querySelector|price\s*="` → все 3 вызова на месте, `querySelector` и `price =` отсутствуют
+  - `python scripts/dev.py check` → `828 passed` (`calc_service/tests`), `81 passed` (`bot_service/tests`)
+- Не сделано и почему: боевой API и JS формы `114` на черновике `2586910` в этой сессии не обновлялись (после ревью нужны `deploy-api` с `main` и повторное применение пакета `ezfc_copy.py` на существующую копию `114` без создания второй копии).
+- Требуется решение: нет. Человек 23.11.2026: слить в `main`, выкатить API и записать JS в существующую копию 114. Новую копию не создавать.
+
+Промпт следующей сессии (`Reviewer`):
+
+```text
+Reviewer. todo/form-badge.md, ветка task/form-badge, рабочая папка D:\Projects\insain-agent-form-badge.
+Прочитай docs/agents/roles/reviewer.md и проверь доработку в task/form-badge:
+- diff только в scope (badge.py, test_badge.py, wp-plugin/forms/badge.js, scripts/js_port_gaps_allowed.txt, todo/form-badge.md, docs/dashboard.md); laser.py и process_tools.py не тронуты;
+- три опции (chkPocket -> calc_pocket, chkGrave/numGraveW/numGraveH -> is_grave/is_grave_fill/is_grave_contur, chkEpoxy -> calc_epoxy + брак EpoxyCoating) совпадают с раннером calcBadge.js; дефолт формы 64 (12913 / 41.3) и прежние эталоны не сдвинуты;
+- python scripts/js_port_gaps.py --check -> ok; оставшиеся 6 строк calcBadge названы в docstring;
+- wp-plugin/forms/badge.js передаёт три опции в calcApi('badge') и не содержит querySelector/своей цены;
+- python scripts/dev.py check зелёный.
+После «принято» и слияния в main — Site ops: deploy-api с main и обновление JS существующей копии 114 (новую копию не создавать).
+```
 
 ### Site ops, 23.11.2026
 
