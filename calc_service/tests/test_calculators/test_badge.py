@@ -105,13 +105,13 @@ REF_PARAMS = {
 # node scripts/run_js_calc.mjs calcBadge --data current --args
 # '[50,[85,55],1,"PVC3",{"isPrint":"","isCutLaser":""},1]'
 # Раннер: cost 3335, price 6060.5, time_hours 1.35, time_ready 17.9, weight_kg 0.87.
-# cost/price/time_hours сходятся (допуск 0.001). time_ready и weight — прежний порт badge.py:
-# JS прибавляет result.time к max(timeReady) и не включает вес второй резки (badge-vs-js).
+# cost/price/time_hours/time_ready сходятся с раннером (допуск 0.001).
+# weight_kg — прежний порт badge.py включает вес второй резки (в JS не входит).
 EXPECTED_REF = {
     "cost": 3335,
     "price": 6060.5,
     "time_hours": 1.35,
-    "time_ready": 16.55,
+    "time_ready": 17.9,
     "weight_kg": 1.18,
 }
 EXPECTED_MATERIAL = {
@@ -185,3 +185,76 @@ def test_expected_values_badge(ref_result):
     assert ok_mat_code, f"material code: got {mat.get('code')}, expected {em['code']}"
     assert ok_mat_name, f"material name должен содержать '{em['name_substring']}'"
     assert ok_mat_q, f"material quantity: got {mat.get('quantity')}, expected ~{em['quantity_approx']}"
+
+
+# ── Эталон дефолта лид-формы 64 (CalcBadge) ──────────────────────────
+
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "difficulty": 1.0,
+    "material_id": "ROWMARKLASERMAX",
+    "is_print": False,
+    "is_uv_print": False,
+    "attachment_id": "Magnet4513",
+    "is_packing": True,
+    "mode": 0,
+}
+# JS, 23.11.2026 — дефолт лид-формы 64 (CalcBadge):
+# node scripts/run_js_calc.mjs calcBadge --data current --args '[100,[50,50],1,"ROWMARKLASERMAX",{"isAttachment":"Magnet4513","isPacking":"","isCutLaser":{"sizeItem":50,"density":0,"difficulty":1,"lenCut":0}},0]'
+EXPECTED_FORM_DEFAULT = {
+    "cost": 6810,
+    "price": 12912.2,
+    "time_hours": 0.9,
+    "time_ready": 41.3,
+}
+
+# JS, 23.11.2026 — режимы 0, 1, 2 на дефолте формы 64:
+EXPECTED_FORM_MODES = {
+    0: {"cost": 6810, "price": 12912.2, "time_hours": 0.9, "time_ready": 41.3},
+    1: {"cost": 7410, "price": 14016.2, "time_hours": 1.3, "time_ready": 17.9},
+    2: {"cost": 8182, "price": 15449.1, "time_hours": 1.72, "time_ready": 10.54},
+}
+
+
+def test_form64_default(calc):
+    """JS, 23.11.2026: дефолт формы 64 CalcBadge сходится с раннером по cost/price/time."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    e = EXPECTED_FORM_DEFAULT
+    assert _cmp(r["cost"], e["cost"], 0.001)
+    assert _cmp(r["price"], e["price"], 0.001)
+    assert _cmp(r["time_hours"], e["time_hours"], 0.001)
+    assert _cmp(r["time_ready"], e["time_ready"], 0.001)
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form64_modes(calc, mode):
+    """JS, 23.11.2026: режимы 0/1/2 на дефолте формы 64 сходятся с раннером."""
+    r = calc.execute({**REF_FORM_DEFAULT, "mode": mode})
+    e = EXPECTED_FORM_MODES[mode]
+    assert _cmp(r["cost"], e["cost"], 0.001)
+    assert _cmp(r["price"], e["price"], 0.001)
+    assert _cmp(r["time_hours"], e["time_hours"], 0.001)
+    assert _cmp(r["time_ready"], e["time_ready"], 0.001)
+
+
+def test_form64_materials_size_mm(calc):
+    """Дефолт формы 64: материалы содержат size_mm для основы, крепления и упаковки."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    by_code = {m["code"]: m for m in r["materials"]}
+    assert set(by_code) == {"ROWMARKLASERMAX", "Magnet4513", "ZipLock0812"}
+    assert by_code["ROWMARKLASERMAX"]["size_mm"] == [600.0, 1200.0]
+    assert by_code["Magnet4513"]["size_mm"] == [45.0, 13.0]
+    assert by_code["Magnet4513"]["quantity"] == 100
+    assert by_code["ZipLock0812"]["size_mm"] == [80.0, 120.0]
+    assert by_code["ZipLock0812"]["quantity"] == 100
+
+
+def test_packing_flag_and_legacy_is_packing_string(calc):
+    """Автоподбор упаковки работает и через is_packing=True, и через packing_id='isPacking'."""
+    r_flag = calc.execute(REF_FORM_DEFAULT)
+    r_str = calc.execute({**REF_FORM_DEFAULT, "is_packing": False, "packing_id": "isPacking"})
+    r_explicit = calc.execute({**REF_FORM_DEFAULT, "is_packing": False, "packing_id": "ZipLock0812"})
+    assert r_flag["price"] == r_str["price"] == r_explicit["price"]
+    assert r_flag["materials"] == r_str["materials"] == r_explicit["materials"]

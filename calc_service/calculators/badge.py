@@ -3,6 +3,12 @@
 
 Мигрировано из js_legacy/calc/calcBadge.js.
 Упрощённая версия: печать + лазерная резка + опционально УФ-печать + крепление + упаковка.
+
+Список «не перенесено» (scripts/js_port_gaps_allowed.txt):
+- опции: option_isEpoxy, option_isAdhesiveLayer, option_isGrave,
+  option_isGraveFill, option_isGraveContur, option_isMetalBlank,
+  option_isEpoxySticker, option_isPocket;
+- вызовы: calcManualRoll, calcEpoxy, calcPolySticker, calcSetSticker, calcPocket.
 """
 
 from __future__ import annotations
@@ -10,7 +16,7 @@ from __future__ import annotations
 import math
 from typing import Any, Dict, List, Mapping
 
-from calculators.base import BaseCalculator, ProductionMode
+from calculators.base import BaseCalculator, ProductionMode, parse_mode
 from calculators.print_sheet import PrintSheetCalculator
 from calculators.laser import LaserCalculator
 from calculators.uv_print import UVPrintCalculator
@@ -18,11 +24,29 @@ from common.helpers import calc_weight
 from common.layout import layout_on_sheet
 from common.markups import BASE_TIME_READY, MARGIN_MATERIAL, MARGIN_OPERATION, get_margin, get_time_ready
 from common.process_tools import calc_attachment, calc_lamination_roll, calc_packing
-from materials import hardsheet as hardsheet_catalog, sheet as sheet_catalog
+from materials import get_material, hardsheet as hardsheet_catalog, sheet as sheet_catalog
 
 DEFAULT_PRINT_MATERIAL = "RaflatacMW"
 DEFAULT_LAMINATION = "Laminat32G"
 SIZE_SHEET_BADGE = [320, 450]
+
+
+def _ensure_size_mm(materials: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Дописать size_mm из каталога для креплений и упаковки, если не заполнено."""
+    out: List[Dict[str, Any]] = []
+    for raw in materials:
+        item = dict(raw)
+        if not item.get("size_mm") and item.get("code"):
+            for category in ("attachment", "pack"):
+                try:
+                    spec = get_material(category, str(item["code"]))
+                except Exception:
+                    continue
+                if spec.sizes:
+                    item["size_mm"] = [float(x) for x in spec.sizes[0]]
+                    break
+        out.append(item)
+    return out
 
 
 class BadgeCalculator(BaseCalculator):
@@ -46,13 +70,14 @@ class BadgeCalculator(BaseCalculator):
                 {"name": "color", "type": "string", "required": False, "default": "4+0", "title": "Цветность печати"},
                 {"name": "is_uv_print", "type": "boolean", "required": False, "default": False, "title": "УФ-печать"},
                 {"name": "attachment_id", "type": "string", "required": False, "title": "Крепление"},
+                {"name": "is_packing", "type": "boolean", "required": False, "default": False, "title": "Упаковка (автоподбор)"},
                 {"name": "packing_id", "type": "string", "required": False, "title": "Упаковка"},
                 {"name": "mode", "type": "integer", "required": False, "default": 1, "title": "Режим"},
             ],
             "param_groups": {
                 "main": ["quantity", "width", "height"],
                 "material": ["material_id"],
-                "processing": ["is_print", "color", "is_uv_print", "attachment_id", "packing_id"],
+                "processing": ["is_print", "color", "is_uv_print", "attachment_id", "is_packing", "packing_id"],
                 "mode": ["mode"],
             },
         }
@@ -91,6 +116,7 @@ class BadgeCalculator(BaseCalculator):
                     "color": {"type": "string", "default": "4+0", "description": "Цветность"},
                     "is_uv_print": {"type": "boolean", "default": False, "description": "УФ-печать"},
                     "attachment_id": {"type": "string", "description": "Код крепления"},
+                    "is_packing": {"type": "boolean", "default": False, "description": "Упаковка в зиплок (автоподбор)"},
                     "packing_id": {"type": "string", "description": "Код упаковки"},
                     "mode": {"type": "integer", "enum": [0, 1, 2], "default": 1},
                 },
@@ -109,8 +135,12 @@ class BadgeCalculator(BaseCalculator):
         color = str(params.get("color", "4+0") or "4+0").strip()
         is_uv_print = bool(params.get("is_uv_print", False))
         attachment_id = str(params.get("attachment_id", "") or "").strip()
+        is_packing = bool(params.get("is_packing", False))
         packing_id = str(params.get("packing_id", "") or "").strip()
-        mode = ProductionMode(int(params.get("mode", 1)))
+        if packing_id == "isPacking":
+            is_packing = True
+            packing_id = ""
+        mode = parse_mode(params.get("mode"))
 
         if not material_id:
             raise ValueError("material_id обязателен")
@@ -256,7 +286,7 @@ class BadgeCalculator(BaseCalculator):
         price_pack = 0.0
         time_pack = 0.0
         weight_pack = 0.0
-        if packing_id:
+        if is_packing or packing_id:
             pack_result = calc_packing(n, [size[0], size[1], 5], {"isPacking": packing_id}, mode.value)
             cost_pack = pack_result.cost
             price_pack = pack_result.price
@@ -278,8 +308,8 @@ class BadgeCalculator(BaseCalculator):
         ]
         base_ready = get_time_ready("baseTimeReady")
         idx = max(0, min(len(base_ready) - 1, mode.value))
-        ready_vals = [t for t in time_ready_list if t > 0] or [time_hours + float(base_ready[idx])]
-        time_ready = max(ready_vals)
+        ready_vals = [t for t in time_ready_list if t > 0]
+        time_ready = time_hours + max(ready_vals) if ready_vals else time_hours + float(base_ready[idx])
 
         weight_kg = weight_print + weight_laser1 + weight_laser2 + weight_attach + weight_pack
         weight_kg = math.ceil(weight_kg * 100) / 100.0
@@ -291,5 +321,5 @@ class BadgeCalculator(BaseCalculator):
             "time_hours": time_hours,
             "time_ready": time_ready,
             "weight_kg": weight_kg,
-            "materials": materials_out,
+            "materials": _ensure_size_mm(materials_out),
         }
