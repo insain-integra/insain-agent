@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **14**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **13**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -46,7 +46,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
-| `milling-cut-floor.md` | черновик |
 | `pilot-acrylic-medals-calc.md` | заблокировано: ждёт todo/ai-calc-authoring-skill.md |
 | `presswall-banner-mode.md` | черновик |
 | `registration-harden.md` | заблокировано: ждёт todo/smartcaptcha-replace.md |
@@ -64,8 +63,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-22 — milling-cut-floor
 - 2026-11-22 — form-poly-sticker-pack
 - 2026-11-22 — form-milling
 - 2026-11-22 — form-pad-print
 - 2026-11-22 — form-vizitki-promo
-- 2026-11-21 — print-sheet-copy-result
