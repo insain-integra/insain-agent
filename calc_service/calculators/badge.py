@@ -310,7 +310,9 @@ class BadgeCalculator(BaseCalculator):
         if not is_print:
             materials_out.extend(laser_result2.get("materials") or [])
 
-        # УФ-печать
+        # УФ-печать (в JS calcBadge передаёт modeProduction = 1 прямо в аргументе,
+        # поэтому УФ-печать и последующие шаги работают в стандартном режиме 1)
+        post_uv_mode = 1 if is_uv_print else mode.value
         cost_uv = 0.0
         price_uv = 0.0
         time_uv = 0.0
@@ -323,10 +325,11 @@ class BadgeCalculator(BaseCalculator):
                 "height": size[1],
                 "item_width": size[0],
                 "item_height": size[1],
+                "printer_code": "RimalSuvUV",
                 "resolution": 2,
-                "color": "4+0",
+                "color": color,
                 "surface": "plain",
-                "mode": mode.value,
+                "mode": 1,
             }
             uv_result = uv_calc.calculate(uv_params)
             cost_uv = float(uv_result.get("cost", 0))
@@ -342,7 +345,7 @@ class BadgeCalculator(BaseCalculator):
         time_ready_epoxy = 0.0
         weight_epoxy = 0.0
         if is_epoxy:
-            epoxy_result = calc_epoxy(n, size, difficulty, {"isLayout": True}, mode.value)
+            epoxy_result = calc_epoxy(n, size, difficulty, {"isLayout": True}, post_uv_mode)
             cost_epoxy = epoxy_result.cost
             price_epoxy = epoxy_result.price
             time_epoxy = epoxy_result.time_hours
@@ -356,7 +359,7 @@ class BadgeCalculator(BaseCalculator):
         time_attach = 0.0
         weight_attach = 0.0
         if attachment_id:
-            attach_result = calc_attachment(n, attachment_id, mode.value)
+            attach_result = calc_attachment(n, attachment_id, post_uv_mode)
             cost_attach = attach_result.cost
             price_attach = attach_result.price
             time_attach = attach_result.time_hours
@@ -370,7 +373,7 @@ class BadgeCalculator(BaseCalculator):
         time_ready_pocket = 0.0
         weight_pocket = 0.0
         if pocket_id:
-            pocket_result = calc_pocket(n, pocket_id, mode.value)
+            pocket_result = calc_pocket(n, pocket_id, post_uv_mode)
             cost_pocket = pocket_result.cost
             price_pocket = pocket_result.price
             time_pocket = pocket_result.time_hours
@@ -384,7 +387,7 @@ class BadgeCalculator(BaseCalculator):
         time_pack = 0.0
         weight_pack = 0.0
         if is_packing or packing_id:
-            pack_result = calc_packing(n, [size[0], size[1], 5], {"isPacking": packing_id}, mode.value)
+            pack_result = calc_packing(n, [size[0], size[1], 5], {"isPacking": packing_id}, post_uv_mode)
             cost_pack = pack_result.cost
             price_pack = pack_result.price
             time_pack = pack_result.time_hours

@@ -395,3 +395,48 @@ def test_form64_all_three_options_and_print_epoxy(calc):
     assert _cmp(r_pe["price"], 11465.5, 0.001)
     assert _cmp(r_pe["time_hours"], 2.44, 0.001)
     assert _cmp(r_pe["time_ready"], 43.46, 0.001)
+
+
+# ── Эталон УФ-печати формы 64 (chkUVPrint + dpdColor) ────────────────
+
+# JS, 23.11.2026 — форма 64, «УФ-печать» (chkUVPrint -> is_uv_print=True, dpdColor -> '4+0'):
+# node scripts/run_js_calc.mjs calcBadge --data current --args '[100,[50,50],1,"ROWMARKLASERMAX",{"isAttachment":"Magnet4513","isPacking":"","isUVPrint":{"printerID":"RimalSuvUV","resolution":2,"surface":"isPlain","color":"4+0"},"isCutLaser":{"sizeItem":50,"density":0,"difficulty":1,"lenCut":0}},0]'
+EXPECTED_FORM_UV_MODES = {
+    0: {"cost": 9073, "price": 17076.35, "time_hours": 2.41, "time_ready": 42.81},
+    1: {"cost": 9373, "price": 17628.35, "time_hours": 2.6, "time_ready": 35.9},
+    2: {"cost": 9845, "price": 18509.25, "time_hours": 2.82, "time_ready": 36.12},
+}
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form64_uv_print_modes(calc, mode):
+    """JS, 23.11.2026: УФ-печать на дефолте формы 64 (режимы 0/1/2) сходится с раннером."""
+    r = calc.execute({**REF_FORM_DEFAULT, "is_uv_print": True, "color": "4+0", "mode": mode})
+    e = EXPECTED_FORM_UV_MODES[mode]
+    assert _cmp(r["cost"], e["cost"], 0.001)
+    assert _cmp(r["price"], e["price"], 0.001)
+    assert _cmp(r["time_hours"], e["time_hours"], 0.001)
+    assert _cmp(r["time_ready"], e["time_ready"], 0.001)
+
+
+def test_form64_uv_print_color_and_epoxy(calc):
+    """JS, 23.11.2026: УФ-печать с цветностью 4+1/1+0 и в связке со смолой сходится с раннером."""
+    # node scripts/run_js_calc.mjs calcBadge --data current --args '[100,[50,50],1,"ROWMARKLASERMAX",{"isAttachment":"Magnet4513","isPacking":"","isUVPrint":{"printerID":"RimalSuvUV","resolution":2,"surface":"isPlain","color":"4+1"},"isCutLaser":{"sizeItem":50,"density":0,"difficulty":1,"lenCut":0}},0]'
+    r_41 = calc.execute({**REF_FORM_DEFAULT, "is_uv_print": True, "color": "4+1", "mode": 0})
+    assert _cmp(r_41["cost"], 10430, 0.001)
+    assert _cmp(r_41["price"], 19573, 0.001)
+    assert _cmp(r_41["time_hours"], 3.44, 0.001)
+    assert _cmp(r_41["time_ready"], 43.84, 0.001)
+
+    r_10 = calc.execute({**REF_FORM_DEFAULT, "is_uv_print": True, "color": "1+0", "mode": 0})
+    assert _cmp(r_10["cost"], 9073, 0.001)
+    assert _cmp(r_10["price"], 17076.35, 0.001)
+    assert _cmp(r_10["time_hours"], 2.41, 0.001)
+    assert _cmp(r_10["time_ready"], 42.81, 0.001)
+
+    # node scripts/run_js_calc.mjs calcBadge --data current --args '[100,[50,50],1,"ROWMARKLASERMAX",{"isAttachment":"Magnet4513","isPacking":"","isUVPrint":{"printerID":"RimalSuvUV","resolution":2,"surface":"isPlain","color":"4+0"},"isEpoxy":"","isCutLaser":{"sizeItem":50,"density":0,"difficulty":1,"lenCut":0}},2]'
+    r_uv_ep_m2 = calc.execute({**REF_FORM_DEFAULT, "is_uv_print": True, "is_epoxy": True, "mode": 2})
+    assert _cmp(r_uv_ep_m2["cost"], 15496, 0.001)
+    assert _cmp(r_uv_ep_m2["price"], 29054.75, 0.001)
+    assert _cmp(r_uv_ep_m2["time_hours"], 5.11, 0.001)
+    assert _cmp(r_uv_ep_m2["time_ready"], 47.28, 0.001)

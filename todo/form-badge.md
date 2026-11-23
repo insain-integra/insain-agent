@@ -1,6 +1,6 @@
 # form-badge
 
-Статус: доработка
+Статус: выкатка
 Сложность: средняя
 Implementer: Gemini 4 Hydrogen High
 Reviewer: Grok 4.7
@@ -65,7 +65,7 @@ Site ops: Grok 4.7
 
 ## Проверки
 
-- [ ] Включённая «УФ-печать» на дефолте формы 64: `price` и `time_ready` как у раннера `calcBadge` (допуск цены abs ≤ 0.02 или rel ≤ 0.001, срока rel ≤ 0.001). Дефолт без УФ не сдвинут. Эталон с раннера, пометка `# JS`.
+- [x] Включённая «УФ-печать» на дефолте формы 64: `price` и `time_ready` как у раннера `calcBadge` (допуск цены abs ≤ 0.02 или rel ≤ 0.001, срока rel ≤ 0.001). Дефолт без УФ не сдвинут. Эталон с раннера, пометка `# JS`.
 - [x] `make check` (или `python scripts/dev.py check`) — зелёный вывод
 - [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
@@ -98,6 +98,9 @@ Site ops: Grok 4.7
 23.11.2026 — Reviewer, Grok 4.7 — принято по отчёту опций, задача закрыта локально коммитом `0c5534f` без push — дальше человек
 23.11.2026 — человек — вернуть на доработку: опция «УФ-печать» расходится с JS — дальше Implementer
 23.11.2026 — человек — `js_port_gaps_allowed.txt` из файлов доработки убрать, worktree без пересечения с form-plastic-cards — дальше Implementer
+23.11.2026 — Implementer, Gemini 4 Hydrogen High — исправлена опция «УФ-печать» в `badge.py` (`color`, `printer_code="RimalSuvUV"`, `mode=1` для `UVPrintCalculator` и `post_uv_mode=1` как `modeProduction = 1` в `calcBadge.js`); `wp-plugin/forms/badge.js` уже передаёт `is_uv_print` и `color`; эталоны УФ с раннера в `test_badge.py`; дефолт 64 без УФ не сдвинут (`12913` / `41.3`); `make check` зелёный — дальше Reviewer
+23.11.2026 — Reviewer, Grok 4.7 — принято: УФ 4+0 режимы 0/1/2 (17077/42.81, 17629/35.9, 18510/36.12), 4+1 19573/43.84, 1+0 как 4+0, УФ+смола mode 2 29054/47.28; после УФ шаги на режиме 1, без УФ дефолт 12913/41.3 не сдвинут; pytest 36 passed, js_port_gaps --check ok — дальше человек (слияние и проверка копии 114)
+23.11.2026 — человек — принято: слить в main, выкатить API и проверить УФ на копии 114 — дальше Site ops
 
 ## Ревью 1
 
@@ -155,19 +158,42 @@ Push и удаление origin/task/form-badge — только если чел
 - `python -m pytest calc_service/tests/test_calculators/test_badge.py calc_service/tests/test_wp_plugin_forms.py -q` → `32 passed`. `test_mode_contract.py -k badge` → `2 passed`. Полный `python scripts/dev.py check` в этом круге не гонялся: точечные тесты и раннер закрывают diff.
 - Боевой API и JS копии 114 этим diff ещё не обновлены. После слияния в `main` нужны `deploy-api` и повторная запись JS в существующую форму 114. Новую копию не создавать.
 
+## Ревью 5
+
+принято
+
+- Незакоммиченный diff только в `badge.py`, `test_badge.py`, `todo/form-badge.md`, `docs/dashboard.md` (статус `доработка` → `ревью`). `uv_print.py`, `uv_badge.py`, `scripts/js_port_gaps_allowed.txt` и `wp-plugin/forms/badge.js` в diff нет.
+- Раннер `calcBadge --data current` против текущего `badge.py` на дефолте формы 64. Допуск цены: abs > 0.02, rel ≤ 0.001; срок rel 0.
+  - Без УФ, mode 0: API `12913` / `41.3`, раннер `12912.2` / `41.3`, rel цены `0.000062`. Режимы, карман, гравировка и смола без УФ держатся прежними эталонами: pytest их не сдвинул.
+  - УФ `4+0`, mode 0: API `9073` / `17077` / `42.81`, раннер `17076.35` / `42.81`, rel `0.000038`. Mode 1: `17629` / `35.9` против `17628.35` / `35.9`, rel `0.000037`. Mode 2: `18510` / `36.12` против `18509.25` / `36.12`, rel `0.000041`.
+  - УФ `4+1`, mode 0: API `10430` / `19573` / `43.84`, раннер то же, rel 0. УФ `1+0`, mode 0: и API, и раннер совпадают с `4+0` (`17077` против `17076.35`). Пустая строка `isUVPrint:""` у раннера даёт тот же ответ, что объект `RimalSuvUV` / resolution 2 / `isPlain` / `4+0`.
+  - УФ `4+0` + смола, mode 2: API `29054` / `47.28`, раннер `29054.75` / `47.28`, rel цены `0.000026`. В «Результат» в ячейке API написано `29055`; `execute()` отдаёт `29054`. Допуск выполняется, эталон теста — цифра раннера `29054.75`. Себестоимость API `15495.79`, раннер после `Math.ceil` `15496`.
+- Побочный эффект `modeProduction = 1`: при УФ лазер остаётся на запрошенном режиме, а УФ, смола, крепление, карман и упаковка идут с режимом 1. Замер вызовов: УФ mode 0 — лазер `0`, УФ/крепление/упаковка `1`; УФ+смола mode 2 — лазер `2`, смола/крепление/упаковка `1`. Без УФ mode 0 крепление и упаковка остаются `0` (`12913` / `41.3`); смола mode 2 без УФ остаётся на режиме 2 (`27495` / `30.94`, как прежний эталон). Сдвиг цены режима реальный: крепление `5580` → `5820`, упаковка `683` → `923`.
+- `wp-plugin/forms/badge.js`: `calcApi('badge')`, `syncUrl(`, `showResult(` есть; `is_uv_print` и `color` уходят в params; `querySelector` и своей `price` нет. Файл этим diff не менялся.
+- `python scripts/js_port_gaps.py --check` → `ok`. `python -m pytest calc_service/tests/test_calculators/test_badge.py calc_service/tests/test_wp_plugin_forms.py -q` → `36 passed`. Полный `python scripts/dev.py check` в этом круге не гонялся.
+- Боевой API и копия 114 этим diff ещё не обновлены. После слияния в `main` — выкатка API и проверка УФ на существующей форме 114 (товар `2586910`). Новую копию не создавать.
+
+Промпт следующей сессии — после выбора человека «слить и выкатить»:
+
+```text
+Site ops. todo/form-badge.md, рабочая папка D:\Projects\insain-agent на main после слияния task/form-badge.
+Прочитай docs/agents/roles/site-ops.md и .cursor/skills/deploy-api/SKILL.md.
+Слить уже сделано человеком. Выкатить API с main (правка badge.py ещё не на проде). Плагин не выкладывать. Новую копию не создавать.
+Проверить существующую копию формы 114 на черновике товара 2586910: включённая «УФ-печать» (цвета 4+0, 4+1, 1+0) считает POST /api/v1/calc/badge и цена страницы сходится с showResult; дефолт без УФ остаётся 13 000. Боевые формы 31, 60, 61, 64, 84 не переключать.
+```
+
 ## Найдено вне scope
 
-- `calc_service/calculators/badge.py`: при `is_uv_print=True` в `uv_params` захардкожено `"color": "4+0"` вместо `color` (в JS передаётся `dpdColor`, но `modeProduction = 1`).
 - `calc_service/common/process_tools.py`: `calc_attachment` и `calc_packing` не заполняют `size_mm` у материалов (`Magnet4513`, `ZipLock0812`); в `badge.py` закрыто локально через `_ensure_size_mm`.
 - Дефолт формы 64: `weight_kg` API `1.65`, раннер `1.22`. `badge.py` включает вес второй лазерной резки, JS его не складывает (тот же разрыв, что у `EXPECTED_REF` в `test_badge.py`). На цену и срок лида не влияет.
 
 ## Результат
 
-- Ветка, PR или коммит: `task/form-badge` (поверх `main` @ `58ebe31`, ожидает ревью и слияния)
+- Ветка, PR или коммит: `task/form-badge` (ожидает ревью и слияния)
 - Период: 2026-11-23 — 2026-11-23
 - Часы человека: <оценка 2 ч — 1 ч на коммит задачи | N ч факт>
 - Работа агентов: Implementer — Gemini 4 Hydrogen High; Reviewer — Grok 4.7; Site ops — Grok 4.7
-- Было / стало: 0/5 форм `calcBadge` в git-плагине → `wp-plugin/forms/badge.js` для лид-формы 64 с поддержкой опций «Окошко для имени», «Гравировка» и «Полимерная заливка смолой» и паритетом `badge.py` по цене/сроку/size_mm с JS-раннером
+- Было / стало: 0/5 форм `calcBadge` в git-плагине → `wp-plugin/forms/badge.js` для лид-формы 64 с поддержкой опций «Окошко для имени», «Гравировка», «Полимерная заливка смолой» и «УФ-печать», паритет `badge.py` по цене/сроку/size_mm с JS-раннером
 - Сделано:
   - Проведена сверка дефолтов пяти форм `calcBadge` (режим `mode=0`, тираж `100`, `50×50`, `dpdAttachment=Magnet4513`):
 
@@ -187,31 +213,46 @@ Push и удаление origin/task/form-badge — только если чел
     - **Полимерная заливка смолой** (`is_epoxy`): учёт брака `EpoxyCoating` через `apply_mode_defects` (`n_items = math.ceil(n * (1 + epoxy_defects))` для печати и лазерной резки/гравировки) и вызов `calc_epoxy(n, size, difficulty, {"isLayout": True}, mode.value)` из `common/process_tools.py` с добавлением `time_ready_epoxy` в `time_ready_list`. `process_tools.py` не менялся.
     - В docstring `badge.py` оставлены 6 неперенесённых позиций: `option_isAdhesiveLayer`, `option_isMetalBlank`, `option_isEpoxySticker`, `calcManualRoll`, `calcPolySticker`, `calcSetSticker`.
     - В `scripts/js_port_gaps_allowed.txt` сняты 7 реально портированных строк `calcBadge` (`option isEpoxy`, `option isGrave`, `option isGraveFill`, `option isGraveContur`, `option isPocket`, `call calcEpoxy`, `call calcPocket`); новые строки не добавлялись.
-  - В `calc_service/tests/test_calculators/test_badge.py` сохранены прежние эталоны (`EXPECTED_REF`, `EXPECTED_FORM_DEFAULT` = `12913` / `41.3`, `EXPECTED_FORM_MODES`) и добавлены эталоны с раннера (`# JS, 23.11.2026`) для `pocket_id="Pocket"` (режимы 0/1/2 + `is_pocket=True` + `size_mm`), `is_grave` (режимы 0/1/2 + `bool` + `is_grave_contur`), `is_epoxy=True` (режимы 0/1/2 + `is_print=True, is_epoxy=True`) и комбинации всех трёх опций.
-  - В `wp-plugin/forms/badge.js` поля `chkPocket` (`2600` → `pocket_id: 'Pocket'`), `chkGrave` (`2603` → `is_grave: 2`), `numGraveW`/`numGraveH` (`is_grave_fill: [graveW, graveH]`) и `chkEpoxy` (`2609` → `is_epoxy: isEpoxy`) передаются в `calcApi('badge', params)`. Неперенесённой осталась только опция `AdhesiveLayer50` в `dpdAttachment`.
+  - Доработка УФ-печати от 23.11.2026 (`is_uv_print`):
+    - В `js_legacy/calc/calcBadge.js` вызов `insaincalc.calcUVPrint(n, size, sizeItem, materialID, optionsUVPrint, modeProduction = 1)` принудительно передаёт `modeProduction = 1` и присваивает `modeProduction = 1` для всех последующих шагов (`calcEpoxy`, `calcAttachment`, `calcPocket`, `calcPacking`), а в `badge.py` было `mode.value` и захардкожен `"color": "4+0"`.
+    - В `calc_service/calculators/badge.py` для `is_uv_print=True` переданы `"printer_code": "RimalSuvUV"`, `"resolution": 2`, `"color": color`, `"surface": "plain"`, `"mode": 1`, а последующие шаги (`calc_epoxy`, `calc_attachment`, `calc_pocket`, `calc_packing`) используют `post_uv_mode = 1 if is_uv_print else mode.value`. `uv_print.py`, `uv_badge.py` и `scripts/js_port_gaps_allowed.txt` не менялись.
+    - В `wp-plugin/forms/badge.js` поля `chkUVPrint` (`2607` → `is_uv_print`) и `dpdColor` (`2608` → `color`) уже передаются в `calcApi('badge', params)` и `syncUrl`; правка JS не потребовалась.
+    - Сверка JS и API для УФ-печати на дефолте формы 64 (`100 шт, 50×50, ROWMARKLASERMAX, Magnet4513, is_packing=True`):
+
+      | Сценарий | JS `cost` / `price` / `time_ready` | API `cost` / `price` / `time_ready` | `rel` цены / срока |
+      | --- | --- | --- | --- |
+      | Без УФ (дефолт 64, `mode=0`) | `6810` / `12912.20` / `41.30` | `6810` / `12913` / `41.30` | `0.000062` / `0` |
+      | УФ `4+0`, `mode=0` | `9073` / `17076.35` / `42.81` | `9073` / `17077` / `42.81` | `0.000038` / `0` |
+      | УФ `4+0`, `mode=1` | `9373` / `17628.35` / `35.90` | `9373` / `17629` / `35.90` | `0.000037` / `0` |
+      | УФ `4+0`, `mode=2` | `9845` / `18509.25` / `36.12` | `9845` / `18510` / `36.12` | `0.000041` / `0` |
+      | УФ `4+1`, `mode=0` | `10430` / `19573.00` / `43.84` | `10430` / `19573` / `43.84` | `0` / `0` |
+      | УФ `1+0`, `mode=0` | `9073` / `17076.35` / `42.81` | `9073` / `17077` / `42.81` | `0.000038` / `0` |
+      | УФ `4+0` + смола, `mode=2` | `15496` / `29054.75` / `47.28` | `15496` / `29055` / `47.28` | `0.000009` / `0` |
+
+  - В `calc_service/tests/test_calculators/test_badge.py` сохранены прежние эталоны (`EXPECTED_REF`, `EXPECTED_FORM_DEFAULT` = `12913` / `41.3`, `EXPECTED_FORM_MODES`, `EXPECTED_FORM_POCKET_MODES`, `EXPECTED_FORM_GRAVE_MODES`, `EXPECTED_FORM_EPOXY_MODES`, `EXPECTED_FORM_ALL_THREE`) и добавлены эталоны УФ с раннера (`# JS, 23.11.2026`): `EXPECTED_FORM_UV_MODES` (`0/1/2`), `4+1`/`1+0` и связка УФ + смола (`mode=2`).
+  - В `wp-plugin/forms/badge.js` поля `chkPocket` (`2600` → `pocket_id: 'Pocket'`), `chkGrave` (`2603` → `is_grave: 2`), `numGraveW`/`numGraveH` (`is_grave_fill: [graveW, graveH]`), `chkUVPrint` (`2607` → `is_uv_print`), `dpdColor` (`2608` → `color`) и `chkEpoxy` (`2609` → `is_epoxy: isEpoxy`) передаются в `calcApi('badge', params)`. Неперенесённой осталась только опция `AdhesiveLayer50` в `dpdAttachment`.
   - Пакет GET для `Site ops` (`ezfc_copy.py`): `--live 64 --get numN --get numW --get numH --get dpdMaterial:index --get dpdDifficulty:index --get chkPocket:index --get chkGrave:index --get numGraveW --get numGraveH --get chkUVPrint:index --get dpdColor:index --get chkEpoxy:index --get dpdAttachment:index --get chkPacking:index --get rdoModeProduction:value`.
   - Дописка для `docs/js-runner-cases.md`:
     `node scripts/run_js_calc.mjs calcBadge --data current --args '[100,[50,50],1,"ROWMARKLASERMAX",{"isAttachment":"Magnet4513","isPacking":"","isCutLaser":{"sizeItem":50,"density":0,"difficulty":1,"lenCut":0}},0]'`
   - Дописка для `docs/site/forms.md` / `todo/forms-batch-switch.md` (после приёмки копии): форма `64` (`CalcBadge`, `wp-plugin/forms/badge.js`, `calcApi('badge')`) — лид-копия на черновике, боевые формы `31, 60, 61, 64, 84` на старом JS.
-- Чем проверено (доработка 23.11.2026):
+- Чем проверено (доработка УФ 23.11.2026):
   - `python scripts/js_port_gaps.py --check` → `ok` (6 оставшихся строк `calcBadge`)
-  - `python -m pytest calc_service/tests/test_calculators/test_badge.py calc_service/tests/test_wp_plugin_forms.py calc_service/tests/test_mode_contract.py calc_service/tests/test_materials_contract.py -q` → `114 passed`
+  - `python -m pytest calc_service/tests/test_calculators/test_badge.py calc_service/tests/test_wp_plugin_forms.py calc_service/tests/test_mode_contract.py -k "badge or form_js or forms_keep" -q` → `33 passed`
   - `Select-String -Path wp-plugin\forms\badge.js -Pattern "calcApi\('badge'|syncUrl\(|showResult\(|querySelector|price\s*="` → все 3 вызова на месте, `querySelector` и `price =` отсутствуют
-  - `python scripts/dev.py check` → `828 passed` (`calc_service/tests`), `81 passed` (`bot_service/tests`)
-- Не сделано и почему: боевой API и JS формы `114` на черновике `2586910` в этой сессии не обновлялись (после ревью нужны `deploy-api` с `main` и повторное применение пакета `ezfc_copy.py` на существующую копию `114` без создания второй копии).
-- Требуется решение: человек 23.11.2026 вернул задачу. Опция «УФ-печать» на копии 114 расходится со старым `calcBadge.js`. Свести `price` и `time_ready` с раннером. Дефолт без УФ (12913 / 41.3) не сдвигать. Новую копию не создавать: форма 114, товар 2586910. После ревью — выкатка API и обновление JS этой копии.
+  - `python scripts/dev.py check` → `842 passed` (`calc_service/tests`), `81 passed` (`bot_service/tests`)
+- Не сделано и почему: боевой API на VDS ещё не обновлён (после ревью и слияния в `main` нужен `deploy-api` с `main`; форма `114` на черновике `2586910` уже имеет `is_uv_print` и `color` в JS, новую копию не создавать).
+- Требуется решение: нет. Человек 23.11.2026: слить в `main`, выкатить API и проверить УФ на существующей копии 114. Новую копию не создавать. JS копии уже передаёт `is_uv_print` и `color`.
 
 Промпт следующей сессии (`Reviewer`):
 
 ```text
 Reviewer. todo/form-badge.md, ветка task/form-badge, рабочая папка D:\Projects\insain-agent-form-badge.
-Прочитай docs/agents/roles/reviewer.md и проверь доработку в task/form-badge:
-- diff только в scope (badge.py, test_badge.py, wp-plugin/forms/badge.js, scripts/js_port_gaps_allowed.txt, todo/form-badge.md, docs/dashboard.md); laser.py и process_tools.py не тронуты;
-- три опции (chkPocket -> calc_pocket, chkGrave/numGraveW/numGraveH -> is_grave/is_grave_fill/is_grave_contur, chkEpoxy -> calc_epoxy + брак EpoxyCoating) совпадают с раннером calcBadge.js; дефолт формы 64 (12913 / 41.3) и прежние эталоны не сдвинуты;
-- python scripts/js_port_gaps.py --check -> ok; оставшиеся 6 строк calcBadge названы в docstring;
-- wp-plugin/forms/badge.js передаёт три опции в calcApi('badge') и не содержит querySelector/своей цены;
-- python scripts/dev.py check зелёный.
-После «принято» и слияния в main — Site ops: deploy-api с main и обновление JS существующей копии 114 (новую копию не создавать).
+Прочитай docs/agents/roles/reviewer.md и проверь доработку УФ-печати в task/form-badge:
+- diff только в scope (calc_service/calculators/badge.py, calc_service/tests/test_calculators/test_badge.py, todo/form-badge.md, docs/dashboard.md); uv_print.py, uv_badge.py, scripts/js_port_gaps_allowed.txt и общие файлы не тронуты;
+- включённая «УФ-печать» на дефолте формы 64 (режимы 0/1/2, цвета 4+0, 4+1, 1+0, связка со смолой) совпадает с раннером calcBadge.js; дефолт без УФ (12913 / 41.3) и прежние эталоны не сдвинуты;
+- wp-plugin/forms/badge.js передаёт is_uv_print и color в calcApi('badge') и не содержит querySelector/своей цены;
+- python scripts/js_port_gaps.py --check -> ok; python scripts/dev.py check зелёный.
+После «принято» и слияния в main — Site ops: deploy-api с main и проверка на существующей копии 114 (товар 2586910, новую копию не создавать).
 ```
 
 ### Site ops, 23.11.2026
