@@ -58,6 +58,9 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | `calcPrintOffsetPromo` form 82 default | `print_offset` | 4244.4 |
 | `calcButtonPins` 2×D38 mode 1 | `button_pins` | 759.88388712 |
 | `calcButtonPins` 2500×D38 Амалит | `button_pins` | 47982.30000000001 |
+| `calcAcrylicMagnets` form 75 default | `magnet_acrylic` | 5120.504224 |
+| `calcAcrylicMagnets` form 75 mode 0 | `magnet_acrylic` | 4471.917824 |
+| `calcAcrylicMagnets` form 75 mode 2 | `magnet_acrylic` | 5800.986624 |
 
 ```powershell
 node scripts/run_js_calc.mjs calcFlagPaper --data current --args '[100,[100,150],\"4+0\",\"PaperCoated115M\",{},1]'
@@ -188,6 +191,8 @@ ORAJET3640 1000×1000, 604×604 и контроль 500×500 / 1000×500 сня�
 Кейс `calcPrintOffsetPromo` снят 17.11.2026 (`--data current`): дефолт формы 82 использует mode 1 (`time_ready` 48, `price` 4244.4; mode 0 даёт 56 ч, mode 2 — 40 ч, цена от `mode` не зависит). Второй эталон тиража: `[2000,\"OffsetPromoА51000\",1]` → `price` 7592.4, `time_ready` 48.
 
 Кейсы `calcButtonPins` сняты 17.11.2026 (`--data current`). Параметры API эталона: `{"quantity":2,"pin_id":"D38","mode":1}` (`price` API 760.59, rel 0.00093 к раннеру из-за `math.ceil` в ламинации); упаковка: `is_packing: true` (автоподбор) или строка — код пакета.
+
+Кейс `calcAcrylicMagnets` в `run_js_calc.mjs` не подключён (24.11.2026): `calcMagnets.js` в раннер не входит. Дефолт формы 75 снят Node vm файла `js_legacy/calc/calcMagnets.js` на прайсе `calc_service/data`: `calcAcrylicMagnets(100, "MagnetAcrylic6565", "4+0", new Map(), mode)` → mode 1 `price` 5120.504224, mode 0 — 4471.917824, mode 2 — 5800.986624.
 
 Кейс `calcPadPrint` в `run_js_calc.mjs` не подключён (22.11.2026). Дефолт формы 38 снят прямым прогоном `js_legacy/calc/calcPadPrint.js`: `100`, `isSmallItems`, цвет `1`, `mode` 0/1/2 → `price` 3001 / 3436 / 3972, `time_ready` 25.11 / 9.26 / 2.41. На этом дефолте Python совпадает с JS.
 

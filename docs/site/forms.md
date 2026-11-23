@@ -56,7 +56,7 @@ Slug из имени функции (`calcLaser` → `laser`) не подста�
 | — | 72 setPockets | — | не калькулятор |
 | https://insain.ru/catalog/kalkulyator-vympelov-bumazhnyh/ (Калькулятор вымпелов бумажных) | 73 CalcPennantPaper | — | старый JS `insaincalc.calcPennantPaper` |
 | https://insain.ru/catalog/kalkulyator-akrilovyh-brelokov/ (Калькулятор акриловых брелоков) | 74 CalcАcrylicKeychains | — | старый JS `insaincalc.calcAcrylicKeychain` |
-| https://insain.ru/catalog/akrilovye-magnity/ (Акриловые магниты) | 75 CalcАcrylicMagnets | — | старый JS `insaincalc.calcAcrylicMagnets` |
+| https://insain.ru/catalog/akrilovye-magnity/ (Акриловые магниты) | 75 CalcАcrylicMagnets | — | старый JS `insaincalc.calcAcrylicMagnets` (копия: форма 118, товар 2586914 draft) |
 | https://insain.ru/catalog/transparanty-bessmertnyj-polk/ (Транспаранты Бессмертный полк) | 76 CalcTabs9May | — | старый JS `insaincalc.calcTablets` |
 | — | 77 setLayers | — | не калькулятор |
 | https://insain.ru/catalog/kalkulyator-akrilovyh-prizov/ (Калькулятор акриловых призов) | 78 CalcAcrilycPrizes | — | старый JS `insaincalc.calcAcrilycPrizes` |

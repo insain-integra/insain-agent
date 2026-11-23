@@ -196,3 +196,9 @@
 - Из `form-plastic-cards`: `calcCards.js` не подключён в `scripts/run_js_calc.mjs`. Эталон снят прямым прогоном файла в Node vm. Раннер не менялся.
 - Из `form-badge`: `calc_service/common/process_tools.py`: `calc_attachment` и `calc_packing` не заполняют `size_mm` у материалов (`Magnet4513`, `ZipLock0812`); в `badge.py` закрыто локально через `_ensure_size_mm`.
 - Из `form-badge`: Дефолт формы 64: `weight_kg` API `1.65`, раннер `1.22`. `badge.py` включает вес второй лазерной резки, JS его не складывает (тот же разрыв, что у `EXPECTED_REF` в `test_badge.py`). На цену и срок лида не влияет.
+- Из `form-magnet-acrylic`: Имя бумаги `PaperCoated115M`: JS «Титан DIGITAL мелованная (матовая) SRA3 113г/м», API «…115г/м» (`description` в `sheet.json`). Состав, размер листа 320×450 и количество 4 совпадают. JSON не менялся.
+- Из `form-magnet-acrylic`: В цепочке `js_port_gaps` у `calcPrintSheet` строка `call calcPrintLaser`: лазерная печать вшита в `print_sheet.py`, строка уже в `scripts/js_port_gaps_allowed.txt`. Новых строк в allowed нет.
+- Из `form-magnet-acrylic`: У формы 75 нет радио «дешевле» (value 0), только «стандарт» 1 и «быстрее» 2. `mode=0` проверен на калькуляторе, на странице его не выбрать.
+- Из `form-magnet-acrylic`: Форма 75 и копия 118 сами открываются на «двухсторонние» (4+4). Эталон задачи — «односторонние» (4+0). На 4+4 менеджерская цена 5 300 руб. и срок совпали; строка «со скидкой» 4 157 руб. / 41.57 руб./шт на копии и 4 156 руб. / 41.56 руб./шт на боевой.
+- Из `form-magnet-acrylic`: Обе заготовки на тираже 100, color 1, mode 1 дают одну цену API 5120.5. Смена формы меняет название и размер (65×65 → 52×77), не цену.
+- Из `form-magnet-acrylic`: `wp litespeed-purge all` дважды вернул `Got 400`. `wp cache flush` прошёл. Превью под админом отдало новый расчёт.

@@ -18,8 +18,8 @@
 - `form-metal-pins` (закрыто 2026-11-23, `docs/history/log.md`) — копия формы 34, slug `metal_pins`
 - `form-plastic-cards` (закрыто 2026-11-24, `docs/history/log.md`) — копия формы 56, slug `cards`
 - `form-keychain` (закрыто 2026-11-23, `docs/history/log.md`) — копия формы 74, slug `keychain`
-- `todo/form-magnet-acrylic.md` — копия формы 75, slug `magnet_acrylic`
-- `todo/form-magnet-laminated.md` — лид-копия 54, slug `magnet_laminated`; ждёт `form-magnet-acrylic` (общий `magnets.py`), форма 57 позже
+- `form-magnet-acrylic` (закрыто 2026-11-24, `docs/history/log.md`) — копия формы 75, slug `magnet_acrylic`
+- `todo/form-magnet-laminated.md` — лид-копия 54, slug `magnet_laminated`; ожидание снято (общий `magnets.py`), форма 57 позже
 - `form-calendar` (закрыто 2026-11-23, `docs/history/log.md`) — лид-копия 50 (квартальный), slug `calendar`; формы 52 и 66 позже
 - `form-badge` (закрыто 2026-11-24, `docs/history/log.md`) — доработка: опция «УФ-печать» расходится с JS. Копия 114 / товар 2586910 уже есть, slug `badge`
 - `todo/form-tablets.md` — сверка дефолтов 36, 48, 51, 76, 68 и лид-копия 36, slug `tablets`
@@ -51,9 +51,9 @@
 
 1. `todo/presswall-banner-mode.md` — в любой момент: только `presswall.py` и его тест. Это не переключение формы 46, задача не отменяется.
 2. Параллельно, лид-копии пачек 5–7:
-   - `form-plastic-cards` (закрыто 2026-11-24, `docs/history/log.md`), `form-keychain` (закрыто 2026-11-23, `docs/history/log.md`), `todo/form-magnet-acrylic.md`, `form-calendar` (закрыто 2026-11-23, `docs/history/log.md`)
+   - `form-plastic-cards` (закрыто 2026-11-24, `docs/history/log.md`), `form-keychain` (закрыто 2026-11-23, `docs/history/log.md`), `form-magnet-acrylic` (закрыто 2026-11-24, `docs/history/log.md`), `form-calendar` (закрыто 2026-11-23, `docs/history/log.md`)
    - `form-badge` (закрыто 2026-11-24, `docs/history/log.md`) (доработка: УФ-печать), `todo/form-tablets.md` — сначала сверка дефолтов всех форм slug, потом лид
-   - `todo/form-magnet-laminated.md` — после `form-magnet-acrylic`: общий `magnets.py`
+   - `todo/form-magnet-laminated.md` — ожидание снято, общий `magnets.py`
    Запись на проде (дубли форм) — последовательно под `lock prod`.
 3. Вторые формы slug — по одной задаче после приёмки лида: `badge` (4 формы), `tablets` (48, 51, 76, 68), `calendar` (52, 66), `magnet_laminated` (57). Файлы заранее не создавать.
 4. Боевое переключение отложено, пока у всех 45 форм эпика нет принятой копии: `todo/forms-batch-switch.md` не запускать и не расширять, `forms-batch-2` не заводить. Как переключать оставшиеся формы (одним пакетом или несколькими) — решение человека после пункта 3.
@@ -69,6 +69,6 @@
 | 4 копии | 30 `poly_sticker`, 70 `poly_sticker_pack`, 45 `notebook`, 35 `milling`, 38 `pad_print`, 40 `heat_press`, 80 `canvas` | закрыто: все 7 копий приняты |
 | 5 копии | 31 60 61 64 84 `badge`, 34 `metal_pins`, 12 `button_pins` | копия 12 принята. `form-badge` (лид после сверки, кандидат 64), `form-metal-pins` |
 | 6 копии | 36 48 51 76 68 `tablets`, 50 52 66 `calendar` | `form-tablets` (лид 36; 68 через `tablets`, не `shild`), `form-calendar` (лид 50) |
-| 7 копии | 54 57 `magnet_laminated`, 56 `cards`, 74 `keychain`, 75 `magnet_acrylic` | `form-magnet-laminated` (лид 54, ждёт `form-magnet-acrylic`), `form-plastic-cards`, `form-keychain`, `form-magnet-acrylic` |
+| 7 копии | 54 57 `magnet_laminated`, 56 `cards`, 74 `keychain`, 75 `magnet_acrylic` | `form-magnet-laminated` (лид 54, черновик), `form-plastic-cards` (закрыто), `form-keychain` (закрыто), `form-magnet-acrylic` (закрыто 2026-11-24) |
 
 C1–C11 из `BACKLOG.md` — новых форм в реестре нет, в эти пачки не входят.
