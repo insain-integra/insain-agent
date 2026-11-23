@@ -184,6 +184,73 @@ def test_expected_values_magnet_acrylic(ref_result):
     assert ok_mat_q, f"material quantity: got {mat_match.get('quantity')}, expected ~{em['quantity_approx']}"
 
 
+# Дефолт формы 75: тираж 100, квадрат 65×65, цветность «4+0» (color 1), упаковка, mode 1.
+# JS, 24.11.2026 — calcAcrylicMagnets в Node vm, прайс calc_service/data.
+# Цвет в форму уходит строкой «4+0», в API — color 1. Упаковки на форме нет: JS всегда считает зиплок.
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "magnet_id": "MagnetAcrylic6565",
+    "color": 1,
+    "is_packing": True,
+    "mode": 1,
+}
+EXPECTED_FORM_DEFAULT = {
+    "cost": 3140.6664,
+    "price": 5120.504224,
+    "time_hours": 0.99,
+    "time_ready": 9.35,
+}
+# JS, 24.11.2026 — тот же дефолт на mode=0 и mode=2.
+FORM_DEFAULT_MODES = [
+    (0, 2736.1264, 4471.917824, 0.79, 24.93),
+    (2, 3565.0064, 5800.986624, 1.19, 2.75),
+]
+
+
+def _assert_js(result: dict, expected: dict) -> None:
+    rel = 0.001
+    assert _cmp(result["cost"], expected["cost"], rel), result["cost"]
+    assert _cmp(result["price"], expected["price"], rel), result["price"]
+    assert _cmp(result["time_hours"], expected["time_hours"], rel), result["time_hours"]
+    assert _cmp(result["time_ready"], expected["time_ready"], rel), result["time_ready"]
+
+
+def test_form_default_magnet_acrylic(calc):
+    """Дефолт формы 75: 100 шт, 65×65, 4+0, упаковка, mode 1. Цена и срок — JS."""
+    result = calc.execute(REF_FORM_DEFAULT)
+    _assert_js(result, EXPECTED_FORM_DEFAULT)
+    # JS не кладёт вес заготовки (2 кг). В ответе API вес изделия, вместе с заготовкой.
+    assert _cmp(result["weight_kg"], 2.137, 0.001)
+    rows = [(m.get("code"), m.get("quantity"), m.get("size_mm")) for m in result["materials"]]
+    assert rows == [
+        ("MagnetAcrylic6565", 100, [65.0, 65.0]),
+        ("PaperCoated115M", 4, [320.0, 450.0]),
+        ("ZipLockAcrylic", 100, [80.0, 120.0]),
+    ]
+    for mat in result["materials"]:
+        assert mat.get("name") and mat["name"] != mat["code"]
+        assert "title" in mat
+
+
+@pytest.mark.parametrize("mode,cost,price,time_hours,time_ready", FORM_DEFAULT_MODES)
+def test_form_default_magnet_acrylic_modes(calc, mode, cost, price, time_hours, time_ready):
+    """Дефолт формы 75 на mode=0 и mode=2: цена и срок как у JS."""
+    result = calc.execute({**REF_FORM_DEFAULT, "mode": mode})
+    _assert_js(result, {
+        "cost": cost,
+        "price": price,
+        "time_hours": time_hours,
+        "time_ready": time_ready,
+    })
+    assert result["price"] != EXPECTED_FORM_DEFAULT["price"]
+    if mode == 0:
+        assert result["price"] < EXPECTED_FORM_DEFAULT["price"]
+        assert result["time_ready"] > EXPECTED_FORM_DEFAULT["time_ready"]
+    else:
+        assert result["price"] > EXPECTED_FORM_DEFAULT["price"]
+        assert result["time_ready"] < EXPECTED_FORM_DEFAULT["time_ready"]
+
+
 # ── Отдельные калькуляторы magnet_acrylic / magnet_laminated ─────────
 
 

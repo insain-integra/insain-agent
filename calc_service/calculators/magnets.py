@@ -117,6 +117,8 @@ def calc_acrylic_magnets(params: Mapping[str, Any]) -> Dict[str, Any]:
         "title": magnet.title,
         "quantity": quantity,
         "unit": "шт",
+        # JS кладёт magnet.size в строку заготовки. showResult берёт размер только из size_mm.
+        "size_mm": [float(size[0]), float(size[1])],
     }
 
     print_calc = PrintSheetCalculator()
@@ -158,7 +160,19 @@ def calc_acrylic_magnets(params: Mapping[str, Any]) -> Dict[str, Any]:
         time_pack = pack_result.time_hours
         time_ready_pack = pack_result.time_ready
         weight_pack = pack_result.weight_kg
-        materials_pack = pack_result.materials
+        # calc_packing не кладёт size_mm. JS showMaterials показывает size пакета.
+        materials_pack = []
+        for row in pack_result.materials:
+            item = dict(row)
+            if not item.get("size_mm"):
+                try:
+                    raw_pack = _get_raw_material("pack", str(item.get("code") or ""))
+                except KeyError:
+                    raw_pack = {}
+                pack_dims = raw_pack.get("size") if isinstance(raw_pack, dict) else None
+                if isinstance(pack_dims, (list, tuple)) and len(pack_dims) >= 2:
+                    item["size_mm"] = [float(pack_dims[0]), float(pack_dims[1])]
+            materials_pack.append(item)
 
     margin = get_margin("marginMagnet") or get_margin("marginAcrylicKeychain")
     cost = cost_insert + cost_set + cost_blank + cost_pack
