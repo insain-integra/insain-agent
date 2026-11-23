@@ -2,6 +2,8 @@
 // dpdColor и ckbVariables пишутся в syncUrl и в calcApi не уходят:
 // цветность и «переменные данные» calcPlasticCards не считает.
 // is_embossing в API есть, поля на форме нет — не отправляем.
+// Пустой radio при включённом GET не получает checked. Если режим подставлен
+// из этого пустого значения, отмечаем пункт «стандарт» через getElementById.
 function first(raw) {
     if (raw == null || raw === '') {
         return '';
@@ -36,10 +38,25 @@ var isEmbossingFoil = isChecked(ezfc_functions.get_value_from(2295, true));
 var isMagneticStripe = isChecked(ezfc_functions.get_value_from(2296, true));
 var isSignatureStrip = isChecked(ezfc_functions.get_value_from(2315, true));
 var isScratchPanel = isChecked(ezfc_functions.get_value_from(2316, true));
-// 0 — «дешевле». Пустое поле → 1; ноль нельзя отбрасывать через ||.
-var modeRaw = first(ezfc_functions.get_value_from(2311, true));
+// У формы 56 в радио только data-value 1 и 2. Невыбранный пункт отдаёт число 0
+// (или строку "0"), не массив и не ''. first(0) не пустой, поэтому скаляр 0 —
+// «ничего не выбрано», не режим «дешевле»: mode 1, как дефолт calcPlasticCards.
+// Выбранное значение приходит массивом и сохраняется, в том числе [0]. Через || не схлопываем.
+var modeListed = ezfc_functions.get_value_from(2311, true);
+var modeRaw = first(modeListed);
 var modeNum = Number(modeRaw);
-var mode = (modeRaw === '' || modeRaw == null || isNaN(modeNum)) ? 1 : modeNum;
+var modeUnset = typeof modeListed !== 'object' && modeNum === 0;
+var mode = (modeUnset || modeRaw === '' || modeRaw == null || isNaN(modeNum)) ? 1 : modeNum;
+// «стандарт» — первый пункт радио, индекс 0, data-value 1.
+// Id по имени: запись копии меняет только get_value_from, литерал 2311 на копии пустой.
+// Выбранный массив ([1], [2], [0]) сюда не попадает. change не шлём: расчёт уже mode 1.
+if (modeUnset && typeof document !== 'undefined' && typeof ezfc_functions.get_element_id_by_name === 'function') {
+    var modeElId = ezfc_functions.get_element_id_by_name(__form_id__, 'rdoModeProduction');
+    var modeInput = modeElId ? document.getElementById('ezfc_element-' + modeElId + '-0') : null;
+    if (modeInput) {
+        modeInput.checked = true;
+    }
+}
 
 insaincalc.syncUrl({
     numN: qty,

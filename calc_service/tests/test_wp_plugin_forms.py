@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import re
+import subprocess
 from pathlib import Path
 
 FORMS = Path(__file__).resolve().parents[2] / "wp-plugin" / "forms"
@@ -123,6 +125,117 @@ def test_print_sheet_js_branches_by_dpd_laminat_with_form_id():
     assert "insaincalc.calcApi('print_sheet'" in text
     assert "insaincalc.syncUrl(" in text
     assert "insaincalc.showResult(" in text
+
+
+def _cards_form_posted(radio):
+    """Прогон forms/cards.js. radio — то, что вернул get_value_from элемента режима.
+
+    get_element_id_by_name для режима отдаёт 4292 — id радио на копии 117.
+    Скрипт копии подменяет только get_value_from, поэтому литерал 2311 в
+    getElementById на копии input не найдёт.
+    """
+    src = (FORMS / "cards.js").read_text(encoding="utf-8").replace("{{numN}}", "100")
+    harness = (
+        "var radio = " + json.dumps(radio) + ";\n"
+        "var __form_id__ = 117;\n"
+        "var checkedId = null;\n"
+        "var document = {\n"
+        "  getElementById: function (id) {\n"
+        "    return { set checked(v) { if (v) checkedId = id; } };\n"
+        "  }\n"
+        "};\n"
+        "var ezfc_functions = {\n"
+        "  get_value_from: function (id, calc, third, opts) {\n"
+        "    if (opts && opts.return_value === 'index') {\n"
+        "      if (id === 2289 || id === 2290 || id === 2288) return [0];\n"
+        "      return '';\n"
+        "    }\n"
+        "    if (id === 2311) return radio;\n"
+        "    if (id === 2289) return ['White'];\n"
+        "    if (id === 2290) return ['gloss'];\n"
+        "    return '';\n"
+        "  },\n"
+        "  get_element_id_by_name: function (formId, name) {\n"
+        "    return name === 'rdoModeProduction' ? 4292 : 0;\n"
+        "  }\n"
+        "};\n"
+        "var posted = null;\n"
+        "var synced = null;\n"
+        "var insaincalc = {\n"
+        "  syncUrl: function (obj) { synced = obj; },\n"
+        "  calcApi: function (slug, body) {\n"
+        "    posted = { slug: slug, body: body };\n"
+        "    return { then: function () { return { catch: function () {} }; } };\n"
+        "  },\n"
+        "  showResult: function () {},\n"
+        "  showError: function () {}\n"
+        "};\n"
+        + src
+        + "\nprocess.stdout.write(JSON.stringify({\n"
+        "  mode: posted && posted.body.mode,\n"
+        "  url: synced && synced.rdoModeProduction,\n"
+        "  slug: posted && posted.slug,\n"
+        "  checked: checkedId\n"
+        "}));\n"
+    )
+    proc = subprocess.run(
+        ["node", "-e", harness],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    assert proc.returncode == 0, proc.stderr
+    return json.loads(proc.stdout)
+
+
+def test_cards_js_empty_radio_is_mode_one():
+    """Форма 56: пустой radio режима отдаёт число 0. Это не «дешевле» — mode 1, как calcPlasticCards.
+
+    Выбранные значения приходят массивом и сохраняются. Массив [0] не схлопывается в 1.
+    """
+    text = (FORMS / "cards.js").read_text(encoding="utf-8")
+    assert "get_value_from(2311, true)" in text
+    assert "querySelector" not in text
+    assert not re.search(r"\bprice\s*=", text)
+
+    empty = _cards_form_posted(0)
+    assert empty["slug"] == "cards"
+    assert empty["mode"] == 1
+    assert empty["url"] == 1
+
+    assert _cards_form_posted("0")["mode"] == 1
+    assert _cards_form_posted(None)["mode"] == 1
+    assert _cards_form_posted("")["mode"] == 1
+
+    standard = _cards_form_posted([1])
+    assert standard["mode"] == 1
+    assert standard["url"] == 1
+    fast = _cards_form_posted([2])
+    assert fast["mode"] == 2
+    assert fast["url"] == 2
+    assert _cards_form_posted([0])["mode"] == 0
+    assert _cards_form_posted([0])["url"] == 0
+
+
+def test_cards_js_empty_radio_checks_standard_option():
+    """Скаляр 0 и «0» уже дают mode 1. Радио «стандарт» (индекс 0) надо отметить.
+
+    На боевой это ezfc_element-2311-0 с data-value 1. Id берётся по имени поля:
+    на копии 117 радио — 4292. Выбранные [1] и [2] не переотмечаем.
+    """
+    text = (FORMS / "cards.js").read_text(encoding="utf-8")
+    assert "querySelector" not in text
+    assert "ezfc_element-2311" not in text
+    assert not re.search(r"\bprice\s*=", text)
+
+    for raw in (0, "0"):
+        posted = _cards_form_posted(raw)
+        assert posted["mode"] == 1
+        assert posted["url"] == 1
+        assert posted["checked"] == "ezfc_element-4292-0", raw
+
+    for raw in ([1], [2], [0], None):
+        assert _cards_form_posted(raw)["checked"] is None, raw
 
 
 def test_forms_keep_mode_zero():
