@@ -35,7 +35,6 @@ Site ops: Grok 4.7
 - `wp-plugin/forms/badge.js`
 - `calc_service/calculators/badge.py`
 - `calc_service/tests/test_calculators/test_badge.py`
-- `scripts/js_port_gaps_allowed.txt` — только снять строки `calcBadge`, если ветка портирована
 - WordPress: только копия лид-формы и её черновик
 
 ## Не-scope
@@ -44,6 +43,7 @@ Site ops: Grok 4.7
 - Копии остальных четырёх форм `calcBadge`; ветки, которые дефолт лида не вызывает
 - `uv_badge.py` (`calcUVBadge`) и прочие чужие калькуляторы и их тесты
 - Боевые формы 31, 60, 61, 64, 84 и шаги 17–24, выкладка плагина, JSON цен, `calc_service/calculators/__init__.py`
+- `scripts/js_port_gaps_allowed.txt` — в этой доработке не править: УФ-печать уже вызывается, строки `calcBadge` там про другие ветки. Файл пересекается с `form-plastic-cards`.
 
 ## Критерии приёмки
 
@@ -97,6 +97,7 @@ Site ops: Grok 4.7
 23.11.2026 — Site ops, Grok 4.7 — API `9a247eb` выкачен, на копии 114 окошко 14 600, гравировка 48 300, смола 22 500, дефолт 13 000 — дальше Reviewer
 23.11.2026 — Reviewer, Grok 4.7 — принято по отчёту опций, задача закрыта локально коммитом `0c5534f` без push — дальше человек
 23.11.2026 — человек — вернуть на доработку: опция «УФ-печать» расходится с JS — дальше Implementer
+23.11.2026 — человек — `js_port_gaps_allowed.txt` из файлов доработки убрать, worktree без пересечения с form-plastic-cards — дальше Implementer
 
 ## Ревью 1
 
