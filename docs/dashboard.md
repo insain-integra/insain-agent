@@ -2,7 +2,7 @@
 
 # Дашборд insain.ru
 
-Состояние на последнюю запись журнала: **23.11.2026**.
+Состояние на последнюю запись журнала: **24.11.2026**.
 
 Собрано из `docs/vision.md`, `todo/`, `docs/site/forms.md`, `docs/history/log.md`. Обновляет
 `python scripts/dev.py dashboard` и `python scripts/dev.py close <задача>`.
@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **18**. В работе/ревью: `form-badge.md`, `form-plastic-cards.md`. Заблокировано: `form-magnet-laminated.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **17**. В работе/ревью: `form-badge.md`. Заблокировано: `form-magnet-laminated.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -46,7 +46,6 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-badge.md` | выкатка |
 | `form-magnet-acrylic.md` | черновик |
 | `form-magnet-laminated.md` | заблокировано: ждёт todo/form-magnet-acrylic.md |
-| `form-plastic-cards.md` | выкатка |
 | `form-tablets.md` | черновик |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
@@ -68,8 +67,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-24 — form-plastic-cards
 - 2026-11-23 — form-keychain
 - 2026-11-23 — form-badge
 - 2026-11-23 — form-calendar
 - 2026-11-23 — form-metal-pins
-- 2026-11-22 — milling-cut-floor
