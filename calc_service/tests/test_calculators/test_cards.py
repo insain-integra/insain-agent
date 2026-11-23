@@ -150,3 +150,68 @@ def test_cards_modes_contractor(calc):
     assert r0["time_ready"] == pytest.approx(56.0)
     assert r1["time_ready"] == pytest.approx(40.0)
     assert r2["time_ready"] == pytest.approx(32.0)
+
+
+# JS, 23.11.2026 — дефолт формы 56 со страницы:
+# 100 шт, White, ламинация gloss (preselect 0), галки выключены, mode 1.
+# calcCards.js не подключён в scripts/run_js_calc.mjs: эталон — прогон
+# js_legacy/calc/calcCards.js в Node vm на прайсе calc_service/data.
+# JS не округляет price вверх (3154), Python делает ceil → 3155, rel < 0.001.
+# mode=0 и mode=2 — тот же вход; у подрядчика цена не зависит от mode.
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "material_id": "White",
+    "lamination": "gloss",
+    "mode": 1,
+}
+
+EXPECTED_FORM_DEFAULT = {
+    "cost": 1900.0,
+    "price": 3154.0,
+    "time_hours": 0.5,
+    "time_ready": 40.0,
+    "weight_kg": 0.5,
+}
+
+# JS, 23.11.2026 — тот же дефолт на mode=0 и mode=2.
+FORM_DEFAULT_MODES = [
+    (0, 1900.0, 3154.0, 0.5, 56.0),
+    (2, 1900.0, 3154.0, 0.5, 32.0),
+]
+
+
+def _assert_js(result: dict, expected: dict) -> None:
+    rel = 0.001
+    assert _cmp(result["cost"], expected["cost"], rel), result["cost"]
+    assert _cmp(result["price"], expected["price"], rel), result["price"]
+    assert _cmp(result["time_hours"], expected["time_hours"], rel), result["time_hours"]
+    assert _cmp(result["time_ready"], expected["time_ready"], rel), result["time_ready"]
+
+
+def test_form_default_matches_js(calc):
+    """Дефолт формы 56: цена и срок как у JS, размер карты в materials."""
+    result = calc.execute(REF_FORM_DEFAULT)
+    _assert_js(result, EXPECTED_FORM_DEFAULT)
+    assert _cmp(result["weight_kg"], EXPECTED_FORM_DEFAULT["weight_kg"], 0.001)
+    materials = result["materials"]
+    assert len(materials) == 1
+    mat = materials[0]
+    assert mat["code"] == "White"
+    assert "Пластиковые карты" in (mat.get("name") or "")
+    assert mat.get("title")
+    assert mat["quantity"] == 100
+    assert mat["size_mm"] == [86.0, 54.0]
+
+
+@pytest.mark.parametrize("mode,cost,price,time_hours,time_ready", FORM_DEFAULT_MODES)
+def test_form_default_modes(calc, mode, cost, price, time_hours, time_ready):
+    """Дефолт формы 56 на mode=0 и mode=2: цена как у JS, срок 56 и 32 ч."""
+    result = calc.execute({**REF_FORM_DEFAULT, "mode": mode})
+    _assert_js(result, {
+        "cost": cost,
+        "price": price,
+        "time_hours": time_hours,
+        "time_ready": time_ready,
+    })
+    assert result["price"] == calc.execute(REF_FORM_DEFAULT)["price"]
+    assert result["time_ready"] != EXPECTED_FORM_DEFAULT["time_ready"]

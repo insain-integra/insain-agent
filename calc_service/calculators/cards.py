@@ -2,6 +2,11 @@
 Калькулятор пластиковых карт.
 
 Перенесено из js_legacy/calc/calcCards.js.
+
+Список «не перенесено» (scripts/js_port_gaps_allowed.txt):
+- option_isMagneticStripeHiCo. Детектор не считает ветку перенесённой:
+  в API она называется is_magnetic_stripe и берёт costMagneticStripeHiCo.
+  Дефолт формы 56 полосу не включает, цена дефолта от этой опции не зависит.
 """
 
 from __future__ import annotations
@@ -296,6 +301,7 @@ class CardsCalculator(BaseCalculator):
                 "title": card_name,
                 "quantity": quantity,
                 "unit": "шт",
+                "size_mm": [float(card_size[0]), float(card_size[1])],
             }
         ]
 
