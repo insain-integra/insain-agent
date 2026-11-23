@@ -194,3 +194,5 @@
 - Из `form-plastic-cards`: Боевой cjsCalc (элемент 2298) пишет ключи `isSignatureStrip ` и `isScratchPanel ` с хвостовым пробелом. На живой форме включённые галки не входят в цену. В `forms/cards.js` ключи без пробела: на 100 шт полоса подписи даёт JS cost 2140 / price 3552.4, скретч — cost 2100 / price 3486. Дефолт обе галки выключены.
 - Из `form-plastic-cards`: `isEmbossing` в боевом JS закомментирован, поля формы нет. В API параметр необязательный, в запрос не уходит.
 - Из `form-plastic-cards`: `calcCards.js` не подключён в `scripts/run_js_calc.mjs`. Эталон снят прямым прогоном файла в Node vm. Раннер не менялся.
+- Из `form-badge`: `calc_service/common/process_tools.py`: `calc_attachment` и `calc_packing` не заполняют `size_mm` у материалов (`Magnet4513`, `ZipLock0812`); в `badge.py` закрыто локально через `_ensure_size_mm`.
+- Из `form-badge`: Дефолт формы 64: `weight_kg` API `1.65`, раннер `1.22`. `badge.py` включает вес второй лазерной резки, JS его не складывает (тот же разрыв, что у `EXPECTED_REF` в `test_badge.py`). На цену и срок лида не влияет.
