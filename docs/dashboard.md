@@ -37,15 +37,16 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **17**. В работе/ревью: нет. Заблокировано: `form-magnet-laminated.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **18**. В работе/ревью: `form-badge.md`, `form-plastic-cards.md`. Заблокировано: `form-magnet-laminated.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `ai-calc-authoring-skill.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
+| `form-badge.md` | доработка |
 | `form-magnet-acrylic.md` | черновик |
 | `form-magnet-laminated.md` | заблокировано: ждёт todo/form-magnet-acrylic.md |
-| `form-plastic-cards.md` | черновик |
+| `form-plastic-cards.md` | выкатка |
 | `form-tablets.md` | черновик |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
