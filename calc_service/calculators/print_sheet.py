@@ -740,6 +740,12 @@ class PrintSheetCalculator(BaseCalculator):
                 lamination_result = lam_calc.calculate(lam_params)
                 cost_lamination = float(lamination_result.get("cost", 0.0))
                 time_lamination = float(lamination_result.get("time_hours", 0.0))
+                # js_time_sum — внутренний флаг цепочки магнитов. JS calcPrintSheet
+                # ceil'ит сумму с сырым временем ламинации, не с уже округлённым time_hours.
+                if params.get("js_time_sum"):
+                    time_lamination = float(
+                        lamination_result.get("time_hours_exact", time_lamination)
+                    )
                 price_lamination = float(lamination_result.get("price", 0.0))
             except Exception:
                 lamination_result = None
@@ -772,7 +778,11 @@ class PrintSheetCalculator(BaseCalculator):
 
         time_total = time_print + time_cut + time_lamination + time_cut_guillotine + opt_time
         # В JS: result.time = Math.ceil((costCut.time+costPrint.time+…)*100)/100
-        time_hours = math.ceil(time_total * 100) / 100.0
+        # js_time_sum: round перед ceil, иначе 0.04+0.03 даёт 7.000000000000001 и лишнюю сотую.
+        if params.get("js_time_sum"):
+            time_hours = math.ceil(round(time_total * 100, 8)) / 100.0
+        else:
+            time_hours = math.ceil(time_total * 100) / 100.0
         base_time_ready_list = get_time_ready("baseTimeReadyPrintSheet")
         idx = max(0, min(len(base_time_ready_list) - 1, mode.value))
         base_ready = float(base_time_ready_list[idx])

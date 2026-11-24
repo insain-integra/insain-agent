@@ -282,6 +282,8 @@ class LaminationCalculator(BaseCalculator):
             "price": float(price),
             "unit_price": float(price) / max(1, quantity),
             "time_hours": time_hours,
+            # Сырое время до round(…*100)/100. Сумму в calcPrintSheet JS ceil'ит родитель.
+            "time_hours_exact": float(time_lamination),
             "time_ready": time_ready,
             "weight_kg": weight_kg,
             "materials": materials_out,

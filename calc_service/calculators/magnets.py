@@ -4,6 +4,11 @@
 Источник логики: js_legacy/calc/calcMagnets.js
 - calcAcrylicMagnets → calc_acrylic_magnets / MagnetAcrylicCalculator (slug magnet_acrylic)
 - calcMagnetLamination → calc_laminated_magnets / MagnetLaminatedCalculator (slug magnet_laminated)
+
+Список «не перенесено» (scripts/js_port_gaps_allowed.txt):
+- option_isLamination. Дефолт формы 54 уже кладёт плёнку Laminat32G в lamination_id.
+  Пустая строка по-прежнему означает эту плёнку. На цене дефолта отдельная ветка не сказывается.
+- option_isBarcode, option_isVariables. Галочки формы 54 по умолчанию сняты и в дефолт не входят.
 """
 
 from __future__ import annotations
@@ -294,6 +299,8 @@ def calc_laminated_magnets(params: Mapping[str, Any]) -> Dict[str, Any]:
         "lamination_id": lamination_id if not is_epoxy else "",
         "lamination_double_side": True,
         "no_cut": True,
+        # Сумма времени как в calcPrintSheet: сырое время ламинации и устойчивый ceil.
+        "js_time_sum": True,
         "mode": mode.value,
     }
     print_result = print_calc.calculate(print_params)
@@ -401,10 +408,13 @@ def calc_laminated_magnets(params: Mapping[str, Any]) -> Dict[str, Any]:
         + price_rounding + price_form + price_epoxy + price_pack
     ) * (1 + margin)
 
-    time_hours = math.ceil(
+    # JS: Math.ceil(сумма * 100) / 100. round снимает хвост 7.000000000000001,
+    # из-за которого ceil даёт лишнюю сотую.
+    time_hours = math.ceil(round(
         (time_print + time_roll + time_cut_roller + time_cut_final
-         + time_rounding + time_form + time_epoxy + time_pack) * 100
-    ) / 100.0
+         + time_rounding + time_form + time_epoxy + time_pack) * 100,
+        8,
+    )) / 100.0
 
     time_ready = time_hours + max(
         time_ready_print, time_ready_cut_roller, time_ready_roll,

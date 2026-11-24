@@ -669,3 +669,73 @@ def test_laminated_epoxy_tool_schema_has_is_epoxy(calc_laminated):
     props = schema["parameters"]["properties"]
     assert "is_epoxy" in props
     assert props["is_epoxy"]["type"] == "boolean"
+
+
+# Дефолт формы 54: 100 шт, 50×50 мм, прямоугольник, винил 0.4 мм, ламинация Laminat32G,
+# сложность 1, без галочек и без упаковки, mode 1.
+# JS, 25.11.2026 — calcMagnetLamination в Node vm, прайс calc_service/data.
+# Цветность в JS всегда «4+0». Галочки штрихкода и переменных данных на дефолте сняты.
+REF_FORM_DEFAULT_LAMINATED = {
+    "quantity": 100,
+    "magnet_id": "MagnetVinil04",
+    "width_mm": 50,
+    "height_mm": 50,
+    "shape": "rectangular",
+    "lamination_id": "Laminat32G",
+    "difficulty": 1,
+    "is_epoxy": False,
+    "is_packing": False,
+    "mode": 1,
+}
+EXPECTED_FORM_DEFAULT_LAMINATED = {
+    "cost": 1525,
+    "price": 2827.85,
+    "time_hours": 0.75,
+    "time_ready": 9.16,
+}
+# JS, 25.11.2026 — тот же дефолт на mode=0 и mode=2.
+# mode=2: price JS 3984.75, допуск rel 0.001 покрывает 3987.05.
+FORM_DEFAULT_LAMINATED_MODES = [
+    (0, 963, 1791.7, 0.45, 24.54),
+    (2, 2154, 3984.75, 1.08, 2.8),
+]
+
+
+def test_form_default_magnet_laminated(calc_laminated):
+    """Дефолт формы 54: 100 шт, 50×50, Laminat32G, mode 1. Цена и срок — JS."""
+    result = calc_laminated.execute(REF_FORM_DEFAULT_LAMINATED)
+    _assert_js(result, EXPECTED_FORM_DEFAULT_LAMINATED)
+    # JS считает вес листа с обрезью (0.54). В ответе API вес изделия.
+    assert _cmp(result["weight_kg"], 0.47, 0.001)
+    by_code = {m["code"]: m for m in result["materials"]}
+    assert set(by_code) == {"MagnetVinil04", "RAFLACOAT", "Laminat32G"}
+    assert _cmp(float(by_code["MagnetVinil04"]["quantity"]), 0.44, 0.001)
+    assert by_code["MagnetVinil04"]["size_mm"] == [620.0, 0.0]
+    assert by_code["RAFLACOAT"]["quantity"] == 5
+    assert by_code["RAFLACOAT"]["size_mm"] == [320.0, 450.0]
+    assert _cmp(float(by_code["Laminat32G"]["quantity"]), 3.384, 0.001)
+    assert by_code["Laminat32G"]["size_mm"] == [330.0, 0.0]
+    for mat in result["materials"]:
+        assert mat.get("name") and mat["name"] != mat["code"]
+        assert "title" in mat
+
+
+@pytest.mark.parametrize("mode,cost,price,time_hours,time_ready", FORM_DEFAULT_LAMINATED_MODES)
+def test_form_default_magnet_laminated_modes(
+    calc_laminated, mode, cost, price, time_hours, time_ready,
+):
+    """Дефолт формы 54 на mode=0 и mode=2: цена и срок как у JS."""
+    result = calc_laminated.execute({**REF_FORM_DEFAULT_LAMINATED, "mode": mode})
+    _assert_js(result, {
+        "cost": cost,
+        "price": price,
+        "time_hours": time_hours,
+        "time_ready": time_ready,
+    })
+    assert result["price"] != EXPECTED_FORM_DEFAULT_LAMINATED["price"]
+    if mode == 0:
+        assert result["price"] < EXPECTED_FORM_DEFAULT_LAMINATED["price"]
+        assert result["time_ready"] > EXPECTED_FORM_DEFAULT_LAMINATED["time_ready"]
+    else:
+        assert result["price"] > EXPECTED_FORM_DEFAULT_LAMINATED["price"]
+        assert result["time_ready"] < EXPECTED_FORM_DEFAULT_LAMINATED["time_ready"]

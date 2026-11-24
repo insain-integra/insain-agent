@@ -32,6 +32,7 @@ NO_FORM_DEFAULT_YET = {"embossing", "mug", "plaque", "uv_print"}
 # Оба калькулятора магнитов живут в test_magnets.py, не в test_<slug>.py.
 SLUG_TEST_FILE = {
     "magnet_acrylic": "test_magnets.py",
+    "magnet_laminated": "test_magnets.py",
 }
 
 
