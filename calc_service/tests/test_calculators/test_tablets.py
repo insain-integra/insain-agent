@@ -108,6 +108,8 @@ def test_get_tool_schema(calc):
     assert schema.get("name") == "calc_tablets"
     assert "parameters" in schema
     props = schema["parameters"]["properties"]
+    assert "material_mode" in props
+    assert "is_cut_manual" in props
     assert "is_cut_manual_metal" in props
     assert "is_sublimation" in props
     assert "is_cut_laser" in props
@@ -117,6 +119,8 @@ def test_get_tool_schema(calc):
 def test_get_param_schema(calc):
     schema = calc.get_param_schema()
     names = {p["name"] for p in schema["params"]}
+    assert "material_mode" in names
+    assert "is_cut_manual" in names
     assert "is_cut_manual_metal" in names
     assert "is_sublimation" in names
     assert "is_cut_laser" in names
@@ -341,3 +345,109 @@ def test_expected_values_tablets(calc):
     assert any(m.get("code") == "PVC3" for m in materials)
     for m in materials:
         assert "title" in m
+
+
+# ── Эталон дефолта формы 36 CalcTabs: JS, 26.11.2026 ──────────────────
+# node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],"PVC5",{"isCutManual":"KeencutEvolutionE2","isUVPrint":{"printerID":"PrintUV","resolution":1,"surface":"isPlain","color":"4+0","isDoubleApplication":false},"Material":"isMaterial"},1]'
+REF_FORM_DEFAULT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "PVC5",
+    "material_mode": "isMaterial",
+    "is_cut_manual": "KeencutEvolutionE2",
+    "is_uv_print": {
+        "printer_id": "PrintUV",
+        "resolution": 1,
+        "surface": "plain",
+        "color": "4+0",
+        "double_application": False,
+    },
+    "mode": 1,
+}
+
+# JS, 26.11.2026
+EXPECTED_FORM_DEFAULT_BY_MODE = {
+    0: {
+        "cost": 7419.0,
+        "price": 11888.0,
+        "time_hours": 4.16,
+        "time_ready": 60.230000000000004,
+        "weight_kg": 0.69,
+    },
+    1: {
+        "cost": 7960.0,
+        "price": 12754.0,
+        "time_hours": 4.5,
+        "time_ready": 52.82,
+        "weight_kg": 0.69,
+    },
+    2: {
+        "cost": 8505.0,
+        "price": 13625.0,
+        "time_hours": 4.86,
+        "time_ready": 45.43,
+        "weight_kg": 0.69,
+    },
+}
+EXPECTED_FORM_DEFAULT = EXPECTED_FORM_DEFAULT_BY_MODE[1]
+
+
+def test_form_default_matches_js(calc):
+    """JS, 26.11.2026: дефолт формы 36 (PVC5, KeencutEvolutionE2 + PrintUV 4+0 res=1, 100 шт)."""
+    r = calc.execute(REF_FORM_DEFAULT)
+    _assert_js(r, EXPECTED_FORM_DEFAULT)
+    materials = r.get("materials") or []
+    assert materials
+    pvc = next((m for m in materials if m.get("code") == "PVC5"), None)
+    assert pvc is not None
+    assert pvc.get("size_mm") == [3050.0, 2050.0]
+    assert pvc.get("quantity") == pytest.approx(0.04, rel=JS_REL_TOL)
+    assert "title" in pvc
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form_default_modes_match_js(calc, mode):
+    """JS, 26.11.2026: дефолт формы 36 на режимах mode=0, 1, 2."""
+    r = calc.execute({**REF_FORM_DEFAULT, "mode": mode})
+    _assert_js(r, EXPECTED_FORM_DEFAULT_BY_MODE[mode])
+
+
+def test_form_default_mode_monotonic(calc):
+    """Собственное производство: price(0) < price(1) < price(2) и time_ready(2) < time_ready(1) < time_ready(0)."""
+    res = {m: calc.execute({**REF_FORM_DEFAULT, "mode": m}) for m in (0, 1, 2)}
+    assert res[0]["price"] < res[1]["price"] < res[2]["price"]
+    assert res[2]["time_ready"] < res[1]["time_ready"] < res[0]["time_ready"]
+
+
+@pytest.mark.parametrize(
+    ("material_mode", "double_app", "expected"),
+    [
+        # JS, 26.11.2026: noMaterial
+        (
+            "noMaterial",
+            False,
+            {"cost": 7665.0, "price": 12264.0, "time_hours": 4.5, "time_ready": 52.82, "weight_kg": 0.69},
+        ),
+        # JS, 26.11.2026: isMaterialCustomer (+25% к резке и УФ)
+        (
+            "isMaterialCustomer",
+            False,
+            {"cost": 9539.25, "price": 15262.0, "time_hours": 5.52, "time_ready": 53.84, "weight_kg": 0.69},
+        ),
+        # JS, 26.11.2026: двойное нанесение УФ
+        (
+            "isMaterial",
+            True,
+            {"cost": 8294.0, "price": 13288.0, "time_hours": 4.56, "time_ready": 52.94, "weight_kg": 0.69},
+        ),
+    ],
+)
+def test_cut_manual_material_modes_and_double_uv(calc, material_mode, double_app, expected):
+    """JS, 26.11.2026: material_mode (noMaterial / isMaterialCustomer) и double_application."""
+    params = {
+        **REF_FORM_DEFAULT,
+        "material_mode": material_mode,
+        "is_uv_print": {**REF_FORM_DEFAULT["is_uv_print"], "double_application": double_app},
+    }
+    _assert_js(calc.execute(params), expected)

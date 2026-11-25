@@ -2,14 +2,19 @@
 Калькулятор ТАБЛИЧЕК.
 
 Мигрировано из js_legacy/calc/calcTablets.js.
-Информационные таблички: резка (лазер / металл), УФ, сублимация, карманы, рамка.
+Информационные таблички: резка (роликовый резак / лазер / металл), УФ, сублимация, карманы, рамка.
 
-Перенесено (ветки плакеток): ручная резка металла, сублимация, лазерная резка
-с гравировкой, УФ-печать; карманы и рамка — упрощённо через common/.
+Перенесено: ручная резка на роликовом резаке (CutRoller, is_cut_manual),
+ручная резка металла (is_cut_manual_metal), сублимация, лазерная резка с гравировкой,
+УФ-печать (с двойным нанесением), режим учёта материала (material_mode);
+карманы и рамка — упрощённо через common/.
 
-Список «не перенесено»: ручная резка роликом, фрезер, экосольвентная печать и плёнка,
-фоновая плёнка, древко, клеевой слой, EVA-пена, подвесы; полные карманы и рамка
-как в JS (см. scripts/js_port_gaps_allowed.txt, префикс calcTablets).
+Список «не перенесено» (см. scripts/js_port_gaps_allowed.txt, префикс calcTablets):
+- фрезерная резка (опция фрезеровки, вызов calcMilling),
+- экосольвентная/латексная печать (вызов calcPrintRoll),
+- аппликация плёнками и накатка (вызовы calcSticker, calcManualRoll),
+- фоновая плёнка, древко, клеевой слой на этапе табличек, EVA-пена,
+- полные карманы и рамка как в JS (вызовы calcPockets, calcFrame; упрощённо через common/).
 """
 
 from __future__ import annotations
@@ -18,6 +23,7 @@ import math
 from typing import Any, Dict, List, Mapping, MutableMapping, Sequence
 
 from calculators.base import BaseCalculator, ProductionMode, material_line
+from calculators.cut_roller import CutRollerCalculator
 from calculators.heat_press import HeatPressCalculator
 from calculators.laser import LaserCalculator
 from calculators.uv_print import UVPrintCalculator
@@ -130,6 +136,16 @@ class TabletsCalculator(BaseCalculator):
                     "width": {"type": "number", "minimum": 1, "description": "Ширина, мм"},
                     "height": {"type": "number", "minimum": 1, "description": "Высота, мм"},
                     "material_id": {"type": "string", "description": "Код материала hardsheet"},
+                    "material_mode": {
+                        "type": "string",
+                        "enum": ["isMaterial", "isMaterialCustomer", "noMaterial"],
+                        "default": "isMaterial",
+                        "description": "Режим учёта материала",
+                    },
+                    "is_cut_manual": {
+                        "type": "string",
+                        "description": "Id резака для ручной резки на роликовом резаке (например KeencutEvolutionE2)",
+                    },
                     "is_cut_manual_metal": {
                         "type": "string",
                         "description": "Id резака для ручной резки металла (например AccusheadPro12)",
@@ -171,6 +187,9 @@ class TabletsCalculator(BaseCalculator):
                 {"name": "width", "type": "number", "required": True, "title": "Ширина (мм)", "unit": "мм"},
                 {"name": "height", "type": "number", "required": True, "title": "Высота (мм)", "unit": "мм"},
                 {"name": "material_id", "type": "enum_cascading", "required": True, "title": "Материал", "choices": {"source": "materials:hardsheet"}},
+                {"name": "material_mode", "type": "enum", "required": False, "default": "isMaterial", "title": "Материал в цене",
+                 "choices": {"inline": [{"id": "isMaterial", "title": "Учитывать"}, {"id": "noMaterial", "title": "Не учитывать"}, {"id": "isMaterialCustomer", "title": "Материал заказчика (+25%)"}]}},
+                {"name": "is_cut_manual", "type": "string", "required": False, "title": "Роликовый резак"},
                 {"name": "is_cut_manual_metal", "type": "string", "required": False, "title": "Резак металла"},
                 {"name": "is_sublimation", "type": "boolean", "required": False, "default": False, "title": "Сублимация"},
                 {"name": "is_cut_laser", "type": "object", "required": False, "title": "Лазерная резка"},
@@ -186,13 +205,32 @@ class TabletsCalculator(BaseCalculator):
             ],
             "param_groups": {
                 "main": ["quantity", "width", "height"],
-                "material": ["material_id"],
-                "cut": ["is_cut_manual_metal", "is_cut_laser", "is_grave", "is_grave_fill"],
+                "material": ["material_id", "material_mode"],
+                "cut": ["is_cut_manual", "is_cut_manual_metal", "is_cut_laser", "is_grave", "is_grave_fill"],
                 "print": ["is_uv_print", "is_sublimation"],
                 "options": ["pocket_id", "pocket_count", "is_frame", "frame_profile_id"],
                 "mode": ["mode"],
             },
         }
+
+    def _cut_manual(
+        self,
+        n: int,
+        size: Sequence[float],
+        material_id: str,
+        cutter_id: str,
+        material_mode: str,
+        mode: int,
+    ) -> Dict[str, Any]:
+        return CutRollerCalculator().calculate({
+            "quantity": n,
+            "width": size[0],
+            "height": size[1],
+            "material_id": material_id,
+            "cutter_code": cutter_id,
+            "material_mode": material_mode,
+            "mode": mode,
+        })
 
     def _cut_manual_metal(
         self,
@@ -280,6 +318,8 @@ class TabletsCalculator(BaseCalculator):
         size: Sequence[float],
         raw: Any,
         mode: int,
+        *,
+        is_customer_material: bool = False,
     ) -> Dict[str, Any]:
         opts: Mapping[str, Any] = raw if isinstance(raw, Mapping) else {}
         size_print_raw = _pick(opts, "size")
@@ -300,6 +340,10 @@ class TabletsCalculator(BaseCalculator):
             "resolution": int(_pick(opts, "resolution", default=0) or 0),
             "color": str(_pick(opts, "color", default="4+0") or "4+0").strip(),
             "surface": _normalize_surface(_pick(opts, "surface", default="plain")),
+            "double_application": bool(
+                _pick(opts, "double_application", "isDoubleApplication", "is_double_application", default=False)
+            ),
+            "is_customer_material": is_customer_material,
             "printer_code": printer,
             "mode": mode,
         })
@@ -310,8 +354,10 @@ class TabletsCalculator(BaseCalculator):
         height = float(params.get("height", 0))
         size = [width, height]
         material_id = str(params.get("material_id", "")).strip()
+        material_mode = str(params.get("material_mode", "isMaterial") or "isMaterial").strip() or "isMaterial"
         mode = ProductionMode(int(params.get("mode", 1)))
 
+        is_cut_manual = params.get("is_cut_manual")
         is_cut_manual_metal = params.get("is_cut_manual_metal")
         is_sublimation = bool(params.get("is_sublimation", False))
         has_cut_laser = "is_cut_laser" in params and params.get("is_cut_laser") is not None
@@ -331,6 +377,16 @@ class TabletsCalculator(BaseCalculator):
 
         parts: List[Dict[str, Any]] = []
 
+        # Ручная резка на роликовом резаке + материал (calcCutRoller)
+        if is_cut_manual and not is_cut_manual_metal:
+            cutter_id = (
+                "KeencutEvolutionE2"
+                if is_cut_manual is True
+                else str(is_cut_manual).strip()
+            )
+            if cutter_id:
+                parts.append(self._cut_manual(n, size, material_id, cutter_id, material_mode, mode.value))
+
         # Ручная резка металла + материал (calcCutSaber + раскладка A4/A3)
         if is_cut_manual_metal:
             cutter_id = str(is_cut_manual_metal).strip()
@@ -344,6 +400,7 @@ class TabletsCalculator(BaseCalculator):
                 "width": width,
                 "height": height,
                 "material_id": material_id,
+                "material_mode": material_mode,
                 "mode": mode.value,
             }
             if has_cut_laser:
@@ -360,7 +417,15 @@ class TabletsCalculator(BaseCalculator):
 
         # УФ-печать поверх резки, не вместо
         if has_uv:
-            parts.append(self._uv_print(n, size, params.get("is_uv_print"), mode.value))
+            parts.append(
+                self._uv_print(
+                    n,
+                    size,
+                    params.get("is_uv_print"),
+                    mode.value,
+                    is_customer_material=(material_mode == "isMaterialCustomer"),
+                )
+            )
 
         # Карманы (упрощённо; полный порт JS-карманов — не перенесён)
         if pocket_id:

@@ -22,14 +22,12 @@ calcShildSublimaton call calcCutRoller
 calcShildSublimaton call calcCutSaber
 calcShildSublimaton call calcManualPress
 calcShildSublimaton call calcRounding
-calcTablets option isCutManual
 calcTablets option isCutMilling
 calcTablets option isFilm
 calcTablets option isBackgroundFilm
 calcTablets option isShaft
 calcTablets option isAdhesiveLayer
 calcTablets option isEVAFoam
-calcTablets call calcCutRoller
 calcTablets call calcMilling
 calcTablets call calcPrintRoll
 calcTablets call calcManualRoll
