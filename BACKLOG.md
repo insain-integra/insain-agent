@@ -205,3 +205,6 @@
 - Из `form-magnet-laminated`: Нумерация (`option isNumber`) детектором пропусков считается перенесённой из-за слова `number` в схеме; в расчёте её нет. На дефолте галочка снята, цену не двигает. Строку в allowed не добавлял.
 - Из `form-magnet-laminated`: Сложность на форме 54 и 57: 1 / 1.5 / 2, в enum схемы 1 / 1.3 / 1.7. `calculate()` число формы принимает. Прямоугольный дефолт сложность не использует.
 - Из `form-magnet-laminated`: Скругление при форме не `rectangular` JS добавляет к вырубке, API умеет его только как `rectangular_rounded` (сабельный рез). В JS копии так только для прямоугольника.
+- Из `form-magnet-laminated`: Сложность на форме 54 и 57: 1 / 1.5 / 2, в enum схемы 1 / 1.3 / 1.7. `calculate()` число формы принимает. Прямоугольный дефолт сложность не использует.
+- Из `form-magnet-laminated`: Консоль превью копии: `insainParse/scrtp.js` — `TypeError` на `options` и `querySelector`; `admin-ajax.php?action=woocommerce_load_status_widget` — 504. Ошибок `insaincalc` и `ezfc` нет. Форму не трогал.
+- Из `form-magnet-laminated`: Скругление при форме не `rectangular` JS добавляет к вырубке, API умеет его только как `rectangular_rounded` (сабельный рез). В JS копии так только для прямоугольника.

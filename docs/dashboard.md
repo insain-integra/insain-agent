@@ -2,7 +2,7 @@
 
 # Дашборд insain.ru
 
-Состояние на последнюю запись журнала: **25.11.2026**.
+Состояние на последнюю запись журнала: **26.11.2026**.
 
 Собрано из `docs/vision.md`, `todo/`, `docs/site/forms.md`, `docs/history/log.md`. Обновляет
 `python scripts/dev.py dashboard` и `python scripts/dev.py close <задача>`.
@@ -37,14 +37,12 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **16**. В работе/ревью: `form-magnet-laminated.md`. Заблокировано: `ai-seo-fact-sheet.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **14**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `ai-calc-authoring-skill.md` | черновик |
-| `ai-seo-fact-sheet.md` | заблокировано: человек |
 | `ezfc-options-source-reset.md` | черновик |
-| `form-magnet-laminated.md` | доработка |
 | `form-tablets.md` | черновик |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
@@ -66,8 +64,8 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Журнал (последние 5)
 
+- 2026-11-26 — form-magnet-laminated
 - 2026-11-25 — form-magnet-laminated
 - 2026-11-24 — form-magnet-acrylic
 - 2026-11-24 — form-badge
 - 2026-11-24 — form-plastic-cards
-- 2026-11-23 — form-keychain
