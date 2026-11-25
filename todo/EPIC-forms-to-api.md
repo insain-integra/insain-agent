@@ -7,25 +7,25 @@
 
 К 30.11.2026 все 45 боевых форм-калькуляторов на https://insain.ru считают через `insaincalc.calcApi`. Переключение пачками по 5–10 форм, копии принимаются выборочно. Форма 10 `_ExternalTest` и не-калькуляторы 71/72/77 в G1 не входят.
 
-Решение человека 22.11.2026: боевое переключение форм ezFC на `insaincalc.calcApi` отложено, пока все 45 форм эпика не получат калькулятор в `calc_service` и принятую копию. `todo/forms-batch-switch.md` не запускать и не расширять, `forms-batch-2` не заводить. Сверка 22.11.2026: все slug эпика зарегистрированы в API; боевая на API — форма 79 `puzzle`; копии приняты у 25 форм — пакет 1 (14), 12, 45, 35, хвост slug 19, 83, 29 и пачка 4 (30, 70, 38, 40, 80), их задачи закрыты. Без копии 19 форм пачек 5–7, их ведут лид-задачи по одной на slug; вторые формы slug — после приёмки лида. Форма 68 вызывает `calcTablets` и идёт через slug `tablets`, не `shild`. Реестр `docs/site/forms.md` снят 25.10.2026 и ещё показывает старый JS — его обновит боевое переключение, не копии.
+Решение человека 22.11.2026: боевое переключение форм ezFC на `insaincalc.calcApi` отложено, пока все 45 форм эпика не получат калькулятор в `calc_service` и принятую копию. `todo/forms-batch-switch.md` не запускать и не расширять, `forms-batch-2` не заводить. Сверка 26.11.2026: все slug эпика зарегистрированы в API; на API в бою только форма 79 `puzzle` (1 из 45). Копии приняты у 32 форм: 25 на срез 22.11 (пакет 1 из 14, плюс 12, 45, 35, хвост 19, 83, 29 и пачка 4: 30, 70, 38, 40, 80) и семь лидов 23–26.11 (34, 64, 50, 56, 74, 75, 54). Без копии 12 форм: лид `todo/form-tablets.md` в статусе `выкатка` (порт и `forms/tablets.js` в `main` `5944aea`, дубль формы 36 после выкатки API; затем 48, 51, 76, 68) и вторые формы принятых лидов — `badge` 31, 60, 61, 84; `calendar` 52, 66; `magnet_laminated` 57. Файлов на вторые формы нет. Форма 68 вызывает `calcTablets` и идёт через slug `tablets`, не `shild`. Реестр `docs/site/forms.md` снят 25.10.2026 и ещё показывает старый JS — его обновит боевое переключение, не копии.
 
 ## Задачи в файлах
 
 Открытые:
 
-- `todo/forms-batch-switch.md` — боевой пакет, 14 принятых копий (список в «Пачки»); отложен решением 22.11.2026, не запускать и не расширять
-- `todo/presswall-banner-mode.md` — баннер и чехол `presswall` в режиме формы; правит калькулятор, форму 46 не переключает
-- `form-metal-pins` (закрыто 2026-11-23, `docs/history/log.md`) — копия формы 34, slug `metal_pins`
-- `form-plastic-cards` (закрыто 2026-11-24, `docs/history/log.md`) — копия формы 56, slug `cards`
-- `form-keychain` (закрыто 2026-11-23, `docs/history/log.md`) — копия формы 74, slug `keychain`
-- `form-magnet-acrylic` (закрыто 2026-11-24, `docs/history/log.md`) — копия формы 75, slug `magnet_acrylic`
-- `form-magnet-laminated` (закрыто 2026-11-26, `docs/history/log.md`) — нумерация, штрихкод и переменные данные в калькуляторе и в JS копии 119; slug `magnet_laminated`; форма 57 позже
-- `form-calendar` (закрыто 2026-11-23, `docs/history/log.md`) — лид-копия 50 (квартальный), slug `calendar`; формы 52 и 66 позже
-- `form-badge` (закрыто 2026-11-24, `docs/history/log.md`) — доработка: опция «УФ-печать» расходится с JS. Копия 114 / товар 2586910 уже есть, slug `badge`
-- `todo/form-tablets.md` — сверка дефолтов 36, 48, 51, 76, 68 и лид-копия 36, slug `tablets`
+- `todo/forms-batch-switch.md` — боевой пакет, 14 принятых копий пакета 1; отложен решением 22.11.2026, не запускать и не расширять, пока нет копии у каждой из 45 форм
+- `todo/presswall-banner-mode.md` — баннер и чехол `presswall` в режиме формы; правит калькулятор, форму 46 не переключает. Черновик с 15.11.2026, работы не было
+- `todo/form-tablets.md` — лид формы 36, slug `tablets`. Порт `is_cut_manual` / `material_mode` и `wp-plugin/forms/tablets.js` в `main` (`5944aea`), статус `выкатка`: Site ops выкатывает API и делает дубль. Копии ещё нет, боевая 36 на старом JS. В боевой пакет не добавлять, пока нет принятой копии
 
 Закрытые (файла в `todo/` нет, запись в `docs/history/log.md`):
 
+- `form-magnet-laminated` (закрыто 2026-11-26) — копия 119 / 2586915, форма 54, slug `magnet_laminated`; нумерация, штрихкод и переменные данные. Форма 57 позже
+- `form-magnet-acrylic` (закрыто 2026-11-24) — копия 118 / 2586914, форма 75, slug `magnet_acrylic`
+- `form-badge` (закрыто 2026-11-24) — лид-копия 114 / 2586910, форма 64, slug `badge`, включая «УФ-печать». Формы 31, 60, 61, 84 позже
+- `form-plastic-cards` (закрыто 2026-11-24) — копия 117 / 2586913, форма 56, slug `cards`
+- `form-keychain` (закрыто 2026-11-23) — копия 116 / 2586912, форма 74, slug `keychain`
+- `form-calendar` (закрыто 2026-11-23) — лид-копия 115 / 2586911, форма 50, slug `calendar`. Формы 52 и 66 позже
+- `form-metal-pins` (закрыто 2026-11-23) — копия 113 / 2586909, форма 34, slug `metal_pins`
 - `milling-cut-floor`, `form-poly-sticker-pack`, `form-milling`, `form-pad-print`, `form-vizitki-promo` (закрыто 2026-11-22) — пачка 4 и хвост slug: копии 70, 35 (111 / 2586907), 38 (110 / 2586906), 83
 - `print-sheet-copy-result`, `print-sheet-big-sheet`, `form-vizitki`, `form-sticker-pack`, `form-poly-sticker`, `form-heat-press` (закрыто 2026-11-21) — блок результата копии 96, лист больше принтера, копии 19, 29, 30, 40
 - `form-canvas` (закрыто 2026-11-20) — копия формы 80, slug `canvas`
@@ -49,26 +49,24 @@
 
 Параллельная группа — задачи, у которых строки «Файлы» не пересекаются. Общие файлы (`docs/site/forms.md`, `todo/forms-batch-switch.md`, `docs/js-runner-cases.md`, `scripts/run_js_calc.mjs`) в ветках копий не править; дописка — в «Результат» задачи. `scripts/js_port_gaps_allowed.txt` каждая задача правит только снятием строк своего префикса.
 
-1. `todo/presswall-banner-mode.md` — в любой момент: только `presswall.py` и его тест. Это не переключение формы 46, задача не отменяется.
-2. Параллельно, лид-копии пачек 5–7:
-   - `form-plastic-cards` (закрыто 2026-11-24, `docs/history/log.md`), `form-keychain` (закрыто 2026-11-23, `docs/history/log.md`), `form-magnet-acrylic` (закрыто 2026-11-24, `docs/history/log.md`), `form-calendar` (закрыто 2026-11-23, `docs/history/log.md`)
-   - `form-badge` (закрыто 2026-11-24, `docs/history/log.md`) (доработка: УФ-печать), `todo/form-tablets.md` — сначала сверка дефолтов всех форм slug, потом лид
-   - `form-magnet-laminated` (закрыто 2026-11-26, `docs/history/log.md`) — опции нумерации, штрихкода и переменных данных на копии 119
-   Запись на проде (дубли форм) — последовательно под `lock prod`.
-3. Вторые формы slug — по одной задаче после приёмки лида: `badge` (4 формы), `tablets` (48, 51, 76, 68), `calendar` (52, 66), `magnet_laminated` (57). Файлы заранее не создавать.
+1. `todo/presswall-banner-mode.md` — в любой момент: только `presswall.py` и его тест. Это не переключение формы 46, задача не отменяется. Не начата.
+2. Лид-копии пачек 5–7 закрыты, кроме `todo/form-tablets.md`: сверка дефолтов сделана, порт в `main`, остались выкатка API и дубль формы 36. Закрыты 23–26.11: `form-metal-pins`, `form-calendar` (лид 50), `form-keychain`, `form-badge` (лид 64, с «УФ-печатью»), `form-plastic-cards`, `form-magnet-acrylic`, `form-magnet-laminated` (лид 54, копия 119). Запись на проде (дубли форм) — последовательно под `lock prod`.
+3. Вторые формы slug — по одной задаче, файлы заранее не создавать. Лиды приняты, задачи можно заводить: `badge` 31, 60, 61, 84; `calendar` 52, 66; `magnet_laminated` 57. Ждут приёмки лида 36: `tablets` 48, 51, 76, 68.
 4. Боевое переключение отложено, пока у всех 45 форм эпика нет принятой копии: `todo/forms-batch-switch.md` не запускать и не расширять, `forms-batch-2` не заводить. Как переключать оставшиеся формы (одним пакетом или несколькими) — решение человека после пункта 3.
 
 ## Пачки
 
-Боевая на API: **79 puzzle**. Копии приняты (25), боевые формы на старом JS: пакет 1 — **69 plaque, 26 uv_print, 41 mug, 85 embossing, 78 acrylic_prizes, 46 presswall, 49 rollup, 73 pennant, 55 flag, 6 print_sheet, 22 sticker, 28 laser, 23 print_roll, 82 print_offset**; вне пакета 1 — **12 button_pins** (101 / 2586896), **45 notebook** (102 / 2586897), **35 milling** (111 / 2586907), **38 pad_print** (110 / 2586906), **19, 83, 29, 30, 70, 40, 80**.
+Боевая на API: **79 puzzle**. Копии приняты (**32**), живые формы этих slug на старом JS. Без копии (**12**): **36** (лид `form-tablets`) и **48, 51, 76, 68** `tablets`; **31, 60, 61, 84** `badge`; **52, 66** `calendar`; **57** `magnet_laminated`.
 
-| Пачка | Формы (id, slug) | Статус 22.11.2026 |
+Пакет 1 и срез 22.11, копии на месте: **69 plaque, 26 uv_print, 41 mug, 85 embossing, 78 acrylic_prizes, 46 presswall, 49 rollup, 73 pennant, 55 flag, 6 print_sheet, 22 sticker, 28 laser, 23 print_roll, 82 print_offset**; вне пакета 1 — **12 button_pins** (101 / 2586896), **45 notebook** (102 / 2586897), **35 milling** (111 / 2586907), **38 pad_print** (110 / 2586906), **19, 83, 29, 30, 70, 40, 80**. Лид-копии 23–26.11: **34** (113 / 2586909), **64** (114 / 2586910), **50** (115 / 2586911), **74** (116 / 2586912), **56** (117 / 2586913), **75** (118 / 2586914), **54** (119 / 2586915).
+
+| Пачка | Формы (id, slug) | Статус 26.11.2026 |
 | --- | --- | --- |
 | 1 бой | 69 `plaque`, 26 `uv_print`, 41 `mug`, 85 `embossing`, 78 `acrylic_prizes`, 49 `rollup`, 73 `pennant`, 55 `flag`, 6 `print_sheet`, 22 `sticker`, 28 `laser`, 46 `presswall`, 23 `print_roll`, 82 `print_offset` | 14 копий приняты, живые формы на старом JS. `forms-batch-switch` отложен решением 22.11.2026 |
 | Хвост slug | 19 `print_sheet`, 83 `print_offset`, 29 `sticker` | закрыто: копии приняты (`form-vizitki`, `form-vizitki-promo`, `form-sticker-pack`) |
 | 4 копии | 30 `poly_sticker`, 70 `poly_sticker_pack`, 45 `notebook`, 35 `milling`, 38 `pad_print`, 40 `heat_press`, 80 `canvas` | закрыто: все 7 копий приняты |
-| 5 копии | 31 60 61 64 84 `badge`, 34 `metal_pins`, 12 `button_pins` | копия 12 принята. `form-badge` (лид после сверки, кандидат 64), `form-metal-pins` |
-| 6 копии | 36 48 51 76 68 `tablets`, 50 52 66 `calendar` | `form-tablets` (лид 36; 68 через `tablets`, не `shild`), `form-calendar` (лид 50) |
-| 7 копии | 54 57 `magnet_laminated`, 56 `cards`, 74 `keychain`, 75 `magnet_acrylic` | `form-magnet-laminated` (лид 54, черновик), `form-plastic-cards` (закрыто), `form-keychain` (закрыто), `form-magnet-acrylic` (закрыто 2026-11-24) |
+| 5 копии | 31 60 61 64 84 `badge`, 34 `metal_pins`, 12 `button_pins` | копии 12, 34 (113 / 2586909) и лид 64 (114 / 2586910) приняты. Без копии 31, 60, 61, 84 — файлов задач нет |
+| 6 копии | 36 48 51 76 68 `tablets`, 50 52 66 `calendar` | лид 50 закрыт (115 / 2586911); 52 и 66 без задачи. `form-tablets`: порт в `main`, копии 36 нет, статус `выкатка`; 48, 51, 76, 68 после приёмки копии. 68 через `tablets`, не `shild` |
+| 7 копии | 54 57 `magnet_laminated`, 56 `cards`, 74 `keychain`, 75 `magnet_acrylic` | закрыты лиды 54 (119 / 2586915), 56 (117 / 2586913), 74 (116 / 2586912), 75 (118 / 2586914). Без копии форма 57 — файла задачи нет |
 
 C1–C11 из `BACKLOG.md` — новых форм в реестре нет, в эти пачки не входят.
