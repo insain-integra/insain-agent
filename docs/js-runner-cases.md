@@ -52,6 +52,8 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | `calcPolySticker` 80×80 | `poly_sticker` | 4107.8 |
 | `calcPolyStickerPack` 80×80 | `poly_sticker_pack` | 6341.1 |
 | `calcTablets` form 36 default | `tablets` | 12754 |
+| `calcTablets` form 36 ecosolvent | `tablets` | 12937 |
+| `calcTablets` form 36 latex | `tablets` | 14471 |
 | `calcLaser` номерки | `laser` | 5631 |
 | `calcLaser` простая резка AcrylWhite3 | `laser` | 23638 |
 | `calcLaser` без резки AcrylWhite3 | `laser` | 1404 |
@@ -161,6 +163,10 @@ node scripts/run_js_calc.mjs calcPolySticker --data current --args '[20,[80,80],
 node scripts/run_js_calc.mjs calcPolyStickerPack --data current --args '[20,[80,80],[{\"size\":[30,30],\"difficulty\":1},{\"size\":[30,30],\"difficulty\":1},{\"size\":[30,30],\"difficulty\":1},{\"size\":[30,30],\"difficulty\":1},{\"size\":[30,30],\"difficulty\":1}],\"PaperCoated115M\",{\"isPrint\":{\"printerID\":\"KMBizhubC220\",\"color\":\"4+0\"}},1]'
 
 node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],\"PVC5\",{\"isCutManual\":\"KeencutEvolutionE2\",\"isUVPrint\":{\"printerID\":\"PrintUV\",\"resolution\":1,\"surface\":\"isPlain\",\"color\":\"4+0\",\"isDoubleApplication\":false},\"Material\":\"isMaterial\"},1]'
+
+node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],\"PVC5\",{\"isCutManual\":\"KeencutEvolutionE2\",\"isPrint\":{\"printerID\":\"Technojet160ECO\",\"resolution\":1,\"surface\":\"isPlain\",\"color\":\"4+0\",\"isDoubleApplication\":false},\"isEdge\":\"isCutEdge\",\"Material\":\"isMaterial\"},1]'
+
+node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],\"PVC5\",{\"isCutManual\":\"KeencutEvolutionE2\",\"isPrint\":{\"printerID\":\"HPLatex335\",\"resolution\":1,\"surface\":\"isPlain\",\"color\":\"4+0\",\"isDoubleApplication\":false},\"isEdge\":\"isCutEdge\",\"Material\":\"isMaterial\"},1]'
 
 node scripts/run_js_calc.mjs calcLaser --data current --args '[50,[40,80],\"AcrylColor3\",{\"isCutLaser\":{\"lenCut\":0,\"sizeItem\":0,\"density\":0,\"difficulty\":1},\"isGrave\":1,\"isGraveFill\":[30,40]},1]'
 
