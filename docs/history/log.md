@@ -9,6 +9,15 @@
 ## 2026-11-26 — form-tablets
 
 - Период: 2026-11-26 — 2026-11-26 (1 дн.)
+- Часы человека: 16 сообщ. в чатах Cursor; активно 1.8 ч (ходы агента > 30 мин — с коэфф. 0.5)
+- Работа агентов: 11 чатов Cursor, 16 сообщ. человека, 1.8 ч активных; Implementer — Gemini 4 Hydrogen High; Reviewer — Grok 4.7; Site ops — Grok 4.7
+- Было / стало: экосольвент и латекс на копии 120 в расчёт не уходили / `is_print` считает `PrintRollCalculator` и `calc_manual_roll`. На копии: УФ 12 800 руб. / 7 дней, экосольвент 13 000 / 3 дня, латекс 14 500 / 5 дней. Боевая форма 36 на `calcTablets`. `REF_FORM_DEFAULT` 12754 / 52.82 не сдвинут.
+- Эффект: —
+- Источник: задача `todo/form-tablets.md`, коммиты d3cea58 03a28cf 7b0aacc 5944aea f3a1fb8
+
+## 2026-11-26 — form-tablets
+
+- Период: 2026-11-26 — 2026-11-26 (1 дн.)
 - Часы человека: 10 сообщ. в чатах Cursor; активно 1.2 ч (ходы агента > 30 мин — с коэфф. 0.5)
 - Работа агентов: 6 чатов Cursor, 10 сообщ. человека, 1.2 ч активных; Implementer — Gemini 4 Hydrogen High; Reviewer — Grok 4.7; Site ops — Grok 4.7
 - Было / стало: 0 перенесённых веток ручной роликовой резки в `tablets.py` и 14 пропусков `calcTablets` в allowed / портированы `is_cut_manual` (`CutRollerCalculator`) + `material_mode` + `double_application`, в allowed осталось 12 строк `calcTablets`, добавлен `wp-plugin/forms/tablets.js` (id 36) и `REF_FORM_DEFAULT` (`mode=0,1,2`). Копия формы 120 на черновике 2586916 считает `tablets` (дефолт 12754 / 52.82); боевая форма 36 осталась на `calcTablets`.
