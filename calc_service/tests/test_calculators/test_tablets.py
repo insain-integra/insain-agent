@@ -114,6 +114,9 @@ def test_get_tool_schema(calc):
     assert "is_sublimation" in props
     assert "is_cut_laser" in props
     assert "is_uv_print" in props
+    assert "is_print" in props
+    assert "is_edge" in props
+    assert "is_lamination" in props
 
 
 def test_get_param_schema(calc):
@@ -125,6 +128,9 @@ def test_get_param_schema(calc):
     assert "is_sublimation" in names
     assert "is_cut_laser" in names
     assert "is_uv_print" in names
+    assert "is_print" in names
+    assert "is_edge" in names
+    assert "is_lamination" in names
 
 
 # ── Эталоны JS, 02.11.2026 ───────────────────────────────────────────
@@ -451,3 +457,233 @@ def test_cut_manual_material_modes_and_double_uv(calc, material_mode, double_app
         "is_uv_print": {**REF_FORM_DEFAULT["is_uv_print"], "double_application": double_app},
     }
     _assert_js(calc.execute(params), expected)
+
+
+# ── Эталоны isPrint (экосольвент и латекс): JS, 26.11.2026 ────────────
+
+REF_ECO_PRINT = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "PVC5",
+    "material_mode": "isMaterial",
+    "is_cut_manual": "KeencutEvolutionE2",
+    "is_print": {
+        "printer_id": "Technojet160ECO",
+        "double_application": False,
+        "is_edge": "isCutEdge",
+        "is_lamination": False,
+    },
+    "mode": 1,
+}
+
+# JS, 26.11.2026: node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],"PVC5",{"isCutManual":"KeencutEvolutionE2","isPrint":{"printerID":"Technojet160ECO","resolution":1,"surface":"isPlain","color":"4+0","isDoubleApplication":false},"isEdge":"isCutEdge","Material":"isMaterial"},<mode>]'
+EXPECTED_ECO_PRINT_BY_MODE = {
+    0: {"cost": 7579.0, "price": 12150.0, "time_hours": 4.29, "time_ready": 32.37, "weight_kg": 0.75},
+    1: {"cost": 8071.0, "price": 12937.0, "time_hours": 4.59, "time_ready": 20.97, "weight_kg": 0.75},
+    2: {"cost": 8574.0, "price": 13743.0, "time_hours": 4.9, "time_ready": 13.58, "weight_kg": 0.75},
+}
+
+REF_LATEX_PRINT = {
+    **REF_ECO_PRINT,
+    "is_print": {
+        "printer_id": "HPLatex335",
+        "double_application": False,
+        "is_edge": "isCutEdge",
+        "is_lamination": False,
+    },
+}
+
+# JS, 26.11.2026: node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],"PVC5",{"isCutManual":"KeencutEvolutionE2","isPrint":{"printerID":"HPLatex335","resolution":1,"surface":"isPlain","color":"4+0","isDoubleApplication":false},"isEdge":"isCutEdge","Material":"isMaterial"},<mode>]'
+EXPECTED_LATEX_PRINT_BY_MODE = {
+    0: {"cost": 8039.0, "price": 12885.0, "time_hours": 4.26, "time_ready": 60.28, "weight_kg": 0.75},
+    1: {"cost": 9030.0, "price": 14471.0, "time_hours": 4.91, "time_ready": 37.93, "weight_kg": 0.75},
+    2: {"cost": 10026.0, "price": 16064.0, "time_hours": 5.56, "time_ready": 23.58, "weight_kg": 0.75},
+}
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_eco_print_modes_match_js(calc, mode):
+    """JS, 26.11.2026: экосольвентная печать (Technojet160ECO) на режимах mode=0, 1, 2."""
+    r = calc.execute({**REF_ECO_PRINT, "mode": mode})
+    _assert_js(r, EXPECTED_ECO_PRINT_BY_MODE[mode])
+    codes = {m.get("code") for m in r.get("materials") or []}
+    assert {"PVC5", "ORAJET3640"}.issubset(codes)
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_latex_print_modes_match_js(calc, mode):
+    """JS, 26.11.2026: латексная печать (HPLatex335) на режимах mode=0, 1, 2."""
+    r = calc.execute({**REF_LATEX_PRINT, "mode": mode})
+    _assert_js(r, EXPECTED_LATEX_PRINT_BY_MODE[mode])
+    codes = {m.get("code") for m in r.get("materials") or []}
+    assert {"PVC5", "ORAJET3640"}.issubset(codes)
+
+
+@pytest.mark.parametrize(
+    ("params", "expected", "expect_laminat"),
+    [
+        # JS, 26.11.2026: экосольвент + ламинация + подгибка + двойное нанесение
+        (
+            {
+                **REF_ECO_PRINT,
+                "is_print": {
+                    "printer_id": "Technojet160ECO",
+                    "double_application": True,
+                    "is_edge": "isBendEdge",
+                    "is_lamination": True,
+                },
+            },
+            {"cost": 32931.0, "price": 52726.0, "time_hours": 20.79, "time_ready": 37.22, "weight_kg": 0.89},
+            True,
+        ),
+        # JS, 26.11.2026: латекс 300×200, 10 шт, подгибка + двойное нанесение
+        (
+            {
+                "quantity": 10,
+                "width": 300,
+                "height": 200,
+                "material_id": "PVC5",
+                "material_mode": "isMaterial",
+                "is_cut_manual": "KeencutEvolutionE2",
+                "is_print": {
+                    "printer_id": "HPLatex335",
+                    "double_application": True,
+                    "is_edge": "isBendEdge",
+                    "is_lamination": False,
+                },
+                "mode": 1,
+            },
+            {"cost": 6303.0, "price": 10146.0, "time_hours": 2.98, "time_ready": 36.02, "weight_kg": 1.91},
+            False,
+        ),
+        # JS, 26.11.2026: экосольвент 1000×1000, 1 шт, ламинация
+        (
+            {
+                "quantity": 1,
+                "width": 1000,
+                "height": 1000,
+                "material_id": "PVC5",
+                "material_mode": "isMaterial",
+                "is_cut_manual": "KeencutEvolutionE2",
+                "is_print": {
+                    "printer_id": "Technojet160ECO",
+                    "double_application": False,
+                    "is_edge": "isCutEdge",
+                    "is_lamination": True,
+                },
+                "mode": 1,
+            },
+            {"cost": 3690.0, "price": 6005.0, "time_hours": 0.92, "time_ready": 17.47, "weight_kg": 3.07},
+            True,
+        ),
+    ],
+)
+def test_is_print_options_match_js(calc, params, expected, expect_laminat):
+    """JS, 26.11.2026: ламинация, подгибка (isBendEdge) и двойное нанесение в is_print."""
+    r = calc.execute(params)
+    _assert_js(r, expected)
+    codes = {m.get("code") for m in r.get("materials") or []}
+    assert ("LaminatDLCLAM" in codes) is expect_laminat
+
+
+def test_is_print_lamination_string_no_and_top_level(calc):
+    """Строка 'No' не включает ламинацию, а верхнеуровневые is_edge / is_lamination работают."""
+    r_no = calc.execute({
+        **REF_ECO_PRINT,
+        "is_print": {"printer_id": "Technojet160ECO", "is_lamination": "No"},
+    })
+    _assert_js(r_no, EXPECTED_ECO_PRINT_BY_MODE[1])
+    assert all(m.get("code") != "LaminatDLCLAM" for m in r_no.get("materials") or [])
+
+    r_top = calc.execute({
+        **REF_ECO_PRINT,
+        "is_print": {"printer_id": "Technojet160ECO", "double_application": True},
+        "is_edge": "isBendEdge",
+        "is_lamination": "LaminatDLCLAM",
+    })
+    _assert_js(
+        r_top,
+        {"cost": 32931.0, "price": 52726.0, "time_hours": 20.79, "time_ready": 37.22, "weight_kg": 0.89},
+    )
+
+
+def test_tablets_js_posts_is_print():
+    """wp-plugin/forms/tablets.js передаёт is_print для isECOPrint и isLatexPrint, сохраняя isUVPrint."""
+    import json
+    import subprocess
+
+    js_path = Path(__file__).resolve().parents[3] / "wp-plugin" / "forms" / "tablets.js"
+    src = js_path.read_text(encoding="utf-8")
+
+    def run_form(values: dict) -> dict:
+        filled = (
+            src.replace("{{numN}}", str(values.get("qty", 100)))
+            .replace("{{numW}}", str(values.get("width", 50)))
+            .replace("{{numH}}", str(values.get("height", 50)))
+        )
+        harness = (
+            "var vals = " + json.dumps(values) + ";\n"
+            "var __form_id__ = 120;\n"
+            "var ezfc_functions = {\n"
+            "  get_value_from: function (id, calc, third, opts) {\n"
+            "    if (opts && opts.return_value === 'index') return [0];\n"
+            "    if (id === 1339) return [vals.material || 'PVC5'];\n"
+            "    if (id === 1340) return [vals.materialMode || 'isMaterial'];\n"
+            "    if (id === 1371) return [vals.cut || 'isCutManual'];\n"
+            "    if (id === 1368) return [vals.app || 'isUVPrint'];\n"
+            "    if (id === 3313) return vals.doubleApp ? 1 : 0;\n"
+            "    if (id === 1378) return [vals.color || '4+0'];\n"
+            "    if (id === 2770) return [vals.res == null ? 1 : vals.res];\n"
+            "    if (id === 1429) return [vals.laminat || 'No'];\n"
+            "    if (id === 1477) return [vals.edge || 'isCutEdge'];\n"
+            "    if (id === 2003) return [vals.mode == null ? 1 : vals.mode];\n"
+            "    return [''];\n"
+            "  }\n"
+            "};\n"
+            "var posted = null, synced = null;\n"
+            "var insaincalc = {\n"
+            "  syncUrl: function (obj) { synced = obj; },\n"
+            "  calcApi: function (slug, body) {\n"
+            "    posted = { slug: slug, body: body };\n"
+            "    return { then: function () { return { catch: function () {} }; } };\n"
+            "  },\n"
+            "  showResult: function () {},\n"
+            "  showError: function () {}\n"
+            "};\n"
+            + filled
+            + "\nprocess.stdout.write(JSON.stringify({ posted: posted, synced: synced }));\n"
+        )
+        proc = subprocess.run(["node", "-e", harness], capture_output=True, text=True, encoding="utf-8")
+        assert proc.returncode == 0, proc.stderr
+        return json.loads(proc.stdout)
+
+    uv = run_form({"app": "isUVPrint", "mode": 0})
+    assert uv["posted"]["slug"] == "tablets"
+    assert uv["posted"]["body"]["mode"] == 0
+    assert "is_uv_print" in uv["posted"]["body"]
+    assert "is_print" not in uv["posted"]["body"]
+
+    eco = run_form({"app": "isECOPrint", "laminat": "LaminatDLCLAM", "edge": "isBendEdge", "doubleApp": True})
+    assert eco["posted"]["body"]["is_print"] == {
+        "printer_id": "Technojet160ECO",
+        "double_application": True,
+        "is_edge": "isBendEdge",
+        "is_lamination": True,
+    }
+
+    eco_no_lam = run_form({"app": "isECOPrint", "laminat": "No", "edge": "isCutEdge", "doubleApp": False})
+    assert eco_no_lam["posted"]["body"]["is_print"] == {
+        "printer_id": "Technojet160ECO",
+        "double_application": False,
+        "is_edge": "isCutEdge",
+        "is_lamination": False,
+    }
+
+    latex = run_form({"app": "isLatexPrint", "laminat": "LaminatDLCLAM", "edge": "isBendEdge", "doubleApp": False})
+    assert latex["posted"]["body"]["is_print"] == {
+        "printer_id": "HPLatex335",
+        "double_application": False,
+        "is_edge": "isBendEdge",
+        "is_lamination": False,
+    }

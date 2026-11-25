@@ -1,6 +1,6 @@
 # form-tablets
 
-Статус: доработка
+Статус: выкатка
 Сложность: средняя
 Implementer: Gemini 4 Hydrogen High
 Reviewer: Grok 4.7
@@ -60,8 +60,8 @@ Site ops: Grok 4.7
 - [ ] Копия не на витрине: `wp post get <product> --field=post_status` → `draft` или `private`; `curl.exe -s -o NUL -w "%{http_code}"` гостем — не `200`.
 - [ ] На копии под админом дефолт даёт `POST /api/v1/calc/tablets` → 200. Цена на странице = `price` API с округлением `showResult`.
 - [x] `curl.exe -s https://insain.ru/catalog/tablichki-s-uf-pechatyu/` — в HTML есть `calcTablets`, нет `calcApi`.
-- [ ] Экосольвентное нанесение (`isPrint`): раннер и `POST /api/v1/calc/tablets` сходятся по `price` и `time_ready` (допуск цены abs ≤ 0.02 или rel ≤ 0.001, срока rel ≤ 0.001). В тесте эталон `# JS,`. `REF_FORM_DEFAULT` не сдвинут.
-- [ ] В `wp-plugin/forms/tablets.js` выбранный способ с экосольвентной печатью уходит в `calcApi`, не только в `syncUrl`.
+- [x] Экосольвентное нанесение (`isPrint`): раннер и `POST /api/v1/calc/tablets` сходятся по `price` и `time_ready` (допуск цены abs ≤ 0.02 или rel ≤ 0.001, срока rel ≤ 0.001). В тесте эталон `# JS,`. `REF_FORM_DEFAULT` не сдвинут.
+- [x] В `wp-plugin/forms/tablets.js` выбранный способ с экосольвентной печатью уходит в `calcApi`, не только в `syncUrl`.
 - [ ] На копии 120 под админом этот способ даёт цену страницы = `price` API с округлением `showResult`. Дефолт с УФ-печатью остаётся 12 800 руб. и срок 7 дней.
 
 ### Критерии перевода формы ezFC на API
@@ -96,6 +96,28 @@ Site ops: Grok 4.7
 26.11.2026 — Reviewer, Grok 4.7 — принято по отчёту Site ops — дальше человек
 26.11.2026 — человек — закрыто, коммит 7b0aacc — дальше человек
 26.11.2026 — человек — доработка: способы нанесения с экосольвентной печатью на копии считаются неверно — дальше Implementer
+26.11.2026 — Implementer, Gemini 4 Hydrogen High — доработка: порт is_print (PrintRollCalculator + calc_manual_roll) в tablets.py, сняты calcPrintRoll/calcManualRoll из allowed, в wp-plugin/forms/tablets.js добавлены isECOPrint и isLatexPrint, REF_FORM_DEFAULT не сдвинут, make check зелёный — дальше Reviewer
+26.11.2026 — Reviewer, Grok 4.7 — принято по diff, блокер «Ревью 2» закрыт (is_print сходится с раннером), проверка копии 120 после выкатки API — дальше человек
+26.11.2026 — человек — принято, слить и выкатить API, затем записать JS в форму 120 — дальше Site ops
+
+## Ревью 3
+
+принято
+
+Незакоммиченный diff относительно HEAD `03a28cf`: `tablets.py`, `test_tablets.py`, `test_js_port_gaps.py` (`MAX_ALLOWED` 68→66), `js_port_gaps_allowed.txt`, `wp-plugin/forms/tablets.js`, `todo/form-tablets.md`. Чужие калькуляторы, JSON цен и `REF_FORM_DEFAULT` не менялись.
+
+Блокер «Ревью 2» закрыт.
+
+- В `tablets.py` ветка `is_print` — вызов `PrintRollCalculator` (материал `ORAJET3640`, `printer_code`, `is_lamination`, `mode`) и `calc_manual_roll` (`isEdge`, `mode`) на тираже `n * (2 if double_application else 1)`. Пересчёта на месте нет.
+- В `wp-plugin/forms/tablets.js` `isECOPrint` (`Technojet160ECO`, ламинация из поля 1429, если значение не `No`, край из 1477, двойное нанесение из 3313) и `isLatexPrint` (`HPLatex335`, ламинация выключена, край и двойное нанесение те же) попадают в `params.is_print` и уходят в `calcApi('tablets', params)`. Ветка УФ по-прежнему шлёт только `is_uv_print`.
+- Раннер `calcTablets` и `TabletsCalculator.execute` (допуск цены abs ≤ 0.02 или rel ≤ 0.001, срока rel ≤ 0.001), `price` / `time_ready`: экосольвент mode 0/1/2 — `12150`/`32.37`, `12937`/`20.97`, `13743`/`13.58`; латекс mode 0/1/2 — `12885`/`60.28`, `14471`/`37.93`, `16064`/`23.58`; ламинация + подгибка + двойное нанесение — `52726`/`37.22`; латекс 10 шт 300×200, подгибка + двойное — `10146`/`36.02`; экосольвент 1 шт 1000×1000 с ламинацией — `6005`/`17.47`. Те же `52726`/`37.22`, если край и ламинация заданы верхним уровнем. Эталоны в тесте с пометкой `# JS, 26.11.2026`.
+- Дефолт формы 36 (УФ) на раннере: `12754` / `52.82`. Строки `REF_FORM_DEFAULT` в diff нет.
+- `python scripts/js_port_gaps.py calcTablets`: `calcPrintRoll` и `calcManualRoll` сняты. Оставшиеся 10 пропусков (`isCutMilling`, `isFilm`, `isBackgroundFilm`, `isShaft`, `isAdhesiveLayer`, `isEVAFoam`, `calcMilling`, `calcSticker`, `calcPockets`, `calcFrame`) названы в docstring и лежат в allowed. `python scripts/js_port_gaps.py --check` → `ok`.
+- `python -m pytest calc_service/tests/test_calculators/test_tablets.py calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_wp_plugin_forms.py calc_service/tests/test_js_port_gaps.py -q` → `71 passed`. Файл `test_plaque.py` в diff нет.
+
+Прод-пункты (боевой POST, цена экосольвента и латекса на копии 120, дефолт УФ `12 800` руб. / 7 дней) закрываются после `deploy-api` с `main` и записи JS в форму 120 на черновике 2586916. Новую копию не создавать, плагин не выкладывать, боевую 36 не переключать. Это не блокер diff.
+
+Замечаний с меткой `блокер` нет.
 
 ## Ревью 2
 
@@ -176,3 +198,20 @@ Diff `task/form-tablets` относительно `main`: `tablets.py`, `test_ta
   - Выкатка `tablets.py` (`deploy-api` с `main`), проверка боевого `POST /api/v1/calc/tablets` на `REF_FORM_DEFAULT` и прод-копия формы 36 (шаги 6–16 `copy.md`) — после `Reviewer` и слияния в `main` (`Site ops` на проде; также требуется доступ к `ssh insain-prod`, сейчас `port 22` таймаутится).
 - Требуется решение:
   - Провести ревью (`Reviewer: Grok 4.7`), затем слить в `main` и выкатить API (`deploy-api`) перед снятием копии формы 36.
+
+### Доработка 26.11.2026 (`is_print`: экосольвент и латекс)
+
+- В `calc_service/calculators/tablets.py` портирована ветка `isPrint` (`_print_roll`): вызов существующих портов `PrintRollCalculator` (материал `ORAJET3640`, `printer_code`, `is_lamination`, `mode`) и `calc_manual_roll` (`isEdge`, `mode`) поверх тиража `n * (2 if double_application else 1)`. Добавлены параметры `is_print`, `is_edge`, `is_lamination` в `get_tool_schema` и `get_param_schema`. `REF_FORM_DEFAULT` (УФ-печать) и чужие калькуляторы не затронуты.
+- Из `scripts/js_port_gaps_allowed.txt` сняты `calcTablets call calcPrintRoll` и `calcTablets call calcManualRoll`; в `calc_service/tests/test_js_port_gaps.py` уменьшен `MAX_ALLOWED` (`68 → 66`).
+- В `wp-plugin/forms/tablets.js` для `isECOPrint` (`Technojet160ECO`, `is_lamination` из поля 1429 != `'No'`, `is_edge` из 1477, `double_application` из 3313) и `isLatexPrint` (`HPLatex335`, `is_lamination: false`, `is_edge` из 1477, `double_application` из 3313) формируется `params.is_print`.
+- В `calc_service/tests/test_calculators/test_tablets.py` добавлены эталоны JS (`# JS, 26.11.2026`) для `Technojet160ECO` (`mode=0,1,2`), `HPLatex335` (`mode=0,1,2`), ламинации + подгибки (`isBendEdge`) + двойного нанесения, `1000×1000` и Node-тест `wp-plugin/forms/tablets.js`.
+- Дописка для `docs/js-runner-cases.md` (добавить к строке формы 36 при слиянии в `main`):
+  - `node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],"PVC5",{"isCutManual":"KeencutEvolutionE2","isPrint":{"printerID":"Technojet160ECO","resolution":1,"surface":"isPlain","color":"4+0","isDoubleApplication":false},"isEdge":"isCutEdge","Material":"isMaterial"},1]'` (`price`: 12937)
+  - `node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],"PVC5",{"isCutManual":"KeencutEvolutionE2","isPrint":{"printerID":"HPLatex335","resolution":1,"surface":"isPlain","color":"4+0","isDoubleApplication":false},"isEdge":"isCutEdge","Material":"isMaterial"},1]'` (`price`: 14471)
+- Чем проверено (доработка):
+  - `python scripts/js_port_gaps.py calcTablets` и `python scripts/js_port_gaps.py --check` → `ok`
+  - `python -m pytest calc_service/tests/test_calculators/test_tablets.py calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_wp_plugin_forms.py calc_service/tests/test_js_port_gaps.py -q` → `71 passed`
+  - FastAPI `TestClient` `POST /api/v1/calc/tablets`: `REF_FORM_DEFAULT` → `12754.0` / `52.82`, `REF_ECO_PRINT` → `12937.0` / `20.97`, `REF_LATEX_PRINT` → `14471.0` / `37.93`
+  - `python scripts/dev.py check` → `calc_service`: `875 passed`, `bot_service`: `81 passed` (`docs/dashboard.md` откачен через `git checkout -- docs/dashboard.md`)
+- Не сделано на проде (следующая роль `Reviewer` → слияние в `main` → `Site ops`):
+  - `deploy-api` с `main`, затем запись обновлённого `wp-plugin/forms/tablets.js` в существующую форму 120 на черновике 2586916 (`read_file=0`) и проверка на копии под админом (`isECOPrint`, `isLatexPrint` и дефолт с УФ-печатью `12 800 руб.` / `7 дней`). Боевую форму 36 не переключать, плагин не выкладывать, новую копию не создавать.

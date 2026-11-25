@@ -29,8 +29,6 @@ calcTablets option isShaft
 calcTablets option isAdhesiveLayer
 calcTablets option isEVAFoam
 calcTablets call calcMilling
-calcTablets call calcPrintRoll
-calcTablets call calcManualRoll
 calcTablets call calcSticker
 calcTablets call calcPockets
 calcTablets call calcFrame

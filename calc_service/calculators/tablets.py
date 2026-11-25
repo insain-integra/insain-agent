@@ -2,17 +2,19 @@
 Калькулятор ТАБЛИЧЕК.
 
 Мигрировано из js_legacy/calc/calcTablets.js.
-Информационные таблички: резка (роликовый резак / лазер / металл), УФ, сублимация, карманы, рамка.
+Информационные таблички: резка (роликовый резак / лазер / металл), УФ,
+экосольвентная/латексная печать с накаткой, сублимация, карманы, рамка.
 
 Перенесено: ручная резка на роликовом резаке (CutRoller, is_cut_manual),
 ручная резка металла (is_cut_manual_metal), сублимация, лазерная резка с гравировкой,
-УФ-печать (с двойным нанесением), режим учёта материала (material_mode);
+УФ-печать (с двойным нанесением), экосольвентная/латексная печать на плёнке ORAJET3640
+с ручной накаткой (PrintRollCalculator + calc_manual_roll, is_print),
+режим учёта материала (material_mode);
 карманы и рамка — упрощённо через common/.
 
 Список «не перенесено» (см. scripts/js_port_gaps_allowed.txt, префикс calcTablets):
 - фрезерная резка (опция фрезеровки, вызов calcMilling),
-- экосольвентная/латексная печать (вызов calcPrintRoll),
-- аппликация плёнками и накатка (вызовы calcSticker, calcManualRoll),
+- аппликация плёнками (вызов calcSticker),
 - фоновая плёнка, древко, клеевой слой на этапе табличек, EVA-пена,
 - полные карманы и рамка как в JS (вызовы calcPockets, calcFrame; упрощённо через common/).
 """
@@ -26,6 +28,7 @@ from calculators.base import BaseCalculator, ProductionMode, material_line
 from calculators.cut_roller import CutRollerCalculator
 from calculators.heat_press import HeatPressCalculator
 from calculators.laser import LaserCalculator
+from calculators.print_roll import DEFAULT_PRINTER as DEFAULT_ROLL_PRINTER, PrintRollCalculator
 from calculators.uv_print import UVPrintCalculator
 from common.layout import layout_on_sheet
 from common.markups import (
@@ -33,7 +36,13 @@ from common.markups import (
     MARGIN_MATERIAL,
     get_margin,
 )
-from common.process_tools import calc_cut_profile, calc_cut_saber, calc_pocket, calc_set_profile
+from common.process_tools import (
+    calc_cut_profile,
+    calc_cut_saber,
+    calc_manual_roll,
+    calc_pocket,
+    calc_set_profile,
+)
 from materials import hardsheet as hardsheet_catalog, pocket as pocket_catalog, profile as profile_catalog
 
 DEFAULT_PROFILE = "AluFrame2Plus"
@@ -79,6 +88,12 @@ def _normalize_surface(surface: Any) -> str:
     if text in ("isRound", "round"):
         return "round"
     return text
+
+
+def _is_truthy_option(val: Any) -> bool:
+    if isinstance(val, str):
+        return val.strip().lower() not in ("", "0", "false", "no", "none")
+    return bool(val)
 
 
 def _normalize_cut_laser(raw: Any) -> Dict[str, float]:
@@ -167,6 +182,26 @@ class TabletsCalculator(BaseCalculator):
                         "type": "object",
                         "description": "УФ-печать: printer_id/printerID, resolution, surface, color, size",
                     },
+                    "is_print": {
+                        "type": "object",
+                        "description": (
+                            "Экосольвентная/латексная печать на плёнке ORAJET3640 с накаткой: "
+                            "printer_id/printerID (Technojet160ECO, HPLatex335), "
+                            "double_application/isDoubleApplication, is_edge/isEdge (isCutEdge, isBendEdge), "
+                            "is_lamination/isLamination, size"
+                        ),
+                    },
+                    "is_edge": {
+                        "type": "string",
+                        "enum": ["isCutEdge", "isBendEdge"],
+                        "default": "isCutEdge",
+                        "description": "Обработка края плёнки при печати (isCutEdge / isBendEdge)",
+                    },
+                    "is_lamination": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": "Широкоформатная ламинация плёнки при печати",
+                    },
                     "pocket_id": {"type": "string", "description": "Код кармана (опционально)"},
                     "pocket_count": {"type": "integer", "default": 1, "description": "Кол-во карманов на изделие"},
                     "is_frame": {"type": "boolean", "default": False, "description": "Рамка из профиля"},
@@ -196,6 +231,10 @@ class TabletsCalculator(BaseCalculator):
                 {"name": "is_grave", "type": "integer", "required": False, "title": "Гравировка (разрешение)"},
                 {"name": "is_grave_fill", "type": "array", "required": False, "title": "Область гравировки"},
                 {"name": "is_uv_print", "type": "object", "required": False, "title": "УФ-печать"},
+                {"name": "is_print", "type": "object", "required": False, "title": "Печать на плёнке (экосольвент/латекс)"},
+                {"name": "is_edge", "type": "enum", "required": False, "default": "isCutEdge", "title": "Обработка края плёнки",
+                 "choices": {"inline": [{"id": "isCutEdge", "title": "Подрезка"}, {"id": "isBendEdge", "title": "Подгибка"}]}},
+                {"name": "is_lamination", "type": "boolean", "required": False, "default": False, "title": "Ламинация плёнки"},
                 {"name": "pocket_id", "type": "enum", "required": False, "title": "Карман", "choices": {"source": "materials:pocket"}},
                 {"name": "pocket_count", "type": "integer", "required": False, "default": 1, "title": "Карманов на изделие"},
                 {"name": "is_frame", "type": "boolean", "required": False, "default": False, "title": "Рамка"},
@@ -207,7 +246,7 @@ class TabletsCalculator(BaseCalculator):
                 "main": ["quantity", "width", "height"],
                 "material": ["material_id", "material_mode"],
                 "cut": ["is_cut_manual", "is_cut_manual_metal", "is_cut_laser", "is_grave", "is_grave_fill"],
-                "print": ["is_uv_print", "is_sublimation"],
+                "print": ["is_uv_print", "is_print", "is_edge", "is_lamination", "is_sublimation"],
                 "options": ["pocket_id", "pocket_count", "is_frame", "frame_profile_id"],
                 "mode": ["mode"],
             },
@@ -348,6 +387,60 @@ class TabletsCalculator(BaseCalculator):
             "mode": mode,
         })
 
+    def _print_roll(
+        self,
+        n: int,
+        size: Sequence[float],
+        raw: Any,
+        mode: int,
+        *,
+        default_edge: Any = None,
+        default_lamination: Any = None,
+    ) -> List[Dict[str, Any]]:
+        opts: Mapping[str, Any] = raw if isinstance(raw, Mapping) else {}
+        size_print_raw = _pick(opts, "size")
+        if isinstance(size_print_raw, (list, tuple)) and len(size_print_raw) >= 2:
+            size_print = [float(size_print_raw[0]), float(size_print_raw[1])]
+        else:
+            size_print = [float(size[0]), float(size[1])]
+        printer = str(
+            _pick(opts, "printer_id", "printerID", "printer_code", default=DEFAULT_ROLL_PRINTER)
+            or DEFAULT_ROLL_PRINTER
+        ).strip() or DEFAULT_ROLL_PRINTER
+        double_app = bool(
+            _pick(opts, "double_application", "isDoubleApplication", "is_double_application", default=False)
+        )
+        n_print = n * (2 if double_app else 1)
+
+        edge_raw = _pick(opts, "is_edge", "isEdge", "edge", default=default_edge)
+        edge = str(edge_raw or "isCutEdge").strip() or "isCutEdge"
+        lam_raw = _pick(
+            opts,
+            "is_lamination",
+            "isLamination",
+            "lamination_id",
+            "lamination",
+            default=default_lamination,
+        )
+        is_lamination = _is_truthy_option(lam_raw)
+
+        print_part = PrintRollCalculator().calculate({
+            "quantity": n_print,
+            "width": size_print[0],
+            "height": size_print[1],
+            "material_id": "ORAJET3640",
+            "printer_code": printer,
+            "is_lamination": is_lamination,
+            "mode": mode,
+        })
+        roll_res = calc_manual_roll(
+            n_print,
+            size_print,
+            {"isEdge": edge},
+            mode,
+        )
+        return [print_part, _from_process(roll_res)]
+
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
         n = int(params.get("quantity", 1))
         width = float(params.get("width", 0))
@@ -364,6 +457,8 @@ class TabletsCalculator(BaseCalculator):
         is_grave = params.get("is_grave")
         is_grave_fill = params.get("is_grave_fill")
         has_uv = "is_uv_print" in params and params.get("is_uv_print") is not None
+        raw_print = params.get("is_print")
+        has_print = raw_print is not None and raw_print is not False
 
         pocket_id = params.get("pocket_id")
         pocket_count = int(params.get("pocket_count", 1) or 1)
@@ -424,6 +519,19 @@ class TabletsCalculator(BaseCalculator):
                     params.get("is_uv_print"),
                     mode.value,
                     is_customer_material=(material_mode == "isMaterialCustomer"),
+                )
+            )
+
+        # Нанесение плёнкой с экосольвентной/латексной печатью (calcPrintRoll + calcManualRoll)
+        if has_print:
+            parts.extend(
+                self._print_roll(
+                    n,
+                    size,
+                    raw_print,
+                    mode.value,
+                    default_edge=params.get("is_edge"),
+                    default_lamination=params.get("is_lamination"),
                 )
             )
 

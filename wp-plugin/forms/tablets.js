@@ -1,7 +1,7 @@
 // Форма 36 CalcTabs, элемент cjsCalc (1348). Id полей — боевой формы 36.
-// Ветки без порта в tablets.py (isCutMilling, isECOPrint, isLatexPrint, isFilm,
-// isShaft, chkAdhesiveLayer) пишутся в syncUrl, но в calcApi не передаются.
-// Не-API поля (dpdTypeCut, параметры плёнки/ламинации/древка) сохраняются в URL.
+// Ветки без порта в tablets.py (isCutMilling, isFilm, isShaft, chkAdhesiveLayer)
+// пишутся в syncUrl, но в calcApi не передаются.
+// Не-API поля (dpdTypeCut, параметры плёнки для аппликации/фона/древка) сохраняются в URL.
 var qty = {{numN}};
 var width = Number(String({{numW}}).replace(',', '.')) || 0;
 var height = Number(String({{numH}}).replace(',', '.')) || 0;
@@ -22,7 +22,9 @@ var color = ezfc_functions.get_value_from(1378, true)[0] || '4+0';
 var colorIndex = optionIndex(ezfc_functions.get_value_from(1378, true, false, { return_value: 'index' }));
 var resolutionRaw = ezfc_functions.get_value_from(2770, true)[0];
 var resolutionIndex = optionIndex(ezfc_functions.get_value_from(2770, true, false, { return_value: 'index' }));
+var laminatId = ezfc_functions.get_value_from(1429, true)[0] || 'No';
 var laminatIndex = optionIndex(ezfc_functions.get_value_from(1429, true, false, { return_value: 'index' }));
+var edgeId = ezfc_functions.get_value_from(1477, true)[0] || 'isCutEdge';
 var edgeIndex = optionIndex(ezfc_functions.get_value_from(1477, true, false, { return_value: 'index' }));
 var appMaterialIndex = optionIndex(ezfc_functions.get_value_from(1484, true, false, { return_value: 'index' }));
 var appW = numFrom(ezfc_functions.get_value_from(1419, true));
@@ -128,6 +130,20 @@ if (String(applicationId) === 'isUVPrint') {
         surface: 'plain',
         color: String(color || '4+0'),
         double_application: isDoubleApplication
+    };
+} else if (String(applicationId) === 'isECOPrint') {
+    params.is_print = {
+        printer_id: 'Technojet160ECO',
+        double_application: isDoubleApplication,
+        is_edge: String(edgeId || 'isCutEdge'),
+        is_lamination: Boolean(laminatId && String(laminatId) !== 'No')
+    };
+} else if (String(applicationId) === 'isLatexPrint') {
+    params.is_print = {
+        printer_id: 'HPLatex335',
+        double_application: isDoubleApplication,
+        is_edge: String(edgeId || 'isCutEdge'),
+        is_lamination: false
     };
 } else if (String(applicationId) === 'isSublimation') {
     params.is_sublimation = true;
