@@ -674,7 +674,7 @@ def test_laminated_epoxy_tool_schema_has_is_epoxy(calc_laminated):
 # Дефолт формы 54: 100 шт, 50×50 мм, прямоугольник, винил 0.4 мм, ламинация Laminat32G,
 # сложность 1, без галочек и без упаковки, mode 1.
 # JS, 25.11.2026 — calcMagnetLamination в Node vm, прайс calc_service/data.
-# Цветность в JS всегда «4+0». Галочки штрихкода и переменных данных на дефолте сняты.
+# Цветность в JS всегда «4+0». Галочки нумерации, штрихкода и переменных данных на дефолте сняты.
 REF_FORM_DEFAULT_LAMINATED = {
     "quantity": 100,
     "magnet_id": "MagnetVinil04",
@@ -739,3 +739,55 @@ def test_form_default_magnet_laminated_modes(
     else:
         assert result["price"] > EXPECTED_FORM_DEFAULT_LAMINATED["price"]
         assert result["time_ready"] < EXPECTED_FORM_DEFAULT_LAMINATED["time_ready"]
+
+
+def test_form_default_magnet_laminated_flags_off(calc_laminated):
+    """Снятые галочки нумерации, штрихкода и переменных данных не двигают дефолт."""
+    result = calc_laminated.execute({
+        **REF_FORM_DEFAULT_LAMINATED,
+        "is_number": False,
+        "is_barcode": False,
+        "is_variables": False,
+    })
+    _assert_js(result, EXPECTED_FORM_DEFAULT_LAMINATED)
+
+
+# JS, 26.11.2026 — calcMagnetLamination в Node vm, прайс calc_service/data.
+# Дефолт формы 54 плюс одна галочка. Надбавка на n_items=100 до наценки.
+FORM_DEFAULT_LAMINATED_OPTIONS = [
+    ("is_number", 1600, 2942.85, 0.8, 9.21),
+    ("is_barcode", 1625, 3057.85, 0.85, 9.26),
+    ("is_variables", 1825, 3402.85, 0.85, 9.26),
+]
+
+
+@pytest.mark.parametrize("flag,cost,price,time_hours,time_ready", FORM_DEFAULT_LAMINATED_OPTIONS)
+def test_form_default_magnet_laminated_one_option(
+    calc_laminated, flag, cost, price, time_hours, time_ready,
+):
+    """Одна галочка на дефолте формы 54: цена и срок как у JS."""
+    result = calc_laminated.execute({**REF_FORM_DEFAULT_LAMINATED, flag: True})
+    _assert_js(result, {
+        "cost": cost,
+        "price": price,
+        "time_hours": time_hours,
+        "time_ready": time_ready,
+    })
+    assert result["price"] > EXPECTED_FORM_DEFAULT_LAMINATED["price"]
+    assert result["time_ready"] > EXPECTED_FORM_DEFAULT_LAMINATED["time_ready"]
+
+
+def test_form_default_magnet_laminated_all_postprint(calc_laminated):
+    """JS, 26.11.2026: нумерация, штрихкод и переменные данные вместе."""
+    result = calc_laminated.execute({
+        **REF_FORM_DEFAULT_LAMINATED,
+        "is_number": True,
+        "is_barcode": True,
+        "is_variables": True,
+    })
+    _assert_js(result, {
+        "cost": 2000,
+        "price": 3747.85,
+        "time_hours": 1.0,
+        "time_ready": 9.41,
+    })

@@ -10,8 +10,6 @@ calcBaguette module
 calcPlasticCards option isMagneticStripeHiCo
 calcHeatPress call calcCutSaber
 calcMagnetLamination option isLamination
-calcMagnetLamination option isBarcode
-calcMagnetLamination option isVariables
 calcMetalPins option isPacking
 calcPrintSheet call calcPrintLaser
 calcPuzzle call calcTablets

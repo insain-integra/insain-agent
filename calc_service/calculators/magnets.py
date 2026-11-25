@@ -8,7 +8,8 @@
 Список «не перенесено» (scripts/js_port_gaps_allowed.txt):
 - option_isLamination. Дефолт формы 54 уже кладёт плёнку Laminat32G в lamination_id.
   Пустая строка по-прежнему означает эту плёнку. На цене дефолта отдельная ветка не сказывается.
-- option_isBarcode, option_isVariables. Галочки формы 54 по умолчанию сняты и в дефолт не входят.
+Нумерация (is_number), штрихкод (is_barcode) и переменные данные (is_variables)
+считаются на n_items до общей наценки — те же величины, что в print_sheet.py.
 """
 
 from __future__ import annotations
@@ -17,7 +18,19 @@ import math
 from typing import Any, Dict, List, Mapping
 
 from calculators.base import BaseCalculator, ProductionMode
-from calculators.print_sheet import PrintSheetCalculator
+from calculators.print_sheet import (
+    PrintSheetCalculator,
+    _OPTION_BARCODE_COST_PER_UNIT,
+    _OPTION_BARCODE_PRICE_PER_UNIT,
+    _OPTION_BARCODE_TIME_H,
+    _OPTION_NUMBERING_COST_PER_UNIT,
+    _OPTION_NUMBERING_PRICE_PER_UNIT,
+    _OPTION_NUMBERING_TIME_H,
+    _OPTION_VARIABLE_DATA_COST_PER_UNIT,
+    _OPTION_VARIABLE_DATA_PRICE_PER_UNIT,
+    _OPTION_VARIABLE_DATA_TIME_H,
+    _coerce_bool,
+)
 from calculators.cut_roller import CutRollerCalculator
 from common.markups import BASE_TIME_READY, MARGIN_MATERIAL, get_margin
 from common.process_tools import (
@@ -200,6 +213,30 @@ def calc_acrylic_magnets(params: Mapping[str, Any]) -> Dict[str, Any]:
     }
 
 
+def _laminated_postprint_options(params: Mapping[str, Any], n_items: int) -> tuple[float, float, float]:
+    """Нумерация, штрихкод и переменные данные — как costOptions в calcMagnetLamination.
+
+    Величины те же, что _OPTION_* в print_sheet.py. Надбавка на n_items до общей наценки.
+    Снятые флаги (false или нет ключа) дают нули и не двигают дефолт.
+    """
+    opt_cost = 0.0
+    opt_price = 0.0
+    opt_time = 0.0
+    if _coerce_bool(params.get("is_number")):
+        opt_cost += _OPTION_NUMBERING_COST_PER_UNIT * n_items
+        opt_price += _OPTION_NUMBERING_PRICE_PER_UNIT * n_items
+        opt_time += _OPTION_NUMBERING_TIME_H
+    if _coerce_bool(params.get("is_barcode")):
+        opt_cost += _OPTION_BARCODE_COST_PER_UNIT * n_items
+        opt_price += _OPTION_BARCODE_PRICE_PER_UNIT * n_items
+        opt_time += _OPTION_BARCODE_TIME_H
+    if _coerce_bool(params.get("is_variables")):
+        opt_cost += _OPTION_VARIABLE_DATA_COST_PER_UNIT * n_items
+        opt_price += _OPTION_VARIABLE_DATA_PRICE_PER_UNIT * n_items
+        opt_time += _OPTION_VARIABLE_DATA_TIME_H
+    return opt_cost, opt_price, opt_time
+
+
 def calc_laminated_magnets(params: Mapping[str, Any]) -> Dict[str, Any]:
     """Ламинированные магниты: печать + ламинация + магнитный винил + резка.
 
@@ -208,7 +245,8 @@ def calc_laminated_magnets(params: Mapping[str, Any]) -> Dict[str, Any]:
     - rectangular_rounded: сабельный + скругление
     - standart: вырубка на прессе готовой формой, поля=[2,2,2,2]
     - nonstandart: изготовление формы + вырубка, поля=[2,2,2,2]
-    Опционально — полимерная заливка (is_epoxy).
+    Опционально — полимерная заливка (is_epoxy), нумерация (is_number),
+    штрихкод (is_barcode) и переменные данные (is_variables).
     """
     from common.layout import layout_on_sheet
 
@@ -396,23 +434,29 @@ def calc_laminated_magnets(params: Mapping[str, Any]) -> Dict[str, Any]:
         weight_pack = pack_result.weight_kg
         materials_pack = pack_result.materials
 
+    # 4в. Нумерация, штрихкод, переменные данные — на n_items, до общей наценки.
+    cost_opt, price_opt, time_opt = _laminated_postprint_options(params, n_items)
+
     # ── Итоги ────────────────────────────────────────────────────────
     margin = get_margin("marginMagnet") or get_margin("marginBadge")
 
     cost = math.ceil(
         cost_print + cost_roll + cost_cut_roller + cost_cut_final
         + cost_rounding + cost_form + cost_epoxy + cost_pack
+        + cost_opt
     )
     price = math.ceil(
         price_print + price_roll + price_cut_roller + price_cut_final
         + price_rounding + price_form + price_epoxy + price_pack
+        + price_opt
     ) * (1 + margin)
 
     # JS: Math.ceil(сумма * 100) / 100. round снимает хвост 7.000000000000001,
     # из-за которого ceil даёт лишнюю сотую.
     time_hours = math.ceil(round(
         (time_print + time_roll + time_cut_roller + time_cut_final
-         + time_rounding + time_form + time_epoxy + time_pack) * 100,
+         + time_rounding + time_form + time_epoxy + time_pack
+         + time_opt) * 100,
         8,
     )) / 100.0
 
@@ -585,7 +629,8 @@ class MagnetLaminatedCalculator(BaseCalculator):
     description = (
         "Расчёт ламинированных магнитов: печать + ламинация + магнитный винил + резка. "
         "Ширина и высота изделия в мм. Толщина винила на выбор: 0.4 / 0.7 / 0.9 мм (MagnetVinil04, 07, 09). "
-        "Ламинация по умолчанию — глянец 32 мкм (Laminat32G). Упаковка (зип-лок) по умолчанию не включена."
+        "Ламинация по умолчанию — глянец 32 мкм (Laminat32G). Упаковка (зип-лок) по умолчанию не включена. "
+        "Нумерация, штрихкод и переменные данные — только если их включили."
     )
     def get_param_schema(self) -> Dict[str, Any]:
         vchoices = _laminated_vinyl_choices()
@@ -679,6 +724,30 @@ class MagnetLaminatedCalculator(BaseCalculator):
                     "description": "По умолчанию без упаковки; true — добавить зип-лок в расчёт.",
                 },
                 {
+                    "name": "is_number",
+                    "type": "boolean",
+                    "required": False,
+                    "default": False,
+                    "title": "Нумерация",
+                    "description": "Надбавка на тираж с браком (n_items), до общей наценки.",
+                },
+                {
+                    "name": "is_barcode",
+                    "type": "boolean",
+                    "required": False,
+                    "default": False,
+                    "title": "Штрихкод",
+                    "description": "Надбавка на тираж с браком (n_items), до общей наценки.",
+                },
+                {
+                    "name": "is_variables",
+                    "type": "boolean",
+                    "required": False,
+                    "default": False,
+                    "title": "Переменные данные",
+                    "description": "Надбавка на тираж с браком (n_items), до общей наценки.",
+                },
+                {
                     "name": "mode",
                     "type": "enum",
                     "required": False,
@@ -695,7 +764,15 @@ class MagnetLaminatedCalculator(BaseCalculator):
             ],
             "param_groups": {
                 "main": ["quantity", "magnet_id", "width_mm", "height_mm", "shape"],
-                "options": ["difficulty", "lamination_id", "is_epoxy", "is_packing"],
+                "options": [
+                    "difficulty",
+                    "lamination_id",
+                    "is_epoxy",
+                    "is_packing",
+                    "is_number",
+                    "is_barcode",
+                    "is_variables",
+                ],
                 "mode": ["mode"],
             },
         }
@@ -764,6 +841,21 @@ class MagnetLaminatedCalculator(BaseCalculator):
                         "default": False,
                         "description": "Упаковка зип-лок; по умолчанию false (без упаковки).",
                     },
+                    "is_number": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": "Нумерация. По умолчанию false.",
+                    },
+                    "is_barcode": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": "Штрихкод. По умолчанию false.",
+                    },
+                    "is_variables": {
+                        "type": "boolean",
+                        "default": False,
+                        "description": "Переменные данные. По умолчанию false.",
+                    },
                     "mode": {"type": "integer", "enum": [0, 1, 2], "default": 1},
                 },
                 "required": ["quantity", "magnet_id", "width_mm", "height_mm"],
@@ -782,6 +874,8 @@ class MagnetLaminatedCalculator(BaseCalculator):
             "Если пользователь не упомянул форму — ставь rectangular.\n"
             "lamination_id не спрашивай: по умолчанию глянцевая 32 мкм (Laminat32G).\n"
             "Упаковку (is_packing) не спрашивай: по умолчанию без зип-лока.\n"
+            "Нумерацию (is_number), штрихкод (is_barcode) и переменные данные (is_variables) "
+            "включай только если пользователь их просит. По умолчанию false.\n"
             "Собери обязательные поля и вызови calc_magnet_laminated.\n"
             "В ответе ОБЯЗАТЕЛЬНО укажи, с какой формой и сложностью выполнен расчёт."
         )

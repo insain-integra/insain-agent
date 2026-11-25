@@ -36,6 +36,26 @@ SLUG_TEST_FILE = {
 }
 
 
+def test_magnet_laminated_js_posts_postprint_flags():
+    """Форма 54: нумерация, штрихкод и переменные данные уходят в calcApi, не только в URL."""
+    text = (FORMS / "magnet_laminated.js").read_text(encoding="utf-8")
+    assert "insaincalc.calcApi('magnet_laminated'" in text
+    assert "insaincalc.syncUrl(" in text
+    assert "insaincalc.showResult(" in text
+    params_at = text.index("var params")
+    sync_at = text.index("insaincalc.syncUrl(")
+    body = text[params_at:sync_at]
+    assert "is_number: isNumber" in body
+    assert "is_barcode: isBarcode" in body
+    assert "is_variables: isVariables" in body
+    assert "ckbNumber" not in body
+    assert "ckbNumber: isNumber ? 0 : ''" in text
+    assert "ckbBarcode: isBarcode ? 0 : ''" in text
+    assert "ckbVariables: isVariables ? 0 : ''" in text
+    assert "querySelector" not in text
+    assert not re.search(r"\bprice\s*=", text)
+
+
 def test_form_js_has_form_default_reference():
     """У формы на API есть эталон JS на дефолте боевой формы: REF_FORM_DEFAULT в test_<slug>.py."""
     missing = []

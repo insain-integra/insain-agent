@@ -1,6 +1,6 @@
 // Форма 54 CalcMagnetLamination, элемент cjsCalc (2234). Id полей — боевой формы 54.
-// ckbNumber, ckbBarcode и ckbVariables пишутся в syncUrl и в calcApi не уходят:
-// на дефолте галочки сняты, в калькуляторе эти опции не считаются.
+// ckbNumber, ckbBarcode и ckbVariables уходят в calcApi (is_number, is_barcode, is_variables)
+// и остаются в syncUrl. Снятая галочка — false, дефолт без них не двигается.
 // Пустой код ламинации («нет») в запрос не кладём.
 // Скругление при прямоугольной форме уходит как shape rectangular_rounded.
 // На форме нет режима «дешевле» (value 0); ноль всё равно не подменяем на 1.
@@ -60,6 +60,9 @@ var params = {
     shape: apiShape,
     difficulty: difficulty,
     is_packing: false,
+    is_number: isNumber,
+    is_barcode: isBarcode,
+    is_variables: isVariables,
     mode: mode
 };
 if (laminatId) {
