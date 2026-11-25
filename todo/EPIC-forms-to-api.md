@@ -19,7 +19,7 @@
 - `form-plastic-cards` (закрыто 2026-11-24, `docs/history/log.md`) — копия формы 56, slug `cards`
 - `form-keychain` (закрыто 2026-11-23, `docs/history/log.md`) — копия формы 74, slug `keychain`
 - `form-magnet-acrylic` (закрыто 2026-11-24, `docs/history/log.md`) — копия формы 75, slug `magnet_acrylic`
-- `form-magnet-laminated` (закрыто 2026-11-25, `docs/history/log.md`) — копия формы 54, slug `magnet_laminated`, черновик 119; форма 57 позже
+- `todo/form-magnet-laminated.md` — доработка 26.11.2026: нумерация, штрихкод и переменные данные на копии 119; slug `magnet_laminated`; форма 57 позже
 - `form-calendar` (закрыто 2026-11-23, `docs/history/log.md`) — лид-копия 50 (квартальный), slug `calendar`; формы 52 и 66 позже
 - `form-badge` (закрыто 2026-11-24, `docs/history/log.md`) — доработка: опция «УФ-печать» расходится с JS. Копия 114 / товар 2586910 уже есть, slug `badge`
 - `todo/form-tablets.md` — сверка дефолтов 36, 48, 51, 76, 68 и лид-копия 36, slug `tablets`
@@ -53,7 +53,7 @@
 2. Параллельно, лид-копии пачек 5–7:
    - `form-plastic-cards` (закрыто 2026-11-24, `docs/history/log.md`), `form-keychain` (закрыто 2026-11-23, `docs/history/log.md`), `form-magnet-acrylic` (закрыто 2026-11-24, `docs/history/log.md`), `form-calendar` (закрыто 2026-11-23, `docs/history/log.md`)
    - `form-badge` (закрыто 2026-11-24, `docs/history/log.md`) (доработка: УФ-печать), `todo/form-tablets.md` — сначала сверка дефолтов всех форм slug, потом лид
-   - `form-magnet-laminated` (закрыто 2026-11-25, `docs/history/log.md`) — копия формы 54 на черновике
+   - `todo/form-magnet-laminated.md` — доработка: нумерация, штрихкод и переменные данные на копии 119
    Запись на проде (дубли форм) — последовательно под `lock prod`.
 3. Вторые формы slug — по одной задаче после приёмки лида: `badge` (4 формы), `tablets` (48, 51, 76, 68), `calendar` (52, 66), `magnet_laminated` (57). Файлы заранее не создавать.
 4. Боевое переключение отложено, пока у всех 45 форм эпика нет принятой копии: `todo/forms-batch-switch.md` не запускать и не расширять, `forms-batch-2` не заводить. Как переключать оставшиеся формы (одним пакетом или несколькими) — решение человека после пункта 3.
