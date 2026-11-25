@@ -6,6 +6,15 @@
 `docs/archive/`. Число сессий агентов — файлы чатов Cursor за период, включая субагентов.
 Часы человека — оценка по правилу 1 ч на коммит. Вне этапов — 1 коммит (`cd640ec`, правило ролей, 1 ч).
 
+## 2026-11-26 — form-tablets
+
+- Период: 2026-11-26 — 2026-11-26 (1 дн.)
+- Часы человека: 10 сообщ. в чатах Cursor; активно 1.2 ч (ходы агента > 30 мин — с коэфф. 0.5)
+- Работа агентов: 6 чатов Cursor, 10 сообщ. человека, 1.2 ч активных; Implementer — Gemini 4 Hydrogen High; Reviewer — Grok 4.7; Site ops — Grok 4.7
+- Было / стало: 0 перенесённых веток ручной роликовой резки в `tablets.py` и 14 пропусков `calcTablets` в allowed / портированы `is_cut_manual` (`CutRollerCalculator`) + `material_mode` + `double_application`, в allowed осталось 12 строк `calcTablets`, добавлен `wp-plugin/forms/tablets.js` (id 36) и `REF_FORM_DEFAULT` (`mode=0,1,2`). Копия формы 120 на черновике 2586916 считает `tablets` (дефолт 12754 / 52.82); боевая форма 36 осталась на `calcTablets`.
+- Эффект: —
+- Источник: задача `todo/form-tablets.md`, коммиты 5944aea f3a1fb8
+
 ## 2026-11-26 — form-magnet-laminated
 
 - Период: 2026-11-25 — 2026-11-26 (2 дн.)
