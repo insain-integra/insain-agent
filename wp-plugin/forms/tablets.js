@@ -1,7 +1,7 @@
 // Форма 36 CalcTabs, элемент cjsCalc (1348). Id полей — боевой формы 36.
-// Ветки без порта в tablets.py (isCutMilling, isFilm, isShaft, chkAdhesiveLayer)
+// Ветки без порта в tablets.py (isCutMilling, isBackgroundFilm, isShaft, chkAdhesiveLayer)
 // пишутся в syncUrl, но в calcApi не передаются.
-// Не-API поля (dpdTypeCut, параметры плёнки для аппликации/фона/древка) сохраняются в URL.
+// Не-API поля (dpdTypeCut, фон аппликации, древко, клеевой слой) сохраняются в URL.
 var qty = {{numN}};
 var width = Number(String({{numW}}).replace(',', '.')) || 0;
 var height = Number(String({{numH}}).replace(',', '.')) || 0;
@@ -26,6 +26,7 @@ var laminatId = ezfc_functions.get_value_from(1429, true)[0] || 'No';
 var laminatIndex = optionIndex(ezfc_functions.get_value_from(1429, true, false, { return_value: 'index' }));
 var edgeId = ezfc_functions.get_value_from(1477, true)[0] || 'isCutEdge';
 var edgeIndex = optionIndex(ezfc_functions.get_value_from(1477, true, false, { return_value: 'index' }));
+var appMaterialId = ezfc_functions.get_value_from(1484, true)[0] || '';
 var appMaterialIndex = optionIndex(ezfc_functions.get_value_from(1484, true, false, { return_value: 'index' }));
 var appW = numFrom(ezfc_functions.get_value_from(1419, true));
 var appH = numFrom(ezfc_functions.get_value_from(1420, true));
@@ -34,6 +35,10 @@ var appSizeItem = numFrom(ezfc_functions.get_value_from(1424, false));
 var appDensityRaw = ezfc_functions.get_value_from(1425, true, true);
 var appDensity = Number(String(appDensityRaw == null ? '' : appDensityRaw).replace('%', '').replace(',', '.'));
 if (isNaN(appDensity)) appDensity = 0;
+var appDensityFactor = numFrom(ezfc_functions.get_value_from(1425));
+var appDifficultyRaw = ezfc_functions.get_value_from(1423, true)[0];
+var appDifficultyNum = Number(appDifficultyRaw);
+var appDifficulty = (appDifficultyRaw === '' || appDifficultyRaw == null || isNaN(appDifficultyNum)) ? 1 : appDifficultyNum;
 var appDifficultyIndex = optionIndex(ezfc_functions.get_value_from(1423, true, false, { return_value: 'index' }));
 var bgMaterialIndex = optionIndex(ezfc_functions.get_value_from(1427, true, false, { return_value: 'index' }));
 var bgEdgeIndex = optionIndex(ezfc_functions.get_value_from(1483, true, false, { return_value: 'index' }));
@@ -144,6 +149,16 @@ if (String(applicationId) === 'isUVPrint') {
         double_application: isDoubleApplication,
         is_edge: String(edgeId || 'isCutEdge'),
         is_lamination: false
+    };
+} else if (String(applicationId) === 'isFilm') {
+    params.is_film = {
+        material_id: String(appMaterialId || ''),
+        size: [appW > 0 ? appW : width, appH > 0 ? appH : height],
+        size_item: appSizeItem > 0 ? appSizeItem : (appW > 0 ? appW : width),
+        density: appDensityFactor,
+        difficulty: appDifficulty,
+        color: appColors,
+        double_application: isDoubleApplication
     };
 } else if (String(applicationId) === 'isSublimation') {
     params.is_sublimation = true;

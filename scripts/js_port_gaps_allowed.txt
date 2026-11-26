@@ -23,13 +23,11 @@ calcShildSublimaton call calcCutSaber
 calcShildSublimaton call calcManualPress
 calcShildSublimaton call calcRounding
 calcTablets option isCutMilling
-calcTablets option isFilm
 calcTablets option isBackgroundFilm
 calcTablets option isShaft
 calcTablets option isAdhesiveLayer
 calcTablets option isEVAFoam
 calcTablets call calcMilling
-calcTablets call calcSticker
 calcTablets call calcPockets
 calcTablets call calcFrame
 calcPockets module

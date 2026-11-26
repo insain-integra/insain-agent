@@ -168,7 +168,7 @@ def load_catalog(filename: str) -> MaterialCatalog:
                 min_size=min_size,
                 is_roll=is_roll,
                 roll_width=roll_width,
-                length_min=merged.get("lengthMin"),
+                length_min=_as_float(merged.get("length_min", merged.get("lengthMin"))),
                 thickness=merged.get("thickness"),
                 density=merged.get("density"),
                 density_unit=merged.get("unitDensity", "гсм3"),

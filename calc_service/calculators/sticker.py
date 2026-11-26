@@ -306,7 +306,7 @@ class StickerCalculator(BaseCalculator):
             length_min = getattr(material, "length_min", 0) or 0
             if length_min > 0:
                 num_min = math.ceil(length_m * 1000 / length_min)
-                cost_material = cost_per_m2 * num_min * length_min / 1_000_000 * (width_mm / 1000)
+                cost_material = cost_per_m2 * num_min * length_min / 1_000_000 * width_mm
             else:
                 cost_material = cost_per_m2 * area_m2
         else:

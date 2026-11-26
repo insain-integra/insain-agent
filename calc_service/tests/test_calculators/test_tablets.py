@@ -117,6 +117,7 @@ def test_get_tool_schema(calc):
     assert "is_print" in props
     assert "is_edge" in props
     assert "is_lamination" in props
+    assert "is_film" in props
 
 
 def test_get_param_schema(calc):
@@ -131,6 +132,7 @@ def test_get_param_schema(calc):
     assert "is_print" in names
     assert "is_edge" in names
     assert "is_lamination" in names
+    assert "is_film" in names
 
 
 # ── Эталоны JS, 02.11.2026 ───────────────────────────────────────────
@@ -687,3 +689,276 @@ def test_tablets_js_posts_is_print():
         "is_edge": "isBendEdge",
         "is_lamination": False,
     }
+
+
+# ── Эталоны isFilm (аппликация плёнками): JS, 26.11.2026 ────────────
+
+REF_FILM_AVERY500W = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "PVC5",
+    "material_mode": "isMaterial",
+    "is_cut_manual": "KeencutEvolutionE2",
+    "is_film": {
+        "material_id": "Avery500w",
+        "size": [50, 50],
+        "size_item": 50,
+        "density": 0.25,
+        "difficulty": 1,
+        "color": 1,
+        "double_application": False,
+    },
+    "mode": 1,
+}
+
+# JS, 26.11.2026: node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],"PVC5",{"isCutManual":"KeencutEvolutionE2","isFilm":{"materialID":"Avery500w","size":[50,50],"sizeItem":50,"density":0.25,"difficulty":1,"color":1,"isDoubleApplication":false},"Material":"isMaterial"},<mode>]'
+# Примечание: на mode=1 time_ready в Python 21.22 против 21.26 в JS (rel=0.00188) из-за round вместо Math.ceil в cut_plotter.py (0.02 ч × 2).
+EXPECTED_FILM_AVERY500W_BY_MODE = {
+    0: {"cost": 8173.98788, "price": 13115.4198808, "time_hours": 4.57, "time_ready": 36.89, "weight_kg": 0.8},
+    1: {"cost": 8576.98788, "price": 13760.4198808, "time_hours": 4.83, "time_ready": 21.26, "weight_kg": 0.8},
+    2: {"cost": 9014.1982, "price": 14458.429012, "time_hours": 5.08, "time_ready": 13.61, "weight_kg": 0.8},
+}
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_film_avery500w_modes_match_js(calc, mode):
+    """JS, 26.11.2026: аппликация Avery500w на режимах mode=0, 1, 2."""
+    r = calc.execute({**REF_FILM_AVERY500W, "mode": mode})
+    e = EXPECTED_FILM_AVERY500W_BY_MODE[mode]
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=JS_REL_TOL)
+    if mode == 1:
+        assert r["time_ready"] == pytest.approx(e["time_ready"], abs=0.05)
+    else:
+        assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL)
+        assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+    codes = {m.get("code") for m in r.get("materials") or []}
+    assert {"PVC5", "Avery500w", "LGChemLC2000H"}.issubset(codes)
+
+
+@pytest.mark.parametrize(
+    ("params", "expected", "check_weight_rel"),
+    [
+        # JS, 26.11.2026: 100 шт 50×50, Avery500w, 2 цвета, mode=1
+        (
+            {
+                **REF_FILM_AVERY500W,
+                "is_film": {**REF_FILM_AVERY500W["is_film"], "color": 2},
+            },
+            {"cost": 9623.1642, "price": 15452.652572, "time_hours": 5.29, "time_ready": 22.01, "weight_kg": 0.91},
+            JS_REL_TOL,
+        ),
+        # JS, 26.11.2026: 10 шт 300×200, аппликация 250×150, Avery500w, 1 цвет, mode=1
+        (
+            {
+                "quantity": 10,
+                "width": 300,
+                "height": 200,
+                "material_id": "PVC5",
+                "material_mode": "isMaterial",
+                "is_cut_manual": "KeencutEvolutionE2",
+                "is_film": {
+                    "material_id": "Avery500w",
+                    "size": [250, 150],
+                    "size_item": 50,
+                    "density": 0.25,
+                    "difficulty": 1,
+                    "color": 1,
+                    "double_application": False,
+                },
+                "mode": 1,
+            },
+            {"cost": 3158.42824, "price": 5120.8708784, "time_hours": 1.28, "time_ready": 17.73, "weight_kg": 1.82},
+            JS_REL_TOL,
+        ),
+        # JS, 26.11.2026: 10 шт 300×200, аппликация 250×150, 2 цвета, плотность 0.5, сложность 1.7, двойное нанесение
+        (
+            {
+                "quantity": 10,
+                "width": 300,
+                "height": 200,
+                "material_id": "PVC5",
+                "material_mode": "isMaterial",
+                "is_cut_manual": "KeencutEvolutionE2",
+                "is_film": {
+                    "material_id": "Avery500w",
+                    "size": [250, 150],
+                    "size_item": 50,
+                    "density": 0.5,
+                    "difficulty": 1.7,
+                    "color": 2,
+                    "double_application": True,
+                },
+                "mode": 1,
+            },
+            {"cost": 7127.1532, "price": 11530.634312, "time_hours": 3.1, "time_ready": 20.65, "weight_kg": 2.31},
+            0.01,
+        ),
+        # JS, 26.11.2026: 1 шт 1000×1000, аппликация 800×800, Avery500w, mode=1
+        (
+            {
+                "quantity": 1,
+                "width": 1000,
+                "height": 1000,
+                "material_id": "PVC5",
+                "material_mode": "isMaterial",
+                "is_cut_manual": "KeencutEvolutionE2",
+                "is_film": {
+                    "material_id": "Avery500w",
+                    "size": [800, 800],
+                    "size_item": 50,
+                    "density": 0.25,
+                    "difficulty": 1,
+                    "color": 1,
+                    "double_application": False,
+                },
+                "mode": 1,
+            },
+            {"cost": 3791.4516, "price": 6178.629656, "time_hours": 1.2, "time_ready": 17.77, "weight_kg": 3.03},
+            JS_REL_TOL,
+        ),
+    ],
+)
+def test_is_film_options_match_js(calc, params, expected, check_weight_rel):
+    """JS, 26.11.2026: число цветов, размер аппликации, плотность, сложность и двойное нанесение."""
+    r = calc.execute(params)
+    assert r["cost"] == pytest.approx(expected["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(expected["price"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(expected["time_ready"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(expected["weight_kg"], rel=check_weight_rel)
+
+
+@pytest.mark.parametrize("bad_material", ["", "0"])
+def test_is_film_empty_material_raises(calc, bad_material):
+    """При невыбранной плёнке аппликации (0 / пусто) выбрасывается ValueError."""
+    params = {
+        **REF_FILM_AVERY500W,
+        "is_film": {**REF_FILM_AVERY500W["is_film"], "material_id": bad_material},
+    }
+    with pytest.raises(ValueError, match="Не выбрана плёнка для аппликации"):
+        calc.execute(params)
+
+
+def test_tablets_js_posts_is_film():
+    """wp-plugin/forms/tablets.js передаёт is_film (с плотностью factor 0.01) и пишет в syncUrl."""
+    import json
+    import subprocess
+
+    js_path = Path(__file__).resolve().parents[3] / "wp-plugin" / "forms" / "tablets.js"
+    src = js_path.read_text(encoding="utf-8")
+
+    def run_form(values: dict) -> dict:
+        filled = (
+            src.replace("{{numN}}", str(values.get("qty", 100)))
+            .replace("{{numW}}", str(values.get("width", 50)))
+            .replace("{{numH}}", str(values.get("height", 50)))
+        )
+        harness = (
+            "var vals = " + json.dumps(values) + ";\n"
+            "var __form_id__ = 120;\n"
+            "var ezfc_functions = {\n"
+            "  get_value_from: function (id, calc, third, opts) {\n"
+            "    if (opts && opts.return_value === 'index') return [0];\n"
+            "    if (id === 1339) return [vals.material || 'PVC5'];\n"
+            "    if (id === 1340) return [vals.materialMode || 'isMaterial'];\n"
+            "    if (id === 1371) return [vals.cut || 'isCutManual'];\n"
+            "    if (id === 1368) return [vals.app || 'isUVPrint'];\n"
+            "    if (id === 3313) return vals.doubleApp ? 1 : 0;\n"
+            "    if (id === 1378) return [vals.color || '4+0'];\n"
+            "    if (id === 2770) return [vals.res == null ? 1 : vals.res];\n"
+            "    if (id === 1429) return [vals.laminat || 'No'];\n"
+            "    if (id === 1477) return [vals.edge || 'isCutEdge'];\n"
+            "    if (id === 1484) return [vals.appMat || '0'];\n"
+            "    if (id === 1419) return vals.appW == null ? 50 : vals.appW;\n"
+            "    if (id === 1420) return vals.appH == null ? 50 : vals.appH;\n"
+            "    if (id === 1430) return vals.appColors == null ? 1 : vals.appColors;\n"
+            "    if (id === 1424) return vals.appSizeItem == null ? 50 : vals.appSizeItem;\n"
+            "    if (id === 1425) {\n"
+            "      var d = vals.appDensity == null ? 25 : vals.appDensity;\n"
+            "      if (third === true) return String(d);\n"
+            "      return vals.app === 'isFilm' ? d * 0.01 : 0;\n"
+            "    }\n"
+            "    if (id === 1423) return [vals.appDiff == null ? '1' : String(vals.appDiff)];\n"
+            "    if (id === 2003) return [vals.mode == null ? 1 : vals.mode];\n"
+            "    return [''];\n"
+            "  }\n"
+            "};\n"
+            "var posted = null, synced = null;\n"
+            "var insaincalc = {\n"
+            "  syncUrl: function (obj) { synced = obj; },\n"
+            "  calcApi: function (slug, body) {\n"
+            "    posted = { slug: slug, body: body };\n"
+            "    return { then: function () { return { catch: function () {} }; } };\n"
+            "  },\n"
+            "  showResult: function () {},\n"
+            "  showError: function () {}\n"
+            "};\n"
+            + filled
+            + "\nprocess.stdout.write(JSON.stringify({ posted: posted, synced: synced }));\n"
+        )
+        proc = subprocess.run(["node", "-e", harness], capture_output=True, text=True, encoding="utf-8")
+        assert proc.returncode == 0, proc.stderr
+        return json.loads(proc.stdout)
+
+    film = run_form({
+        "app": "isFilm",
+        "appMat": "Avery500w",
+        "appW": 45,
+        "appH": 40,
+        "appColors": 2,
+        "appSizeItem": 20,
+        "appDensity": 50,
+        "appDiff": "1.7",
+        "doubleApp": True,
+    })
+    assert film["posted"]["body"]["is_film"] == {
+        "material_id": "Avery500w",
+        "size": [45, 40],
+        "size_item": 20,
+        "density": 0.5,
+        "difficulty": 1.7,
+        "color": 2,
+        "double_application": True,
+    }
+    assert film["synced"]["numDensity"] == 50
+
+    uv = run_form({"app": "isUVPrint", "appMat": "Avery500w"})
+    assert "is_uv_print" in uv["posted"]["body"]
+    assert "is_film" not in uv["posted"]["body"]
+
+
+# ── Все 7 плёнок поля 1484 формы 36 (isFilm): JS, 27.11.2026 ───────────
+# node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],"PVC5",{"isCutManual":"KeencutEvolutionE2","isFilm":{"materialID":"<film>","size":[50,50],"sizeItem":50,"density":0.25,"difficulty":1,"color":1,"isDoubleApplication":false},"Material":"isMaterial"},1]'
+# Для Avery500w и Avery500c на mode=1 time_ready в Python 21.22 против 21.26 в JS (rel=0.00188) из-за round вместо Math.ceil в cut_plotter.py.
+@pytest.mark.parametrize(
+    ("material_id", "expected", "time_abs"),
+    [
+        # JS, 27.11.2026
+        ("Avery500w", {"cost": 8576.98788, "price": 13760.4198808, "time_ready": 21.26, "weight_kg": 0.8}, 0.05),
+        ("Avery500c", {"cost": 8908.65, "price": 14310.979, "time_ready": 21.26, "weight_kg": 0.8}, 0.05),
+        ("Oracal352", {"cost": 9151.45, "price": 14712.147, "time_ready": 21.26, "weight_kg": 0.8}, None),
+        ("LGLT4000", {"cost": 9302.25, "price": 14955.375, "time_ready": 21.4, "weight_kg": 0.8}, None),
+        ("FES24", {"cost": 11099.45, "price": 17915.607, "time_ready": 21.84, "weight_kg": 0.8}, None),
+        ("DMP2000", {"cost": 8769.186, "price": 14070.48876, "time_ready": 21.4, "weight_kg": 0.8}, None),
+        ("TM3100", {"cost": 8813.454, "price": 14143.97364, "time_ready": 21.4, "weight_kg": 0.8}, None),
+    ],
+)
+def test_film_all_7_materials_match_js(calc, material_id, expected, time_abs):
+    """JS, 27.11.2026: все 7 плёнок аппликации поля 1484 (включая length_min > 0 из roll.json)."""
+    params = {
+        **REF_FILM_AVERY500W,
+        "is_film": {**REF_FILM_AVERY500W["is_film"], "material_id": material_id},
+    }
+    r = calc.execute(params)
+    assert r["cost"] == pytest.approx(expected["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(expected["price"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(expected["weight_kg"], rel=JS_REL_TOL)
+    if time_abs is not None:
+        assert r["time_ready"] == pytest.approx(expected["time_ready"], abs=time_abs)
+    else:
+        assert r["time_ready"] == pytest.approx(expected["time_ready"], rel=JS_REL_TOL)
+    codes = {m.get("code") for m in r.get("materials") or []}
+    assert {"PVC5", material_id, "LGChemLC2000H"}.issubset(codes)
+

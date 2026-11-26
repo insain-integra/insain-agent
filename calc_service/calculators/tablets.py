@@ -3,18 +3,18 @@
 
 Мигрировано из js_legacy/calc/calcTablets.js.
 Информационные таблички: резка (роликовый резак / лазер / металл), УФ,
-экосольвентная/латексная печать с накаткой, сублимация, карманы, рамка.
+экосольвентная/латексная печать с накаткой, аппликация плёнками, сублимация, карманы, рамка.
 
 Перенесено: ручная резка на роликовом резаке (CutRoller, is_cut_manual),
 ручная резка металла (is_cut_manual_metal), сублимация, лазерная резка с гравировкой,
 УФ-печать (с двойным нанесением), экосольвентная/латексная печать на плёнке ORAJET3640
 с ручной накаткой (PrintRollCalculator + calc_manual_roll, is_print),
+аппликация плёнками (StickerCalculator + calc_manual_roll, is_film),
 режим учёта материала (material_mode);
 карманы и рамка — упрощённо через common/.
 
 Список «не перенесено» (см. scripts/js_port_gaps_allowed.txt, префикс calcTablets):
 - фрезерная резка (опция фрезеровки, вызов calcMilling),
-- аппликация плёнками (вызов calcSticker),
 - фоновая плёнка, древко, клеевой слой на этапе табличек, EVA-пена,
 - полные карманы и рамка как в JS (вызовы calcPockets, calcFrame; упрощённо через common/).
 """
@@ -29,6 +29,7 @@ from calculators.cut_roller import CutRollerCalculator
 from calculators.heat_press import HeatPressCalculator
 from calculators.laser import LaserCalculator
 from calculators.print_roll import DEFAULT_PRINTER as DEFAULT_ROLL_PRINTER, PrintRollCalculator
+from calculators.sticker import StickerCalculator
 from calculators.uv_print import UVPrintCalculator
 from common.layout import layout_on_sheet
 from common.markups import (
@@ -202,6 +203,14 @@ class TabletsCalculator(BaseCalculator):
                         "default": False,
                         "description": "Широкоформатная ламинация плёнки при печати",
                     },
+                    "is_film": {
+                        "type": "object",
+                        "description": (
+                            "Аппликация плёнками (StickerCalculator + calc_manual_roll): "
+                            "material_id/materialID, size [w, h], size_item/sizeItem, density, "
+                            "difficulty, color (число цветов), double_application/isDoubleApplication"
+                        ),
+                    },
                     "pocket_id": {"type": "string", "description": "Код кармана (опционально)"},
                     "pocket_count": {"type": "integer", "default": 1, "description": "Кол-во карманов на изделие"},
                     "is_frame": {"type": "boolean", "default": False, "description": "Рамка из профиля"},
@@ -235,6 +244,7 @@ class TabletsCalculator(BaseCalculator):
                 {"name": "is_edge", "type": "enum", "required": False, "default": "isCutEdge", "title": "Обработка края плёнки",
                  "choices": {"inline": [{"id": "isCutEdge", "title": "Подрезка"}, {"id": "isBendEdge", "title": "Подгибка"}]}},
                 {"name": "is_lamination", "type": "boolean", "required": False, "default": False, "title": "Ламинация плёнки"},
+                {"name": "is_film", "type": "object", "required": False, "title": "Аппликация плёнками"},
                 {"name": "pocket_id", "type": "enum", "required": False, "title": "Карман", "choices": {"source": "materials:pocket"}},
                 {"name": "pocket_count", "type": "integer", "required": False, "default": 1, "title": "Карманов на изделие"},
                 {"name": "is_frame", "type": "boolean", "required": False, "default": False, "title": "Рамка"},
@@ -246,7 +256,7 @@ class TabletsCalculator(BaseCalculator):
                 "main": ["quantity", "width", "height"],
                 "material": ["material_id", "material_mode"],
                 "cut": ["is_cut_manual", "is_cut_manual_metal", "is_cut_laser", "is_grave", "is_grave_fill"],
-                "print": ["is_uv_print", "is_print", "is_edge", "is_lamination", "is_sublimation"],
+                "print": ["is_uv_print", "is_print", "is_edge", "is_lamination", "is_film", "is_sublimation"],
                 "options": ["pocket_id", "pocket_count", "is_frame", "frame_profile_id"],
                 "mode": ["mode"],
             },
@@ -441,6 +451,56 @@ class TabletsCalculator(BaseCalculator):
         )
         return [print_part, _from_process(roll_res)]
 
+    def _film_application(
+        self,
+        n: int,
+        size: Sequence[float],
+        raw: Any,
+        mode: int,
+    ) -> List[Dict[str, Any]]:
+        opts: Mapping[str, Any] = raw if isinstance(raw, Mapping) else {}
+        film_material_id = str(_pick(opts, "material_id", "materialID", default="") or "").strip()
+        if not film_material_id or film_material_id == "0":
+            raise ValueError("Не выбрана плёнка для аппликации")
+
+        size_raw = _pick(opts, "size")
+        if (
+            isinstance(size_raw, (list, tuple))
+            and len(size_raw) >= 2
+            and float(size_raw[0] or 0) > 0
+            and float(size_raw[1] or 0) > 0
+        ):
+            size_app = [float(size_raw[0]), float(size_raw[1])]
+        else:
+            size_app = [float(size[0]), float(size[1])]
+
+        size_item = float(_pick(opts, "size_item", "sizeItem", default=0) or 0)
+        if size_item <= 0:
+            size_item = size_app[0]
+        density = float(_pick(opts, "density", default=0) or 0)
+        difficulty = float(_pick(opts, "difficulty", default=1) or 1)
+        color_count = int(float(_pick(opts, "color", default=1) or 1))
+        if color_count < 1:
+            color_count = 1
+        double_app = bool(
+            _pick(opts, "double_application", "isDoubleApplication", "is_double_application", default=False)
+        )
+        n_film = n * (2 if double_app else 1) * color_count
+
+        sticker_part = StickerCalculator().calculate({
+            "quantity": n_film,
+            "width": size_app[0],
+            "height": size_app[1],
+            "size_item": size_item,
+            "density": density,
+            "difficulty": difficulty,
+            "material_id": film_material_id,
+            "is_mounting_film": True,
+            "mode": mode,
+        })
+        roll_res = calc_manual_roll(n_film, size, {}, mode)
+        return [sticker_part, _from_process(roll_res)]
+
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
         n = int(params.get("quantity", 1))
         width = float(params.get("width", 0))
@@ -459,6 +519,8 @@ class TabletsCalculator(BaseCalculator):
         has_uv = "is_uv_print" in params and params.get("is_uv_print") is not None
         raw_print = params.get("is_print")
         has_print = raw_print is not None and raw_print is not False
+        raw_film = params.get("is_film")
+        has_film = raw_film is not None and raw_film is not False
 
         pocket_id = params.get("pocket_id")
         pocket_count = int(params.get("pocket_count", 1) or 1)
@@ -534,6 +596,10 @@ class TabletsCalculator(BaseCalculator):
                     default_lamination=params.get("is_lamination"),
                 )
             )
+
+        # Нанесение аппликации плёнками (calcSticker + calcManualRoll)
+        if has_film:
+            parts.extend(self._film_application(n, size, raw_film, mode.value))
 
         # Карманы (упрощённо; полный порт JS-карманов — не перенесён)
         if pocket_id:

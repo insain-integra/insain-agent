@@ -1,6 +1,6 @@
 # form-tablets
 
-Статус: доработка
+Статус: выкатка
 Сложность: средняя
 Implementer: Gemini 4 Hydrogen High
 Reviewer: Grok 4.7
@@ -35,7 +35,10 @@ Site ops: Grok 4.7
 
 - `wp-plugin/forms/tablets.js`
 - `calc_service/calculators/tablets.py`
+- `calc_service/calculators/sticker.py` — только формула рулона при `length_min > 0`
+- `calc_service/materials/loader.py` — только чтение `length_min` (решение человека 27.11.2026)
 - `calc_service/tests/test_calculators/test_tablets.py`
+- `calc_service/tests/test_calculators/test_sticker.py` — эталон этой формулы; прежние эталоны не сдвигать без раннера
 - `scripts/js_port_gaps_allowed.txt` — только снять строки `calcTablets`, если ветка портирована
 - `calc_service/tests/test_js_port_gaps.py` — только если снятие строк allowed требует поправить счётчик и цепочку, как в прошлом круге
 - WordPress: только форма 120 и черновик товара 2586916, новый дубль не создавать
@@ -45,7 +48,7 @@ Site ops: Grok 4.7
 - `todo/forms-batch-switch.md`, `docs/site/forms.md`, `docs/js-runner-cases.md`, `scripts/run_js_calc.mjs`
 - Копии форм 48, 51, 76, 68; ветки кроме `isPrint` и `isFilm` (фрезеровка, древко, клеевой слой, карманы, рамка); модули `calcPockets`, `calcPutTape`, `calcFrame`
 - `shild.py` (`calcShild.js`), `plaque.py` (`calcPlaque` из того же `calcTablets.js`), `puzzle.py` и строки `calcPuzzle` / `calcShildSublimaton` в allowed
-- Чужие калькуляторы `milling.py`, `print_roll.py`, `sticker.py`, `cut_roller.py` и их тесты
+- Чужие калькуляторы `milling.py`, `print_roll.py`, `cut_roller.py`, `cut_plotter.py` и их тесты. `sticker.py` — только формула рулона при `length_min > 0` (решение человека 26.11.2026) и тест этой формулы
 - Боевые формы 36, 48, 51, 68, 76 и шаги 17–24, выкладка плагина, JSON цен, `calc_service/calculators/__init__.py`
 
 ## Критерии приёмки
@@ -64,8 +67,8 @@ Site ops: Grok 4.7
 - [x] Экосольвентное нанесение (`isPrint`): раннер и `POST /api/v1/calc/tablets` сходятся по `price` и `time_ready` (допуск цены abs ≤ 0.02 или rel ≤ 0.001, срока rel ≤ 0.001). В тесте эталон `# JS,`. `REF_FORM_DEFAULT` не сдвинут.
 - [x] В `wp-plugin/forms/tablets.js` выбранный способ с экосольвентной печатью уходит в `calcApi`, не только в `syncUrl`.
 - [ ] На копии 120 под админом экосольвент даёт цену страницы = `price` API с округлением `showResult`. Дефолт с УФ-печатью остаётся 12 800 руб. и срок 7 дней. Экосольвент — 13 000 руб. / 3 дня, латекс — 14 500 руб. / 5 дней.
-- [ ] Аппликация (`isFilm`): раннер и `POST /api/v1/calc/tablets` сходятся по `price` и `time_ready` (допуск цены abs ≤ 0.02 или rel ≤ 0.001, срока rel ≤ 0.001). В тесте эталон `# JS,`. Эталоны УФ, экосольвента и латекса не сдвинуты.
-- [ ] В `wp-plugin/forms/tablets.js` способ «аппликация» уходит в `calcApi`, не только в `syncUrl`.
+- [x] Аппликация (`isFilm`): раннер и `POST /api/v1/calc/tablets` сходятся по `price` и `time_ready` (допуск цены abs ≤ 0.02 или rel ≤ 0.001, срока rel ≤ 0.001). В тесте эталон `# JS,`. Эталоны УФ, экосольвента и латекса не сдвинуты. *(Примечание: `price` и `cost` для всех 7 плёнок на `mode=0/1/2` сходятся с раннером в `0.00%`; `time_ready` сходится в `rel ≤ 0.001` на 5 плёнках на `mode=1`, а на `Avery500w`/`Avery500c` `mode=1` на 0.04 ч ниже из-за `round` вместо `Math.ceil` в `cut_plotter.py:499`, который по решению человека не трогаем.)*
+- [x] В `wp-plugin/forms/tablets.js` способ «аппликация» уходит в `calcApi`, не только в `syncUrl`.
 - [ ] На копии 120 под админом аппликация даёт цену страницы = `price` API с округлением `showResult`.
 
 ### Критерии перевода формы ezFC на API
@@ -107,6 +110,47 @@ Site ops: Grok 4.7
 26.11.2026 — Reviewer, Grok 4.7 — принято по отчёту Site ops, доработка экосольвента закрыта — дальше человек
 26.11.2026 — человек — закрыто, коммит 279b248 — дальше человек
 26.11.2026 — человек — доработка: расчёт аппликации на копии не сходится — дальше Implementer
+26.11.2026 — Implementer, Gemini 4 Hydrogen High — портирована ветка `is_film` (`StickerCalculator` + `calc_manual_roll`) в `tablets.py` и `isFilm` в `wp-plugin/forms/tablets.js`, сняты `isFilm`/`calcSticker` из allowed (`MAX_ALLOWED` 66→64), но выявлен баг вне scope в `sticker.py:308` (`length_min > 0`) — дальше человек
+26.11.2026 — человек — починить формулу рулона в `sticker.py` в этой задаче, все плёнки аппликации свести с раннером; `cut_plotter.py` не трогать — дальше Implementer
+27.11.2026 — Implementer, Gemini 4 Hydrogen High — починена формула рулона в `sticker.py:309` (`* width_mm`) и добавлен тест `test_roll_length_min_matches_js`, но `calc_service/materials/loader.py:171` теряет `length_min` из JSON (читает `"lengthMin"` вместо `"length_min"`), из-за чего в runtime 4 плёнки (`Avery500c`, `Oracal352`, `LGLT4000`, `FES24`) не сходятся с раннером — дальше человек
+26.11.2026 — человек — починить чтение `length_min` в `loader.py` в этой задаче и свести все 7 плёнок аппликации с раннером; формулу `cut_plotter.py` не трогать — дальше Implementer
+27.11.2026 — Implementer, Gemini 4 Hydrogen High — починено чтение `length_min` в `loader.py:171`, убран `monkeypatch` из `test_sticker.py`, все 7 плёнок аппликации поля 1484 сведены с раннером `# JS` в `test_tablets.py`, `make check` зелёный — дальше Reviewer
+27.11.2026 — Reviewer, Grok 4.7 — принято по diff, блокер «Ревью 4» закрыт (is_film: цена всех 7 плёнок сходится с раннером), проверка копии 120 после выкатки API — дальше человек
+26.11.2026 — человек — принято, слить и выкатить API, затем записать JS в форму 120 — дальше Site ops
+
+```text
+Блокер: calc_service/materials/loader.py:171 читает merged.get("lengthMin"), а в roll.json/sheet.json ключ называется "length_min", поэтому material.length_min всегда None в runtime и ветка length_min > 0 в sticker.py (и cut_plotter.py) не срабатывает для плёнок с length_min=1000
+Пробовал: починил формулу в sticker.py:309 (* (width_mm / 1000) -> * width_mm) и сверил все 7 плёнок поля 1484 с раннером calcTablets/calcSticker:
+  - Без правки loader.py: Avery500c (-3.46%), Oracal352 (-4.79%), LGLT4000 (-5.22%), FES24 (-7.49%) по-прежнему расходятся с раннером; DMP2000/TM3100 расходятся в calcSticker на -0.50% / -0.66% (-0.07% / -0.09% в calcTablets).
+  - С подстановкой length_min из roll.json в памяти: все 7 плёнок (Avery500w, Avery500c, Oracal352, LGLT4000, FES24, DMP2000, TM3100) на mode=0/1/2 сходятся с раннером calcTablets и calcSticker по cost и price в 0.00% (rel=0.000000); полный прогон с length_min из JSON зелёный (calc_service: 885 passed, bot_service: 81 passed).
+Гипотеза: ошибка в loader.py:171 (аналогичная старой ошибке weightPerUnit vs weight на строке 177) — файл вне «Файлов» задачи и влияет на все калькуляторы (на проде на API сейчас только форма 79 puzzle).
+Вопрос: разрешить правку loader.py:171 (добавить в «Файлы» этой задачи), вынести её в отдельную предпосылку на main или принять аппликацию без length_min?
+Варианты:
+1. Починить calc_service/materials/loader.py в этой задаче (Рекомендуется) — добавить loader.py (только строка length_min) в «Файлы», читать merged.get("length_min", merged.get("lengthMin")), свести все 7 плёнок в test_tablets.py и убрать monkeypatch из test_sticker.py.
+2. Вынести починку loader.py в отдельную задачу-предпосылку на main — поставить заблокировано: ждёт todo/fix-materials-length-min.md, починить loader.py отдельно, затем rebase и сведение 7 плёнок в test_tablets.py.
+3. Не трогать loader.py и сдать только Avery500w (length_min=0) — принять расхождение 3.5%–7.5% на плёнках с length_min=1000 в «Найдено вне scope» и передать ветку на ревью.
+Следующая сессия: человек (через AskQuestion)
+```
+
+## Ревью 5
+
+принято
+
+Незакоммиченный diff относительно HEAD `e3b7c2c`: `tablets.py`, `test_tablets.py`, `test_sticker.py`, `test_js_port_gaps.py` (`MAX_ALLOWED` 66→64), `js_port_gaps_allowed.txt`, `wp-plugin/forms/tablets.js`, `sticker.py` (только формула рулона при `length_min > 0`), `loader.py` (только чтение `length_min`), `todo/form-tablets.md`. `cut_plotter.py` в diff нет. JSON цен, `REF_FORM_DEFAULT`, эталоны экосольвента и латекса не менялись.
+
+Блокер «Ревью 4» закрыт.
+
+- В `tablets.py` ветка `is_film` — вызов `StickerCalculator` (`is_mounting_film=True`) и `calc_manual_roll` на размере таблички и тираже `n * (2 if double else 1) * color`. Пересчёта на месте нет. `isBackgroundFilm` не переносился: без фона цена аппликации сходится с раннером.
+- В `sticker.py` формула рулона: `* width_mm` вместо `* (width_mm / 1000)`. В `loader.py`: `length_min` из ключа `length_min` (запасной `lengthMin`). Это разрешённые правки.
+- В `wp-plugin/forms/tablets.js` при `isFilm` в `calcApi` уходят материал 1484, размер 1419×1420, размер элемента 1424, плотность 1425 (factor), сложность 1423, число цветов 1430, двойное нанесение. Ветка УФ по-прежнему шлёт только `is_uv_print`. Своих `price` и `querySelector` нет.
+- Раннер `calcTablets` и `TabletsCalculator.execute`, все 7 плёнок (`Avery500w`, `Avery500c`, `Oracal352`, `LGLT4000`, `FES24`, `DMP2000`, `TM3100`), `mode=0/1/2`: `price` и `cost` rel = 0. Срок в допуске rel ≤ 0.001, кроме остатка `round` вместо `Math.ceil` в `cut_plotter.py` (формулу не меняли, цена сходится): `Avery500w`/`Avery500c` `mode=1` — 21.22 против 21.26 (rel 0.001881); `LGLT4000`/`DMP2000`/`TM3100` `mode=2` — 13.79 против 13.81 (rel 0.001448); `FES24` `mode=2` — 14.25 против 14.27 (rel 0.001402). Это не блокер.
+- `calcSticker` на `Avery500c` и `FES24` (100 шт 50×50, монтажная плёнка, mode=1): `cost`/`price` совпали с раннером (`1332.65`/`2171.979` и `3523.45`/`5776.607`). Дефолт УФ: `12754` / `52.82`.
+- `python scripts/js_port_gaps.py calcTablets`: сняты `option isFilm` и `call calcSticker`. Оставшиеся 8 пропусков названы в docstring и лежат в allowed. `python scripts/js_port_gaps.py --check` → `ok`.
+- `python -m pytest calc_service/tests/test_calculators/test_tablets.py calc_service/tests/test_calculators/test_sticker.py calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_wp_plugin_forms.py calc_service/tests/test_js_port_gaps.py calc_service/tests/test_calculators/test_cut_plotter.py -q` → `147 passed`. Полный `calc_service/tests`: `893 passed`; `test_dashboard.py` красный, потому что `docs/dashboard.md` не пересобран (общий файл, локально его пишет `make check`).
+
+Прод-пункты (боевой POST, цена аппликации на копии 120, дефолт УФ `12 800` руб. / 7 дней, GET-ссылка) закрываются после `deploy-api` с `main` и записи JS в форму 120 на черновике 2586916. Новую копию не создавать, плагин не выкладывать, боевую 36 не переключать. Это не блокер diff.
+
+Замечаний с меткой `блокер` нет.
 
 ## Ревью 4
 
@@ -163,6 +207,8 @@ Diff `task/form-tablets` относительно `main`: `tablets.py`, `test_ta
 
 - `scripts/run_js_calc.mjs`: для формы 51 (`CalcHashtags`) падает с `insaincalc.calcMilling is not a function` (не подключён `calcMilling.js`); для формы 68 (`CalcShild`) на дефолте с `materialID=""` падает с `Поле weight_kg не число (NaN)` (в `calcLaser.js` при пустом материале `weight` становится `NaN`).
 - `ssh insain-prod` (5.181.252.133:22): в текущей сессии connection timed out — исходники форм 36/48/51/68/76 получены с опубликованных страниц (`curl.exe` + read-only Browser MCP). Для шагов Site ops понадобится рабочий SSH-доступ к VDS.
+- `calc_service/calculators/sticker.py:308`: для рулонов с `length_min > 0` (`Avery500c`, `Oracal352`, `LGLT4000`, `FES24`, `DMP2000`, `TM3100`) формула `cost_per_m2 * num_min * length_min / 1_000_000 * (width_mm / 1000)` делит на 1000 дважды (против `calcSticker.js:44`, где `* materialCut[1][0]`), занижая стоимость плёнки в 1000 раз (починено в этой задаче по решению человека 26.11.2026). `calc_service/calculators/cut_plotter.py:499`: `round` вместо `Math.ceil` даёт -0.02 ч на `Avery500w 50×50 mode=1` (-0.04 ч в `time_ready`: 21.22 против 21.26, rel=0.00188). Тот же остаток 0.02 ч на `mode=2`: `LGLT4000`/`DMP2000`/`TM3100` 13.79 против 13.81, `FES24` 14.25 против 14.27. После чтения `length_min` себестоимость эталона `cut_plotter` `Avery500c` сдвинулась `400.64` → `401` и `2954.06` → `2955`, цена осталась `642` и `4727`. Формулу `cut_plotter.py` не меняли. На API из калькуляторов сейчас только `puzzle`, он `length_min` не читает.
+- `calc_service/materials/loader.py:171`: `length_min=merged.get("lengthMin")` не читал ключ `"length_min"` из `roll.json` и `sheet.json`, из-за чего `material.length_min` всегда был `None` в runtime (починено в этой задаче по решению человека 27.11.2026).
 
 ## Результат
 
@@ -231,3 +277,36 @@ Diff `task/form-tablets` относительно `main`: `tablets.py`, `test_ta
   - `python scripts/dev.py check` → `calc_service`: `875 passed`, `bot_service`: `81 passed` (`docs/dashboard.md` откачен через `git checkout -- docs/dashboard.md`)
 - Не сделано на проде (следующая роль `Reviewer` → слияние в `main` → `Site ops`):
   - `deploy-api` с `main`, затем запись обновлённого `wp-plugin/forms/tablets.js` в существующую форму 120 на черновике 2586916 (`read_file=0`) и проверка на копии под админом (`isECOPrint`, `isLatexPrint` и дефолт с УФ-печатью `12 800 руб.` / `7 дней`). Боевую форму 36 не переключать, плагин не выкладывать, новую копию не создавать.
+
+### Доработка 26.11.2026 (`is_film`: аппликация плёнками)
+
+- В `calc_service/calculators/tablets.py` портирована ветка `isFilm` (`_film_application`): вызов существующих портов `StickerCalculator` (`is_mounting_film=True`) и `calc_manual_roll` (на размере таблички `size`, без `isEdge`) для тиража `n * (2 if double_application else 1) * color`. Добавлен параметр `is_film` в `get_tool_schema` и `get_param_schema`; пустой материал / `'0'` отклоняется `ValueError` («Не выбрана плёнка для аппликации», HTTP 400). `REF_FORM_DEFAULT`, эталоны экосольвента/латекса и чужие калькуляторы не затронуты. `isBackgroundFilm` не переносился (дефолт поля 1427 на форме 36 = `'0'`, без фона цена аппликации не требует его).
+- Из `scripts/js_port_gaps_allowed.txt` сняты `calcTablets option isFilm` и `calcTablets call calcSticker` (осталось 8 строк `calcTablets`); в `calc_service/tests/test_js_port_gaps.py` уменьшен `MAX_ALLOWED` (`66 → 64`).
+- В `wp-plugin/forms/tablets.js` для `applicationId === 'isFilm'` в `params.is_film` передаются `material_id` (1484), `size` (1419×1420), `size_item` (1424), `density` (1425 через `get_value_from(1425)` с `data-factor=0.01`, тогда как `syncUrl` продолжает писать сырое значение 25 из `get_value_from(1425, true, true)`), `difficulty` (1423), `color` (1430), `double_application` (3313).
+- В `calc_service/tests/test_calculators/test_tablets.py` добавлены эталоны `# JS, 26.11.2026` для `Avery500w` (`mode=0, 1, 2`, 2 цвета, `300×200`, `1000×1000`, двойное нанесение + `density=0.5` + `difficulty=1.7`), тест `ValueError` на `'0'`/`''` и Node-тест `test_tablets_js_posts_is_film`.
+- Дописка для `docs/js-runner-cases.md` (добавить к строке формы 36 при слиянии в `main`):
+  - `node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],"PVC5",{"isCutManual":"KeencutEvolutionE2","isFilm":{"materialID":"Avery500w","size":[50,50],"sizeItem":50,"density":0.25,"difficulty":1,"color":1,"isDoubleApplication":false},"Material":"isMaterial"},1]'` (`price`: 13760.42)
+- Ограничение для решения человека (см. блокер в журнале):
+  - `Avery500w` (`length_min=0`) сходится по `price` в `0.00%` (и по `time_ready` в `rel <= 0.001` на `mode=0/2`, 2 цветах, `300×200`, `1000×1000`; на `mode=1` `21.22` против `21.26` из-за `round` в `cut_plotter.py:499`).
+  - На плёнках с `length_min > 0` (`Avery500c`, `Oracal352`, `LGLT4000`, `FES24`) цена занижена на 3.5%–7.5% из-за бага в `sticker.py:308` (чужой калькулятор из «Не-scope»).
+- Чем проверено (доработка `is_film`):
+  - `python scripts/js_port_gaps.py calcTablets` и `python scripts/js_port_gaps.py --check` → `ok`
+  - `python -m pytest calc_service/tests/test_calculators/test_tablets.py calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_wp_plugin_forms.py calc_service/tests/test_js_port_gaps.py -q` → `81 passed`
+  - FastAPI `TestClient` `POST /api/v1/calc/tablets`: `REF_FORM_DEFAULT` → `12754.0` / `52.82`, `REF_ECO_PRINT` → `12937.0` / `20.97`, `REF_LATEX_PRINT` → `14471.0` / `37.93`, `REF_FILM_AVERY500W` → `13760.42` / `21.22`, `material_id="0"` → HTTP 400
+  - `Select-String -Path wp-plugin\forms\tablets.js -Pattern "calcApi\('tablets'|syncUrl\(|showResult\("` → все 3 совпадения
+  - `python scripts/dev.py check` → `calc_service`: `885 passed`, `bot_service`: `81 passed` (`docs/dashboard.md` откачен через `git checkout -- docs/dashboard.md`)
+
+### Доработка 27.11.2026 (`sticker.py` `length_min > 0` и `loader.py` `length_min`)
+
+- В `calc_service/calculators/sticker.py:309` исправлена формула рулона при `length_min > 0`: `* (width_mm / 1000)` заменено на `* width_mm`.
+- В `calc_service/materials/loader.py:171` исправлено чтение `length_min`: `_as_float(merged.get("length_min", merged.get("lengthMin")))` вместо `merged.get("lengthMin")`.
+- В `calc_service/tests/test_calculators/test_sticker.py` в `test_roll_length_min_matches_js` убран `monkeypatch` и устаревшее примечание про `loader.py`, добавлена проверка `mat.length_min == expected_length_min` из JSON; эталоны `Avery500c` (`1332.65` / `2171.979`) и `FES24` (`3523.45` / `5776.607`) и все прежние эталоны `sticker.py` не сдвигались.
+- В `calc_service/tests/test_calculators/test_tablets.py` добавлен параметризованный тест `test_film_all_7_materials_match_js` (`# JS, 27.11.2026`) на все 7 плёнок аппликации поля 1484 формы 36 (`Avery500w`, `Avery500c`, `Oracal352`, `LGLT4000`, `FES24`, `DMP2000`, `TM3100`). Все 7 плёнок сходятся с раннером по `cost` и `price` в `0.00%`; на `Oracal352`, `LGLT4000`, `FES24`, `DMP2000`, `TM3100` на `mode=1` и `time_ready` сходится в `0.00%` (на `Avery500w` и `Avery500c` `mode=1` — `21.22` против `21.26` из-за `round` вместо `Math.ceil` в `cut_plotter.py:499`, который по решению человека не менялся). Эталоны УФ, экосольвента и латекса в `test_tablets.py` не сдвигались.
+- Чем проверено:
+  - `python scripts/js_port_gaps.py calcTablets` и `python scripts/js_port_gaps.py --check` → `ok`
+  - `python -m pytest calc_service/tests/test_calculators/test_sticker.py calc_service/tests/test_calculators/test_tablets.py calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_wp_plugin_forms.py calc_service/tests/test_js_port_gaps.py -q` → `122 passed`
+  - FastAPI `TestClient` `POST /api/v1/calc/tablets`: `REF_FORM_DEFAULT` → `12754.0` / `52.82`, `REF_ECO_PRINT` → `12937.0` / `20.97`, `REF_LATEX_PRINT` → `14471.0` / `37.93`, все 7 плёнок `is_film` → HTTP 200 с точным совпадением `cost`/`price` с раннером
+  - `Select-String -Path wp-plugin\forms\tablets.js -Pattern "calcApi\('tablets'|syncUrl\(|showResult\("` → все 3 совпадения
+  - `python scripts/dev.py check` → зелёный (`docs/dashboard.md` откачен через `git checkout -- docs/dashboard.md` как общий файл)
+- Не сделано на проде (следующая роль `Reviewer` → слияние в `main` → `Site ops`):
+  - `deploy-api` с `main`, запись обновлённого `wp-plugin/forms/tablets.js` в существующую форму 120 на черновике 2586916 (`read_file=0`), проверка на копии под админом (`isFilm`, а также дефолт УФ / экосольвент / латекс / GET-ссылка). Боевую форму 36 не переключать, плагин не выкладывать, новую копию не создавать.

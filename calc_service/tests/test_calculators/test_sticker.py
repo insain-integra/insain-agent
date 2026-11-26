@@ -455,3 +455,35 @@ def test_sheet_wide_printer_http_400():
     response = TestClient(app).post("/api/v1/calc/sticker", json=body)
     assert response.status_code == 400, response.text
     assert response.json()["detail"] == WIDE_ON_SHEET_MESSAGE
+
+
+# JS, 27.11.2026 — рулон с length_min > 0 (100 шт 50×50, size_item=50, density=0.25, difficulty=1, isMountingFilm=true, mode=1).
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0.25,1,"Avery500c",{"isMountingFilm":true},1]'
+# node scripts/run_js_calc.mjs calcSticker --data current --args '[100,[50,50],50,0.25,1,"FES24",{"isMountingFilm":true},1]'
+@pytest.mark.parametrize(
+    ("material_id", "expected_length_min", "cost", "price"),
+    [
+        ("Avery500c", 1000.0, 1332.65, 2171.9790000000003),
+        ("FES24", 1000.0, 3523.45, 5776.607),
+    ],
+)
+def test_roll_length_min_matches_js(calc, material_id, expected_length_min, cost, price):
+    """JS, 27.11.2026: length_min берётся из JSON и умножается на width_mm в формуле рулона."""
+    from materials import ALL_MATERIALS
+
+    mat = ALL_MATERIALS["roll"].get(material_id)
+    assert mat.length_min == expected_length_min
+    result = calc.execute({
+        "quantity": 100,
+        "width": 50,
+        "height": 50,
+        "size_item": 50,
+        "density": 0.25,
+        "difficulty": 1,
+        "material_id": material_id,
+        "is_mounting_film": True,
+        "mode": 1,
+    })
+    assert result["cost"] == pytest.approx(cost, rel=0.001)
+    assert result["price"] == pytest.approx(price, rel=0.001)
+
