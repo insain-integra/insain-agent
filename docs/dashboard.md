@@ -43,7 +43,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | --- | --- |
 | `ai-calc-authoring-skill.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
-| `form-tablets.md` | доработка |
+| `form-tablets.md` | выкатка |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |

@@ -54,6 +54,7 @@ PowerShell 5.1: кавычки JSON внутри `--args` экранируютс
 | `calcTablets` form 36 default | `tablets` | 12754 |
 | `calcTablets` form 36 ecosolvent | `tablets` | 12937 |
 | `calcTablets` form 36 latex | `tablets` | 14471 |
+| `calcTablets` form 36 applique Avery500w | `tablets` | 13760.42 |
 | `calcLaser` номерки | `laser` | 5631 |
 | `calcLaser` простая резка AcrylWhite3 | `laser` | 23638 |
 | `calcLaser` без резки AcrylWhite3 | `laser` | 1404 |
@@ -167,6 +168,8 @@ node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],\"P
 node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],\"PVC5\",{\"isCutManual\":\"KeencutEvolutionE2\",\"isPrint\":{\"printerID\":\"Technojet160ECO\",\"resolution\":1,\"surface\":\"isPlain\",\"color\":\"4+0\",\"isDoubleApplication\":false},\"isEdge\":\"isCutEdge\",\"Material\":\"isMaterial\"},1]'
 
 node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],\"PVC5\",{\"isCutManual\":\"KeencutEvolutionE2\",\"isPrint\":{\"printerID\":\"HPLatex335\",\"resolution\":1,\"surface\":\"isPlain\",\"color\":\"4+0\",\"isDoubleApplication\":false},\"isEdge\":\"isCutEdge\",\"Material\":\"isMaterial\"},1]'
+
+node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],\"PVC5\",{\"isCutManual\":\"KeencutEvolutionE2\",\"isFilm\":{\"materialID\":\"Avery500w\",\"size\":[50,50],\"sizeItem\":50,\"density\":0.25,\"difficulty\":1,\"color\":1,\"isDoubleApplication\":false},\"Material\":\"isMaterial\"},1]'
 
 node scripts/run_js_calc.mjs calcLaser --data current --args '[50,[40,80],\"AcrylColor3\",{\"isCutLaser\":{\"lenCut\":0,\"sizeItem\":0,\"density\":0,\"difficulty\":1},\"isGrave\":1,\"isGraveFill\":[30,40]},1]'
 
