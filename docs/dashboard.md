@@ -37,13 +37,12 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **14**. В работе/ревью: `form-tablets.md`. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **13**. В работе/ревью: нет. Заблокировано: `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `ai-calc-authoring-skill.md` | черновик |
 | `ezfc-options-source-reset.md` | черновик |
-| `form-tablets.md` | выкатка |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
 | `metrics-baseline.md` | заблокировано: человек |
@@ -65,7 +64,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 ## Журнал (последние 5)
 
 - 2026-11-27 — form-tablets
+- 2026-11-27 — form-tablets
 - 2026-11-26 — form-tablets
 - 2026-11-26 — form-tablets
 - 2026-11-26 — form-magnet-laminated
-- 2026-11-25 — form-magnet-laminated
