@@ -23,7 +23,6 @@ calcShildSublimaton call calcCutSaber
 calcShildSublimaton call calcManualPress
 calcShildSublimaton call calcRounding
 calcTablets option isCutMilling
-calcTablets option isBackgroundFilm
 calcTablets option isShaft
 calcTablets option isAdhesiveLayer
 calcTablets option isEVAFoam

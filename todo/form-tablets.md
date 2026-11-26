@@ -1,6 +1,6 @@
 # form-tablets
 
-Статус: доработка
+Статус: выкатка
 Сложность: средняя
 Implementer: Gemini 4 Hydrogen High
 Reviewer: Grok 4.7
@@ -71,8 +71,8 @@ Site ops: Grok 4.7
 - [x] Аппликация (`isFilm`): раннер и `POST /api/v1/calc/tablets` сходятся по `price` и `time_ready` (допуск цены abs ≤ 0.02 или rel ≤ 0.001, срока rel ≤ 0.001). В тесте эталон `# JS,`. Эталоны УФ, экосольвента и латекса не сдвинуты. *(Примечание: `price` и `cost` для всех 7 плёнок на `mode=0/1/2` сходятся с раннером в `0.00%`; `time_ready` сходится в `rel ≤ 0.001` на 5 плёнках на `mode=1`, а на `Avery500w`/`Avery500c` `mode=1` на 0.04 ч ниже из-за `round` вместо `Math.ceil` в `cut_plotter.py:499`, который по решению человека не трогаем.)*
 - [x] В `wp-plugin/forms/tablets.js` способ «аппликация» уходит в `calcApi`, не только в `syncUrl`.
 - [ ] На копии 120 под админом аппликация даёт цену страницы = `price` API с округлением `showResult`.
-- [ ] Оклейка фона (`isBackgroundFilm`, поле 1427 не `0`): раннер и `POST /api/v1/calc/tablets` сходятся по `price` и `time_ready` (допуск цены abs ≤ 0.02 или rel ≤ 0.001, срока rel ≤ 0.001). В тесте эталон `# JS,`. Эталоны УФ, экосольвента, латекса и аппликации не сдвинуты.
-- [ ] В `wp-plugin/forms/tablets.js` выбранная оклейка фона (1427) и край (1483) уходят в `calcApi`, не только в `syncUrl`. Значение `0` фон не включает.
+- [x] Оклейка фона (`isBackgroundFilm`, поле 1427 не `0`): раннер и `POST /api/v1/calc/tablets` сходятся по `price` и `time_ready` (допуск цены abs ≤ 0.02 или rel ≤ 0.001, срока rel ≤ 0.001). В тесте эталон `# JS,`. Эталоны УФ, экосольвента, латекса и аппликации не сдвинуты.
+- [x] В `wp-plugin/forms/tablets.js` выбранная оклейка фона (1427) и край (1483) уходят в `calcApi`, не только в `syncUrl`. Значение `0` фон не включает.
 - [ ] На копии 120 под админом выбор плёнки в «Оклейка фона таблички» меняет цену страницы на `price` API с округлением `showResult`. «без оклейки» оставляет цену выбранного способа нанесения.
 
 ### Критерии перевода формы ezFC на API
@@ -137,6 +137,31 @@ Site ops: Grok 4.7
 ```
 
 27.11.2026 — человек — доработка: оклейка фона таблички (поле 1427) не меняет цену, портировать `isBackgroundFilm` — дальше Implementer
+27.11.2026 — Implementer, Gemini 4 Hydrogen High — доработка: портирована ветка `is_background_film` (`CutRollerCalculator` `KWTrio3026` + `calc_manual_roll`) в `tablets.py`, снята `calcTablets option isBackgroundFilm` из allowed (`MAX_ALLOWED` 64→63), в `wp-plugin/forms/tablets.js` добавлены поля 1427/1483/3313, добавлены эталоны `# JS` в `test_tablets.py`, `make check` зелёный — дальше Reviewer
+27.11.2026 — Reviewer, Grok 4.7 — принято по diff, блокер оклейки фона закрыт (`is_background_film` сходится с раннером, множитель как в `calcTablets.js`), проверка копии 120 после выкатки API — дальше человек
+27.11.2026 — человек — принято, слить и выкатить API, затем записать JS в форму 120 — дальше Site ops
+
+## Ревью 6
+
+принято
+
+Незакоммиченный diff относительно HEAD `e3912dc`: `tablets.py`, `test_tablets.py` (только добавления), `test_js_port_gaps.py` (`MAX_ALLOWED` 64→63), `js_port_gaps_allowed.txt` (снята `calcTablets option isBackgroundFilm`), `wp-plugin/forms/tablets.js`, `todo/form-tablets.md`. `cut_roller.py`, `cut_plotter.py`, `sticker.py`, `loader.py` в diff нет. `REF_FORM_DEFAULT` и эталоны экосольвента, латекса и аппликации в diff не менялись.
+
+Блокер оклейки фона закрыт.
+
+- В `tablets.py` ветка `is_background_film` — вызов `CutRollerCalculator` (`KWTrio3026`, `material_mode="isMaterial"`) и `calc_manual_roll` (`isEdge`). Пересчёта на месте нет. `time_ready` резки фона обнуляется и в `max` не входит, как `costCutBackgroundFilm.timeReady` в `calcTablets.js`. Значение `'0'` и пустой материал фон не добавляют.
+- Множитель тиража фона — `is_film.isBackgroundFilm` (`2` или `1`), как `options.get('isFilm')['isBackgroundFilm']` в `calcTablets.js`. Поле 3313 (`is_background_film.double_application`) цену фона не умножает. Раннер и `TabletsCalculator.execute`, `price` совпал: двойное нанесение 3313 (`isDoubleApplication` на плёнке и на фоне) — `21278.652572` при фоне ×1; `isFilm.isBackgroundFilm=true` и фон `FES24` — `27887.419881` при фоне ×2.
+- В `wp-plugin/forms/tablets.js` при значении поля 1427 не `'0'` в `calcApi` уходят материал 1427 и край 1483. `'0'` объект `is_background_film` не создаёт. Своих `price` и `querySelector` нет. Поле 3313 в объект фона пишется, калькулятор его для множителя не читает.
+- Раннер `calcTablets` и API, допуск цены abs ≤ 0.02 или rel ≤ 0.001, срока rel ≤ 0.001. `Oracal352` + фон `Avery500c`, `isCutEdge`: mode 0 — `19773.147` / `38.91` против `38.93` (rel 0.000514); mode 1 — `20538.147` / `23.33`; mode 2 — `21326.147` / `15.73`. `10×300×200` и `1×1000×1000` — цена и срок rel = 0. Эталоны без фона не сдвинулись: УФ `12754` / `52.82`, экосольвент `12937` / `20.97`, латекс `14471` / `37.93`, аппликация `Avery500w` цена `13760.419881`.
+- Срок на связке с `Avery500w` короче раннера на те же 0.04 ч, что уже приняты в «Ревью 5» (`round` в `cut_plotter.py`, формулу не меняли): подгибка фона `31.29` против `31.33` (rel 0.001277), фон ×2 `25.53` против `25.57` (rel 0.001564). Цена этих кейсов совпала. Это не блокер.
+- `python scripts/js_port_gaps.py calcTablets`: `option isBackgroundFilm` снята. Оставшиеся 7 пропусков (`isCutMilling`, `isShaft`, `isAdhesiveLayer`, `isEVAFoam`, `calcMilling`, `calcPockets`, `calcFrame`) названы в docstring и лежат в allowed. `python scripts/js_port_gaps.py --check` → `ok`.
+- `python -m pytest calc_service/tests/test_calculators/test_tablets.py calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_wp_plugin_forms.py calc_service/tests/test_js_port_gaps.py -q` → `100 passed`.
+
+Без блока `isFilm` раннер падает (`isBackgroundFilm` у `undefined`), API считает фон с множителем ×1. Форма 36 шлёт фон вместе с УФ, без `is_film`; так цена оклейки появляется, а множитель 3313 по-прежнему не «исправлен». Это не блокер diff.
+
+Прод-пункты (боевой POST, цена оклейки на копии 120, «без оклейки», дефолт УФ `12 800` руб. / 7 дней, GET-ссылка) закрываются после `deploy-api` с `main` и записи JS в форму 120 на черновике 2586916. Новую копию не создавать, плагин не выкладывать, боевую 36 не переключать. Это не блокер diff.
+
+Замечаний с меткой `блокер` нет.
 
 ## Ревью 5
 
@@ -316,3 +341,23 @@ Diff `task/form-tablets` относительно `main`: `tablets.py`, `test_ta
   - `python scripts/dev.py check` → зелёный (`docs/dashboard.md` откачен через `git checkout -- docs/dashboard.md` как общий файл)
 - Не сделано на проде (следующая роль `Reviewer` → слияние в `main` → `Site ops`):
   - `deploy-api` с `main`, запись обновлённого `wp-plugin/forms/tablets.js` в существующую форму 120 на черновике 2586916 (`read_file=0`), проверка на копии под админом (`isFilm`, а также дефолт УФ / экосольвент / латекс / GET-ссылка). Боевую форму 36 не переключать, плагин не выкладывать, новую копию не создавать.
+
+### Доработка 27.11.2026 (`is_background_film`: оклейка фона таблички)
+
+- В `calc_service/calculators/tablets.py` портирована ветка `isBackgroundFilm` (`_background_film`): вызов существующих портов `CutRollerCalculator` (резак `KWTrio3026`, `material_mode="isMaterial"`) и `calc_manual_roll` (`isEdge`, `mode`). Множитель двойного нанесения взят как в `calcTablets.js` (`options.get('isFilm')['isBackgroundFilm'] ? 2 : 1`), расхождение формы (поле 3313) и функции не исправлялось; `cut_part["time_ready"]` не включается в `max(time_ready)` (как в `calcTablets.js:294-301`). Значение `'0'` или пустой `material_id` фон не добавляет; без `is_film` ветка также работает безопасно. `is_background_film` добавлен в `get_tool_schema` и `get_param_schema`. Эталоны УФ, экосольвента, латекса и аппликации и чужие калькуляторы не сдвигались.
+- Из `scripts/js_port_gaps_allowed.txt` снята строка `calcTablets option isBackgroundFilm`; в `calc_service/tests/test_js_port_gaps.py` уменьшен `MAX_ALLOWED` (`64 → 63`).
+- В `wp-plugin/forms/tablets.js` поля `1427` (`dpdBackgroudMaterial`), `1483` (`dpdBackroundEdge`) и `3313` (`isDoubleApplication`) при значении `1427` отличном от `'0'` передаются в `params.is_background_film`; значение `'0'` фон в `calcApi` не включает.
+- В `calc_service/tests/test_calculators/test_tablets.py` добавлены эталоны `# JS, 27.11.2026` для `Oracal352` + `Avery500c` (`mode=0, 1, 2`), подгибки (`isBendEdge`), `10×300×200`, `1×1000×1000`, `double_application=True` (как в `calcTablets.js` x1, и x2 от `isFilm.isBackgroundFilm`), `'0'`/`""` (no-op), работы без `is_film` и Node-тест `test_tablets_js_posts_is_background_film`.
+- Дописка для `docs/js-runner-cases.md` (добавить к строке формы 36 при слиянии в `main`):
+  - ``| `calcTablets` form 36 applique + background film | `tablets` | 20538.15 |``
+  - `node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],"PVC5",{"isCutManual":"KeencutEvolutionE2","isFilm":{"materialID":"Oracal352","size":[50,50],"sizeItem":50,"density":0.25,"difficulty":1,"color":1,"isDoubleApplication":false},"isBackgroundFilm":{"materialID":"Avery500c","isEdge":"isCutEdge"},"Material":"isMaterial"},1]'`
+- Чем проверено (доработка `is_background_film`):
+  - `python scripts/js_port_gaps.py calcTablets` и `python scripts/js_port_gaps.py --check` → `ok`
+  - `python -m pytest calc_service/tests/test_calculators/test_tablets.py calc_service/tests/test_calculators/test_plaque.py calc_service/tests/test_wp_plugin_forms.py calc_service/tests/test_js_port_gaps.py -q` → `100 passed`
+  - Сверка раннера и FastAPI `TestClient` `POST /api/v1/calc/tablets`:
+    - `REF_BG_FILM_ORACAL` (`Oracal352` + `Avery500c`, `isCutEdge`, `mode=1`): раннер `20538.147` / `23.33`, API `20538.147` / `23.33` (`mode=0`: `19773.147` / `38.91` vs раннер `38.93`, `rel=0.00051`; `mode=2`: `21326.147` / `15.73` vs раннер `21326.147` / `15.73`)
+    - `REF_FORM_DEFAULT` (УФ): `12754.0` / `52.82`; `REF_ECO_PRINT`: `12937.0` / `20.97`; `REF_LATEX_PRINT`: `14471.0` / `37.93`; `REF_FILM_AVERY500W`: `13760.4198808` / `21.22` (раннер `21.26`); `is_background_film.material_id="0"` → `13760.4198808` / `21.22` (без сдвига цены)
+  - `Select-String -Path wp-plugin\forms\tablets.js -Pattern "calcApi\('tablets'|syncUrl\(|showResult\("` → все 3 совпадения, `price` / `querySelector` нет
+  - `python scripts/dev.py check` → `calc_service`: `906 passed`, `bot_service`: `81 passed` (`docs/dashboard.md` откачен через `git checkout -- docs/dashboard.md` как общий файл)
+- Не сделано на проде (следующая роль `Reviewer` → слияние в `main` → `Site ops`):
+  - `deploy-api` с `main`, запись обновлённого `wp-plugin/forms/tablets.js` в существующую форму 120 на черновике 2586916 (`read_file=0`), проверка на копии под админом (выбор плёнки в «Оклейка фона таблички» и «без оклейки», а также дефолт УФ / экосольвент / латекс / аппликация / GET-ссылка). Боевую форму 36 не переключать, плагин не выкладывать, новую копию не создавать.

@@ -1,7 +1,7 @@
 // Форма 36 CalcTabs, элемент cjsCalc (1348). Id полей — боевой формы 36.
-// Ветки без порта в tablets.py (isCutMilling, isBackgroundFilm, isShaft, chkAdhesiveLayer)
+// Ветки без порта в tablets.py (isCutMilling, isShaft, chkAdhesiveLayer)
 // пишутся в syncUrl, но в calcApi не передаются.
-// Не-API поля (dpdTypeCut, фон аппликации, древко, клеевой слой) сохраняются в URL.
+// Не-API поля (dpdTypeCut, древко, клеевой слой) сохраняются в URL.
 var qty = {{numN}};
 var width = Number(String({{numW}}).replace(',', '.')) || 0;
 var height = Number(String({{numH}}).replace(',', '.')) || 0;
@@ -40,7 +40,9 @@ var appDifficultyRaw = ezfc_functions.get_value_from(1423, true)[0];
 var appDifficultyNum = Number(appDifficultyRaw);
 var appDifficulty = (appDifficultyRaw === '' || appDifficultyRaw == null || isNaN(appDifficultyNum)) ? 1 : appDifficultyNum;
 var appDifficultyIndex = optionIndex(ezfc_functions.get_value_from(1423, true, false, { return_value: 'index' }));
+var bgMaterialId = ezfc_functions.get_value_from(1427, true)[0] || '';
 var bgMaterialIndex = optionIndex(ezfc_functions.get_value_from(1427, true, false, { return_value: 'index' }));
+var bgEdgeId = ezfc_functions.get_value_from(1483, true)[0] || 'isCutEdge';
 var bgEdgeIndex = optionIndex(ezfc_functions.get_value_from(1483, true, false, { return_value: 'index' }));
 var hasShaft = ezfc_functions.get_value_from(1533, true) == 'true';
 var shaftLen = numFrom(ezfc_functions.get_value_from(1534, true)) || 1;
@@ -162,6 +164,14 @@ if (String(applicationId) === 'isUVPrint') {
     };
 } else if (String(applicationId) === 'isSublimation') {
     params.is_sublimation = true;
+}
+
+if (bgMaterialId && String(bgMaterialId) !== '0') {
+    params.is_background_film = {
+        material_id: String(bgMaterialId),
+        is_edge: String(bgEdgeId || 'isCutEdge'),
+        double_application: isDoubleApplication
+    };
 }
 
 insaincalc.calcApi('tablets', params).then(function (calcCost) {

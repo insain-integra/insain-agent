@@ -118,6 +118,7 @@ def test_get_tool_schema(calc):
     assert "is_edge" in props
     assert "is_lamination" in props
     assert "is_film" in props
+    assert "is_background_film" in props
 
 
 def test_get_param_schema(calc):
@@ -133,6 +134,7 @@ def test_get_param_schema(calc):
     assert "is_edge" in names
     assert "is_lamination" in names
     assert "is_film" in names
+    assert "is_background_film" in names
 
 
 # ── Эталоны JS, 02.11.2026 ───────────────────────────────────────────
@@ -961,4 +963,252 @@ def test_film_all_7_materials_match_js(calc, material_id, expected, time_abs):
         assert r["time_ready"] == pytest.approx(expected["time_ready"], rel=JS_REL_TOL)
     codes = {m.get("code") for m in r.get("materials") or []}
     assert {"PVC5", material_id, "LGChemLC2000H"}.issubset(codes)
+
+
+# ── Эталоны isBackgroundFilm (оклейка фона таблички): JS, 27.11.2026 ───
+
+REF_BG_FILM_ORACAL = {
+    "quantity": 100,
+    "width": 50,
+    "height": 50,
+    "material_id": "PVC5",
+    "material_mode": "isMaterial",
+    "is_cut_manual": "KeencutEvolutionE2",
+    "is_film": {
+        "material_id": "Oracal352",
+        "size": [50, 50],
+        "size_item": 50,
+        "density": 0.25,
+        "difficulty": 1,
+        "color": 1,
+        "double_application": False,
+    },
+    "is_background_film": {
+        "material_id": "Avery500c",
+        "is_edge": "isCutEdge",
+    },
+    "mode": 1,
+}
+
+# JS, 27.11.2026: node scripts/run_js_calc.mjs calcTablets --data current --args '[100,[50,50],"PVC5",{"isCutManual":"KeencutEvolutionE2","isFilm":{"materialID":"Oracal352","size":[50,50],"sizeItem":50,"density":0.25,"difficulty":1,"color":1,"isDoubleApplication":false},"isBackgroundFilm":{"materialID":"Avery500c","isEdge":"isCutEdge"},"Material":"isMaterial"},<mode>]'
+EXPECTED_BG_FILM_ORACAL_BY_MODE = {
+    0: {"cost": 12298.45, "price": 19773.147, "time_hours": 6.6, "time_ready": 38.93, "weight_kg": 0.86},
+    1: {"cost": 12777.45, "price": 20538.147, "time_hours": 6.9, "time_ready": 23.33, "weight_kg": 0.86},
+    2: {"cost": 13270.45, "price": 21326.147, "time_hours": 7.2, "time_ready": 15.73, "weight_kg": 0.86},
+}
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_background_film_modes_match_js(calc, mode):
+    """JS, 27.11.2026: оклейка фона Avery500c (isCutEdge) с аппликацией Oracal352 на mode=0, 1, 2."""
+    r = calc.execute({**REF_BG_FILM_ORACAL, "mode": mode})
+    e = EXPECTED_BG_FILM_ORACAL_BY_MODE[mode]
+    assert r["cost"] == pytest.approx(e["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(e["price"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(e["time_ready"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(e["weight_kg"], rel=JS_REL_TOL)
+    if mode == 0:
+        # Остаток 0.01 ч от round в cut_plotter.py:499 (time_ready укладывается в rel <= 0.001)
+        assert r["time_hours"] == pytest.approx(e["time_hours"], abs=0.02)
+    else:
+        assert r["time_hours"] == pytest.approx(e["time_hours"], rel=JS_REL_TOL)
+    codes = {m.get("code") for m in r.get("materials") or []}
+    assert {"PVC5", "Oracal352", "Avery500c", "LGChemLC2000H"}.issubset(codes)
+
+
+@pytest.mark.parametrize(
+    ("params", "expected", "time_abs"),
+    [
+        # JS, 27.11.2026: Avery500w + Avery500c подгибка (isBendEdge), mode=1 (остаток 0.04 ч от Avery500w cut_plotter)
+        (
+            {
+                **REF_FILM_AVERY500W,
+                "is_background_film": {"material_id": "Avery500c", "is_edge": "isBendEdge"},
+            },
+            {"cost": 24202.98788, "price": 38786.4198808, "time_ready": 31.33, "weight_kg": 0.86},
+            0.05,
+        ),
+        # JS, 27.11.2026: 10 шт 300×200, фон Oracal352 с подгибкой (isBendEdge)
+        (
+            {
+                "quantity": 10,
+                "width": 300,
+                "height": 200,
+                "material_id": "PVC5",
+                "material_mode": "isMaterial",
+                "is_cut_manual": "KeencutEvolutionE2",
+                "is_film": {
+                    "material_id": "Avery500w",
+                    "size": [250, 150],
+                    "size_item": 50,
+                    "density": 0.25,
+                    "difficulty": 1,
+                    "color": 1,
+                    "double_application": False,
+                },
+                "is_background_film": {"material_id": "Oracal352", "is_edge": "isBendEdge"},
+                "mode": 1,
+            },
+            {"cost": 5666.42824, "price": 9171.870878400001, "time_ready": 18.97, "weight_kg": 1.95},
+            None,
+        ),
+        # JS, 27.11.2026: 1 шт 1000×1000, фон Avery500w с подгибкой (isBendEdge)
+        (
+            {
+                "quantity": 1,
+                "width": 1000,
+                "height": 1000,
+                "material_id": "PVC5",
+                "material_mode": "isMaterial",
+                "is_cut_manual": "KeencutEvolutionE2",
+                "is_film": {
+                    "material_id": "Avery500w",
+                    "size": [800, 800],
+                    "size_item": 50,
+                    "density": 0.25,
+                    "difficulty": 1,
+                    "color": 1,
+                    "double_application": False,
+                },
+                "is_background_film": {"material_id": "Avery500w", "is_edge": "isBendEdge"},
+                "mode": 1,
+            },
+            {"cost": 5073.4516, "price": 8247.629656000001, "time_ready": 18.43, "weight_kg": 3.25},
+            None,
+        ),
+        # JS, 27.11.2026: двойное нанесение 3313 в форме (double_application=True) — фон x1, как в calcTablets.js
+        (
+            {
+                **REF_FILM_AVERY500W,
+                "is_film": {**REF_FILM_AVERY500W["is_film"], "double_application": True},
+                "is_background_film": {"material_id": "Avery500c", "is_edge": "isCutEdge", "double_application": True},
+            },
+            {"cost": 13249.1642, "price": 21278.652572, "time_ready": 24.08, "weight_kg": 0.97},
+            None,
+        ),
+        # JS, 27.11.2026: множитель x2 фона срабатывает от isFilm.isBackgroundFilm (как в calcTablets.js)
+        (
+            {
+                **REF_FILM_AVERY500W,
+                "is_film": {**REF_FILM_AVERY500W["is_film"], "isBackgroundFilm": True},
+                "is_background_film": {"material_id": "FES24", "is_edge": "isCutEdge"},
+            },
+            {"cost": 17328.98788, "price": 27887.4198808, "time_ready": 25.57, "weight_kg": 0.91},
+            0.05,
+        ),
+    ],
+)
+def test_background_film_options_match_js(calc, params, expected, time_abs):
+    """JS, 27.11.2026: подгибка края, разные размеры и правило двойного нанесения как в calcTablets.js."""
+    r = calc.execute(params)
+    assert r["cost"] == pytest.approx(expected["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(expected["price"], rel=JS_REL_TOL)
+    assert r["weight_kg"] == pytest.approx(expected["weight_kg"], rel=JS_REL_TOL)
+    if time_abs is not None:
+        assert r["time_ready"] == pytest.approx(expected["time_ready"], abs=time_abs)
+    else:
+        assert r["time_ready"] == pytest.approx(expected["time_ready"], rel=JS_REL_TOL)
+
+
+@pytest.mark.parametrize("empty_bg", ["", "0"])
+def test_background_film_zero_or_empty_is_noop(calc, empty_bg):
+    """Значение '0' («без оклейки») или пустая строка фон не добавляют."""
+    base = calc.execute(REF_FORM_DEFAULT)
+    with_zero = calc.execute({
+        **REF_FORM_DEFAULT,
+        "is_background_film": {"material_id": empty_bg, "is_edge": "isBendEdge"},
+    })
+    assert with_zero["price"] == base["price"]
+    assert with_zero["time_ready"] == base["time_ready"]
+
+
+def test_background_film_without_is_film_adds_background_safely(calc):
+    """Оклейка фона работает и без блока is_film (не падает, увеличивает цену относительно базы)."""
+    base = calc.execute(REF_FORM_DEFAULT)
+    with_bg = calc.execute({
+        **REF_FORM_DEFAULT,
+        "is_background_film": {"material_id": "Avery500c", "is_edge": "isCutEdge"},
+    })
+    assert with_bg["price"] > base["price"]
+    codes = {m.get("code") for m in with_bg.get("materials") or []}
+    assert "Avery500c" in codes
+
+
+def test_tablets_js_posts_is_background_film():
+    """wp-plugin/forms/tablets.js передаёт is_background_film (1427/1483/3313) и не шлёт при '0'."""
+    import json
+    import subprocess
+
+    js_path = Path(__file__).resolve().parents[3] / "wp-plugin" / "forms" / "tablets.js"
+    src = js_path.read_text(encoding="utf-8")
+
+    def run_form(values: dict) -> dict:
+        filled = (
+            src.replace("{{numN}}", str(values.get("qty", 100)))
+            .replace("{{numW}}", str(values.get("width", 50)))
+            .replace("{{numH}}", str(values.get("height", 50)))
+        )
+        harness = (
+            "var vals = " + json.dumps(values) + ";\n"
+            "var __form_id__ = 120;\n"
+            "var ezfc_functions = {\n"
+            "  get_value_from: function (id, calc, third, opts) {\n"
+            "    if (opts && opts.return_value === 'index') return [0];\n"
+            "    if (id === 1339) return [vals.material || 'PVC5'];\n"
+            "    if (id === 1340) return [vals.materialMode || 'isMaterial'];\n"
+            "    if (id === 1371) return [vals.cut || 'isCutManual'];\n"
+            "    if (id === 1368) return [vals.app || 'isUVPrint'];\n"
+            "    if (id === 3313) return vals.doubleApp ? 1 : 0;\n"
+            "    if (id === 1378) return [vals.color || '4+0'];\n"
+            "    if (id === 2770) return [vals.res == null ? 1 : vals.res];\n"
+            "    if (id === 1429) return [vals.laminat || 'No'];\n"
+            "    if (id === 1477) return [vals.edge || 'isCutEdge'];\n"
+            "    if (id === 1484) return [vals.appMat || 'Avery500w'];\n"
+            "    if (id === 1419) return 50;\n"
+            "    if (id === 1420) return 50;\n"
+            "    if (id === 1430) return 1;\n"
+            "    if (id === 1424) return 50;\n"
+            "    if (id === 1425) return third === true ? '25' : 0.25;\n"
+            "    if (id === 1423) return ['1'];\n"
+            "    if (id === 1427) return vals.bgMat == null ? ['0'] : [vals.bgMat];\n"
+            "    if (id === 1483) return vals.bgEdge == null ? ['isCutEdge'] : [vals.bgEdge];\n"
+            "    if (id === 2003) return [vals.mode == null ? 1 : vals.mode];\n"
+            "    return [''];\n"
+            "  }\n"
+            "};\n"
+            "var posted = null, synced = null;\n"
+            "var insaincalc = {\n"
+            "  syncUrl: function (obj) { synced = obj; },\n"
+            "  calcApi: function (slug, body) {\n"
+            "    posted = { slug: slug, body: body };\n"
+            "    return { then: function () { return { catch: function () {} }; } };\n"
+            "  },\n"
+            "  showResult: function () {},\n"
+            "  showError: function () {}\n"
+            "};\n"
+            + filled
+            + "\nprocess.stdout.write(JSON.stringify({ posted: posted, synced: synced }));\n"
+        )
+        proc = subprocess.run(["node", "-e", harness], capture_output=True, text=True, encoding="utf-8")
+        assert proc.returncode == 0, proc.stderr
+        return json.loads(proc.stdout)
+
+    no_bg = run_form({"app": "isFilm", "bgMat": "0", "bgEdge": "isBendEdge"})
+    assert "is_background_film" not in no_bg["posted"]["body"]
+    assert no_bg["synced"]["dpdBackgroudMaterial"] == 0
+
+    with_bg = run_form({"app": "isFilm", "bgMat": "Avery500c", "bgEdge": "isBendEdge", "doubleApp": True})
+    assert with_bg["posted"]["body"]["is_background_film"] == {
+        "material_id": "Avery500c",
+        "is_edge": "isBendEdge",
+        "double_application": True,
+    }
+
+    uv_bg = run_form({"app": "isUVPrint", "bgMat": "Oracal352", "bgEdge": "isCutEdge", "doubleApp": False})
+    assert "is_uv_print" in uv_bg["posted"]["body"]
+    assert uv_bg["posted"]["body"]["is_background_film"] == {
+        "material_id": "Oracal352",
+        "is_edge": "isCutEdge",
+        "double_application": False,
+    }
 
