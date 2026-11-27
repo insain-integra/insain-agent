@@ -28,6 +28,17 @@ TESTS = Path(__file__).resolve().parent / "test_calculators"
 # Копии приняты до правила «эталон на дефолте формы» (08.11.2026); список только сокращается.
 NO_FORM_DEFAULT_YET = {"embossing", "mug", "plaque", "uv_print"}
 
+# Существующие чекбоксы в syncUrl, не уходящие в calcApi (приняты до регламента или ветка без порта).
+# Для новых форм сюда не добавлять; при переносе/исправлении опции — убрать из списка.
+SYNC_URL_ONLY_CHECKBOXES = {
+    ("cards", "ckbVariables"): "calcPlasticCards и cards.py не считают переменные данные (только URL)",
+    ("embossing", "ckbPacking"): "calcEmbossing и embossing.py не считают упаковку (только URL)",
+    ("embossing", "ckbMaterialCustomer"): "calcEmbossing и embossing.py не считают материал заказчика (только URL)",
+    ("sticker", "chkMark"): "в форме 22 не передаётся в calcApi (в sticker.py есть is_find_mark, не в tool_schema)",
+    ("tablets", "ckbShaft"): "ветка isShaft не портирована в tablets.py (только URL)",
+    ("tablets", "chkAdhesiveLayer"): "ветка chkAdhesiveLayer не портирована в tablets.py (только URL)",
+}
+
 
 # Оба калькулятора магнитов живут в test_magnets.py, не в test_<slug>.py.
 SLUG_TEST_FILE = {
@@ -277,3 +288,216 @@ def test_forms_keep_mode_zero():
         elif "modeRaw == null || isNaN(modeNum)" not in text:
             bad.append(f"{path.name}: нет проверки пустого режима, как в mug.js")
     assert not bad, "\n".join(bad)
+
+
+def _strip_js_comments(code: str) -> str:
+    """Убирает // и /* ... */ комментарии, не трогая строковые литералы."""
+    out: list[str] = []
+    i = 0
+    n = len(code)
+    while i < n:
+        ch = code[i]
+        if ch in ("'", '"'):
+            quote = ch
+            out.append(ch)
+            i += 1
+            while i < n:
+                c = code[i]
+                out.append(c)
+                if c == "\\" and i + 1 < n:
+                    out.append(code[i + 1])
+                    i += 2
+                    continue
+                if c == quote:
+                    i += 1
+                    break
+                i += 1
+            continue
+        if ch == "/" and i + 1 < n and code[i + 1] == "/":
+            i += 2
+            while i < n and code[i] != "\n":
+                i += 1
+            continue
+        if ch == "/" and i + 1 < n and code[i + 1] == "*":
+            end = code.find("*/", i + 2)
+            i = n if end == -1 else end + 2
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
+def _extract_sync_url_calls(code: str) -> list[tuple[int, int, str]]:
+    """Находит все вызовы insaincalc.syncUrl({...}) и возвращает (start, end, body)."""
+    calls: list[tuple[int, int, str]] = []
+    marker = "insaincalc.syncUrl("
+    idx = 0
+    n = len(code)
+    while True:
+        pos = code.find(marker, idx)
+        if pos == -1:
+            break
+        open_paren = pos + len(marker) - 1
+        depth = 0
+        i = open_paren
+        while i < n:
+            ch = code[i]
+            if ch in ("'", '"'):
+                quote = ch
+                i += 1
+                while i < n:
+                    if code[i] == "\\" and i + 1 < n:
+                        i += 2
+                        continue
+                    if code[i] == quote:
+                        break
+                    i += 1
+            elif ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+                if depth == 0:
+                    calls.append((pos, i + 1, code[open_paren + 1 : i]))
+                    break
+            i += 1
+        idx = pos + len(marker)
+    return calls
+
+
+def _split_top_level_object_entries(obj_body: str) -> list[tuple[str, str]]:
+    """Разбирает верхнеуровневые пары key: value из аргумента syncUrl({...})."""
+    s = obj_body.strip()
+    if s.startswith("{") and s.endswith("}"):
+        s = s[1:-1]
+    parts: list[str] = []
+    cur: list[str] = []
+    depth_paren = depth_brace = depth_bracket = 0
+    i = 0
+    n = len(s)
+    while i < n:
+        ch = s[i]
+        if ch in ("'", '"'):
+            quote = ch
+            cur.append(ch)
+            i += 1
+            while i < n:
+                cur.append(s[i])
+                if s[i] == "\\" and i + 1 < n:
+                    cur.append(s[i + 1])
+                    i += 2
+                    continue
+                if s[i] == quote:
+                    break
+                i += 1
+        elif ch == "(":
+            depth_paren += 1
+            cur.append(ch)
+        elif ch == ")":
+            depth_paren -= 1
+            cur.append(ch)
+        elif ch == "{":
+            depth_brace += 1
+            cur.append(ch)
+        elif ch == "}":
+            depth_brace -= 1
+            cur.append(ch)
+        elif ch == "[":
+            depth_bracket += 1
+            cur.append(ch)
+        elif ch == "]":
+            depth_bracket -= 1
+            cur.append(ch)
+        elif ch == "," and depth_paren == 0 and depth_brace == 0 and depth_bracket == 0:
+            parts.append("".join(cur))
+            cur = []
+            i += 1
+            continue
+        else:
+            cur.append(ch)
+        i += 1
+    if cur:
+        parts.append("".join(cur))
+
+    entries: list[tuple[str, str]] = []
+    for part in parts:
+        m = re.match(r"^\s*(?:['\"])?([A-Za-z0-9_]+)(?:['\"])?\s*:\s*([\s\S]+)$", part)
+        if m:
+            entries.append((m.group(1), m.group(2).strip()))
+    return entries
+
+
+def _checkbox_reaches_calc_api(branch_code: str, val_expr: str) -> bool:
+    """Проверяет, что переменная или элемент чекбокса из syncUrl участвует в формировании calcApi."""
+    m_ident = re.match(r"^([A-Za-z_]\w*)\b", val_expr)
+    if m_ident:
+        ident = m_ident.group(1)
+        if re.search(rf"\b(?:var|let|const)\s+{re.escape(ident)}\b", branch_code):
+            without_decl = re.sub(
+                rf"\b(?:var|let|const)\s+{re.escape(ident)}\s*=[^;]*;",
+                "",
+                branch_code,
+            )
+            return bool(re.search(rf"\b{re.escape(ident)}\b", without_decl))
+
+    m_el = re.search(r"get_value_from\(\s*(\d+)", val_expr)
+    if m_el:
+        el_id = m_el.group(1)
+        assigned = re.findall(
+            rf"\b(?:var|let|const)\s+([A-Za-z_]\w*)\s*=[^;]*get_value_from\(\s*{el_id}\b[^;]*;",
+            branch_code,
+        )
+        for var_name in assigned:
+            without_decl = re.sub(
+                rf"\b(?:var|let|const)\s+{re.escape(var_name)}\s*=[^;]*;",
+                "",
+                branch_code,
+            )
+            if re.search(rf"\b{re.escape(var_name)}\b", without_decl):
+                return True
+        without_var_decls = re.sub(
+            rf"\b(?:var|let|const)\s+[A-Za-z_]\w*\s*=[^;]*get_value_from\(\s*{el_id}\b[^;]*;",
+            "",
+            branch_code,
+        )
+        return bool(re.search(rf"get_value_from\(\s*{el_id}\b", without_var_decls))
+
+    return False
+
+
+def test_sync_url_checkboxes_reach_calc_api():
+    """Каждый чекбокс ckb*/chk* в syncUrl либо уходит в calcApi, либо явно разрешён в SYNC_URL_ONLY_CHECKBOXES."""
+    errors: list[str] = []
+    seen_url_only: set[tuple[str, str]] = set()
+
+    for path in sorted(FORMS.glob("*.js")):
+        slug = path.stem
+        code = _strip_js_comments(path.read_text(encoding="utf-8"))
+        calls = _extract_sync_url_calls(code)
+        for idx, (start, end, body) in enumerate(calls):
+            prev_end = calls[idx - 1][1] if idx > 0 else 0
+            next_start = calls[idx + 1][0] if idx + 1 < len(calls) else len(code)
+            branch_code = code[prev_end:start] + code[end:next_start]
+
+            for key, val_expr in _split_top_level_object_entries(body):
+                if not re.match(r"^(?:ckb|chk)[A-Za-z0-9_]+$", key):
+                    continue
+                used = _checkbox_reaches_calc_api(branch_code, val_expr)
+                pair = (slug, key)
+                if used:
+                    if pair in SYNC_URL_ONLY_CHECKBOXES:
+                        errors.append(
+                            f"{slug}.js: чекбокс {key} уже уходит в calcApi — убрать из SYNC_URL_ONLY_CHECKBOXES"
+                        )
+                else:
+                    if pair in SYNC_URL_ONLY_CHECKBOXES:
+                        seen_url_only.add(pair)
+                    else:
+                        errors.append(
+                            f"{slug}.js: чекбокс {key} ({val_expr}) есть в syncUrl, но не участвует в calcApi"
+                        )
+
+    for pair in sorted(SYNC_URL_ONLY_CHECKBOXES):
+        if pair not in seen_url_only:
+            errors.append(f"{pair[0]}.js: {pair[1]} из SYNC_URL_ONLY_CHECKBOXES не найден как url-only в syncUrl")
+
+    assert not errors, "\n".join(errors)
