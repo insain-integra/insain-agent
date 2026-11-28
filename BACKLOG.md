@@ -229,3 +229,6 @@
 - Из `form-stands`: Стоковый `scripts/run_js_calc.mjs` не грузит `profile.json`: `isFrame` / `AluFrame2Plus` падает с `Cannot read properties of undefined (reading 'AluFrame2Plus')`. Файл раннера не менялся. Числа рамки сняты тем же раннером после временной загрузки каталога профиля и совпали с портом.
 - Из `form-stands`: `Avery500c` есть и в ленте (cost 3), и в рулоне (cost 340). `--data current` склеивает коды, и `calcPutTape` окантовки берёт 340. Живой misc и `tape.json` — cost 3. Порт кармана считает ленту.
 - Из `form-stands`: У формы 48 поле пены названо `dpd` (id 2959), не `dpdFoam`.
+- Из `ai-seo-fact-sheet`: «Требования к макетам» в подвале ведёт на `/`.
+- Из `ai-seo-fact-sheet`: На сайте ещё есть WhatsApp и Instagram, рубрика «Настольные календари 2020-2021» и старые счётчики — нужны задачи на снятие.
+- Из `ai-seo-fact-sheet`: `/contacts/all/` расходится с `/contacts/ekaterinburg/`.
