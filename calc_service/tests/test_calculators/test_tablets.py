@@ -1576,3 +1576,160 @@ def test_tablets_js_posts_is_background_film():
         "double_application": False,
     }
 
+
+# ── Эталон дефолта формы 51 CalcHashtags: JS, 29.11.2026 ──────────────
+# Дефолт: PVC5 (условный select_option ставит фрезу), 1000×100, текст «#хештег», тираж 1, mode 1.
+# lenCut = (100 + 1000/7) * 2 * 7 * 1.3 = 4420.
+# Стоковый scripts/run_js_calc.mjs падает: calcMilling is not a function.
+# Эталон снят тем же раннером с подключёнными calcMilling.js и equipment/milling.json, --data current:
+# node scripts/run_js_calc.mjs calcTablets --data current --args '[1,[1000,100],"PVC5",{"isCutMilling":{"sizeItem":100,"density":0,"difficulty":1,"lenCut":4420}},1]'
+# JS, 29.11.2026
+REF_FORM51_DEFAULT = {
+    "quantity": 1,
+    "width": 1000,
+    "height": 100,
+    "material_id": "PVC5",
+    "material_mode": "isMaterial",
+    "is_cut_milling": {
+        "size_item": 100,
+        "density": 0,
+        "difficulty": 1,
+        "len_cut": 4420,
+    },
+    "mode": 1,
+}
+EXPECTED_FORM51_DEFAULT_BY_MODE = {
+    0: {
+        "cost": 1254.5,
+        "price": 1544.0,
+        "time_hours": 0.0,
+        "time_ready": 72.0,
+        "weight_kg": 0.28,
+    },
+    1: {
+        "cost": 1579.5,
+        "price": 1944.0,
+        "time_hours": 0.05,
+        "time_ready": 56.099999999999994,
+        "weight_kg": 0.28,
+    },
+    2: {
+        "cost": 2235.030820982143,
+        "price": 2668.9071642857148,
+        "time_hours": 0.1,
+        "time_ready": 40.2,
+        "weight_kg": 0.28,
+    },
+}
+
+
+def test_form51_default_matches_js(calc):
+    """JS, 29.11.2026: дефолт формы 51 (PVC5 1000×100, фреза lenCut 4420, без УФ, 1 шт)."""
+    r = calc.execute(REF_FORM51_DEFAULT)
+    _assert_js(r, EXPECTED_FORM51_DEFAULT_BY_MODE[1])
+    materials = r.get("materials") or []
+    pvc = next((m for m in materials if m.get("code") == "PVC5"), None)
+    assert pvc is not None
+    assert pvc.get("title")
+    assert pvc.get("name")
+    assert pvc.get("name") != pvc.get("code")
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form51_default_modes_match_js(calc, mode):
+    """JS, 29.11.2026: дефолт формы 51 на режимах mode=0, 1, 2."""
+    r = calc.execute({**REF_FORM51_DEFAULT, "mode": mode})
+    _assert_js(r, EXPECTED_FORM51_DEFAULT_BY_MODE[mode])
+
+
+def test_form51_default_mode_monotonic(calc):
+    """Собственное производство, дефолт формы 51: цена растёт с режимом, срок падает."""
+    res = {m: calc.execute({**REF_FORM51_DEFAULT, "mode": m}) for m in (0, 1, 2)}
+    assert res[0]["price"] < res[1]["price"] < res[2]["price"]
+    assert res[2]["time_ready"] < res[1]["time_ready"] < res[0]["time_ready"]
+
+
+def test_tablets_js_form51_posts_default():
+    """Форма 51: дефолт хештега уходит во фрезу, ветки форм 36 и 48 не исполняются."""
+    import json
+    import subprocess
+
+    js_path = Path(__file__).resolve().parents[3] / "wp-plugin" / "forms" / "tablets.js"
+    src = js_path.read_text(encoding="utf-8")
+    assert "/* form 51 */" in src
+    assert "/* form 48 */" in src
+    assert "/* form 36 */" in src
+    assert "ezfc_functions.get_value_from(1339, true)[0]" in src
+    assert "ezfc_functions.get_value_from(1924)" in src
+    assert "insaincalc.calcApi('tablets'" in src
+    assert "insaincalc.syncUrl(" in src
+    assert "insaincalc.showResult(" in src
+    filled = (
+        src.replace("{{numN}}", "0")
+        .replace("{{numW}}", "0")
+        .replace("{{numH}}", "0")
+    )
+    harness = (
+        "var __form_id__ = 51;\n"
+        "var ezfc_functions = {\n"
+        "  get_element_id_by_name: function (formId, name) {\n"
+        "    return name === 'inpText' ? 2148 : 0;\n"
+        "  },\n"
+        "  get_value_from: function (id, calc, third, opts) {\n"
+        "    if (opts && opts.return_value === 'index') {\n"
+        "      var indexes = {2102: 0, 2106: 1, 2109: 0, 2111: 0};\n"
+        "      return [indexes[id] == null ? 0 : indexes[id]];\n"
+        "    }\n"
+        "    if (id === 2099) return 1;\n"
+        "    if (id === 2100) return 1000;\n"
+        "    if (id === 2101) return 100;\n"
+        "    if (id === 2148) return '#хештег';\n"
+        "    if (id === 2102) return ['PVC5'];\n"
+        "    if (id === 2106) return ['isCutMilling'];\n"
+        "    if (id === 2109) return ['noApplication'];\n"
+        "    if (id === 2111) return ['4+0'];\n"
+        "    if (id === 2143) return ['1'];\n"
+        "    return [''];\n"
+        "  }\n"
+        "};\n"
+        "var posted = null, synced = null;\n"
+        "var insaincalc = {\n"
+        "  syncUrl: function (obj) { synced = obj; },\n"
+        "  calcApi: function (slug, body) {\n"
+        "    posted = { slug: slug, body: body };\n"
+        "    return { then: function () { return { catch: function () {} }; } };\n"
+        "  },\n"
+        "  showResult: function () {},\n"
+        "  showError: function () {}\n"
+        "};\n"
+        + filled
+        + "\nprocess.stdout.write(JSON.stringify({ posted: posted, synced: synced }));\n"
+    )
+    proc = subprocess.run(["node", "-e", harness], capture_output=True, text=True, encoding="utf-8")
+    assert proc.returncode == 0, proc.stderr
+    got = json.loads(proc.stdout)
+    assert got["posted"]["slug"] == "tablets"
+    assert got["posted"]["body"] == {
+        "quantity": 1,
+        "width": 1000,
+        "height": 100,
+        "material_id": "PVC5",
+        "material_mode": "isMaterial",
+        "mode": 1,
+        "is_cut_milling": {
+            "size_item": 100,
+            "density": 0,
+            "difficulty": 1,
+            "len_cut": 4420,
+        },
+    }
+    assert "is_cut_manual" not in got["posted"]["body"]
+    assert "is_uv_print" not in got["posted"]["body"]
+    assert got["synced"]["inpText"] == "#хештег"
+    assert got["synced"]["dpdCut"] == 1
+    assert got["synced"]["dpdMaterial"] == 0
+    assert got["synced"]["rdoModeProduction"] == 1
+    assert got["synced"]["numN"] == 1
+    assert got["synced"]["numW"] == 1000
+    assert got["synced"]["numH"] == 100
+

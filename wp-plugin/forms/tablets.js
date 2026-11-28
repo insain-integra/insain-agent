@@ -1,14 +1,16 @@
 // Форма 36 CalcTabs, элемент cjsCalc (1348). Id полей — боевой формы 36.
-// Ветки без порта в tablets.py (isCutMilling, isShaft, chkAdhesiveLayer)
+// Ветки без порта в tablets.py (isShaft, chkAdhesiveLayer) и фрезеровка формы 36
 // пишутся в syncUrl, но в calcApi не передаются.
 // Не-API поля (dpdTypeCut, древко, клеевой слой) сохраняются в URL.
 // Форма 48 CalcStands — второй набор в этом же файле (1924, 1925, 1926, 1927, 1934,
 // 1936, 1937, 1938, 1940, 1941, 1942, 1943, 1946, 1947, 1948, 1949, 1987, 2008,
 // 2009, 2318, 2871, 2872, 2873, 2959, 2960, 2961).
-// Развилка по имени dpdProfile: его нет у формы 36. Id копии и боевой 48 различаются, по ним не ветвимся.
-// Плейсхолдеры полей только формы 48 в файле нельзя: на форме 36 ezFC заменит весь расчёт на return 0.
+// Форма 51 CalcHashtags — третий набор (2099, 2100, 2101, 2102, 2106, 2109, 2111, 2143, 2148).
+// Развилка по именам полей, не по id копии: dpdProfile — форма 48, inpText — форма 51.
+// Плейсхолдеры полей только формы 48 или 51 в файле нельзя: на форме 36 ezFC заменит весь расчёт на return 0.
 // Резка формы 48 в боевом cjsCalc зашита: isCutManual / KeencutEvolutionE2, материал — isMaterial.
 // Рамка, подвесы, EVA и карманы уходят в calcApi. Подвес меняет цену только вместе с рамкой, как calcFrame.
+// Резка формы 51 — лазер или фрезер. Длина реза букв: (высота + ширина / длина текста) * 2 * длина текста * 1.3.
 function optionIndex(raw) {
     if (raw == null || typeof raw !== 'object' || raw[0] == null || raw[0] === '') {
         return '';
@@ -24,6 +26,8 @@ function numFrom(raw) {
 
 var isStands = typeof ezfc_functions.get_element_id_by_name === 'function'
     && ezfc_functions.get_element_id_by_name(__form_id__, 'dpdProfile');
+var isHashtags = typeof ezfc_functions.get_element_id_by_name === 'function'
+    && ezfc_functions.get_element_id_by_name(__form_id__, 'inpText');
 if (isStands) {
 /* form 48 */
     var qty = numFrom(ezfc_functions.get_value_from(1924));
@@ -200,6 +204,88 @@ if (isStands) {
         params.is_eva_foam = {
             eva_foam_id: String(foamId),
             size: [foamW > 0 ? foamW : 0, foamH > 0 ? foamH : 0]
+        };
+    }
+
+    insaincalc.calcApi('tablets', params).then(function (calcCost) {
+        insaincalc.showResult(calcCost, qty, __form_id__);
+    }).catch(function (err) {
+        insaincalc.showError(err, __form_id__);
+    });
+/* /form */
+} else if (isHashtags) {
+/* form 51 */
+    var qty = numFrom(ezfc_functions.get_value_from(2099));
+    var width = numFrom(ezfc_functions.get_value_from(2100, true));
+    var height = numFrom(ezfc_functions.get_value_from(2101, true));
+    var textRaw = ezfc_functions.get_value_from(2148, true);
+    var text = '';
+    if (Array.isArray(textRaw)) {
+        text = String(textRaw[0] == null ? '' : textRaw[0]);
+    } else if (textRaw != null && typeof textRaw === 'object') {
+        text = String(textRaw[0] == null ? '' : textRaw[0]);
+    } else {
+        text = String(textRaw == null ? '' : textRaw);
+    }
+    var materialId = ezfc_functions.get_value_from(2102, true)[0] || '';
+    var materialIndex = optionIndex(ezfc_functions.get_value_from(2102, true, false, { return_value: 'index' }));
+    var cutId = ezfc_functions.get_value_from(2106, true)[0] || '';
+    var cutIndex = optionIndex(ezfc_functions.get_value_from(2106, true, false, { return_value: 'index' }));
+    var applicationId = ezfc_functions.get_value_from(2109, true)[0] || '';
+    var applicationIndex = optionIndex(ezfc_functions.get_value_from(2109, true, false, { return_value: 'index' }));
+    var color = ezfc_functions.get_value_from(2111, true)[0] || '4+0';
+    var colorIndex = optionIndex(ezfc_functions.get_value_from(2111, true, false, { return_value: 'index' }));
+    // 0 — «дешевле». Пустое поле → 1; ноль нельзя отбрасывать через ||.
+    // У формы 51 в радио только 1 и 2.
+    var modeRaw = ezfc_functions.get_value_from(2143, true)[0];
+    var modeNum = Number(modeRaw);
+    var mode = (modeRaw === '' || modeRaw == null || isNaN(modeNum)) ? 1 : modeNum;
+
+    insaincalc.syncUrl({
+        numN: qty,
+        numW: width,
+        numH: height,
+        inpText: text,
+        dpdMaterial: materialIndex,
+        dpdCut: cutIndex,
+        dpdApplication: applicationIndex,
+        dpdColor: colorIndex,
+        rdoModeProduction: mode
+    });
+
+    var params = {
+        quantity: Number(qty) || 1,
+        width: width,
+        height: height,
+        material_id: String(materialId),
+        material_mode: 'isMaterial',
+        mode: mode
+    };
+
+    if (String(cutId) === 'isCutLaser' || String(cutId) === 'isCutMilling') {
+        var sizeItem = Math.min(width, height);
+        var textLen = text.length;
+        var lenCut = textLen > 0 ? (height + width / textLen) * 2 * textLen * 1.3 : 0;
+        var cutParams = {
+            size_item: sizeItem,
+            density: 0,
+            difficulty: 1,
+            len_cut: lenCut
+        };
+        if (String(cutId) === 'isCutLaser') {
+            params.is_cut_laser = cutParams;
+        } else {
+            params.is_cut_milling = cutParams;
+        }
+    }
+
+    if (String(applicationId) === 'isUVPrint') {
+        params.is_uv_print = {
+            printer_id: 'PrintUV',
+            resolution: 1,
+            surface: 'plain',
+            color: String(color || '4+0'),
+            double_application: false
         };
     }
 

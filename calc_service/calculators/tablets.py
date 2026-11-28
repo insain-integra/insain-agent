@@ -13,10 +13,10 @@
 оклейка фона таблички плёнкой (CutRoller KWTrio3026 + calc_manual_roll, is_background_film),
 режим учёта материала (material_mode);
 карманы (PocketsCalculator), рамка и подвесы (FrameCalculator),
-EVA-пена (CutRoller KeencutEvolutionE2 + calc_manual_roll, is_eva_foam).
+EVA-пена (CutRoller KeencutEvolutionE2 + calc_manual_roll, is_eva_foam),
+фрезерная резка (MillingCalculator, is_cut_milling).
 
 Список «не перенесено» (см. scripts/js_port_gaps_allowed.txt, префикс calcTablets):
-- фрезерная резка (опция фрезеровки, вызов calcMilling),
 - древко и клеевой слой на этапе табличек.
 """
 
@@ -30,6 +30,7 @@ from calculators.cut_roller import CutRollerCalculator
 from calculators.frame import FrameCalculator
 from calculators.heat_press import HeatPressCalculator
 from calculators.laser import LaserCalculator
+from calculators.milling import MillingCalculator
 from calculators.pockets import PocketsCalculator
 from calculators.print_roll import DEFAULT_PRINTER as DEFAULT_ROLL_PRINTER, PrintRollCalculator
 from calculators.sticker import StickerCalculator
@@ -72,6 +73,18 @@ def _is_truthy_option(val: Any) -> bool:
 
 
 def _normalize_cut_laser(raw: Any) -> Dict[str, float]:
+    if not isinstance(raw, Mapping):
+        return {"len_cut": 0.0, "size_item": 0.0, "density": 0.0, "difficulty": 1.0}
+    return {
+        "len_cut": float(_pick(raw, "len_cut", "lenCut", default=0) or 0),
+        "size_item": float(_pick(raw, "size_item", "sizeItem", default=0) or 0),
+        "density": float(_pick(raw, "density", default=0) or 0),
+        "difficulty": float(_pick(raw, "difficulty", default=1) or 1),
+    }
+
+
+def _normalize_cut_milling(raw: Any) -> Dict[str, float]:
+    """Параметры фрезы в виде calcMilling: lenCut / sizeItem."""
     if not isinstance(raw, Mapping):
         return {"len_cut": 0.0, "size_item": 0.0, "density": 0.0, "difficulty": 1.0}
     return {
@@ -144,6 +157,10 @@ class TabletsCalculator(BaseCalculator):
                     "is_cut_laser": {
                         "type": "object",
                         "description": "Параметры лазерной резки (size_item/sizeItem, len_cut/lenCut, density, difficulty)",
+                    },
+                    "is_cut_milling": {
+                        "type": "object",
+                        "description": "Фрезерная резка (MillingCalculator): len_cut/lenCut, size_item/sizeItem, density, difficulty",
                     },
                     "is_grave": {"type": "integer", "description": "Индекс детализации гравировки"},
                     "is_grave_fill": {
@@ -218,6 +235,7 @@ class TabletsCalculator(BaseCalculator):
                 {"name": "is_cut_manual_metal", "type": "string", "required": False, "title": "Резак металла"},
                 {"name": "is_sublimation", "type": "boolean", "required": False, "default": False, "title": "Сублимация"},
                 {"name": "is_cut_laser", "type": "object", "required": False, "title": "Лазерная резка"},
+                {"name": "is_cut_milling", "type": "object", "required": False, "title": "Фрезерная резка"},
                 {"name": "is_grave", "type": "integer", "required": False, "title": "Гравировка (разрешение)"},
                 {"name": "is_grave_fill", "type": "array", "required": False, "title": "Область гравировки"},
                 {"name": "is_uv_print", "type": "object", "required": False, "title": "УФ-печать"},
@@ -237,7 +255,7 @@ class TabletsCalculator(BaseCalculator):
             "param_groups": {
                 "main": ["quantity", "width", "height"],
                 "material": ["material_id", "material_mode"],
-                "cut": ["is_cut_manual", "is_cut_manual_metal", "is_cut_laser", "is_grave", "is_grave_fill"],
+                "cut": ["is_cut_manual", "is_cut_manual_metal", "is_cut_laser", "is_cut_milling", "is_grave", "is_grave_fill"],
                 "print": ["is_uv_print", "is_print", "is_edge", "is_lamination", "is_film", "is_background_film", "is_sublimation"],
                 "options": ["pocket_id", "pocket_count", "is_frame", "frame_profile_id"],
                 "mode": ["mode"],
@@ -674,6 +692,10 @@ class TabletsCalculator(BaseCalculator):
         is_cut_manual_metal = params.get("is_cut_manual_metal")
         is_sublimation = bool(params.get("is_sublimation", False))
         has_cut_laser = "is_cut_laser" in params and params.get("is_cut_laser") is not None
+        raw_milling = params.get("is_cut_milling")
+        if raw_milling is None and "isCutMilling" in params:
+            raw_milling = params.get("isCutMilling")
+        has_milling = raw_milling not in (None, False, "", "no", "0", "noCut")
         is_grave = params.get("is_grave")
         is_grave_fill = params.get("is_grave_fill")
         has_uv = "is_uv_print" in params and params.get("is_uv_print") is not None
@@ -728,6 +750,18 @@ class TabletsCalculator(BaseCalculator):
             if is_grave_fill is not None:
                 laser_params["is_grave_fill"] = is_grave_fill
             parts.append(LaserCalculator().calculate(laser_params))
+
+        # Фрезерная резка с материалом (calcMilling). Цена фрезы ещё без marginTablets.
+        if has_milling:
+            parts.append(MillingCalculator().calculate({
+                "quantity": n,
+                "width": width,
+                "height": height,
+                "material_id": material_id,
+                "material_mode": material_mode,
+                "is_cut_milling": _normalize_cut_milling(raw_milling),
+                "mode": mode.value,
+            }))
 
         # Сублимация (calcHeatPress на раскладке A4/A3)
         if is_sublimation:

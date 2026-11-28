@@ -22,10 +22,8 @@ calcShildSublimaton call calcCutRoller
 calcShildSublimaton call calcCutSaber
 calcShildSublimaton call calcManualPress
 calcShildSublimaton call calcRounding
-calcTablets option isCutMilling
 calcTablets option isShaft
 calcTablets option isAdhesiveLayer
-calcTablets call calcMilling
 calcUVBadge option isPocket
 calcUVBadge option isAttachment
 calcUVPrint call calcLayoutOnSheet
