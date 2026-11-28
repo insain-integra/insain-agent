@@ -232,3 +232,7 @@
 - Из `ai-seo-fact-sheet`: «Требования к макетам» в подвале ведёт на `/`.
 - Из `ai-seo-fact-sheet`: На сайте ещё есть WhatsApp и Instagram, рубрика «Настольные календари 2020-2021» и старые счётчики — нужны задачи на снятие.
 - Из `ai-seo-fact-sheet`: `/contacts/all/` расходится с `/contacts/ekaterinburg/`.
+- Из `form-hashtags`: `scripts/run_js_calc.mjs` не грузит `calcMilling.js` и `milling.json`: стоковый раннер на дефолте формы 51 падает с `insaincalc.calcMilling is not a function`. Скрипт не менялся. Эталон снят тем же раннером с этими двумя файлами.
+- Из `form-hashtags`: Консоль копии: `TypeError` в `insainParse/scrtp.js`. Ошибок `insaincalc` и `ezfc` нет.
+- Из `form-hashtags`: При тексте `#хештег` пункт «раскрой на лазере» сразу возвращается на фрезу. Отдельный POST лазера со страницы не снят.
+- Из `form-hashtags`: В `materials` боевого API у листа ПВХ `quantity` 0.0 и `size_mm` [3050, 2050]. На копии колонка количества «0», размер показан. Калькулятор в этой сессии не менялся.

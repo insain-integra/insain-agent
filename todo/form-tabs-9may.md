@@ -1,6 +1,6 @@
 # form-tabs-9may
 
-Статус: заблокировано: ждёт todo/form-hashtags.md
+Статус: черновик
 Сложность: низкая
 Implementer: Grok 4.7
 Reviewer: Auto
