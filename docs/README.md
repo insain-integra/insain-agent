@@ -33,3 +33,4 @@
 | [site/access-tools.md](site/access-tools.md) | Runbook: чем читать и писать объекты WordPress | живой |
 | [site/content-inventory.md](site/content-inventory.md) | Карта контента сайта: объект, где лежит, чем правится | живой |
 | [site/forms.md](site/forms.md) | Реестр форм ezFC: страница, id, slug API, статус | живой |
+| [site/facts.md](site/facts.md) | Факт-лист компании: города, реквизиты, sameAs, счётчики, FAQ | живой |
