@@ -26,7 +26,7 @@
 ### Волна 1 — контент и разметка (после Волны 0 и подтверждения факт-листа владельцем)
 
 - **ai-seo-faq-and-facts** (`T04` + `T05`, после `ai-seo-cleanup-noindex`): обновить устаревшие даты/факты («11 лет», 2019, календари-2027, `sameAs`) + новый раздел `/faq/` (15–25 реальных вопросов с подтверждёнными цифрами и валидной разметкой `FAQPage`).
-- **ai-seo-org-schema** (`T08`, после `ai-seo-geo-yoast`): JSON-LD `Organization` (главная) и `LocalBusiness` (5 страниц `/contacts/<city>/`) с подтверждёнными реквизитами.
+- **ai-seo-org-schema** (`todo/ai-seo-org-schema.md`, `T08`, после `ai-seo-geo-yoast`): JSON-LD `Organization` (главная) и `LocalBusiness` (5 страниц `/contacts/<city>/`) с подтверждёнными реквизитами.
 - **ai-seo-ins-products** (`T06` только для ~63 товаров `INS…`, после `ai-seo-geo-yoast` и `ai-seo-h1-structure`): описание, таблица характеристик, ориентир цены «от» (для 36 калькуляторных — согласованно с `calc_service`), meta/title, `Product`/`Offer`; без касания форм ezFC. Обкатка skill карточки Woo + SEO.
 
 ### Волна 2 — меню, HTML-структура, редиректы и индексация (после `todo/supplier-old-cleanup.md`)
