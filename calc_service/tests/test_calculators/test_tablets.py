@@ -430,6 +430,165 @@ def test_form_default_mode_monotonic(calc):
     assert res[2]["time_ready"] < res[1]["time_ready"] < res[0]["time_ready"]
 
 
+# ── Эталон дефолта формы 48 CalcStands: JS, 29.11.2026 ────────────────
+# node scripts/run_js_calc.mjs calcTablets --data current --args '[1,[1000,1000],"PVC5",{"isCutManual":"KeencutEvolutionE2","isUVPrint":{"printerID":"PrintUV","resolution":0,"surface":"isPlain","color":"4+0"},"Material":"isMaterial"},1]'
+# Боевой API 29.11.2026: price 4780, time_ready 48.9. mode 0 и 2 — тот же вход.
+# JS, 29.11.2026
+REF_FORM48_DEFAULT = {
+    "quantity": 1,
+    "width": 1000,
+    "height": 1000,
+    "material_id": "PVC5",
+    "material_mode": "isMaterial",
+    "is_cut_manual": "KeencutEvolutionE2",
+    "is_uv_print": {
+        "printer_id": "PrintUV",
+        "resolution": 0,
+        "surface": "plain",
+        "color": "4+0",
+        "double_application": False,
+    },
+    "mode": 1,
+}
+EXPECTED_FORM48_DEFAULT_BY_MODE = {
+    0: {
+        "cost": 2400.0,
+        "price": 3914.0,
+        "time_hours": 0.19,
+        "time_ready": 56.3,
+        "weight_kg": 2.75,
+    },
+    1: {
+        "cost": 2942.0,
+        "price": 4780.0,
+        "time_hours": 0.54,
+        "time_ready": 48.9,
+        "weight_kg": 2.75,
+    },
+    2: {
+        "cost": 3487.0,
+        "price": 5653.0,
+        "time_hours": 0.91,
+        "time_ready": 41.529999999999994,
+        "weight_kg": 2.75,
+    },
+}
+
+
+def test_form48_default_matches_js(calc):
+    """JS, 29.11.2026: дефолт формы 48 (PVC5 1000×1000, Keencut + PrintUV 4+0 res=0, 1 шт)."""
+    r = calc.execute(REF_FORM48_DEFAULT)
+    _assert_js(r, EXPECTED_FORM48_DEFAULT_BY_MODE[1])
+    materials = r.get("materials") or []
+    pvc = next((m for m in materials if m.get("code") == "PVC5"), None)
+    assert pvc is not None
+    assert pvc.get("size_mm") == [3050.0, 2050.0]
+    assert "title" in pvc
+
+
+@pytest.mark.parametrize("mode", [0, 1, 2])
+def test_form48_default_modes_match_js(calc, mode):
+    """JS, 29.11.2026: дефолт формы 48 на режимах mode=0, 1, 2."""
+    r = calc.execute({**REF_FORM48_DEFAULT, "mode": mode})
+    _assert_js(r, EXPECTED_FORM48_DEFAULT_BY_MODE[mode])
+
+
+def test_form48_default_mode_monotonic(calc):
+    """Собственное производство, дефолт формы 48: цена растёт с режимом, срок падает."""
+    res = {m: calc.execute({**REF_FORM48_DEFAULT, "mode": m}) for m in (0, 1, 2)}
+    assert res[0]["price"] < res[1]["price"] < res[2]["price"]
+    assert res[2]["time_ready"] < res[1]["time_ready"] < res[0]["time_ready"]
+
+
+def test_tablets_js_form48_posts_default():
+    """Форма 48: дефолт стенда уходит в calc/tablets, ветка формы 36 не исполняется."""
+    import json
+    import subprocess
+
+    js_path = Path(__file__).resolve().parents[3] / "wp-plugin" / "forms" / "tablets.js"
+    src = (
+        js_path.read_text(encoding="utf-8")
+        .replace("{{numN}}", "0")
+        .replace("{{numW}}", "0")
+        .replace("{{numH}}", "0")
+    )
+    harness = (
+        "var __form_id__ = 48;\n"
+        "var document = { getElementsByClassName: function () { return []; } };\n"
+        "var ezfc_functions = {\n"
+        "  get_element_id_by_name: function (formId, name) {\n"
+        "    return name === 'dpdProfile' ? 2871 : 0;\n"
+        "  },\n"
+        "  get_value_from: function (id, calc, third, opts) {\n"
+        "    if (opts && opts.return_value === 'index') {\n"
+        "      var indexes = {1927:2, 1934:1, 1936:0, 1938:0, 1937:0, 1949:0, 1940:0, 1948:0, 2871:0, 2872:0, 2959:0};\n"
+        "      return [indexes[id] == null ? 0 : indexes[id]];\n"
+        "    }\n"
+        "    if (id === 1924) return 1;\n"
+        "    if (id === 1925) return 1000;\n"
+        "    if (id === 1926) return 1000;\n"
+        "    if (id === 1927) return ['PVC5'];\n"
+        "    if (id === 1934) return ['isUVPrint'];\n"
+        "    if (id === 1936) return ['4+0'];\n"
+        "    if (id === 2318) return [0];\n"
+        "    if (id === 1938) return ['isCutEdge'];\n"
+        "    if (id === 1937) return ['No'];\n"
+        "    if (id === 1949) return ['Avery500w'];\n"
+        "    if (id === 1940) return ['0'];\n"
+        "    if (id === 1947) return calc ? '25' : 0.25;\n"
+        "    if (id === 1948) return ['1'];\n"
+        "    if (id === 1987) return ['1'];\n"
+        "    if (id === 2008 || id === 1941 || id === 1946) return 50;\n"
+        "    if (id === 2009 || id === 1942) return 50;\n"
+        "    if (id === 1943) return 1;\n"
+        "    if (id === 2873) return 2;\n"
+        "    if (id === 2960 || id === 2961) return 500;\n"
+        "    return [''];\n"
+        "  }\n"
+        "};\n"
+        "var posted = null, synced = null;\n"
+        "var insaincalc = {\n"
+        "  syncUrl: function (obj) { synced = obj; },\n"
+        "  calcApi: function (slug, body) {\n"
+        "    posted = { slug: slug, body: body };\n"
+        "    return { then: function () { return { catch: function () {} }; } };\n"
+        "  },\n"
+        "  showResult: function () {},\n"
+        "  showError: function () {}\n"
+        "};\n"
+        + src
+        + "\nprocess.stdout.write(JSON.stringify({ posted: posted, synced: synced }));\n"
+    )
+    proc = subprocess.run(["node", "-e", harness], capture_output=True, text=True, encoding="utf-8")
+    assert proc.returncode == 0, proc.stderr
+    got = json.loads(proc.stdout)
+    assert got["posted"]["slug"] == "tablets"
+    assert got["posted"]["body"] == {
+        "quantity": 1,
+        "width": 1000,
+        "height": 1000,
+        "material_id": "PVC5",
+        "material_mode": "isMaterial",
+        "is_cut_manual": "KeencutEvolutionE2",
+        "mode": 1,
+        "is_uv_print": {
+            "printer_id": "PrintUV",
+            "resolution": 0,
+            "surface": "plain",
+            "color": "4+0",
+            "double_application": False,
+        },
+    }
+    assert got["synced"]["numN"] == 1
+    assert got["synced"]["numW"] == 1000
+    assert got["synced"]["dpdMaterial"] == 2
+    assert got["synced"]["dpdApplication"] == 1
+    assert got["synced"]["rdoModeProduction"] == 1
+    assert got["synced"]["dpdProfile"] == 0
+    assert "is_print" not in got["posted"]["body"]
+    assert "is_film" not in got["posted"]["body"]
+
+
 @pytest.mark.parametrize(
     ("material_mode", "double_app", "expected"),
     [

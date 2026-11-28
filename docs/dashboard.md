@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **24**. В работе/ревью: нет. Заблокировано: `form-badge-lamination.md`, `form-calendar-table.md`, `form-hashtags.md`, `form-pins.md`, `form-poly-pin.md`, `form-shields.md`, `form-tabs-9may.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **24**. В работе/ревью: `form-stands.md`. Заблокировано: `form-badge-lamination.md`, `form-calendar-table.md`, `form-hashtags.md`, `form-pins.md`, `form-poly-pin.md`, `form-shields.md`, `form-tabs-9may.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -52,7 +52,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-poly-badge.md` | черновик |
 | `form-poly-pin.md` | заблокировано: ждёт todo/form-poly-badge.md |
 | `form-shields.md` | заблокировано: ждёт todo/form-tabs-9may.md |
-| `form-stands.md` | черновик |
+| `form-stands.md` | ревью |
 | `form-tabs-9may.md` | заблокировано: ждёт todo/form-hashtags.md |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
