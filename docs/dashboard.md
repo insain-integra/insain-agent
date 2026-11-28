@@ -37,22 +37,22 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **24**. В работе/ревью: `form-stands.md`. Заблокировано: `form-badge-lamination.md`, `form-calendar-table.md`, `form-hashtags.md`, `form-pins.md`, `form-poly-pin.md`, `form-shields.md`, `form-tabs-9may.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **24**. В работе/ревью: нет. Заблокировано: `ai-seo-fact-sheet.md`, `form-badge-lamination.md`, `form-calendar-table.md`, `form-pins.md`, `form-poly-pin.md`, `form-shields.md`, `form-tabs-9may.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `ai-calc-authoring-skill.md` | черновик |
+| `ai-seo-fact-sheet.md` | заблокировано: человек |
 | `ezfc-options-source-reset.md` | черновик |
 | `form-badge-lamination.md` | заблокировано: ждёт todo/form-pins.md |
 | `form-calendar-flip.md` | черновик |
 | `form-calendar-table.md` | заблокировано: ждёт todo/form-calendar-flip.md |
-| `form-hashtags.md` | заблокировано: ждёт todo/form-stands.md |
+| `form-hashtags.md` | черновик |
 | `form-magnet-poly.md` | черновик |
 | `form-pins.md` | заблокировано: ждёт todo/form-poly-pin.md |
 | `form-poly-badge.md` | черновик |
 | `form-poly-pin.md` | заблокировано: ждёт todo/form-poly-badge.md |
 | `form-shields.md` | заблокировано: ждёт todo/form-tabs-9may.md |
-| `form-stands.md` | выкатка |
 | `form-tabs-9may.md` | заблокировано: ждёт todo/form-hashtags.md |
 | `forms-batch-switch.md` | черновик |
 | `insainparse-admin-scripts.md` | черновик |
@@ -75,7 +75,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 ## Журнал (последние 5)
 
 - 2026-11-29 — form-stands
+- 2026-11-29 — form-stands
 - 2026-11-27 — ezfc-options-testing-rules
 - 2026-11-27 — form-tablets
 - 2026-11-27 — form-tablets
-- 2026-11-26 — form-tablets

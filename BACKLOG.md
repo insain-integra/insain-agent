@@ -225,3 +225,7 @@
 - Из `form-stands`: `calcTablets.js`: оклейка фона без аппликации падает на `options.get('isFilm')['isBackgroundFilm']`. Дефолт формы 48 — УФ, ветка не исполняется.
 - Из `form-stands`: Раннер `isFrame` / `AluFrame2Plus`: `Cannot read properties of undefined (reading 'AluFrame2Plus')`. Рамку с раннером не сверил.
 - Из `form-stands`: У формы 48 поле пены названо `dpd` (id 2959), не `dpdFoam`.
+- Из `form-stands`: `calcTablets.js`: оклейка фона без аппликации падает на `options.get('isFilm')['isBackgroundFilm']`. Дефолт формы 48 — УФ, ветка не исполняется.
+- Из `form-stands`: Стоковый `scripts/run_js_calc.mjs` не грузит `profile.json`: `isFrame` / `AluFrame2Plus` падает с `Cannot read properties of undefined (reading 'AluFrame2Plus')`. Файл раннера не менялся. Числа рамки сняты тем же раннером после временной загрузки каталога профиля и совпали с портом.
+- Из `form-stands`: `Avery500c` есть и в ленте (cost 3), и в рулоне (cost 340). `--data current` склеивает коды, и `calcPutTape` окантовки берёт 340. Живой misc и `tape.json` — cost 3. Порт кармана считает ленту.
+- Из `form-stands`: У формы 48 поле пены названо `dpd` (id 2959), не `dpdFoam`.
