@@ -587,6 +587,211 @@ def test_tablets_js_form48_posts_default():
     assert got["synced"]["dpdProfile"] == 0
     assert "is_print" not in got["posted"]["body"]
     assert "is_film" not in got["posted"]["body"]
+    assert "is_pocket" not in got["posted"]["body"]
+    assert "is_frame" not in got["posted"]["body"]
+    assert "is_eva_foam" not in got["posted"]["body"]
+
+
+# JS, 29.11.2026. Карман ПЭТ А4 с окантовкой Avery500c, как боевая форма 48.
+# calcLaser PET05 и calcPutTape TapePOLIMOUNT385_6 на --data current совпали с портом.
+# calcPutTape Avery500c на --data current берёт cost 340 у рулона с тем же кодом
+# (scripts/run_js_calc.mjs кладёт прайс всех файлов в один индекс). Живой misc и tape.json — cost 3.
+# Эталон собран из совпавших частей и каталога ленты, не из склеенного прогона calcTablets.
+# node scripts/run_js_calc.mjs calcLaser --data current --args '[1,[226,305],"PET05",{"Material":"isMaterial","isCutLaser":{"sizeItem":226,"density":0,"difficulty":1,"lenCut":0}},0]'
+# node scripts/run_js_calc.mjs calcPutTape --data current --args '[1,[[1,226],[2,305]],"TapePOLIMOUNT385_6",2,{},0]'
+REF_FORM48_POCKET_A4 = {
+    **REF_FORM48_DEFAULT,
+    "is_pocket": [{"pocket_id": "PocketPETA4V", "n": 1, "border_id": "Avery500c"}],
+}
+EXPECTED_FORM48_POCKET_A4 = {
+    "cost": 3202.78986,
+    "price": 5183.9191676,
+    "time_hours": 0.72,
+    "time_ready": 49.08,
+    "weight_kg": 2.81,
+}
+
+# JS, 29.11.2026: карман на держателях, окантовка не входит в mount standoff.
+# node scripts/run_js_calc.mjs calcTablets --data current --args '[1,[1000,1000],"PVC5",{"isCutManual":"KeencutEvolutionE2","isUVPrint":{"printerID":"PrintUV","resolution":0,"surface":"isPlain","color":"4+0"},"Material":"isMaterial","isPocket":[{"n":1,"pocketID":"PocketStandoffА4V","borderID":"Avery500c"}]},1]'
+REF_FORM48_POCKET_STANDOFF = {
+    **REF_FORM48_DEFAULT,
+    "is_pocket": [{"pocket_id": "PocketStandoffА4V", "n": 1, "border_id": "Avery500c"}],
+}
+EXPECTED_FORM48_POCKET_STANDOFF = {
+    "cost": 3346.8,
+    "price": 5413.72,
+    "time_ready": 49.08,
+}
+
+# JS, 29.11.2026.
+# node scripts/run_js_calc.mjs calcTablets --data current --args '[1,[1000,1000],"PVC5",{"isCutManual":"KeencutEvolutionE2","isUVPrint":{"printerID":"PrintUV","resolution":0,"surface":"isPlain","color":"4+0"},"Material":"isMaterial","isEVAFoam":{"evaFoamID":"EVAFoam5","size":[500,500]}},1]'
+REF_FORM48_EVA = {
+    **REF_FORM48_DEFAULT,
+    "is_eva_foam": {"eva_foam_id": "EVAFoam5", "size": [500, 500]},
+}
+EXPECTED_FORM48_EVA = {
+    "cost": 3932.0,
+    "price": 6385.0,
+    "time_hours": 0.94,
+    "time_ready": 49.3,
+    "weight_kg": 2.9,
+}
+
+# JS, 29.11.2026. Стоковый раннер без profile.json падает на AluFrame2Plus.
+# Числа сняты calcTablets после загрузки profile.json тем же раннером.
+REF_FORM48_FRAME = {
+    **REF_FORM48_DEFAULT,
+    "is_frame": {"profile_id": "AluFrame2Plus", "segments": [[1000, 2], [1000, 2]]},
+}
+EXPECTED_FORM48_FRAME = {
+    "cost": 4772.24,
+    "price": 7773.1,
+    "time_hours": 0.98,
+    "time_ready": 49.339999999999996,
+    "weight_kg": 4.79,
+}
+REF_FORM48_FRAME_HANGER = {
+    **REF_FORM48_FRAME,
+    "is_hanger": {"hanger_id": "HangerH35", "num_hanger": 2},
+}
+EXPECTED_FORM48_FRAME_HANGER = {
+    "cost": 4809.573333333333,
+    "price": 7834.573333333334,
+    "time_hours": 0.99,
+    "time_ready": 49.35,
+    "weight_kg": 4.79,
+}
+
+
+def test_form48_pocket_a4_changes_price(calc):
+    """JS, 29.11.2026: карман А4 ПЭТ с окантовкой меняет цену дефолта 4780."""
+    r = calc.execute(REF_FORM48_POCKET_A4)
+    _assert_js(r, EXPECTED_FORM48_POCKET_A4)
+    assert r["price"] != pytest.approx(EXPECTED_FORM48_DEFAULT_BY_MODE[1]["price"])
+    codes = {m.get("code") for m in r["materials"]}
+    assert "Avery500c" in codes
+    assert "TapePOLIMOUNT385_6" in codes
+
+
+def test_form48_pocket_count_scales(calc):
+    """Два кармана дороже одного: количество из строки формы не отбрасывается."""
+    one = calc.execute(REF_FORM48_POCKET_A4)
+    two = calc.execute({
+        **REF_FORM48_DEFAULT,
+        "is_pocket": [{"pocket_id": "PocketPETA4V", "n": 2, "border_id": "Avery500c"}],
+    })
+    assert two["price"] > one["price"]
+
+
+def test_form48_pocket_standoff_matches_js(calc):
+    """JS, 29.11.2026: карман на дистанционных держателях, price и time_ready."""
+    r = calc.execute(REF_FORM48_POCKET_STANDOFF)
+    assert r["cost"] == pytest.approx(EXPECTED_FORM48_POCKET_STANDOFF["cost"], rel=JS_REL_TOL)
+    assert r["price"] == pytest.approx(EXPECTED_FORM48_POCKET_STANDOFF["price"], rel=JS_REL_TOL)
+    assert r["time_ready"] == pytest.approx(EXPECTED_FORM48_POCKET_STANDOFF["time_ready"], rel=JS_REL_TOL)
+
+
+def test_form48_eva_matches_js(calc):
+    """JS, 29.11.2026: EVA 500×500 меняет цену и срок дефолта."""
+    r = calc.execute(REF_FORM48_EVA)
+    _assert_js(r, EXPECTED_FORM48_EVA)
+    assert r["price"] != pytest.approx(EXPECTED_FORM48_DEFAULT_BY_MODE[1]["price"])
+
+
+def test_form48_frame_and_hanger_match_js(calc):
+    """JS, 29.11.2026: рамка и подвес меняют цену; подвес без рамки цену не меняет."""
+    frame = calc.execute(REF_FORM48_FRAME)
+    _assert_js(frame, EXPECTED_FORM48_FRAME)
+    with_hanger = calc.execute(REF_FORM48_FRAME_HANGER)
+    _assert_js(with_hanger, EXPECTED_FORM48_FRAME_HANGER)
+    assert with_hanger["price"] > frame["price"]
+    hanger_only = calc.execute({
+        **REF_FORM48_DEFAULT,
+        "is_hanger": {"hanger_id": "HangerH35", "num_hanger": 2},
+    })
+    assert hanger_only["price"] == pytest.approx(EXPECTED_FORM48_DEFAULT_BY_MODE[1]["price"])
+    assert hanger_only["time_ready"] == pytest.approx(EXPECTED_FORM48_DEFAULT_BY_MODE[1]["time_ready"])
+
+
+def test_tablets_js_form48_posts_options():
+    """Форма 48: карман, рамка, подвес и EVA уходят в calcApi."""
+    import json
+    import subprocess
+
+    js_path = Path(__file__).resolve().parents[3] / "wp-plugin" / "forms" / "tablets.js"
+    src = (
+        js_path.read_text(encoding="utf-8")
+        .replace("{{numN}}", "0")
+        .replace("{{numW}}", "0")
+        .replace("{{numH}}", "0")
+    )
+    harness = (
+        "var __form_id__ = 48;\n"
+        "function opt(value) { return { getAttribute: function (name) { return name === 'data-value' ? value : ''; } }; }\n"
+        "function row(pocketId, count) {\n"
+        "  return { getElementsByClassName: function (cls) {\n"
+        "    if (cls === 'countPocket') return [{ value: String(count) }];\n"
+        "    if (cls === 'idPocket') return [{ options: [opt(pocketId)], selectedIndex: 0 }];\n"
+        "    return [];\n"
+        "  } };\n"
+        "}\n"
+        "var document = { getElementsByClassName: function (cls) {\n"
+        "  if (cls !== 'setPockets') return [];\n"
+        "  return [{ getElementsByClassName: function () {\n"
+        "    return [{ getElementsByClassName: function () { return [row('PocketPETA4V', 2), row('PocketPETA5V', 0)]; } }];\n"
+        "  } }];\n"
+        "} };\n"
+        "var ezfc_functions = {\n"
+        "  get_element_id_by_name: function (formId, name) { return name === 'dpdProfile' ? 2871 : 0; },\n"
+        "  get_value_from: function (id, calc, third, opts) {\n"
+        "    if (opts && opts.return_value === 'index') return [1];\n"
+        "    if (id === 1924) return 1;\n"
+        "    if (id === 1925) return 1000;\n"
+        "    if (id === 1926) return 1000;\n"
+        "    if (id === 1927) return ['PVC5'];\n"
+        "    if (id === 1934) return ['isUVPrint'];\n"
+        "    if (id === 1936) return ['4+0'];\n"
+        "    if (id === 2318) return [0];\n"
+        "    if (id === 1938) return ['isCutEdge'];\n"
+        "    if (id === 1937) return ['No'];\n"
+        "    if (id === 1949) return ['0'];\n"
+        "    if (id === 1940) return ['0'];\n"
+        "    if (id === 1987) return ['1'];\n"
+        "    if (id === 2871) return ['AluFrame2Plus'];\n"
+        "    if (id === 2872) return ['HangerH35'];\n"
+        "    if (id === 2873) return 2;\n"
+        "    if (id === 2959) return ['EVAFoam5'];\n"
+        "    if (id === 2960) return 500;\n"
+        "    if (id === 2961) return 400;\n"
+        "    return [''];\n"
+        "  }\n"
+        "};\n"
+        "var posted = null;\n"
+        "var insaincalc = {\n"
+        "  syncUrl: function () {},\n"
+        "  calcApi: function (slug, body) {\n"
+        "    posted = body;\n"
+        "    return { then: function () { return { catch: function () {} }; } };\n"
+        "  },\n"
+        "  showResult: function () {},\n"
+        "  showError: function () {}\n"
+        "};\n"
+        + src
+        + "\nprocess.stdout.write(JSON.stringify(posted));\n"
+    )
+    proc = subprocess.run(["node", "-e", harness], capture_output=True, text=True, encoding="utf-8")
+    assert proc.returncode == 0, proc.stderr
+    body = json.loads(proc.stdout)
+    assert body["is_pocket"] == [
+        {"pocket_id": "PocketPETA4V", "n": 2, "border_id": "Avery500c"},
+    ]
+    assert body["is_frame"] == {
+        "profile_id": "AluFrame2Plus",
+        "segments": [[1000, 2], [1000, 2]],
+    }
+    assert body["is_hanger"]["hanger_id"] == "HangerH35"
+    assert body["is_hanger"]["num_hanger"] == 2
+    assert body["is_eva_foam"] == {"eva_foam_id": "EVAFoam5", "size": [500, 400]}
 
 
 @pytest.mark.parametrize(

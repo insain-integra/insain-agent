@@ -1238,6 +1238,55 @@ def calc_pocket(n: int, pocket_id: str, mode: int = 1) -> ProcessResult:
     )
 
 
+def calc_put_tape(
+    n: int,
+    segments: Sequence[Sequence[float]],
+    tape_id: str,
+    difficult: float = 1,
+    mode: int = 1,
+) -> ProcessResult:
+    """
+    Нанесение скотча или окантовочной ленты (calcPutTape).
+
+    segments — [[число отрезков, длина мм], ...].
+    Вес считается той же формулой, что в JS: weight * длина / длина рулона.
+    """
+    tape = _get_material("tape", tape_id)
+    tape_raw = _get_raw_material("tape", tape_id)
+    size = tape_raw.get("size") or (tape.sizes[0] if tape.sizes else None)
+    if not size or len(size) < 2 or float(size[1]) == 0:
+        raise ValueError(f"У ленты {tape_id} не задана длина рулона")
+    tape_len = float(size[1])
+    num_cut = sum(n * float(seg[0]) for seg in segments)
+    len_tape = sum(n * float(seg[1]) for seg in segments)
+    cost_material = len_tape / tape_len * float(tape.cost or 0)
+    time_process = float(difficult) * (
+        num_cut * 10 / 3600 + math.ceil(len_tape / 1000) * 30 / 3600
+    )
+    cost_operator = time_process * COST_OPERATOR
+    cost = cost_material + cost_operator
+    price = (
+        cost_material * (1 + MARGIN_MATERIAL)
+        + cost_operator * (1 + MARGIN_OPERATION)
+    )
+    time_hours = math.ceil(time_process * 100) / 100
+    weight_kg = float(tape_raw.get("weight") or 0) * len_tape / tape_len
+    idx = max(0, min(len(BASE_TIME_READY) - 1, math.ceil(mode)))
+    time_ready = time_hours + float(BASE_TIME_READY[idx])
+    materials_out = [{
+        "code": tape_id,
+        "name": tape.description,
+        "title": tape.title,
+        "quantity": len_tape / tape_len,
+        "unit": "шт",
+        "size_mm": [float(size[0]), float(size[1])],
+    }]
+    return ProcessResult(
+        cost=cost, price=price, time_hours=time_hours,
+        time_ready=time_ready, weight_kg=weight_kg, materials=materials_out,
+    )
+
+
 def calc_packing(
     n: int,
     size: Sequence[float],

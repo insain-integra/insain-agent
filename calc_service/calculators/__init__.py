@@ -48,6 +48,8 @@ from .calendar import CalendarCalculator
 from .heat_press import HeatPressCalculator
 from .canvas import CanvasCalculator
 from .tablets import TabletsCalculator
+from .pockets import PocketsCalculator
+from .frame import FrameCalculator
 from .plaque import PlaqueCalculator
 from .shild import ShildCalculator
 
@@ -92,6 +94,8 @@ CALCULATORS: Dict[str, BaseCalculator] = {
     "heat_press": HeatPressCalculator(),
     "canvas": CanvasCalculator(),
     "tablets": TabletsCalculator(),
+    "pockets": PocketsCalculator(),
+    "frame": FrameCalculator(),
     "shild": ShildCalculator(),
     "plaque": PlaqueCalculator(),
 }

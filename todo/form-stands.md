@@ -1,6 +1,6 @@
 # form-stands
 
-Статус: доработка
+Статус: выкатка
 Сложность: средняя
 Implementer: Grok 4.7
 Reviewer: Auto
@@ -65,8 +65,8 @@ Site ops: Grok 4.7
 
 ## Проверки
 
-- [ ] `make check` (или `python scripts/dev.py check`) — зелёный вывод после этой доработки
-- [ ] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
+- [x] `make check` (или `python scripts/dev.py check`) — зелёный вывод после этой доработки
+- [x] Self-review — чеклист «Перед сдачей» в [AGENTS.md](../AGENTS.md)
 
 ## Риски
 
@@ -96,6 +96,16 @@ Site ops: Grok 4.7
 29.11.2026 — Reviewer, Auto — ревью 1: принято; перед слиянием нужен коммит в task/form-stands — дальше человек
 29.11.2026 — человек — принято — закрытие
 29.11.2026 — человек — вернуть на доработку: на копии 121 карманы и дополнительные опции (рамка, подвесы, EVA) не меняют цену — дальше Implementer
+29.11.2026 — Implementer, Grok 4.7 — порт карманов, рамки и EVA; JS формы 48 шлёт их в calcApi; дефолт 4780 / 48.9 не сдвинут; make check зелёный — дальше Site ops
+
+Блокер: критерии кармана, рамки, подвеса и EVA на копии 121 не закрыты. В форму 121 всё ещё JS прошлого круга, без этих опций в `calcApi`.
+Пробовал: порт `calcPockets` / `calcFrame` / EVA и тесты локально (см. «Результат», доработка). WordPress не правил — это Site ops.
+Гипотеза: после записи текущего `forms/tablets.js` в форму 121 цена на копии совпадёт с API и `showResult`.
+Вопрос: записать JS в форму 121 и сверить цены, без нового дубля и без переключения боевых 36 и 48.
+Следующая сессия: Site ops, модель Grok 4.7
+29.11.2026 — человек — ревью git-diff до записи на форму 121; форму не трогать, пока порт не принят, не слит в main и API не выкачен — дальше Reviewer
+29.11.2026 — Reviewer, Auto — ревью 2: принято по git; копия 121 и критерии на проде вне этого круга — дальше человек
+29.11.2026 — человек — принято: коммит, слияние в main и push; форму 121 обновить после выкатки API — выкатка
 
 ## Ревью 1
 
@@ -119,10 +129,42 @@ Site ops: Grok 4.7
 - `желательно` — перед слиянием в `main`: один коммит с `tablets.js` и `test_tablets.py` на ветке `task/form-stands` (сейчас HEAD = main, изменения только в рабочем дереве).
 - `вне scope` — повтор «Найдено вне scope»: раннер `isFrame` / `AluFrame2Plus`; матрица кроме строк Site ops в git-тестах не дублируется (приёмка копии уже у Site ops).
 
+## Ревью 2
+
+**Вердикт:** принято (только git-часть доработки 29.11.2026; копию 121 и критерии «на копии» по решению человека не перепроверял)
+
+**Diff после «Ревью 1»** (коммита нет, HEAD = точка ответвления от `main`): `wp-plugin/forms/tablets.js`; `calc_service/calculators/tablets.py`, `pockets.py` (новый), `frame.py` (новый), `__init__.py`, `common/process_tools.py`; `calc_service/tests/test_calculators/test_tablets.py`, `test_pockets.py` (новый), `test_frame.py` (новый), `test_js_port_gaps.py`, `test_mode_contract.py`; `scripts/js_port_gaps.py`, `scripts/js_port_gaps_allowed.txt`; `todo/form-stands.md`, `docs/dashboard.md` (побочный от check).
+
+**Scope доработки:**
+
+- Порт `calcPockets` / `calcFrame` / EVA в `tablets.py` через `PocketsCalculator`, `FrameCalculator`, существующие `CutRoller` + `calc_manual_roll`. `pockets` и `frame` в реестре с `is_public = False`.
+- Строки allowed сняты: `calcPockets`, `calcPutTape`, `calcFrame`, вызовы из `calcTablets`, опция `isEVAFoam`. Новых строк в `scripts/js_port_gaps_allowed.txt` нет. `python scripts/js_port_gaps.py --check` — **ok**.
+- Блок `/* form 48 */` в `tablets.js`: `is_pocket` (DOM `setPockets`, окантовка `Avery500c`), `is_frame`, `is_hanger`, `is_eva_foam` в `calcApi('tablets')`; профиль/подвес/EVA по-прежнему в `syncUrl`. Форма 36: блок `/* form 36 */`, id и POST без новых полей.
+- Эталоны лида 36 (`REF_FORM_DEFAULT`, `EXPECTED_FORM_DEFAULT*`) не менялись. Дефолт формы 48 mode 1: **price 4780**, **time_ready 48.9**. Добавлены эталоны `# JS, 29.11.2026`: карман A4 / standoff, EVA, рамка, рамка+подвес; подвес без рамки оставляет 4780 / 48.9 (как JS).
+
+**Проверки Reviewer:**
+
+- `python -m pytest calc_service/tests/test_calculators/test_tablets.py calc_service/tests/test_wp_plugin_forms.py -q` — **86 passed**.
+- `python scripts/dev.py check` — **927 + 81 passed**, exit 0.
+- `Select-String` по `tablets.js` — `calcApi('tablets'`, `syncUrl(`, `showResult(` в обеих ветках; блоки `/* form 36 */` / `/* form 48 */`.
+- `test_tablets_js_form48_posts_default` — без `is_pocket` / `is_frame` / `is_eva_foam` в теле; `test_tablets_js_form48_posts_options` — все четыре опции в POST.
+
+**Опции формы 48:** карманы, рамка, подвес, EVA закрыты в git (POST + тесты с раннером). Критерии приёмки с формулировкой «на копии 121» **намеренно открыты**: форма 121 не обновлялась, боевой API без выкатки ветки.
+
+**Инварианты:** цен в Python нет; эталоны лида не сдвинуты; внутренние `code` в тестах материалов — служебные assert.
+
+**Замечания:**
+
+- `желательно` — перед слиянием: один коммит со всеми файлами доработки на `task/form-stands` (по-прежнему только рабочее дерево).
+- `вне scope` — копия 121 / deploy API / `docs/js-runner-cases.md` (строки в «Результат»); `time_hours` кармана standoff vs JS (в «Результат»); склейка `Avery500c` в стоковом раннере для кармана.
+
+**Блокеры этого круга:** нет (для git).
+
 ## Найдено вне scope
 
 - `calcTablets.js`: оклейка фона без аппликации падает на `options.get('isFilm')['isBackgroundFilm']`. Дефолт формы 48 — УФ, ветка не исполняется.
-- Раннер `isFrame` / `AluFrame2Plus`: `Cannot read properties of undefined (reading 'AluFrame2Plus')`. Рамку с раннером не сверил.
+- Стоковый `scripts/run_js_calc.mjs` не грузит `profile.json`: `isFrame` / `AluFrame2Plus` падает с `Cannot read properties of undefined (reading 'AluFrame2Plus')`. Файл раннера не менялся. Числа рамки сняты тем же раннером после временной загрузки каталога профиля и совпали с портом.
+- `Avery500c` есть и в ленте (cost 3), и в рулоне (cost 340). `--data current` склеивает коды, и `calcPutTape` окантовки берёт 340. Живой misc и `tape.json` — cost 3. Порт кармана считает ленту.
 - У формы 48 поле пены названо `dpd` (id 2959), не `dpdFoam`.
 
 ## Результат
@@ -161,3 +203,26 @@ Site ops: Grok 4.7
 - URL-only (в `syncUrl`, не в `calcApi`): `dpdProfile`, `dpdHanger`, `numHangers`, `dpd` (EVA), `numFoamW`, `numFoamH`. Карманы в URL одной парой не пишутся. `ckbSize` влияет на `size` печати и фона.
 - Строка для `docs/js-runner-cases.md`: `| calcTablets form 48 default | tablets | 4780 |` и команда `node scripts/run_js_calc.mjs calcTablets --data current --args '[1,[1000,1000],"PVC5",{"isCutManual":"KeencutEvolutionE2","isUVPrint":{"printerID":"PrintUV","resolution":0,"surface":"isPlain","color":"4+0"},"Material":"isMaterial"},1]'`.
 - Строка будущего боевого пакета: форма 48 CalcStands, slug `tablets`, страница https://insain.ru/catalog/kalkulyator-stendov/. В `forms-batch-switch` не входит. Боевая остаётся на `insaincalc.calcTablets`, пока её не переключат отдельно.
+
+### Доработка 29.11.2026
+
+- Ветка, PR или коммит: `task/form-stands`, коммита нет.
+- Было / стало: рамка, подвес, EVA и карманы писались только в `syncUrl`. Стало: блок `/* form 48 */` шлёт `is_pocket`, `is_frame`, `is_hanger`, `is_eva_foam` в `calcApi('tablets')`. Порт: `calculators/pockets.py`, `calculators/frame.py`, `calc_put_tape`, EVA через уже существующие резку и `calc_manual_roll`. Калькуляторы `pockets` и `frame` не публичные. Дефолт формы 48 и эталоны лида 36 не сдвигались.
+- Сделано: строки allowed своего префикса сняты (`calcPockets`, `calcPutTape`, `calcFrame`, вызовы из `calcTablets`, опция `isEVAFoam`). Новых строк в allowed нет. Подвес меняет цену только вместе с рамкой, как `calcFrame`. Окантовка кармана всегда `Avery500c`, цена ленты из `tape.json` (cost 3), не из склеенного раннера.
+- Чем проверено: `python -m pytest calc_service/tests/test_calculators/test_tablets.py::test_form48_pocket_a4_changes_price calc_service/tests/test_calculators/test_tablets.py::test_form48_pocket_count_scales calc_service/tests/test_calculators/test_tablets.py::test_form48_pocket_standoff_matches_js calc_service/tests/test_calculators/test_tablets.py::test_form48_eva_matches_js calc_service/tests/test_calculators/test_tablets.py::test_form48_frame_and_hanger_match_js calc_service/tests/test_calculators/test_tablets.py::test_tablets_js_form48_posts_options calc_service/tests/test_calculators/test_tablets.py::test_tablets_js_form48_posts_default -q` — 7 passed. `python scripts/dev.py check` — exit 0 (927 passed, затем 81 passed). `python scripts/js_port_gaps.py --check` — `ok`.
+- Не сделано и почему: форма 121 не обновлена, плагин не выкладывался, боевые 36 и 48 не переключались, коммита нет. Критерии «на копии 121» остаются открытыми до Site ops.
+- Как откатить git: не коммитить. Как откатить копию после записи: бэкап `/tmp/ezfc-copy-121-20261128-165139.json` — это JS прошлого круга, без опций в POST.
+- Требуется решение: нет. Дальше Site ops: записать текущий `wp-plugin/forms/tablets.js` в форму 121, `read_file=0`, новый дубль не создавать, копию 120 / 2586916 и боевые 36 и 48 не трогать.
+
+| Опция на дефолте формы 48 | POST | price API | Ожидаемая цена `showResult`, qty 1 | time_ready |
+| --- | --- | --- | --- | --- |
+| без кармана, рамки и EVA | этих полей нет | 4780 | 4 800 | 48.9 |
+| карман PocketPETA4V ×1, окантовка Avery500c | is_pocket | 5183.9191676 | 5 200 | 49.08 |
+| карман PocketStandoffА4V ×1 | is_pocket | 5413.72 | 5 500 | 49.08 |
+| EVA EVAFoam5, 500×500 | is_eva_foam | 6385 | 6 400 | 49.3 |
+| рамка AluFrame2Plus, сегменты 1000×2 и 1000×2 | is_frame | 7773.1 | 7 800 | 49.34 |
+| та же рамка и подвес HangerH35 ×2 | is_frame и is_hanger | 7834.573333333334 | 7 900 | 49.35 |
+| подвес без рамки | is_hanger | 4780 | 4 800 | 48.9 |
+
+- Карман на держателях: `price` и `time_ready` совпали с раннером. `time_hours` у порта 0.71 против 0.72 у JS, вес 2.96 против 2.9; в приёмке этих полей нет, тест их не фиксирует.
+- Строки для `docs/js-runner-cases.md` (в файл не писались): `| calcTablets form 48 pocket A4 | tablets | 5183.9191676 |`, `| calcTablets form 48 EVA 500 | tablets | 6385 |`, `| calcTablets form 48 frame | tablets | 7773.1 |`, `| calcTablets form 48 frame hanger | tablets | 7834.573333333334 |`. Рамка — только с загруженным `profile.json`. Карман с окантовкой на стоковом `--data current` даёт 5480.9711876 из-за склейки `Avery500c`; эталон задачи — 5183.9191676.

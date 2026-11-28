@@ -8,7 +8,7 @@
 // Развилка по имени dpdProfile: его нет у формы 36. Id копии и боевой 48 различаются, по ним не ветвимся.
 // Плейсхолдеры полей только формы 48 в файле нельзя: на форме 36 ezFC заменит весь расчёт на return 0.
 // Резка формы 48 в боевом cjsCalc зашита: isCutManual / KeencutEvolutionE2, материал — isMaterial.
-// Рамка, подвесы, EVA и карманы (calcFrame / calcPockets не портированы) — только URL.
+// Рамка, подвесы, EVA и карманы уходят в calcApi. Подвес меняет цену только вместе с рамкой, как calcFrame.
 function optionIndex(raw) {
     if (raw == null || typeof raw !== 'object' || raw[0] == null || raw[0] === '') {
         return '';
@@ -61,10 +61,12 @@ if (isStands) {
     var appDifficultyNum = Number(appDifficultyRaw);
     var appDifficulty = (appDifficultyRaw === '' || appDifficultyRaw == null || isNaN(appDifficultyNum)) ? 1 : appDifficultyNum;
     var appDifficultyIndex = optionIndex(ezfc_functions.get_value_from(1948, true, false, { return_value: 'index' }));
-    // Коды рамки, подвеса и EVA в calcApi не уходят: calcFrame и isEVAFoam не портированы.
+    var profileId = ezfc_functions.get_value_from(2871, true)[0] || '';
     var profileIndex = optionIndex(ezfc_functions.get_value_from(2871, true, false, { return_value: 'index' }));
+    var hangerId = ezfc_functions.get_value_from(2872, true)[0] || '';
     var hangerIndex = optionIndex(ezfc_functions.get_value_from(2872, true, false, { return_value: 'index' }));
-    var numHangers = numFrom(ezfc_functions.get_value_from(2873, true)) || 0;
+    var numHangers = numFrom(ezfc_functions.get_value_from(2873, true));
+    var foamId = ezfc_functions.get_value_from(2959, true)[0] || '';
     var foamIndex = optionIndex(ezfc_functions.get_value_from(2959, true, false, { return_value: 'index' }));
     var foamW = numFrom(ezfc_functions.get_value_from(2960, true));
     var foamH = numFrom(ezfc_functions.get_value_from(2961, true));
@@ -75,19 +77,25 @@ if (isStands) {
     var mode = (modeRaw === '' || modeRaw == null || isNaN(modeNum)) ? 1 : modeNum;
 
     // Карманы — повторяемая форма. get_value_from ряды не обходит, читаем DOM как боевой cjsCalc.
-    // calcPockets не портирован: ряд с количеством > 0 в calcApi не отправляем.
+    // Окантовка в боевом расчёте зашита: borderID Avery500c.
+    var pockets = [];
     var pocketRoot = document.getElementsByClassName('setPockets')[0];
     var pocketList = pocketRoot ? pocketRoot.getElementsByClassName('ezfc-repeatable-form-elements')[0] : null;
     var pocketRows = pocketList ? pocketList.getElementsByClassName('ezfc-element-wrapper-repeatable_form') : [];
-    var pocketCount = 0;
     for (var pocketI = 0; pocketI < pocketRows.length; pocketI++) {
         var pocketRow = pocketRows[pocketI];
         var pocketCountEl = pocketRow.getElementsByClassName('countPocket')[0];
         var pocketN = pocketCountEl ? Number(pocketCountEl.value) : 0;
-        if (pocketN > 0) pocketCount += pocketN;
-    }
-    if (pocketCount > 0) {
-        // Ряд с количеством есть, в params не пишем.
+        if (!(pocketN > 0)) continue;
+        var pocketSelect = pocketRow.getElementsByClassName('idPocket')[0];
+        var pocketId = '';
+        if (pocketSelect && pocketSelect.options && pocketSelect.selectedIndex >= 0) {
+            var pocketOpt = pocketSelect.options[pocketSelect.selectedIndex];
+            pocketId = pocketOpt.getAttribute('data-value') || '';
+        }
+        if (pocketId && pocketId !== 'no' && pocketId !== '0') {
+            pockets.push({ pocket_id: pocketId, n: pocketN, border_id: 'Avery500c' });
+        }
     }
 
     insaincalc.syncUrl({
@@ -170,6 +178,28 @@ if (isStands) {
             difficulty: appDifficulty,
             color: appColors,
             double_application: false
+        };
+    }
+
+    if (pockets.length) {
+        params.is_pocket = pockets;
+    }
+    if (profileId && profileId !== 'no' && profileId !== '0') {
+        params.is_frame = {
+            profile_id: String(profileId),
+            segments: [[width, 2], [height, 2]]
+        };
+    }
+    if (hangerId && hangerId !== 'no' && hangerId !== '0') {
+        params.is_hanger = {
+            hanger_id: String(hangerId),
+            num_hanger: numHangers > 0 ? numHangers : 0
+        };
+    }
+    if (foamId && foamId !== 'no' && foamId !== '0') {
+        params.is_eva_foam = {
+            eva_foam_id: String(foamId),
+            size: [foamW > 0 ? foamW : 0, foamH > 0 ? foamH : 0]
         };
     }
 

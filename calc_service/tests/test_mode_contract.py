@@ -82,6 +82,11 @@ MODE_CONTRACT_CASES: Dict[str, Dict[str, Any]] = {
         "bottom_material_id": "PaperCoated115M",
         "bottom_color": "4+0",
     },
+    "frame": {
+        "quantity": 2,
+        "profile_id": "AluFrame2Plus",
+        "segments": [[1000, 2], [1000, 2]],
+    },
     "canvas": {
         "quantity": 2,
         "width": 400,
@@ -232,6 +237,13 @@ MODE_CONTRACT_CASES: Dict[str, Dict[str, Any]] = {
         "material_id": "PaperCoated170M",
         "color": "4+0",
         "lamination_id": "Laminat32G",
+    },
+    "pockets": {
+        "quantity": 2,
+        "width": 100,
+        "height": 80,
+        "material_id": "PET05",
+        "pocket_id": "NoSuchPocket",
     },
     "plaque": {
         "quantity": 2,

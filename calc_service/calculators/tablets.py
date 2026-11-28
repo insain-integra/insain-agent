@@ -12,12 +12,12 @@
 аппликация плёнками (StickerCalculator + calc_manual_roll, is_film),
 оклейка фона таблички плёнкой (CutRoller KWTrio3026 + calc_manual_roll, is_background_film),
 режим учёта материала (material_mode);
-карманы и рамка — упрощённо через common/.
+карманы (PocketsCalculator), рамка и подвесы (FrameCalculator),
+EVA-пена (CutRoller KeencutEvolutionE2 + calc_manual_roll, is_eva_foam).
 
 Список «не перенесено» (см. scripts/js_port_gaps_allowed.txt, префикс calcTablets):
 - фрезерная резка (опция фрезеровки, вызов calcMilling),
-- древко, клеевой слой на этапе табличек, EVA-пена,
-- полные карманы и рамка как в JS (вызовы calcPockets, calcFrame; упрощённо через common/).
+- древко и клеевой слой на этапе табличек.
 """
 
 from __future__ import annotations
@@ -27,53 +27,26 @@ from typing import Any, Dict, List, Mapping, MutableMapping, Sequence
 
 from calculators.base import BaseCalculator, ProductionMode, material_line
 from calculators.cut_roller import CutRollerCalculator
+from calculators.frame import FrameCalculator
 from calculators.heat_press import HeatPressCalculator
 from calculators.laser import LaserCalculator
+from calculators.pockets import PocketsCalculator
 from calculators.print_roll import DEFAULT_PRINTER as DEFAULT_ROLL_PRINTER, PrintRollCalculator
 from calculators.sticker import StickerCalculator
 from calculators.uv_print import UVPrintCalculator
 from common.layout import layout_on_sheet
 from common.markups import (
-    BASE_TIME_READY,
     MARGIN_MATERIAL,
     get_margin,
 )
 from common.process_tools import (
-    calc_cut_profile,
     calc_cut_saber,
     calc_manual_roll,
-    calc_pocket,
-    calc_set_profile,
 )
 from materials import hardsheet as hardsheet_catalog, pocket as pocket_catalog, profile as profile_catalog
 
 DEFAULT_PROFILE = "AluFrame2Plus"
-CUT_TOOL = "DWE713XPS"
 DEFAULT_UV_PRINTER = "RimalSuvUV"
-
-
-def _min_profiles(len_profile: float, segments: List[List[float]]) -> int:
-    """Минимальное кол-во палок профиля для нарезки сегментов."""
-    sort_segments = [list(s) for s in segments]
-    sort_segments.sort(key=lambda x: x[0], reverse=True)
-    count = 0
-    count_profile = 1
-    index = 0
-    len_remain = len_profile
-    count_segments = sum(int(s[1]) for s in sort_segments)
-
-    while count < count_segments:
-        if len_remain >= sort_segments[index][0] and sort_segments[index][1] > 0:
-            len_remain -= sort_segments[index][0]
-            sort_segments[index][1] -= 1
-            count += 1
-        else:
-            index += 1
-            if index >= len(sort_segments):
-                index = 0
-                len_remain = len_profile
-                count_profile += 1
-    return count_profile
 
 
 def _pick(mapping: Mapping[str, Any], *keys: str, default: Any = None) -> Any:
@@ -560,6 +533,134 @@ class TabletsCalculator(BaseCalculator):
         roll_res = calc_manual_roll(n_bg, size_bg, {"isEdge": edge}, mode)
         return [cut_part_no_ready, _from_process(roll_res)]
 
+    def _pocket_items(self, params: Mapping[str, Any]) -> List[Mapping[str, Any]]:
+        raw = params.get("is_pocket")
+        if raw is None:
+            raw = params.get("isPocket")
+        if isinstance(raw, Mapping):
+            return [raw]
+        if isinstance(raw, (list, tuple)):
+            return [item for item in raw if isinstance(item, Mapping)]
+        pocket_id = params.get("pocket_id")
+        if pocket_id:
+            return [{
+                "pocket_id": pocket_id,
+                "n": params.get("pocket_count", 1),
+            }]
+        return []
+
+    def _pockets_part(self, n: int, items: Sequence[Mapping[str, Any]], mode: int) -> Dict[str, Any] | None:
+        """Сумма calcPockets. time_ready — максимум по карманам, как в calcTablets."""
+        cost = price = time_hours = weight = ready = 0.0
+        materials: List[Dict[str, Any]] = []
+        used = False
+        for item in items:
+            pocket_n = float(_pick(item, "n", "count", default=1) or 0)
+            if pocket_n <= 0:
+                continue
+            pocket_id = str(_pick(item, "pocket_id", "pocketID", default="") or "").strip()
+            size = _pick(item, "size", default=None)
+            width = height = 0.0
+            if isinstance(size, (list, tuple)) and len(size) >= 2:
+                width, height = float(size[0] or 0), float(size[1] or 0)
+            border = str(_pick(item, "border_id", "borderID", default="") or "")
+            material_id = str(_pick(item, "material_id", "materialID", default="") or "")
+            res = PocketsCalculator().calculate({
+                "quantity": pocket_n * n,
+                "pocket_id": pocket_id,
+                "width": width,
+                "height": height,
+                "material_id": material_id,
+                "border_id": border,
+                "mode": mode,
+            })
+            used = True
+            cost += float(res["cost"])
+            price += float(res["price"])
+            time_hours += float(res["time_hours"])
+            weight += float(res["weight_kg"])
+            ready = max(ready, float(res["time_ready"]))
+            materials.extend(res.get("materials") or [])
+        if not used:
+            return None
+        return {
+            "cost": cost,
+            "price": price,
+            "time_hours": time_hours,
+            "time_ready": ready,
+            "weight_kg": weight,
+            "materials": materials,
+        }
+
+    def _frame_part(
+        self,
+        n: int,
+        size: Sequence[float],
+        params: Mapping[str, Any],
+        mode: int,
+    ) -> Dict[str, Any] | None:
+        """Рамка. time_ready рамки в Math.max calcTablets не входит — здесь 0."""
+        raw = params.get("is_frame")
+        if raw is None:
+            raw = params.get("isFrame")
+        if raw is None or raw is False:
+            return None
+        if isinstance(raw, str) and raw.strip().lower() in ("", "0", "false", "no"):
+            return None
+        segments = None
+        if isinstance(raw, Mapping):
+            profile_id = str(_pick(raw, "profile_id", "profileID", default="") or "").strip()
+            segments = raw.get("segments")
+        elif raw is True:
+            profile_id = str(params.get("frame_profile_id") or DEFAULT_PROFILE).strip() or DEFAULT_PROFILE
+            segments = params.get("frame_segments")
+        else:
+            profile_id = str(raw).strip()
+            segments = params.get("frame_segments")
+        if not profile_id or profile_id in ("no", "0"):
+            return None
+        if not segments:
+            segments = [[size[0], 2], [size[1], 2]]
+        hanger = params.get("is_hanger")
+        if hanger is None:
+            hanger = params.get("isHanger")
+        res = FrameCalculator().calculate({
+            "quantity": n,
+            "profile_id": profile_id,
+            "segments": segments,
+            "is_hanger": hanger if isinstance(hanger, Mapping) else {},
+            "mode": mode,
+        })
+        return {
+            "cost": float(res["cost"]),
+            "price": float(res["price"]),
+            "time_hours": float(res["time_hours"]),
+            "time_ready": 0.0,
+            "weight_kg": float(res["weight_kg"]),
+            "materials": list(res.get("materials") or []),
+        }
+
+    def _eva_parts(self, n: int, raw: Any, mode: int) -> List[Dict[str, Any]]:
+        """EVA: резка и накатка. Их timeReady в максимум calcTablets не входят."""
+        if not isinstance(raw, Mapping):
+            return []
+        eva_id = str(_pick(raw, "eva_foam_id", "evaFoamID", default="") or "").strip()
+        if not eva_id or eva_id in ("no", "0"):
+            return []
+        size_raw = _pick(raw, "size", default=None)
+        if not isinstance(size_raw, (list, tuple)) or len(size_raw) < 2:
+            raise ValueError("Не задан размер EVA-листа")
+        size_foam = [float(size_raw[0]), float(size_raw[1])]
+        if size_foam[0] <= 0 or size_foam[1] <= 0:
+            raise ValueError("Размер EVA-листа должен быть положительным")
+        cut = self._cut_manual(n, size_foam, eva_id, "KeencutEvolutionE2", "isMaterial", mode)
+        roll = calc_manual_roll(n, size_foam, {}, mode)
+        roll_part = _from_process(roll)
+        roll_part["weight_kg"] = 0.0
+        roll_part["time_ready"] = 0.0
+        cut["time_ready"] = 0.0
+        return [cut, roll_part]
+
     def calculate(self, params: Mapping[str, Any]) -> Dict[str, Any]:
         n = int(params.get("quantity", 1))
         width = float(params.get("width", 0))
@@ -583,10 +684,9 @@ class TabletsCalculator(BaseCalculator):
         raw_bg_film = params.get("is_background_film")
         has_bg_film = raw_bg_film is not None and raw_bg_film is not False
 
-        pocket_id = params.get("pocket_id")
-        pocket_count = int(params.get("pocket_count", 1) or 1)
-        is_frame = bool(params.get("is_frame", False))
-        frame_profile_id = str(params.get("frame_profile_id", "") or DEFAULT_PROFILE).strip() or DEFAULT_PROFILE
+        raw_eva = params.get("is_eva_foam")
+        if raw_eva is None:
+            raw_eva = params.get("isEVAFoam")
 
         if width <= 0 or height <= 0:
             raise ValueError("Ширина и высота должны быть положительными")
@@ -666,58 +766,16 @@ class TabletsCalculator(BaseCalculator):
         if has_bg_film:
             parts.extend(self._background_film(n, size, raw_bg_film, mode.value, raw_film=raw_film))
 
-        # Карманы (упрощённо; полный порт JS-карманов — не перенесён)
-        if pocket_id:
-            pocket_res = calc_pocket(n * pocket_count, str(pocket_id), mode.value)
-            parts.append(_from_process(pocket_res))
+        pocket_part = self._pockets_part(n, self._pocket_items(params), mode.value)
+        if pocket_part:
+            parts.append(pocket_part)
 
-        # Рамка из профиля (упрощённо; полный порт JS-рамки — не перенесён)
-        if is_frame:
-            profile_spec = profile_catalog.get(frame_profile_id)
-            profile_len = float(getattr(profile_spec, "len", 3050) or 3050)
-            profile_cost_unit = float(profile_spec.cost or 0)
-            profile_weight = float(getattr(profile_spec, "weight", 0.5) or 0.5)
-
-            frame_segments = params.get("frame_segments")
-            if frame_segments and isinstance(frame_segments, (list, tuple)):
-                segments = [[float(s[0]), int(s[1])] for s in frame_segments if len(s) >= 2]
-            else:
-                segments = [[size[0], 2], [size[1], 2]]
-
-            n_segments = [[s[0], s[1] * n] for s in segments]
-            num_profile = _min_profiles(profile_len, n_segments)
-            len_profile_mm = sum(s[0] * s[1] for s in n_segments)
-
-            cost_mat_frame = num_profile * profile_cost_unit
-            cut_res = calc_cut_profile(n, segments, CUT_TOOL, mode.value)
-            set_res = calc_set_profile(n, segments, frame_profile_id, mode.value)
-
-            frame_part = {
-                "cost": cost_mat_frame + cut_res.cost + set_res.cost,
-                "price": (
-                    cost_mat_frame * (1 + MARGIN_MATERIAL)
-                    + cut_res.price
-                    + set_res.price
-                ),
-                "time_hours": cut_res.time_hours + set_res.time_hours,
-                "time_ready": (
-                    cut_res.time_hours
-                    + set_res.time_hours
-                    + float(BASE_TIME_READY[min(mode.value, len(BASE_TIME_READY) - 1)])
-                ),
-                "weight_kg": profile_weight * len_profile_mm / 1000 + set_res.weight_kg,
-                "materials": [
-                    {
-                        "code": frame_profile_id,
-                        "name": profile_spec.description,
-                        "title": profile_spec.title,
-                        "quantity": num_profile,
-                        "unit": "шт",
-                    },
-                    *list(set_res.materials or []),
-                ],
-            }
+        frame_part = self._frame_part(n, size, params, mode.value)
+        if frame_part:
             parts.append(frame_part)
+
+        if raw_eva is not None and raw_eva is not False:
+            parts.extend(self._eva_parts(n, raw_eva, mode.value))
 
         cost_total = sum(float(p["cost"]) for p in parts)
         price_parts = sum(float(p["price"]) for p in parts)
