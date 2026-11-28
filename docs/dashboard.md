@@ -37,11 +37,12 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **23**. В работе/ревью: нет. Заблокировано: `form-badge-lamination.md`, `form-calendar-table.md`, `form-pins.md`, `form-poly-pin.md`, `form-shields.md`, `form-tabs-9may.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **24**. В работе/ревью: нет. Заблокировано: `ai-seo-fact-sheet.md`, `form-badge-lamination.md`, `form-calendar-table.md`, `form-pins.md`, `form-poly-pin.md`, `form-shields.md`, `form-tabs-9may.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
 | `ai-calc-authoring-skill.md` | черновик |
+| `ai-seo-fact-sheet.md` | заблокировано: человек |
 | `ezfc-options-source-reset.md` | черновик |
 | `form-badge-lamination.md` | заблокировано: ждёт todo/form-pins.md |
 | `form-calendar-flip.md` | черновик |
