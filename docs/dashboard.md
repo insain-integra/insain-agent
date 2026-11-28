@@ -37,7 +37,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 
 ## Задачи
 
-Открытых файлов задач: **23**. В работе/ревью: нет. Заблокировано: `form-badge-lamination.md`, `form-calendar-table.md`, `form-pins.md`, `form-poly-pin.md`, `form-shields.md`, `form-tabs-9may.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
+Открытых файлов задач: **23**. В работе/ревью: `form-hashtags.md`. Заблокировано: `form-badge-lamination.md`, `form-calendar-table.md`, `form-pins.md`, `form-poly-pin.md`, `form-shields.md`, `form-tabs-9may.md`, `metrics-baseline.md`, `pilot-acrylic-medals-calc.md`, `registration-harden.md`, `spam-users-cleanup.md`, `supplier-catalog-load.md`.
 
 | Файл | Статус |
 | --- | --- |
@@ -46,7 +46,7 @@ G1 по реестру: **1** на API, **44** старый JS на опубли
 | `form-badge-lamination.md` | заблокировано: ждёт todo/form-pins.md |
 | `form-calendar-flip.md` | черновик |
 | `form-calendar-table.md` | заблокировано: ждёт todo/form-calendar-flip.md |
-| `form-hashtags.md` | черновик |
+| `form-hashtags.md` | выкатка |
 | `form-magnet-poly.md` | черновик |
 | `form-pins.md` | заблокировано: ждёт todo/form-poly-pin.md |
 | `form-poly-badge.md` | черновик |
